@@ -19,8 +19,8 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API | 27 |
-| P2 structural | 27 |
+| P1 API | 38 |
+| P2 structural | 38 |
 | P3 semantic | 0 |
 | P4 numerical | 0 |
 | P5 algorithmic | 0 |
@@ -33,8 +33,8 @@ Direct R definition lookup resolved all 1,182 exported names to source definitio
 
 ## Milestone 1 initial foundational tranche
 
-Implemented without placeholders: **27** frozen exports.
+Implemented without placeholders: **38** frozen exports.
 
-Families: canonical schema, generic mapping object, canonical dataset construction/validation, table mutation/provenance, timebase primitives, clock transforms, coordinate-space registration/conversion/audit.
+Families: canonical schema, generic mapping/inference/validation, canonical dataset construction/validation, table mutation/provenance, timebase primitives, clock transforms, coordinate-space registration/conversion/audit, generic import, adapter registry/detection, folder import, dataset combining and recording-ID remapping.
 
 These are **initial source-level ports**; cross-language R-oracle verification remains required before promoting them to final P3/P4/P5 status.

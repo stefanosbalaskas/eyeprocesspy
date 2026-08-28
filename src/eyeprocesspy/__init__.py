@@ -9,4 +9,7 @@ from .dataset import EyeDataset, new_eye_dataset, is_eye_dataset, validate_eye_d
 from .timebase import EyeClockTransform, estimate_sampling_rate, normalize_timebase, audit_timebase, align_clock, estimate_clock_transform, apply_clock_transform
 from .coordinates import register_coordinate_space, coordinate_space, convert_coordinates, audit_coordinate_spaces
 
+from .importers import validate_eye_mapping, infer_eye_mapping, read_eye_generic
+from .adapters import register_eye_adapter, unregister_eye_adapter, supported_eye_formats, detect_eye_format, read_eye_export, read_eye_folder, combine_eye_datasets, remap_recording_ids
+
 __all__ = [n for n in globals() if not n.startswith('_')]

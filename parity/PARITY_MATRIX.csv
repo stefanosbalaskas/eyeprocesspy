@@ -72,7 +72,7 @@ canonical_table_names,canonical_table_names,R/001-schema.R,man/eyeprocess-schema
 check_feature_level,check_feature_level,R/011-quality-governance.R,man/eyeprocess-quality.Rd,(x),1,False,False,,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 check_local_dependence,check_local_dependence,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 check_process_leakage,check_process_leakage,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(x, response_time_tolerance = 0)",2,False,False,,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-combine_eye_datasets,combine_eye_datasets,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(..., resolve_ids = TRUE)",2,True,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+combine_eye_datasets,combine_eye_datasets,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(..., resolve_ids = TRUE)",2,True,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 compact_eye_dataset,compact_eye_dataset,R/002-class.R,man/eyeprocess-class.Rd,"(x, drop_raw = FALSE, drop_empty = FALSE)",3,False,False,,,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 compare_aoi_definitions,compare_aoi_definitions,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(..., source = ""samples"")",2,True,False,,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 compare_eye_datasets,compare_eye_datasets,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
@@ -104,7 +104,7 @@ derive_gazepoint_workflow_features,derive_gazepoint_workflow_features,R/019-gaze
 derive_pupil_features,derive_pupil_features,R/010-features.R,man/eyeprocess-features.Rd,"(x, level = c(""trial"", ""trial_aoi""), append = TRUE, pupil_column = ""pupil_diameter"")",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 derive_rt_features,derive_rt_features,R/010-features.R,man/eyeprocess-features.Rd,"(x, append = TRUE)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 detect_blinks,detect_blinks,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, min_duration_ms = 50, max_duration_ms = 1000, source = c(""pupil_missing"", ""validity""), overwrite = FALSE)",5,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-detect_eye_format,detect_eye_format,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, inspect_rows = 20L, candidates = NULL)",3,False,False,,vignettes/importing-and-harmonizing.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+detect_eye_format,detect_eye_format,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, inspect_rows = 20L, candidates = NULL)",3,False,False,,vignettes/importing-and-harmonizing.Rmd,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 detect_fixations_idt,detect_fixations_idt,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(
     x,
     dispersion_threshold = 1,
@@ -307,7 +307,7 @@ gp_reconstruct_stimuli,gp_reconstruct_stimuli,R/005-import-gazepoint.R,man/eyepr
 gp_reconstruct_trials,gp_reconstruct_trials,R/005-import-gazepoint.R,man/eyeprocess-import-gazepoint.Rd,"(x, ...)",2,True,False,,vignettes/gazepoint-workflows.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 gp_validate_export,gp_validate_export,R/005-import-gazepoint.R,man/eyeprocess-import-gazepoint.Rd,(path),1,False,False,,vignettes/gazepoint-workflows.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 import_canonical,import_canonical,R/015-export-report-bridges.R,man/eyeprocess-export-report.Rd,(...),1,True,False,tests/testthat/test-export-report.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-infer_eye_mapping,infer_eye_mapping,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(data, vendor = NULL)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+infer_eye_mapping,infer_eye_mapping,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(data, vendor = NULL)",2,False,False,,,unclassified,False,src/eyeprocesspy/importers.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 init_validation_corpus,init_validation_corpus,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(path, overwrite = FALSE)",2,False,False,tests/testthat/test-format-validation.R,vignettes/validating-real-exports.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 inspect_eye_source,inspect_eye_source,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
     path,
@@ -452,8 +452,8 @@ provenance_manifest,provenance_manifest,R/002-class.R,man/eyeprocess-class.Rd,(x
 pupil_deconvolve,pupil_deconvolve,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, tau = 0.9, regularization = 0.01, output_column = ""pupil_phasic"")",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 pupil_labs_format,pupil_labs_format,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,(path),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 read_eye_dataset,read_eye_dataset,R/015-export-report-bridges.R,man/eyeprocess-export-report.Rd,"(path, validate = TRUE)",2,False,False,tests/testthat/test-export-report.R|tests/testthat/test-format-validation.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-read_eye_export,read_eye_export,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, vendor = ""auto"", confidence_threshold = 0.55, ...)",4,True,False,,vignettes/importing-and-harmonizing.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-read_eye_folder,read_eye_folder,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, recursive = FALSE, vendor = ""auto"", pattern = NULL, combine = TRUE, ...)",6,True,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+read_eye_export,read_eye_export,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, vendor = ""auto"", confidence_threshold = 0.55, ...)",4,True,False,,vignettes/importing-and-harmonizing.Rmd,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
+read_eye_folder,read_eye_folder,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(path, recursive = FALSE, vendor = ""auto"", pattern = NULL, combine = TRUE, ...)",6,True,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 read_eye_generic,read_eye_generic,R/004-import-generic.R,man/eyeprocess-import-generic.Rd,"(
     path,
     mapping = NULL,
@@ -472,7 +472,7 @@ read_eye_generic,read_eye_generic,R/004-import-generic.R,man/eyeprocess-import-g
     keep_extra = TRUE,
     encoding = ""UTF-8"",
     quiet = FALSE,
-    ...)",18,True,False,tests/testthat/test-generic-import.R,vignettes/importing-and-harmonizing.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",18,True,False,tests/testthat/test-generic-import.R,vignettes/importing-and-harmonizing.Rmd,unclassified,False,src/eyeprocesspy/importers.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 read_eyelink_asc,read_eyelink_asc,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,"(
     path,
     participant_id = ""P001"",
@@ -577,8 +577,8 @@ read_tobii,read_tobii,R/006-import-other-vendors.R,man/eyeprocess-import-vendors
 read_validation_manifest,read_validation_manifest,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,(path),1,False,False,tests/testthat/test-format-validation.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 register_aois,register_aois,R/008-trials-aoi.R,man/eyeprocess-trials-aoi.Rd,"(x, ..., overwrite = FALSE)",3,True,False,tests/testthat/test-trials-aoi-features.R,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 register_coordinate_space,register_coordinate_space,R/007-coordinates-time.R,man/eyeprocess-coordinates-time.Rd,"(x, space, overwrite = FALSE)",3,False,False,,,unclassified,False,src/eyeprocesspy/coordinates.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
-register_eye_adapter,register_eye_adapter,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(name, detect, read, validate = NULL, priority = 0, overwrite = FALSE)",6,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-remap_recording_ids,remap_recording_ids,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(x, mapping)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+register_eye_adapter,register_eye_adapter,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(name, detect, read, validate = NULL, priority = 0, overwrite = FALSE)",6,False,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
+remap_recording_ids,remap_recording_ids,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(x, mapping)",2,False,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 report_eye_dataset,report_eye_dataset,R/015-export-report-bridges.R,man/eyeprocess-export-report.Rd,"(
     x,
     path = ""eyeprocess-report.md"",
@@ -634,7 +634,7 @@ source_preservation_audit,source_preservation_audit,R/017-format-validation.R,ma
 standardize_eye_table,standardize_eye_table,R/001-schema.R,man/eyeprocess-schema.Rd,"(data, name, keep_extra = TRUE, schema = eye_schema())",4,False,False,tests/testthat/test-schema-class.R,,unclassified,False,src/eyeprocesspy/schema.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 store_quality,store_quality,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(x, report, replace_metric = FALSE)",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 summarize_fixations,summarize_fixations,R/010-features.R,man/eyeprocess-features.Rd,"(x, by = c(""recording_id"", ""trial_id"", ""aoi_id""), source = c(""all"", ""vendor"", ""eyeprocess""))",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-supported_eye_formats,supported_eye_formats,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,(),0,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+supported_eye_formats,supported_eye_formats,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,(),0,False,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 synchronize_eye_biometrics,synchronize_eye_biometrics,R/007-coordinates-time.R,man/eyeprocess-coordinates-time.Rd,"(
     gaze,
     biometrics,
@@ -645,7 +645,7 @@ synchronize_eye_biometrics,synchronize_eye_biometrics,R/007-coordinates-time.R,m
 transition_entropy,transition_entropy,R/010-features.R,man/eyeprocess-features.Rd,"(x, source = c(""visits"", ""fixations"", ""samples""), base = 2)",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 transition_matrix,transition_matrix,R/010-features.R,man/eyeprocess-features.Rd,"(x, normalize = c(""none"", ""row"", ""all""), source = c(""visits"", ""fixations"", ""samples""), include_self = FALSE)",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 trial_table,trial_table,R/010-features.R,man/eyeprocess-features.Rd,(x),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-unregister_eye_adapter,unregister_eye_adapter,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,(name),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+unregister_eye_adapter,unregister_eye_adapter,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,(name),1,False,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 validate_eye_corpus,validate_eye_corpus,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
     manifest,
     spec = format_validation_spec(),
@@ -653,7 +653,7 @@ validate_eye_corpus,validate_eye_corpus,R/017-format-validation.R,man/eyeprocess
     retain_datasets = FALSE,
     stop_on_failure = FALSE)",5,False,False,tests/testthat/test-format-validation.R,vignettes/multi-vendor-validation.Rmd|vignettes/validating-real-exports.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 validate_eye_dataset,validate_eye_dataset,R/002-class.R,man/eyeprocess-class.Rd,"(x, strict = FALSE, stop_on_error = FALSE)",3,False,False,tests/testthat/test-format-validation.R|tests/testthat/test-schema-class.R,vignettes/getting-started.Rmd|vignettes/interoperability-storage.Rmd|vignettes/responsible-use.Rmd,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
-validate_eye_mapping,validate_eye_mapping,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(mapping, data = NULL, required = c(""timestamp"", ""x"", ""y""))",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+validate_eye_mapping,validate_eye_mapping,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(mapping, data = NULL, required = c(""timestamp"", ""x"", ""y""))",3,False,False,,,unclassified,False,src/eyeprocesspy/importers.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 validate_eye_source,validate_eye_source,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
     path,
     vendor = ""auto"",
