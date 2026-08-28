@@ -11,9 +11,9 @@ This is **not a formal parity release**.
 
 ## Development checkpoint
 
-- 27 frozen exports have real initial implementations.
+- 56 frozen exports have real initial implementations.
 - No generated placeholder exports are counted.
-- 13 local pytest tests pass.
+- 26 local pytest tests pass.
 - Wheel builds and contains all 13 Stan resources.
 - M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 

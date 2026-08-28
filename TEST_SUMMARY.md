@@ -1,7 +1,7 @@
 # Test summary — 0.1.0.dev0 initial tranche
 
 - Local runtime: Python 3.13.5
-- pytest: **13 passed**
+- pytest: **26 passed**
 - Python compileall: PASS
 - Wheel build: PASS using installed setuptools/wheel without network isolation
 - Wheel artifact: `eyeprocesspy-0.1.0.dev0-py3-none-any.whl`

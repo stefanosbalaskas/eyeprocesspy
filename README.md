@@ -18,7 +18,7 @@
 
 This repository is in **Milestone 0/1 development**. The full frozen API is inventoried before implementation. No placeholder functions are counted as parity. See `IMPLEMENTATION_STATUS.md` and `parity/PARITY_MATRIX.csv`.
 
-The initial implemented tranche establishes the canonical schema, dataset validation, provenance, mappings, timebase primitives and coordinate-space primitives.
+The implemented Milestone 0/1 tranches establish the canonical schema, dataset validation, provenance, mappings, timebase and coordinate-space primitives, generic import/adapter infrastructure, and first-class Gazepoint 7.x gaze, pupil, fixation and biometric ingestion against the frozen package demo exports.
 
 ## Scientific commitments
 
