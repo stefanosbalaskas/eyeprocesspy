@@ -115,7 +115,8 @@ def combine_eye_datasets(*xs,resolve_ids=True):
     tables={}
     for name in canonical_table_names():
         frames=[x[name] for x in xs]
-        tables[name]=pd.concat(frames,ignore_index=True,sort=False) if frames else pd.DataFrame()
+        nonempty=[f for f in frames if not f.empty]
+        tables[name]=pd.concat(nonempty,ignore_index=True,sort=False) if nonempty else (frames[0].copy() if frames else pd.DataFrame())
     identity={"recordings":"recording_id","streams":"stream_id","coordinate_spaces":"coordinate_space_id","aoi_definitions":"aoi_id","calibrations":"calibration_id"}
     for name,key in identity.items():
         if not tables[name].empty and key in tables[name].columns:

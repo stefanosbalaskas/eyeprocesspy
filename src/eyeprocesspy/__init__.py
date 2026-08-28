@@ -12,4 +12,7 @@ from .coordinates import register_coordinate_space, coordinate_space, convert_co
 from .importers import validate_eye_mapping, infer_eye_mapping, read_eye_generic
 from .adapters import register_eye_adapter, unregister_eye_adapter, supported_eye_formats, detect_eye_format, read_eye_export, read_eye_folder, combine_eye_datasets, remap_recording_ids
 
+from .gazepoint import (is_gazepoint_export, gp_identify_export_type, gp_profile_export, gp_list_export_fields, gp_validate_export, read_gazepoint, read_gazepoint_gaze, read_gazepoint_fixations, read_gazepoint_events, read_gazepoint_folder, gp_pair_exports, gp_match_recordings, gp_match_biometrics, gp_audit_file_pairs, read_gazepoint_biometrics, read_gazepoint_combined, gp_parse_user_events, gp_parse_media_events)
+register_eye_adapter("gazepoint", is_gazepoint_export, read_gazepoint, gp_validate_export, priority=100, overwrite=True)
+
 __all__ = [n for n in globals() if not n.startswith('_')]
