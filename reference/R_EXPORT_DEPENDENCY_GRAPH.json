@@ -1,0 +1,2428 @@
+{
+  "add_provenance": [
+    "validate_eye_dataset"
+  ],
+  "add_responses": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "align_clock": [],
+  "align_response_matrices": [],
+  "analysis_readiness": [
+    "audit_coordinate_spaces",
+    "audit_signal_quality",
+    "audit_timebase",
+    "audit_trial_coverage",
+    "validate_eye_dataset"
+  ],
+  "anonymize_eye_dataset": [],
+  "append_eye_table": [
+    "get_eye_table",
+    "set_eye_table"
+  ],
+  "apply_clock_transform": [
+    "add_provenance",
+    "align_clock"
+  ],
+  "as_eye_biometrics": [],
+  "as_eye_dataset": [],
+  "assign_aois": [
+    "add_provenance"
+  ],
+  "assign_trials": [
+    "add_provenance"
+  ],
+  "audit_aois": [],
+  "audit_clock_sync": [],
+  "audit_coordinate_spaces": [],
+  "audit_episodes": [],
+  "audit_event_order": [],
+  "audit_missingness": [],
+  "audit_pupil_quality": [
+    "store_quality"
+  ],
+  "audit_sampling_rate": [
+    "estimate_sampling_rate",
+    "store_quality"
+  ],
+  "audit_signal_quality": [
+    "empty_eye_table",
+    "store_quality"
+  ],
+  "audit_timebase": [
+    "estimate_sampling_rate"
+  ],
+  "audit_trial_coverage": [
+    "trial_table"
+  ],
+  "baseline_pupil": [
+    "add_provenance"
+  ],
+  "build_aoi_visits": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "build_gazepoint_media_trials": [
+    "add_provenance",
+    "assign_trials",
+    "empty_eye_table",
+    "standardize_eye_table"
+  ],
+  "build_item_responses": [
+    "add_responses"
+  ],
+  "build_stimulus_intervals": [
+    "add_provenance",
+    "assign_trials",
+    "standardize_eye_table"
+  ],
+  "build_trials": [],
+  "canonical_table_names": [
+    "eye_schema"
+  ],
+  "check_feature_level": [],
+  "check_local_dependence": [],
+  "check_process_leakage": [],
+  "combine_eye_datasets": [],
+  "compact_eye_dataset": [
+    "add_provenance",
+    "canonical_table_names"
+  ],
+  "compare_aoi_definitions": [
+    "is_eye_dataset"
+  ],
+  "compare_eye_datasets": [
+    "canonical_table_names"
+  ],
+  "compare_preprocessing": [
+    "audit_signal_quality",
+    "is_eye_dataset"
+  ],
+  "convert_coordinates": [
+    "add_provenance",
+    "convert_xy",
+    "coordinate_space",
+    "standardize_eye_table"
+  ],
+  "convert_xy": [],
+  "coordinate_space": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "create_validation_bundle": [
+    "anonymize_eye_dataset",
+    "write_eye_dataset",
+    "write_format_validation_report"
+  ],
+  "derive_all_features": [
+    "add_provenance",
+    "derive_biometric_features",
+    "derive_gaze_features",
+    "derive_pupil_features",
+    "derive_rt_features",
+    "empty_eye_table",
+    "feature_spec"
+  ],
+  "derive_biometric_features": [
+    "add_provenance",
+    "empty_eye_table",
+    "standardize_eye_table",
+    "trial_table"
+  ],
+  "derive_gaze_features": [
+    "add_provenance",
+    "empty_eye_table",
+    "standardize_eye_table",
+    "trial_table"
+  ],
+  "derive_gazepoint_workflow_features": [
+    "add_provenance",
+    "derive_gaze_features",
+    "derive_pupil_features",
+    "derive_rt_features",
+    "standardize_eye_table",
+    "trial_table"
+  ],
+  "derive_pupil_features": [
+    "add_provenance",
+    "empty_eye_table",
+    "standardize_eye_table",
+    "trial_table"
+  ],
+  "derive_rt_features": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "detect_blinks": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "detect_eye_format": [],
+  "detect_fixations_idt": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "detect_fixations_ivt": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "detect_saccades": [
+    "add_provenance",
+    "gaze_velocity",
+    "standardize_eye_table"
+  ],
+  "discover_validation_cases": [
+    "validation_manifest"
+  ],
+  "empty_eye_table": [
+    "eye_schema",
+    "schema_table"
+  ],
+  "estimate_clock_transform": [
+    "align_clock"
+  ],
+  "estimate_ez_diffusion": [
+    "is_eye_dataset"
+  ],
+  "estimate_sampling_rate": [],
+  "export_canonical": [
+    "write_eye_dataset"
+  ],
+  "eye_format_profiles": [],
+  "eye_mapping": [],
+  "eye_schema": [],
+  "feature_dictionary": [],
+  "feature_spec": [],
+  "features_wide": [],
+  "filter_gaze": [
+    "add_provenance",
+    "rolling_apply"
+  ],
+  "filter_pupil": [
+    "add_provenance",
+    "rolling_apply"
+  ],
+  "fingerprint_eye_dataset": [
+    "canonical_table_names"
+  ],
+  "fit_accuracy_rt": [
+    "align_response_matrices",
+    "fit_irt",
+    "model_data",
+    "response_matrix",
+    "response_time_matrix"
+  ],
+  "fit_dif": [
+    "model_data",
+    "response_matrix"
+  ],
+  "fit_dynamic_aoi_model": [
+    "scanpath_sequence",
+    "transition_matrix"
+  ],
+  "fit_explanatory_irt": [
+    "model_data"
+  ],
+  "fit_gaze_informed_irt": [
+    "fit_process_irt",
+    "process_irt_spec"
+  ],
+  "fit_gaze_weighted_choice": [
+    "fit_explanatory_irt"
+  ],
+  "fit_irt": [
+    "response_matrix"
+  ],
+  "fit_joint_process_model": [
+    "model_data"
+  ],
+  "fit_multimodal_irt": [
+    "fit_process_irt",
+    "process_irt_spec"
+  ],
+  "fit_process_irt": [
+    "fit_explanatory_irt",
+    "process_irt_spec"
+  ],
+  "fit_pupil_informed_irt": [
+    "fit_process_irt",
+    "process_irt_spec"
+  ],
+  "fit_shared_process_factor": [
+    "features_wide",
+    "standardize_eye_table"
+  ],
+  "fit_strategy_mixture": [
+    "features_wide",
+    "model_data",
+    "standardize_eye_table"
+  ],
+  "flag_gaze_outliers": [
+    "add_provenance",
+    "gaze_velocity"
+  ],
+  "format_compatibility_matrix": [
+    "eye_format_profiles"
+  ],
+  "format_validation_spec": [],
+  "functional_pupil_features": [
+    "add_provenance",
+    "empty_eye_table",
+    "standardize_eye_table",
+    "trial_table"
+  ],
+  "gaze_entropy": [],
+  "gaze_velocity": [
+    "add_provenance"
+  ],
+  "gazepoint_analysis_tables": [
+    "feature_dictionary",
+    "summarize_fixations",
+    "trial_table"
+  ],
+  "gazepoint_irt_tables": [
+    "gazepoint_analysis_tables",
+    "response_matrix",
+    "response_time_matrix",
+    "trial_table"
+  ],
+  "gazepoint_workflow_spec": [],
+  "get_eye_table": [],
+  "gp_align_media_ids": [
+    "assign_trials"
+  ],
+  "gp_audit_file_pairs": [
+    "gp_pair_exports"
+  ],
+  "gp_check_biometrics_sync": [
+    "audit_clock_sync"
+  ],
+  "gp_check_fixation_ids": [
+    "audit_episodes"
+  ],
+  "gp_check_media_timing": [
+    "audit_event_order"
+  ],
+  "gp_check_pupil_channels": [
+    "audit_pupil_quality"
+  ],
+  "gp_check_sampling_rate": [
+    "audit_sampling_rate"
+  ],
+  "gp_check_validity_fields": [
+    "audit_signal_quality"
+  ],
+  "gp_identify_export_type": [],
+  "gp_list_export_fields": [],
+  "gp_match_biometrics": [
+    "gp_pair_exports"
+  ],
+  "gp_match_recordings": [
+    "gp_pair_exports"
+  ],
+  "gp_pair_exports": [
+    "add_provenance"
+  ],
+  "gp_parse_markers": [
+    "gp_parse_user_events"
+  ],
+  "gp_parse_media_events": [
+    "add_provenance"
+  ],
+  "gp_parse_user_events": [
+    "add_provenance",
+    "gp_parse_media_events"
+  ],
+  "gp_profile_export": [
+    "gp_identify_export_type",
+    "is_gazepoint_export"
+  ],
+  "gp_reconstruct_stimuli": [
+    "build_stimulus_intervals"
+  ],
+  "gp_reconstruct_trials": [
+    "build_trials"
+  ],
+  "gp_validate_export": [
+    "gp_profile_export"
+  ],
+  "import_canonical": [
+    "read_eye_dataset"
+  ],
+  "infer_eye_mapping": [],
+  "init_validation_corpus": [
+    "eye_format_profiles",
+    "supported_eye_formats",
+    "validate_eye_corpus",
+    "write_validation_manifest"
+  ],
+  "inspect_eye_source": [
+    "detect_eye_format"
+  ],
+  "interpolate_pupil": [
+    "add_provenance"
+  ],
+  "interpretive_warnings": [],
+  "is_eye_dataset": [],
+  "is_eyelink_export": [],
+  "is_gazepoint_export": [],
+  "is_pupil_labs_export": [],
+  "is_smi_export": [],
+  "is_tobii_export": [],
+  "item_parameters": [],
+  "model_data": [
+    "features_wide"
+  ],
+  "model_fit_statistics": [],
+  "model_missing_process": [
+    "model_data"
+  ],
+  "new_aoi": [],
+  "new_coordinate_space": [],
+  "new_eye_dataset": [
+    "empty_eye_table",
+    "standardize_eye_table",
+    "validate_eye_dataset"
+  ],
+  "normalize_timebase": [
+    "add_provenance"
+  ],
+  "parameter_recovery": [],
+  "person_scores": [],
+  "plot_aoi_dwell": [],
+  "plot_biometrics": [],
+  "plot_clock_alignment": [
+    "audit_clock_sync"
+  ],
+  "plot_coordinate_spaces": [
+    "audit_coordinate_spaces"
+  ],
+  "plot_eye_overview": [],
+  "plot_eye_trace": [],
+  "plot_feature_correlation": [
+    "features_wide"
+  ],
+  "plot_feature_distribution": [],
+  "plot_fixations": [],
+  "plot_gaze_heatmap": [],
+  "plot_gazepoint_workflow": [],
+  "plot_item_difficulty": [
+    "item_parameters"
+  ],
+  "plot_missingness": [
+    "audit_missingness"
+  ],
+  "plot_model_diagnostics": [],
+  "plot_pupil_timeseries": [],
+  "plot_sampling_rate": [
+    "audit_sampling_rate"
+  ],
+  "plot_scanpath": [],
+  "plot_signal_quality": [
+    "audit_signal_quality"
+  ],
+  "plot_transition_matrix": [
+    "transition_matrix"
+  ],
+  "plot_trial_timeline": [
+    "trial_table"
+  ],
+  "power_process_simulation": [
+    "simulate_process_irt"
+  ],
+  "preprocess_eye": [
+    "add_provenance",
+    "baseline_pupil",
+    "detect_blinks",
+    "filter_gaze",
+    "filter_pupil",
+    "interpolate_pupil",
+    "preprocess_spec"
+  ],
+  "preprocess_spec": [],
+  "process_irt_diagnostics": [
+    "check_local_dependence",
+    "model_fit_statistics"
+  ],
+  "process_irt_spec": [],
+  "provenance_manifest": [
+    "validate_eye_dataset"
+  ],
+  "pupil_deconvolve": [
+    "add_provenance"
+  ],
+  "pupil_labs_format": [],
+  "read_eye_dataset": [
+    "canonical_table_names",
+    "empty_eye_table",
+    "standardize_eye_table",
+    "validate_eye_dataset"
+  ],
+  "read_eye_export": [
+    "detect_eye_format",
+    "read_eye_generic"
+  ],
+  "read_eye_folder": [
+    "read_eye_export"
+  ],
+  "read_eye_generic": [
+    "add_provenance",
+    "estimate_sampling_rate",
+    "infer_eye_mapping",
+    "new_coordinate_space",
+    "new_eye_dataset",
+    "validate_eye_dataset",
+    "validate_eye_mapping"
+  ],
+  "read_eyelink_asc": [
+    "add_provenance",
+    "estimate_sampling_rate",
+    "new_coordinate_space",
+    "new_eye_dataset",
+    "validate_eye_dataset"
+  ],
+  "read_eyelink_edf": [
+    "add_provenance",
+    "read_eyelink_asc"
+  ],
+  "read_eyelink_report": [
+    "infer_eye_mapping",
+    "read_eye_generic"
+  ],
+  "read_gazepoint": [
+    "add_provenance",
+    "gp_identify_export_type",
+    "gp_parse_media_events",
+    "gp_parse_user_events",
+    "read_eye_generic",
+    "read_gazepoint_aoi_statistics",
+    "read_gazepoint_fixations",
+    "read_gazepoint_folder"
+  ],
+  "read_gazepoint_aoi_statistics": [
+    "add_provenance",
+    "gp_parse_media_events",
+    "gp_parse_user_events",
+    "read_eye_generic"
+  ],
+  "read_gazepoint_biometrics": [
+    "add_provenance",
+    "empty_eye_table",
+    "eye_mapping",
+    "read_eye_generic"
+  ],
+  "read_gazepoint_combined": [
+    "read_gazepoint",
+    "read_gazepoint_biometrics",
+    "read_gazepoint_fixations"
+  ],
+  "read_gazepoint_events": [
+    "empty_eye_table",
+    "read_gazepoint"
+  ],
+  "read_gazepoint_fixations": [
+    "add_provenance",
+    "gp_parse_media_events",
+    "gp_parse_user_events",
+    "read_eye_generic",
+    "read_gazepoint_aoi_statistics"
+  ],
+  "read_gazepoint_folder": [
+    "add_provenance",
+    "gp_identify_export_type",
+    "gp_parse_media_events",
+    "gp_parse_user_events",
+    "read_eye_generic",
+    "read_gazepoint_aoi_statistics",
+    "read_gazepoint_fixations"
+  ],
+  "read_gazepoint_gaze": [
+    "read_gazepoint"
+  ],
+  "read_gazepoint_summary": [],
+  "read_pupil_core": [],
+  "read_pupil_neon": [
+    "read_pupil_core"
+  ],
+  "read_pupillabs": [
+    "pupil_labs_format",
+    "read_pupil_core",
+    "read_pupil_neon"
+  ],
+  "read_smi": [
+    "add_provenance",
+    "eye_mapping",
+    "read_eye_generic"
+  ],
+  "read_smi_aoi_export": [
+    "read_smi"
+  ],
+  "read_smi_event_export": [
+    "read_smi"
+  ],
+  "read_smi_raw_export": [
+    "read_smi"
+  ],
+  "read_tobii": [],
+  "read_validation_manifest": [],
+  "register_aois": [
+    "add_provenance",
+    "new_aoi",
+    "standardize_eye_table"
+  ],
+  "register_coordinate_space": [
+    "add_provenance",
+    "standardize_eye_table"
+  ],
+  "register_eye_adapter": [],
+  "remap_recording_ids": [
+    "add_provenance",
+    "canonical_table_names",
+    "validate_eye_dataset"
+  ],
+  "report_eye_dataset": [
+    "analysis_readiness",
+    "audit_sampling_rate",
+    "audit_signal_quality",
+    "audit_trial_coverage",
+    "interpretive_warnings",
+    "plot_eye_overview",
+    "plot_pupil_timeseries",
+    "plot_sampling_rate",
+    "plot_signal_quality",
+    "validate_eye_dataset"
+  ],
+  "report_processirt": [
+    "report_eye_dataset"
+  ],
+  "response_matrix": [],
+  "response_time_matrix": [],
+  "rolling_apply": [],
+  "roundtrip_eye_dataset": [
+    "compare_eye_datasets",
+    "fingerprint_eye_dataset",
+    "read_eye_dataset",
+    "write_eye_dataset"
+  ],
+  "run_gazepoint_workflow": [
+    "interpretive_warnings",
+    "trial_table"
+  ],
+  "scanpath_sequence": [],
+  "schema_coverage": [
+    "canonical_table_names",
+    "schema_table"
+  ],
+  "schema_coverage_summary": [
+    "schema_coverage"
+  ],
+  "schema_table": [
+    "eye_schema"
+  ],
+  "sensitivity_missing_process": [
+    "model_data"
+  ],
+  "sensitivity_process": [
+    "compare_preprocessing"
+  ],
+  "set_eye_table": [
+    "add_provenance",
+    "canonical_table_names",
+    "standardize_eye_table",
+    "validate_eye_dataset"
+  ],
+  "simulate_eye_dataset": [
+    "add_provenance",
+    "assign_aois",
+    "new_aoi",
+    "new_coordinate_space",
+    "new_eye_dataset",
+    "register_aois",
+    "validate_eye_dataset"
+  ],
+  "simulate_process_irt": [],
+  "source_preservation_audit": [],
+  "standardize_eye_table": [
+    "eye_schema",
+    "schema_table"
+  ],
+  "store_quality": [
+    "add_provenance",
+    "schema_table",
+    "standardize_eye_table"
+  ],
+  "summarize_fixations": [],
+  "supported_eye_formats": [],
+  "synchronize_eye_biometrics": [
+    "add_provenance",
+    "apply_clock_transform",
+    "combine_eye_datasets",
+    "estimate_clock_transform"
+  ],
+  "transition_entropy": [
+    "transition_matrix"
+  ],
+  "transition_matrix": [
+    "scanpath_sequence"
+  ],
+  "trial_table": [],
+  "unregister_eye_adapter": [],
+  "validate_eye_corpus": [
+    "write_validation_manifest"
+  ],
+  "validate_eye_dataset": [],
+  "validate_eye_mapping": [],
+  "validate_eye_source": [
+    "detect_eye_format",
+    "format_validation_spec",
+    "inspect_eye_source",
+    "is_eye_dataset",
+    "roundtrip_eye_dataset",
+    "schema_coverage",
+    "source_preservation_audit",
+    "validate_eye_dataset"
+  ],
+  "validate_eye_table": [
+    "eye_schema",
+    "schema_table"
+  ],
+  "validate_eyelink_export": [],
+  "validate_gazepoint_workflow": [
+    "write_gazepoint_workflow_report"
+  ],
+  "validate_generic_export": [
+    "infer_eye_mapping"
+  ],
+  "validate_pupillabs_export": [
+    "pupil_labs_format"
+  ],
+  "validate_smi_export": [
+    "is_smi_export"
+  ],
+  "validate_tobii_export": [],
+  "validation_manifest": [],
+  "write_eye_dataset": [
+    "canonical_table_names",
+    "compact_eye_dataset",
+    "provenance_manifest"
+  ],
+  "write_format_validation_report": [
+    "format_compatibility_matrix",
+    "schema_coverage_summary"
+  ],
+  "write_gazepoint_workflow_report": [
+    "interpretive_warnings",
+    "run_gazepoint_workflow",
+    "trial_table"
+  ],
+  "write_provenance": [
+    "provenance_manifest"
+  ],
+  "write_validation_manifest": [],
+  "eye_storage_spec": [],
+  "write_eye_storage": [
+    "canonical_table_names",
+    "eye_storage_spec"
+  ],
+  "open_eye_storage": [
+    "eye_storage_spec"
+  ],
+  "collect_eye_storage": [
+    "open_eye_storage"
+  ],
+  "export_eye_bids": [],
+  "import_eye_bids": [
+    "add_provenance",
+    "new_coordinate_space",
+    "new_eye_dataset"
+  ],
+  "as_eyeprocess_eyetools": [],
+  "as_eyeprocess_eyetrackingr": [],
+  "as_eyeprocess_gazer": [],
+  "as_eyeprocess_eyeris": [],
+  "as_eyeprocess_pupillometryr": [
+    "as_traminer_sequence"
+  ],
+  "as_procdata_sequence": [
+    "scanpath_sequence"
+  ],
+  "as_traminer_sequence": [],
+  "as_seqhmm_data": [
+    "scanpath_sequence"
+  ],
+  "fit_gdina_adapter": [
+    "response_matrix"
+  ],
+  "fit_diffirt_adapter": [
+    "align_response_matrices",
+    "response_matrix",
+    "response_time_matrix"
+  ],
+  "fit_openmx_process_model": [
+    "model_data"
+  ],
+  "vendor_validation_spec": [],
+  "audit_vendor_validation": [
+    "vendor_validation_spec"
+  ],
+  "write_vendor_validation_report": [],
+  "model_validation_spec": [],
+  "run_model_validation": [
+    "model_validation_spec"
+  ],
+  "model_validation_summary": [],
+  "advanced_model_evidence_spec": [],
+  "audit_advanced_model_evidence": [
+    "advanced_model_evidence_spec"
+  ],
+  "write_advanced_model_evidence_report": [],
+  "simulation_based_calibration": [],
+  "sbc_summary": [],
+  "compare_model_engines": [],
+  "raven_reproduction_spec": [],
+  "run_raven_reproduction": [
+    "raven_reproduction_spec"
+  ],
+  "grouped_folds": [],
+  "grouped_cv": [],
+  "crossed_grouped_folds": [],
+  "crossed_grouped_cv": [],
+  "quantify_process_leakage": [
+    "crossed_grouped_cv",
+    "grouped_cv"
+  ],
+  "preprocessing_multiverse": [],
+  "benchmark_eyeprocess": [],
+  "reporting_guideline_audit": [],
+  "write_reporting_guideline_report": [],
+  "create_public_benchmark": [
+    "anonymize_eye_dataset",
+    "canonical_table_names",
+    "empty_eye_table",
+    "export_canonical",
+    "reporting_guideline_audit"
+  ],
+  "write_software_paper_scaffold": [
+    "crossed_grouped_cv"
+  ],
+  "run_eyeprocess_validation_program": [
+    "advanced_model_evidence_spec"
+  ],
+  "dynamic_irtree_spec": [],
+  "fit_dynamic_irtree": [
+    "dynamic_irtree_spec"
+  ],
+  "functional_pupil_irt_spec": [],
+  "fit_joint_functional_pupil_irt": [
+    "fit_explanatory_irt",
+    "fit_joint_process_model",
+    "functional_pupil_features",
+    "functional_pupil_irt_spec",
+    "model_data"
+  ],
+  "theory_strategy_spec": [],
+  "fit_theory_strategy_irt": [
+    "is_eye_dataset",
+    "model_data",
+    "theory_strategy_spec"
+  ],
+  "gaze_diffusion_spec": [],
+  "fit_gaze_diffusion_irt": [
+    "estimate_ez_diffusion",
+    "fit_diffirt_adapter",
+    "gaze_diffusion_spec"
+  ],
+  "advanced_validation_grid": [],
+  "simulate_advanced_process_data": [],
+  "audit_benchmark_release": [
+    "eyeprocess_benchmark_study",
+    "run_benchmark_reproduction",
+    "validate_benchmark_study"
+  ],
+  "audit_model_promotion": [
+    "model_promotion_spec"
+  ],
+  "audit_roundtrip_loss": [
+    "canonical_table_names"
+  ],
+  "audit_validation_completion": [
+    "validation_failure_summary",
+    "validation_recovery_summary",
+    "validation_sbc_summary",
+    "validation_thresholds"
+  ],
+  "audit_vendor_field_coverage": [],
+  "benchmark_expected_outputs": [
+    "eyeprocess_benchmark_study"
+  ],
+  "benchmark_eye_storage": [
+    "partition_eye_storage",
+    "query_eye_storage",
+    "write_partitioned_eye_storage"
+  ],
+  "build_compatibility_matrix": [
+    "read_vendor_registry"
+  ],
+  "collect_validation_jobs": [],
+  "compare_diffusion_accuracy_rt": [],
+  "compare_dynamic_transition_models": [],
+  "compare_engine_adapters": [],
+  "compare_functional_scalar_models": [
+    "functional_pupil_basis",
+    "grouped_folds"
+  ],
+  "compare_strategy_heterogeneity": [],
+  "compare_vendor_semantics": [],
+  "decode_dynamic_states": [],
+  "detect_corrupt_partitions": [
+    "validate_eye_storage_metadata"
+  ],
+  "diffusion_identification_study": [],
+  "diffusion_parameter_diagnostics": [],
+  "diffusion_posterior_predictive": [],
+  "dynamic_irtree_recovery": [
+    "dynamic_irtree_spec",
+    "validation_job_plan"
+  ],
+  "dynamic_posterior_predictive_check": [],
+  "dynamic_transition_design": [
+    "dynamic_irtree_spec",
+    "prepare_dynamic_irtree_data",
+    "structural_transition_mask"
+  ],
+  "engine_adapter_status": [],
+  "external_model_engines": [],
+  "extract_diffusion_parameters": [],
+  "extract_functional_pupil_parameters": [],
+  "eyeprocess_api_version": [],
+  "eyeprocess_benchmark_study": [],
+  "eyeprocess_deprecation": [],
+  "fingerprint_validation_case": [],
+  "fit_brms_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_diffirt_engine_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_dynamic_irtree_stan": [],
+  "fit_external_engine": [
+    "engine_adapter_status"
+  ],
+  "fit_eyetrackingr_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_functional_pupil_stan": [
+    "functional_pupil_basis"
+  ],
+  "fit_gaze_diffusion_stan": [],
+  "fit_lnirt_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_mirt_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_multinomial_transition": [],
+  "fit_openmx_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_pupillometryr_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_seqhmm_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_strategy_mixture_em": [],
+  "fit_strategy_mixture_stan": [],
+  "fit_tam_adapter": [
+    "fit_external_engine"
+  ],
+  "fit_traminer_adapter": [
+    "fit_external_engine"
+  ],
+  "functional_pupil_basis": [],
+  "functional_pupil_diagnostics": [],
+  "import_benchmark_study": [
+    "eyeprocess_benchmark_study",
+    "read_benchmark_table"
+  ],
+  "init_vendor_corpus": [],
+  "migrate_eye_storage_schema": [
+    "open_partitioned_eye_storage",
+    "partition_eye_storage",
+    "query_eye_storage",
+    "write_partitioned_eye_storage"
+  ],
+  "model_promotion_spec": [],
+  "object_schema": [],
+  "open_partitioned_eye_storage": [],
+  "package_reproducibility_manifest": [],
+  "partition_eye_storage": [],
+  "plot_interval_coverage": [
+    "validation_recovery_summary"
+  ],
+  "plot_parameter_recovery": [],
+  "plot_sbc_rank": [],
+  "plot_validation_failures": [
+    "validation_failure_summary"
+  ],
+  "plot_validation_runtime": [],
+  "prepare_dynamic_irtree_data": [
+    "dynamic_irtree_spec"
+  ],
+  "prepare_functional_pupil_data": [
+    "functional_pupil_irt_spec"
+  ],
+  "prepare_gaze_diffusion_data": [
+    "gaze_diffusion_spec"
+  ],
+  "prepare_strategy_mixture_data": [
+    "theory_strategy_spec"
+  ],
+  "promote_vendor_support": [
+    "read_vendor_registry",
+    "write_vendor_registry"
+  ],
+  "prune_validation_checkpoints": [],
+  "pupil_preprocessing_grid": [],
+  "pupil_preprocessing_sensitivity": [
+    "fit_joint_functional_pupil_irt",
+    "functional_pupil_irt_spec",
+    "prepare_functional_pupil_data",
+    "pupil_preprocessing_grid"
+  ],
+  "query_eye_storage": [
+    "open_partitioned_eye_storage"
+  ],
+  "read_benchmark_table": [
+    "eyeprocess_benchmark_study"
+  ],
+  "read_validation_job_manifest": [],
+  "read_vendor_registry": [],
+  "redact_validation_case": [
+    "fingerprint_validation_case"
+  ],
+  "register_validation_case": [
+    "fingerprint_validation_case",
+    "init_vendor_corpus",
+    "read_vendor_registry",
+    "write_vendor_registry"
+  ],
+  "register_vendor_semantics": [
+    "init_vendor_corpus"
+  ],
+  "resume_validation_jobs": [
+    "read_validation_job_manifest",
+    "run_validation_jobs"
+  ],
+  "run_benchmark_reproduction": [
+    "benchmark_expected_outputs",
+    "eyeprocess_benchmark_study",
+    "read_benchmark_table"
+  ],
+  "run_validation_jobs": [
+    "read_validation_job_manifest",
+    "write_validation_job_manifest"
+  ],
+  "simulate_dynamic_irtree_data": [
+    "structural_transition_mask"
+  ],
+  "simulate_gaze_diffusion_data": [],
+  "simulate_strategy_mixture_data": [],
+  "split_validation_plan": [],
+  "storage_transaction_manifest": [
+    "open_partitioned_eye_storage"
+  ],
+  "strategy_aoi_sensitivity": [],
+  "strategy_classification_uncertainty": [
+    "strategy_posterior_probabilities"
+  ],
+  "strategy_label_switching_diagnostics": [],
+  "strategy_posterior_probabilities": [],
+  "structural_transition_mask": [],
+  "transition_residual_diagnostics": [
+    "dynamic_posterior_predictive_check"
+  ],
+  "upgrade_eye_dataset": [
+    "canonical_table_names"
+  ],
+  "upgrade_eyeprocess_model": [],
+  "validate_benchmark_study": [
+    "eyeprocess_benchmark_study",
+    "read_benchmark_table"
+  ],
+  "validate_engine_adapter": [],
+  "validate_eye_storage_metadata": [
+    "open_partitioned_eye_storage"
+  ],
+  "validate_model_object": [],
+  "validate_strategy_manipulation": [
+    "strategy_posterior_probabilities"
+  ],
+  "validation_calibration_summary": [],
+  "validation_failure_summary": [],
+  "validation_job_plan": [],
+  "validation_recovery_summary": [],
+  "validation_runtime_summary": [],
+  "validation_sbc_summary": [],
+  "validation_seed": [],
+  "validation_thresholds": [],
+  "verify_reproducibility_manifest": [],
+  "write_benchmark_data_dictionary": [
+    "eyeprocess_benchmark_study",
+    "read_benchmark_table"
+  ],
+  "write_model_promotion_report": [],
+  "write_partitioned_eye_storage": [
+    "eyeprocess_api_version",
+    "open_partitioned_eye_storage",
+    "partition_eye_storage"
+  ],
+  "write_software_paper_reproduction": [
+    "eyeprocess_benchmark_study",
+    "package_reproducibility_manifest",
+    "run_benchmark_reproduction",
+    "validate_benchmark_study"
+  ],
+  "write_validation_job_manifest": [
+    "validation_job_plan"
+  ],
+  "write_validation_release_report": [
+    "audit_validation_completion",
+    "validation_calibration_summary",
+    "validation_failure_summary",
+    "validation_recovery_summary",
+    "validation_runtime_summary",
+    "validation_sbc_summary"
+  ],
+  "write_vendor_case_report": [
+    "read_vendor_registry"
+  ],
+  "write_vendor_registry": [],
+  "aoi_balance_coordinates": [],
+  "apply_device_linking": [],
+  "apply_offline_recalibration": [],
+  "assign_aois_probabilistic": [],
+  "audit_aoi_separation": [],
+  "audit_bank_decision_stability": [],
+  "audit_device_equivalence": [],
+  "audit_evidence_dependencies": [],
+  "audit_fairness_transportability": [],
+  "audit_norm_transportability": [
+    "score_process_deviation"
+  ],
+  "audit_process_reliability": [
+    "design_process_dstudy",
+    "fit_process_gstudy"
+  ],
+  "audit_pupil_registration": [],
+  "audit_recalibration": [],
+  "autoplot_eyeprocess": [],
+  "bootstrap_representative_scanpath": [
+    "representative_scanpath"
+  ],
+  "build_evidence_graph": [],
+  "compare_aoi_compositions": [
+    "transform_aoi_composition"
+  ],
+  "compare_decision_provenance": [],
+  "compare_episode_structure": [],
+  "compare_scanpath_distributions": [
+    "representative_scanpath"
+  ],
+  "compare_uncertainty_budgets": [
+    "uncertainty_budget"
+  ],
+  "cross_recurrence": [],
+  "crossmodal_recurrence_model": [],
+  "decompose_dif_evidence": [],
+  "decompose_pupil_phase_amplitude": [],
+  "derive_aoi_composition": [],
+  "design_process_dstudy": [],
+  "detect_calibration_drift": [],
+  "detect_process_changepoints": [],
+  "diagnose_gaze_point_process": [],
+  "estimate_device_specific_error": [],
+  "estimate_process_uncertainty": [
+    "process_uncertainty_spec"
+  ],
+  "eye_plot_spec": [],
+  "fit_aoi_compositional_model": [
+    "transform_aoi_composition"
+  ],
+  "fit_device_linking": [],
+  "fit_fixation_point_process": [],
+  "fit_joint_signal_missingness": [],
+  "fit_marked_gaze_process": [],
+  "fit_offline_recalibration": [],
+  "fit_phase_amplitude_irt": [],
+  "fit_process_dif": [],
+  "fit_process_gstudy": [],
+  "fit_process_missingness_model": [
+    "cross_recurrence",
+    "fit_process_observation_model"
+  ],
+  "fit_process_norms": [],
+  "fit_process_observation_model": [],
+  "gaze_recurrence": [
+    "recurrence_features"
+  ],
+  "item_objective_spec": [],
+  "item_pareto_front": [],
+  "label_process_episodes": [],
+  "monitor_dif_drift": [],
+  "optimize_item_bank": [
+    "item_pareto_front"
+  ],
+  "plot_aoi_balance_biplot": [],
+  "plot_aoi_boundary_risk": [],
+  "plot_aoi_composition_trajectory": [],
+  "plot_aoi_metric_uncertainty": [],
+  "plot_aoi_probability_map": [],
+  "plot_aoi_ternary": [],
+  "plot_aoi_variation_matrix": [],
+  "plot_bank_information_coverage": [],
+  "plot_calibration_error_ellipses": [],
+  "plot_calibration_vector_field": [],
+  "plot_changepoint_ribbons": [],
+  "plot_complete_case_sensitivity": [],
+  "plot_compositional_group_difference": [],
+  "plot_covariate_effect_surface": [],
+  "plot_cross_vendor_metric_matrix": [],
+  "plot_crossmodal_recurrence": [],
+  "plot_decision_stability": [],
+  "plot_dependability_surface": [],
+  "plot_device_agreement": [],
+  "plot_device_bias_by_magnitude": [],
+  "plot_device_equivalence_intervals": [],
+  "plot_device_transfer_curve": [],
+  "plot_diagnostics": [],
+  "plot_diagonal_recurrence_profile": [],
+  "plot_dif_drift_heatmap": [],
+  "plot_drift_over_time": [],
+  "plot_episode_duration_distribution": [],
+  "plot_episode_transition_graph": [],
+  "plot_episode_waterfall": [],
+  "plot_evidence": [],
+  "plot_evidence_graph": [],
+  "plot_fairness_transport_matrix": [],
+  "plot_fixation_intensity": [],
+  "plot_fuzzy_transition_matrix": [],
+  "plot_group_icc_process_overlay": [],
+  "plot_group_scanpath_transport": [],
+  "plot_item_decision_path": [],
+  "plot_item_group_process_curves": [],
+  "plot_item_normative_deviation": [],
+  "plot_item_pareto": [],
+  "plot_item_phase_delay": [],
+  "plot_item_sampling_reliability": [],
+  "plot_metric_dependency_graph": [],
+  "plot_missingness_by_aoi": [],
+  "plot_missingness_by_time": [],
+  "plot_mnar_tipping_point": [],
+  "plot_model_decision_impact": [],
+  "plot_normative_fan": [],
+  "plot_objective_tradeoffs": [],
+  "plot_observation_probability": [],
+  "plot_observed_expected_fixations": [],
+  "plot_person_normative_profile": [],
+  "plot_phase_amplitude_scores": [],
+  "plot_probabilistic_scanpath": [],
+  "plot_process_centiles": [],
+  "plot_process_dif_forest": [],
+  "plot_process_episodes": [],
+  "plot_pupil_registration": [],
+  "plot_recalibration_before_after": [],
+  "plot_recurrence_matrix": [],
+  "plot_recurrence_network": [],
+  "plot_registered_pupil_effects": [],
+  "plot_reliability_by_metric": [],
+  "plot_representative_scanpath": [],
+  "plot_scanpath_atlas": [],
+  "plot_scanpath_dispersion": [],
+  "plot_scanpath_similarity_matrix": [],
+  "plot_screen_coverage": [],
+  "plot_selected_bank_profile": [],
+  "plot_sensitivity": [],
+  "plot_session_stability": [],
+  "plot_spatial_residuals": [],
+  "plot_temporal_excitation_kernel": [],
+  "plot_uncertainty_by_item": [],
+  "plot_uncertainty_by_stage": [],
+  "plot_uncertainty_tornado": [],
+  "plot_uncertainty_waterfall": [],
+  "plot_variance_components": [],
+  "plot_warping_functions": [],
+  "plot_windowed_recurrence": [],
+  "predict_fixation_intensity": [],
+  "predict_process_centiles": [],
+  "process_pattern_mixture": [],
+  "process_uncertainty_spec": [],
+  "process_variance_components": [],
+  "propagate_aoi_uncertainty": [],
+  "propagate_process_uncertainty": [],
+  "recurrence_features": [],
+  "register_pupil_curves": [],
+  "representative_scanpath": [],
+  "scanpath_dispersion": [
+    "representative_scanpath"
+  ],
+  "score_process_deviation": [],
+  "segment_process_episodes": [
+    "detect_process_changepoints"
+  ],
+  "sensitivity_mnar_process": [
+    "process_pattern_mixture"
+  ],
+  "summarise_aoi_membership": [],
+  "trace_item_decision": [],
+  "transform_aoi_composition": [],
+  "uncertainty_budget": [],
+  "windowed_recurrence": [],
+  "algorithm_facet_effects": [
+    "detect_irt_changepoints"
+  ],
+  "as_irt_recovery_results": [],
+  "audit_bias": [
+    "summarize_parameter_recovery"
+  ],
+  "audit_channel_incremental_information": [
+    "validation_failure_taxonomy"
+  ],
+  "audit_convergence": [
+    "as_irt_recovery_results"
+  ],
+  "audit_coverage": [
+    "summarize_parameter_recovery"
+  ],
+  "audit_distractor_attention": [],
+  "audit_identifiability": [
+    "as_irt_recovery_results"
+  ],
+  "audit_interval_width": [
+    "summarize_parameter_recovery"
+  ],
+  "audit_irf_shape": [
+    "compare_parametric_nonparametric_irf"
+  ],
+  "audit_latent_distribution": [],
+  "audit_measurement_transportability": [],
+  "audit_process_adjusted_dif": [
+    "process_dif_nuisance_surrogate"
+  ],
+  "audit_process_local_dependence": [],
+  "audit_process_measurement_invariance": [
+    "facet_effects"
+  ],
+  "audit_rmse": [
+    "summarize_parameter_recovery"
+  ],
+  "audit_sbc": [],
+  "calibration_transfer_audit": [],
+  "classify_item_missingness": [],
+  "compare_irt_models": [],
+  "compare_latent_distribution_models": [
+    "audit_latent_distribution",
+    "stress_test_latent_distribution"
+  ],
+  "compare_parametric_nonparametric_irf": [
+    "fit_gpirt"
+  ],
+  "compare_validation_engines": [
+    "summarize_parameter_recovery"
+  ],
+  "compatibility_evidence_matrix": [],
+  "coordinate_fidelity_audit": [],
+  "cross_device_process_equating_audit": [],
+  "cross_version_adapter_regression": [],
+  "detect_irt_changepoints": [],
+  "detect_process_changepoint": [
+    "detect_irt_changepoints"
+  ],
+  "device_facet_effects": [],
+  "distractor_process_map": [],
+  "encode_response_combinations": [],
+  "equate_irt_scales": [],
+  "estimate_visual_exposure_probability": [],
+  "event_roundtrip_audit": [
+    "event_semantics_audit",
+    "validate_hed_event_semantics"
+  ],
+  "event_semantics_audit": [],
+  "expected_process_information": [
+    "process_item_information"
+  ],
+  "explain_latent_interaction": [
+    "fit_latent_space_irt"
+  ],
+  "external_validate_irt": [
+    "validation_failure_taxonomy"
+  ],
+  "extract_parameter_truth": [],
+  "eye_stream_fidelity_audit": [],
+  "facet_effects": [],
+  "field_fidelity_report": [],
+  "fit_censored_normal_process_irt": [],
+  "fit_changepoint_multimodal_irt": [
+    "detect_irt_changepoints"
+  ],
+  "fit_changepoint_rt_irt": [
+    "detect_irt_changepoints"
+  ],
+  "fit_cognitive_diagnosis_process": [],
+  "fit_continuous_time_irt": [],
+  "fit_crossclassified_process_irt": [],
+  "fit_dynamic_gpirt": [],
+  "fit_event_time_irt": [],
+  "fit_flow_mirt": [],
+  "fit_gaze_informed_missingness_irt": [],
+  "fit_gpirt": [],
+  "fit_irt_model": [
+    "get_irt_model"
+  ],
+  "fit_joint_gaze_rt_irt": [],
+  "fit_joint_graded_rt_process_irt": [],
+  "fit_latent_class_process_irt": [],
+  "fit_latent_space_irt": [],
+  "fit_manyfacet_process_irt": [],
+  "fit_multimodal_trait_irt": [
+    "fit_joint_gaze_rt_irt"
+  ],
+  "fit_multiple_response_process_irt": [
+    "fit_cognitive_diagnosis_process"
+  ],
+  "fit_nominal_gaze_irt": [],
+  "fit_omission_survival_irt": [
+    "classify_item_missingness"
+  ],
+  "fit_process_hmm_irt": [],
+  "fit_response_process_embedding_irt": [
+    "process_sequence_embedding"
+  ],
+  "fit_revisit_process_cdm": [
+    "fit_cognitive_diagnosis_process"
+  ],
+  "fit_speed_accuracy_engagement_irt": [
+    "fit_joint_gaze_rt_irt"
+  ],
+  "fit_validation_replicate": [
+    "as_irt_recovery_results",
+    "extract_parameter_truth",
+    "validation_failure_taxonomy"
+  ],
+  "fit_variational_irt": [],
+  "generalizability_process_study": [],
+  "get_irt_model": [
+    "list_irt_models"
+  ],
+  "grade_model_evidence": [
+    "audit_sbc",
+    "irt_validation_spec",
+    "summarize_parameter_recovery"
+  ],
+  "irt_compositional_channel": [],
+  "irt_continuous_channel": [],
+  "irt_count_channel": [],
+  "irt_functional_channel": [],
+  "irt_model_spec": [],
+  "irt_nominal_channel": [],
+  "irt_response_channel": [],
+  "irt_rt_channel": [],
+  "irt_sequence_channel": [],
+  "irt_survival_channel": [],
+  "irt_validation_spec": [],
+  "latent_distribution_stress_test": [
+    "stress_test_latent_distribution"
+  ],
+  "latent_trait_trajectory": [],
+  "leave_device_out_validation": [],
+  "leave_item_out_validation": [],
+  "leave_session_out_validation": [],
+  "leave_site_out_validation": [],
+  "list_irt_models": [],
+  "negative_control_process_test": [],
+  "option_process_information": [],
+  "plot_distractor_information": [
+    "distractor_process_map"
+  ],
+  "plot_irf_uncertainty": [
+    "fit_gpirt"
+  ],
+  "plot_person_item_space": [
+    "fit_latent_space_irt"
+  ],
+  "plot_process_changepoint": [],
+  "posterior_predictive_discrepancies": [],
+  "posterior_sbc_contract": [],
+  "predict_theta_at_time": [
+    "latent_trait_trajectory"
+  ],
+  "process_channel_ablation": [],
+  "process_dependent_discrimination_audit": [],
+  "process_dif_nuisance_surrogate": [],
+  "process_item_information": [],
+  "process_ngram_features": [],
+  "process_person_fit": [],
+  "process_residual_map": [],
+  "process_sequence_embedding": [
+    "process_ngram_features"
+  ],
+  "process_state_occupancy": [],
+  "process_state_transition_summary": [],
+  "promote_irt_model": [
+    "get_irt_model",
+    "grade_model_evidence",
+    "register_irt_model"
+  ],
+  "public_validation_corpus": [
+    "build_compatibility_matrix"
+  ],
+  "pupil_unit_fidelity_audit": [],
+  "recalibrate_after_changepoint": [
+    "detect_irt_changepoints"
+  ],
+  "recommended_validation_replications": [],
+  "register_irt_model": [
+    "irt_model_spec"
+  ],
+  "roundtrip_eye_bids": [
+    "field_fidelity_report"
+  ],
+  "run_posterior_sbc": [
+    "posterior_sbc_contract",
+    "validation_failure_taxonomy"
+  ],
+  "run_sbc": [
+    "validation_failure_taxonomy"
+  ],
+  "select_next_item_process": [
+    "process_item_information"
+  ],
+  "semantic_fidelity_spec": [],
+  "semantic_loss_map": [],
+  "semantic_roundtrip_audit": [
+    "field_fidelity_report"
+  ],
+  "session_facet_effects": [],
+  "simulate_from_model": [
+    "simulate_irt_model"
+  ],
+  "simulate_irt_model": [
+    "get_irt_model",
+    "irt_model_spec"
+  ],
+  "simulate_process_cat": [
+    "select_next_item_process"
+  ],
+  "stress_test_latent_distribution": [
+    "stress_test_misspecification"
+  ],
+  "stress_test_local_dependence": [
+    "stress_test_misspecification"
+  ],
+  "stress_test_missingness": [
+    "stress_test_misspecification"
+  ],
+  "stress_test_misspecification": [
+    "validation_failure_taxonomy"
+  ],
+  "stress_test_preprocessing": [
+    "stress_test_misspecification"
+  ],
+  "stress_test_speededness": [
+    "stress_test_misspecification"
+  ],
+  "summarize_parameter_recovery": [
+    "as_irt_recovery_results"
+  ],
+  "timestamp_fidelity_audit": [],
+  "validate_bids_eye_semantics": [],
+  "validate_hed_event_semantics": [],
+  "validate_irt_model": [
+    "get_irt_model",
+    "grade_model_evidence"
+  ],
+  "validate_latent_space_process_similarity": [],
+  "validate_vendor_semantics": [
+    "event_semantics_audit",
+    "validate_vendor_timestamp_semantics",
+    "vendor_schema_contract"
+  ],
+  "validate_vendor_timestamp_semantics": [],
+  "validation_evidence_levels": [],
+  "validation_failure_taxonomy": [],
+  "validation_mcse": [
+    "as_irt_recovery_results"
+  ],
+  "vendor_schema_contract": [],
+  "addm_glam_proxy_features": [],
+  "adjust_pupil_confounds": [],
+  "aoi_trajectory_features": [],
+  "apply_preflight_decision": [],
+  "assign_process_feature_family": [
+    "process_feature_family_registry"
+  ],
+  "audit_3pl_process_signatures": [],
+  "audit_biometric_imputation": [
+    "biometric_imputation_sensitivity"
+  ],
+  "audit_biometric_preflight": [
+    "process_preflight_spec"
+  ],
+  "audit_candidate_item_bank": [
+    "predict_item_parameter_priors"
+  ],
+  "audit_frontier_model_contract": [],
+  "audit_item_reduction_sensitivity": [],
+  "audit_multivariate_process_quality": [
+    "audit_process_anomalies"
+  ],
+  "audit_nonparametric_rasch": [],
+  "audit_presentation_accessibility": [],
+  "audit_process_anomalies": [],
+  "audit_process_drift": [
+    "process_drift_spec"
+  ],
+  "audit_process_external_validity": [],
+  "audit_process_window_sensitivity": [
+    "process_window_spec"
+  ],
+  "audit_pupil_fatigue_drift": [],
+  "audit_pupil_frequency_stability": [
+    "pupil_frequency_features"
+  ],
+  "audit_signal_filter": [],
+  "audit_visual_context_dependence": [],
+  "bayesian_process_diagnostic_flags": [],
+  "bayesian_process_diagnostics_dashboard": [],
+  "bind_process_windows": [],
+  "biometric_imputation_sensitivity": [],
+  "collect_validation_evidence": [],
+  "compare_aoi_trajectories": [],
+  "compare_bayesian_process_models": [],
+  "compare_deployment_batches": [],
+  "compare_presentation_fairness": [],
+  "compare_process_criterion_models": [],
+  "compare_process_profile_solutions": [],
+  "compare_pupil_kernels": [
+    "fit_pupil_event_deconvolution"
+  ],
+  "compare_raw_adjusted_pupil": [],
+  "compare_signal_filters": [
+    "audit_signal_filter",
+    "filter_eye_signal"
+  ],
+  "compare_visual_context_irt": [],
+  "context_factor_effects": [],
+  "drift_by_device": [],
+  "drift_by_site": [],
+  "drift_by_stimulus_version": [],
+  "drift_by_vendor": [],
+  "export_validation_bundle": [
+    "validation_bundle_manifest",
+    "write_validation_report"
+  ],
+  "extract_process_windows": [
+    "process_window_spec"
+  ],
+  "filter_eye_signal": [],
+  "filter_pupil_signal": [
+    "filter_eye_signal"
+  ],
+  "fit_aoi_growth_curve": [],
+  "fit_crossclassified_process_irt_mhrm": [],
+  "fit_gaze_anchored_3pl_audit": [],
+  "fit_item_parameter_seed_model": [],
+  "fit_kde_latent_distribution_irt": [],
+  "fit_mixture_irt_process_classes": [],
+  "fit_multiblock_process_map": [
+    "process_feature_blocks"
+  ],
+  "fit_nonignorable_missing_irt": [],
+  "fit_persistence_gaze_diffusion_irt": [],
+  "fit_process_profile_mixture": [],
+  "fit_process_rasch_tree": [],
+  "fit_pupil_confound_model": [],
+  "fit_pupil_event_deconvolution": [
+    "pupil_event_regressor"
+  ],
+  "fit_visual_context_irt": [
+    "visual_context_registry"
+  ],
+  "gaze_anchored_3pl_alignment": [],
+  "incremental_process_validity": [],
+  "map_latent_classes_to_process_profiles": [],
+  "multiblock_contributions": [],
+  "multiblock_person_coordinates": [],
+  "multiblock_variable_coordinates": [],
+  "plot_aoi_transition_matrix": [],
+  "plot_aoi_transition_rank": [],
+  "plot_process_channel_ablation_delta": [],
+  "plot_process_feature_stability": [],
+  "plot_process_window_sensitivity": [],
+  "plot_pupil_activity_sensitivity": [],
+  "plot_pupil_activity_windows": [],
+  "plot_pupil_band_power": [],
+  "plot_pupil_components": [
+    "plot_pupil_preprocessing_audit"
+  ],
+  "plot_pupil_preprocessing_audit": [],
+  "plot_pupil_spectrum": [],
+  "preaction_process_features": [],
+  "predict_aoi_trajectory": [],
+  "predict_item_parameter_priors": [],
+  "preflight_decisions": [],
+  "preflight_exclusion_manifest": [
+    "preflight_decisions"
+  ],
+  "preflight_failures": [
+    "preflight_decisions"
+  ],
+  "preflight_passed": [
+    "preflight_decisions"
+  ],
+  "prepare_structured_unstructured_process_features": [],
+  "process_anomaly_distance": [],
+  "process_criterion_associations": [],
+  "process_drift_alerts": [],
+  "process_drift_spec": [],
+  "process_feature_blocks": [],
+  "process_feature_family_registry": [],
+  "process_feature_stability": [
+    "assign_process_feature_family"
+  ],
+  "process_preflight_spec": [],
+  "process_profile_probabilities": [],
+  "process_profile_summary": [],
+  "process_window_spec": [],
+  "pupil_activity_index": [
+    "pupil_band_power",
+    "pupil_velocity_activity"
+  ],
+  "pupil_band_power": [],
+  "pupil_confound_effects": [],
+  "pupil_event_effects": [
+    "fit_pupil_event_deconvolution"
+  ],
+  "pupil_event_regressor": [
+    "pupil_response_kernel"
+  ],
+  "pupil_frequency_features": [
+    "pupil_activity_index",
+    "pupil_band_power",
+    "pupil_velocity_activity"
+  ],
+  "pupil_response_kernel": [],
+  "pupil_velocity_activity": [],
+  "score_partial_response_pattern": [],
+  "score_response_stream": [
+    "score_partial_response_pattern"
+  ],
+  "simulate_presentation_variants": [
+    "audit_presentation_accessibility"
+  ],
+  "streaming_score_history": [],
+  "summarize_process_windows": [],
+  "update_person_score": [
+    "score_partial_response_pattern"
+  ],
+  "validate_process_windows": [
+    "extract_process_windows"
+  ],
+  "validation_bundle_manifest": [],
+  "validation_report": [
+    "validation_bundle_manifest"
+  ],
+  "visual_context_registry": [],
+  "write_validation_report": [
+    "validation_report"
+  ],
+  "analysis_decision_entropy": [],
+  "analysis_environment_snapshot": [],
+  "analysis_resolution_guard": [],
+  "aoi_membership_probability": [],
+  "api_family_map": [],
+  "api_lifecycle_diff": [
+    "eye_api_lifecycle"
+  ],
+  "api_surface_summary": [],
+  "apply_synthetic_corruption": [
+    "inject_aoi_label_noise",
+    "inject_calibration_offset",
+    "inject_device_shift",
+    "inject_eye_missingness",
+    "inject_pupil_dropout",
+    "inject_sampling_jitter",
+    "inject_trial_imbalance"
+  ],
+  "audit_decision_provenance": [
+    "validate_decision_manifest"
+  ],
+  "audit_eye_api": [
+    "eye_api_inventory",
+    "eye_api_lifecycle",
+    "eye_api_status"
+  ],
+  "audit_eye_pipeline": [
+    "eye_pipeline_manifest",
+    "pipeline_step_status",
+    "validate_eye_pipeline"
+  ],
+  "audit_pupil_preprocessing_order": [],
+  "audit_sampling_irregularity": [
+    "effective_sampling_frequency"
+  ],
+  "audit_temporal_leakage": [],
+  "benchmark_memory_estimate": [],
+  "benchmark_scaling_curve": [
+    "summarise_eye_benchmark"
+  ],
+  "bootstrap_process_reliability": [
+    "process_icc"
+  ],
+  "calibration_drift_profile": [
+    "estimate_calibration_error"
+  ],
+  "calibration_error_model": [
+    "estimate_calibration_error"
+  ],
+  "calibration_sensitivity_grid": [],
+  "canonical_eye_api": [
+    "eye_api_inventory",
+    "eye_api_lifecycle"
+  ],
+  "compare_aoi_methods": [],
+  "compare_decision_manifests": [
+    "decision_manifest_table"
+  ],
+  "compare_fixation_methods": [],
+  "compare_hard_probabilistic_aoi": [],
+  "compare_process_models": [],
+  "compare_pupil_preprocessing": [],
+  "compare_reproducibility_fingerprints": [],
+  "coverage_calibration_curve": [],
+  "data_quality_reporting_table": [],
+  "decision_manifest_diff": [],
+  "decision_manifest_hash": [],
+  "decision_manifest_table": [
+    "validate_decision_manifest"
+  ],
+  "decision_space_coverage": [],
+  "decision_stability": [
+    "summarise_process_sensitivity"
+  ],
+  "effective_sampling_frequency": [],
+  "estimate_calibration_error": [],
+  "expand_process_validation_design": [
+    "validate_process_validation_design"
+  ],
+  "export_eye_pipeline": [
+    "eye_pipeline_manifest",
+    "pipeline_step_status"
+  ],
+  "export_prov_json": [
+    "validate_eye_prov_graph"
+  ],
+  "export_ro_crate_metadata": [],
+  "eye_analysis_pipeline": [
+    "eye_analysis_spec",
+    "eye_pipeline_manifest",
+    "validate_eye_pipeline"
+  ],
+  "eye_analysis_spec": [],
+  "eye_api_inventory": [
+    "eye_api_lifecycle"
+  ],
+  "eye_api_lifecycle": [],
+  "eye_api_recommendation": [],
+  "eye_api_status": [
+    "eye_api_lifecycle"
+  ],
+  "eye_api_superseded": [
+    "eye_api_lifecycle"
+  ],
+  "eye_benchmark_design": [],
+  "eye_decision_manifest": [
+    "decision_manifest_hash"
+  ],
+  "eye_pipeline_dot": [
+    "eye_pipeline_graph"
+  ],
+  "eye_pipeline_graph": [
+    "validate_eye_pipeline"
+  ],
+  "eye_pipeline_manifest": [],
+  "eye_pipeline_mermaid": [
+    "eye_pipeline_graph"
+  ],
+  "eye_pipeline_step": [],
+  "eye_prov_graph": [
+    "validate_eye_prov_graph"
+  ],
+  "eye_reproducibility_fingerprint": [
+    "analysis_environment_snapshot",
+    "file_hash_manifest",
+    "object_hash"
+  ],
+  "eye_session_manifest": [
+    "analysis_environment_snapshot",
+    "file_hash_manifest",
+    "object_hash"
+  ],
+  "eye_targets_manifest": [
+    "eye_pipeline_manifest"
+  ],
+  "file_hash_manifest": [],
+  "find_process_measures": [
+    "process_measure_registry",
+    "validate_process_measure_registry"
+  ],
+  "fixation_boundary_uncertainty": [],
+  "freeze_software_paper_evidence": [],
+  "freeze_validation_reference": [
+    "summarise_process_validation",
+    "validation_failure_profile"
+  ],
+  "gaze_data_quality_profile": [
+    "effective_sampling_frequency",
+    "estimate_calibration_error",
+    "gaze_precision_rms_s2s"
+  ],
+  "gaze_precision_rms_s2s": [],
+  "gaze_uncertainty_ellipse": [],
+  "inject_aoi_label_noise": [],
+  "inject_calibration_offset": [],
+  "inject_device_shift": [],
+  "inject_eye_missingness": [],
+  "inject_pupil_dropout": [
+    "inject_eye_missingness"
+  ],
+  "inject_sampling_jitter": [],
+  "inject_trial_imbalance": [],
+  "lock_decision_manifest": [
+    "decision_manifest_hash",
+    "validate_decision_manifest"
+  ],
+  "measurement_error_budget": [],
+  "negative_control_concordance": [
+    "summarise_process_negative_controls"
+  ],
+  "object_hash": [],
+  "outcome_blind_feature_audit": [],
+  "outcome_blind_snapshot": [],
+  "paper_reproducibility_manifest": [
+    "file_hash_manifest"
+  ],
+  "pipeline_failures": [
+    "pipeline_step_status"
+  ],
+  "pipeline_result": [],
+  "pipeline_step_status": [],
+  "placebo_window_audit": [],
+  "probabilistic_aoi_assignment": [
+    "aoi_membership_probability",
+    "propagate_calibration_uncertainty"
+  ],
+  "process_bland_altman": [],
+  "process_feature_time_provenance": [],
+  "process_icc": [],
+  "process_measure_card": [
+    "process_measure_registry",
+    "validate_process_measure_registry"
+  ],
+  "process_measure_coverage": [
+    "process_measure_registry",
+    "validate_process_measure_registry"
+  ],
+  "process_measure_guardrails": [
+    "process_measure_registry",
+    "validate_process_measure_registry"
+  ],
+  "process_measure_lineage": [],
+  "process_measure_registry": [],
+  "process_measure_units": [
+    "process_measure_registry"
+  ],
+  "process_negative_control_permute": [],
+  "process_negative_control_shift": [],
+  "process_null_benchmark": [],
+  "process_reliability_profile": [
+    "process_bland_altman",
+    "process_icc"
+  ],
+  "process_sensitivity_grid": [],
+  "process_temporal_stability": [],
+  "process_validation_design": [],
+  "propagate_calibration_uncertainty": [],
+  "provenance_edge_table": [],
+  "provenance_lineage_table": [],
+  "pupil_baseline_sensitivity": [],
+  "read_api_lifecycle_registry": [
+    "eye_api_lifecycle"
+  ],
+  "read_decision_manifest": [
+    "decision_manifest_hash",
+    "validate_decision_manifest"
+  ],
+  "read_reproducibility_fingerprint": [
+    "verify_reproducibility_fingerprint"
+  ],
+  "register_eye_api_status": [
+    "eye_api_lifecycle"
+  ],
+  "register_process_measure": [
+    "process_measure_registry",
+    "validate_process_measure_registry"
+  ],
+  "resume_eye_pipeline": [
+    "run_eye_pipeline"
+  ],
+  "run_eye_benchmark": [
+    "eye_benchmark_design"
+  ],
+  "run_eye_pipeline": [
+    "validate_eye_pipeline"
+  ],
+  "run_process_negative_controls": [
+    "process_negative_control_permute",
+    "process_negative_control_shift"
+  ],
+  "run_process_sensitivity": [],
+  "run_process_validation": [
+    "expand_process_validation_design"
+  ],
+  "sbc_ecdf_deviation": [
+    "sbc_rank_diagnostics"
+  ],
+  "sbc_rank_diagnostics": [],
+  "sensitivity_branch_fingerprint": [],
+  "sensitivity_decision_leverage": [],
+  "sensitivity_fragility_index": [],
+  "sensitivity_multiverse_manifest": [],
+  "sensitivity_rank_stability": [],
+  "sensitivity_sign_stability": [
+    "sensitivity_significance_stability",
+    "sensitivity_threshold_stability"
+  ],
+  "sensitivity_significance_stability": [],
+  "sensitivity_threshold_stability": [
+    "sensitivity_significance_stability"
+  ],
+  "simulate_process_validation_data": [],
+  "simulation_rank_statistic": [],
+  "software_paper_claim_matrix": [],
+  "software_paper_coverage": [],
+  "software_paper_evidence_bundle": [
+    "object_hash"
+  ],
+  "software_paper_gap_analysis": [
+    "software_paper_readiness"
+  ],
+  "software_paper_readiness": [],
+  "software_paper_validation_table": [
+    "summarise_process_validation"
+  ],
+  "specification_coverage": [],
+  "specification_curve_data": [],
+  "split_half_process_reliability": [],
+  "stress_test_process_pipeline": [
+    "apply_synthetic_corruption"
+  ],
+  "stress_test_summary": [],
+  "stress_tolerance_frontier": [],
+  "summarise_eye_benchmark": [],
+  "summarise_process_negative_controls": [],
+  "summarise_process_sensitivity": [
+    "sensitivity_sign_stability",
+    "sensitivity_significance_stability",
+    "sensitivity_threshold_stability"
+  ],
+  "summarise_process_validation": [],
+  "synthetic_corruption_plan": [],
+  "validate_against_reference": [
+    "summarise_process_validation"
+  ],
+  "validate_decision_manifest": [],
+  "validate_eye_pipeline": [
+    "eye_pipeline_manifest"
+  ],
+  "validate_eye_prov_graph": [],
+  "validate_feature_availability": [],
+  "validate_process_measure_registry": [],
+  "validate_process_validation_design": [],
+  "validation_condition_id": [
+    "expand_process_validation_design"
+  ],
+  "validation_condition_ranking": [
+    "summarise_process_validation"
+  ],
+  "validation_coverage_table": [
+    "summarise_process_validation"
+  ],
+  "validation_evidence_matrix": [],
+  "validation_failure_profile": [],
+  "validation_summary_mcse": [],
+  "validation_recovery_table": [
+    "summarise_process_validation"
+  ],
+  "validation_robustness_score": [
+    "validation_condition_ranking"
+  ],
+  "verify_decision_manifest_lock": [
+    "decision_manifest_hash"
+  ],
+  "verify_outcome_blind_snapshot": [],
+  "verify_reproducibility_fingerprint": [
+    "object_hash"
+  ],
+  "write_api_lifecycle_registry": [
+    "eye_api_lifecycle"
+  ],
+  "write_decision_manifest": [
+    "validate_decision_manifest"
+  ],
+  "write_eye_pipeline_report": [
+    "audit_eye_pipeline",
+    "pipeline_step_status"
+  ],
+  "write_eye_targets_template": [
+    "eye_targets_manifest"
+  ],
+  "write_prov_dot": [
+    "validate_eye_prov_graph"
+  ],
+  "write_reproducibility_fingerprint": [],
+  "write_software_paper_evidence": [
+    "software_paper_coverage",
+    "software_paper_readiness"
+  ],
+  "evaluate_validation_acceptance": [
+    "validation_acceptance_rule"
+  ],
+  "expand_eyeprocess_stress_evidence_plan": [
+    "eyeprocess_validation_seed"
+  ],
+  "expand_eyeprocess_validation_plan": [
+    "eyeprocess_validation_seed",
+    "validate_eyeprocess_validation_plan"
+  ],
+  "eyeprocess_cdm_attribute_profiles": [],
+  "eyeprocess_cdm_classification_uncertainty": [],
+  "eyeprocess_cdm_dina_ideal_response": [],
+  "eyeprocess_cdm_dina_probability": [],
+  "eyeprocess_cdm_qmatrix_audit": [],
+  "eyeprocess_irt_2pl_probability": [],
+  "eyeprocess_irt_3pl_probability": [
+    "eyeprocess_irt_2pl_probability"
+  ],
+  "eyeprocess_irt_4pl_probability": [
+    "eyeprocess_irt_2pl_probability"
+  ],
+  "eyeprocess_irt_adaptive_trace": [],
+  "eyeprocess_irt_anchor_audit": [
+    "eyeprocess_irt_item_information"
+  ],
+  "eyeprocess_irt_anchor_purification": [],
+  "eyeprocess_irt_apply_link": [],
+  "eyeprocess_irt_bank_coverage": [
+    "eyeprocess_irt_test_information"
+  ],
+  "eyeprocess_irt_category_function_audit": [],
+  "eyeprocess_irt_classification_precision": [],
+  "eyeprocess_irt_conditional_sem": [],
+  "eyeprocess_irt_content_balance_audit": [
+    "validate_eyeprocess_irt_item_bank"
+  ],
+  "eyeprocess_irt_device_drift": [],
+  "eyeprocess_irt_dif_effect_curve": [
+    "eyeprocess_irt_4pl_probability"
+  ],
+  "eyeprocess_irt_dtf_curve": [
+    "eyeprocess_irt_test_characteristic_curve"
+  ],
+  "eyeprocess_irt_eap_score": [],
+  "eyeprocess_irt_engine_evidence_table": [
+    "eyeprocess_irt_engine_registry"
+  ],
+  "eyeprocess_irt_engine_registry": [],
+  "eyeprocess_irt_engine_status": [
+    "eyeprocess_irt_engine_registry"
+  ],
+  "eyeprocess_irt_expected_score": [
+    "eyeprocess_irt_2pl_probability",
+    "eyeprocess_irt_3pl_probability",
+    "eyeprocess_irt_4pl_probability",
+    "eyeprocess_irt_gpcm_probability",
+    "eyeprocess_irt_grm_probability",
+    "eyeprocess_irt_nominal_probability"
+  ],
+  "eyeprocess_irt_exposure_summary": [],
+  "eyeprocess_irt_extreme_score_audit": [],
+  "eyeprocess_irt_fit_dashboard": [],
+  "eyeprocess_irt_functioning_effect_summary": [
+    "eyeprocess_irt_information_area"
+  ],
+  "eyeprocess_irt_gpcm_probability": [],
+  "eyeprocess_irt_grm_probability": [],
+  "eyeprocess_irt_haebara_link": [
+    "eyeprocess_irt_4pl_probability"
+  ],
+  "eyeprocess_irt_identification_audit": [
+    "validate_eyeprocess_irt_model_spec"
+  ],
+  "eyeprocess_irt_infit_outfit": [],
+  "eyeprocess_irt_information_area": [],
+  "eyeprocess_irt_information_gain": [],
+  "eyeprocess_irt_information_targeting": [
+    "eyeprocess_irt_test_information"
+  ],
+  "eyeprocess_irt_invariance_evidence": [],
+  "eyeprocess_irt_item_bank": [],
+  "eyeprocess_irt_item_fit_residuals": [],
+  "eyeprocess_irt_item_information": [
+    "eyeprocess_irt_2pl_probability",
+    "eyeprocess_irt_gpcm_probability",
+    "eyeprocess_irt_grm_probability",
+    "eyeprocess_irt_nominal_probability"
+  ],
+  "eyeprocess_irt_item_selection": [
+    "eyeprocess_irt_item_information",
+    "validate_eyeprocess_irt_item_bank"
+  ],
+  "eyeprocess_irt_latent_regression_design": [],
+  "eyeprocess_irt_link_stability": [],
+  "eyeprocess_irt_local_dependence_pairs": [],
+  "eyeprocess_irt_map_score": [],
+  "eyeprocess_irt_marginal_reliability": [],
+  "eyeprocess_irt_mean_mean_link": [],
+  "eyeprocess_irt_mean_sigma_link": [],
+  "eyeprocess_irt_measurement_precision_profile": [
+    "eyeprocess_irt_information_area",
+    "eyeprocess_irt_test_information"
+  ],
+  "eyeprocess_irt_missing_by_design_audit": [],
+  "eyeprocess_irt_misspecification_metrics": [],
+  "eyeprocess_irt_misspecification_suite": [],
+  "eyeprocess_irt_mle_score": [],
+  "eyeprocess_irt_model_card": [],
+  "eyeprocess_irt_model_card_audit": [
+    "eyeprocess_irt_model_card"
+  ],
+  "eyeprocess_irt_model_spec": [],
+  "eyeprocess_irt_monotonicity_audit": [],
+  "eyeprocess_irt_nominal_probability": [],
+  "eyeprocess_irt_parameter_plausibility_audit": [],
+  "eyeprocess_irt_person_fit_lz": [],
+  "eyeprocess_irt_person_fit_residuals": [],
+  "eyeprocess_irt_plausible_values": [],
+  "eyeprocess_irt_ppc_discrepancy": [],
+  "eyeprocess_irt_precision_evidence_table": [
+    "eyeprocess_irt_test_information"
+  ],
+  "eyeprocess_irt_prior_sensitivity_grid": [],
+  "eyeprocess_irt_prior_sensitivity_summary": [],
+  "eyeprocess_irt_prior_spec": [],
+  "eyeprocess_irt_process_alignment": [],
+  "eyeprocess_irt_process_aware_selection_penalty": [],
+  "eyeprocess_irt_process_dif_concordance": [],
+  "eyeprocess_irt_q3": [],
+  "eyeprocess_irt_recovery_design": [],
+  "eyeprocess_irt_recovery_failures": [],
+  "eyeprocess_irt_recovery_summary": [],
+  "eyeprocess_irt_sbc_ranks": [
+    "eyeprocess_irt_eap_score"
+  ],
+  "eyeprocess_irt_sbc_summary": [],
+  "eyeprocess_irt_score_table": [],
+  "eyeprocess_irt_score_uncertainty": [
+    "eyeprocess_irt_marginal_reliability"
+  ],
+  "eyeprocess_irt_session_drift": [],
+  "eyeprocess_irt_sparse_design_audit": [],
+  "eyeprocess_irt_stocking_lord_link": [
+    "eyeprocess_irt_test_characteristic_curve"
+  ],
+  "eyeprocess_irt_stopping_rule": [],
+  "eyeprocess_irt_targeting_gap": [
+    "eyeprocess_irt_test_information"
+  ],
+  "eyeprocess_irt_test_characteristic_curve": [
+    "eyeprocess_irt_4pl_probability"
+  ],
+  "eyeprocess_irt_test_information": [
+    "eyeprocess_irt_item_information"
+  ],
+  "eyeprocess_irt_testlet_audit": [],
+  "eyeprocess_irt_testlet_spec": [],
+  "eyeprocess_irt_threshold_order_audit": [],
+  "eyeprocess_joint_process_irt_spec": [],
+  "eyeprocess_mirt_directional_information": [],
+  "eyeprocess_mirt_information_matrix": [],
+  "eyeprocess_mirt_loading_audit": [
+    "eyeprocess_mirt_loading_spec"
+  ],
+  "eyeprocess_mirt_loading_spec": [],
+  "eyeprocess_multichannel_measurement_map": [],
+  "eyeprocess_negative_control_evidence_plan": [],
+  "eyeprocess_negative_control_evidence_table": [
+    "summarise_process_negative_controls"
+  ],
+  "eyeprocess_process_irt_data_bundle": [],
+  "eyeprocess_process_item_profile": [],
+  "eyeprocess_process_missingness_pattern": [],
+  "eyeprocess_process_person_profile": [],
+  "eyeprocess_recovery_evidence_table": [
+    "eyeprocess_irt_recovery_summary"
+  ],
+  "eyeprocess_reliability_evidence_plan": [],
+  "eyeprocess_reliability_evidence_table": [],
+  "eyeprocess_response_time_profile": [],
+  "eyeprocess_sbc_evidence_table": [
+    "sbc_ecdf_deviation"
+  ],
+  "eyeprocess_speed_accuracy_profile": [],
+  "eyeprocess_stress_evidence_plan": [],
+  "eyeprocess_stress_evidence_table": [],
+  "eyeprocess_validation_atlas_gaps": [
+    "eyeprocess_validation_evidence_atlas"
+  ],
+  "eyeprocess_validation_claim_matrix": [],
+  "eyeprocess_validation_evidence_atlas": [],
+  "eyeprocess_validation_evidence_grade": [],
+  "eyeprocess_validation_evidence_index": [],
+  "eyeprocess_validation_evidence_manifest": [],
+  "eyeprocess_validation_plan": [],
+  "eyeprocess_validation_readiness": [
+    "verify_eyeprocess_validation_evidence"
+  ],
+  "eyeprocess_validation_release_gate": [
+    "eyeprocess_validation_readiness"
+  ],
+  "eyeprocess_validation_seed": [],
+  "fit_eyeprocess_erm": [],
+  "fit_eyeprocess_gdina": [],
+  "fit_eyeprocess_lnirt": [],
+  "fit_eyeprocess_mirt": [],
+  "fit_eyeprocess_tam": [],
+  "freeze_eyeprocess_irt_reference": [],
+  "freeze_eyeprocess_validation_atlas": [],
+  "freeze_eyeprocess_validation_evidence": [],
+  "read_eyeprocess_validation_evidence": [
+    "verify_eyeprocess_validation_evidence"
+  ],
+  "read_validation_scenario_manifest": [],
+  "run_eyeprocess_equateirt": [],
+  "run_eyeprocess_irt_recovery": [
+    "eyeprocess_irt_recovery_design",
+    "eyeprocess_validation_seed",
+    "simulate_eyeprocess_irt_binary"
+  ],
+  "run_eyeprocess_irt_ability_sbc": [
+    "eyeprocess_irt_4pl_probability",
+    "eyeprocess_irt_eap_score",
+    "eyeprocess_irt_sbc_summary"
+  ],
+  "run_eyeprocess_mirtcat": [],
+  "simulate_eyeprocess_catr": [],
+  "simulate_eyeprocess_irt_binary": [
+    "eyeprocess_irt_4pl_probability"
+  ],
+  "summarise_validation_acceptance": [],
+  "validate_eyeprocess_external_irt_fit": [],
+  "validate_eyeprocess_irt_item_bank": [],
+  "validate_eyeprocess_irt_model_spec": [],
+  "validate_eyeprocess_joint_process_irt_spec": [],
+  "validate_eyeprocess_validation_plan": [],
+  "validation_acceptance_matrix": [
+    "evaluate_validation_acceptance"
+  ],
+  "validation_acceptance_rule": [],
+  "validation_mcse_profile": [],
+  "validation_replication_budget": [],
+  "validation_scenario_manifest": [
+    "expand_eyeprocess_validation_plan",
+    "validate_eyeprocess_validation_plan"
+  ],
+  "verify_eyeprocess_validation_atlas": [],
+  "verify_eyeprocess_validation_evidence": [],
+  "write_eyeprocess_validation_evidence": [
+    "verify_eyeprocess_validation_evidence"
+  ],
+  "write_eyeprocess_validation_report": [
+    "eyeprocess_validation_atlas_gaps"
+  ],
+  "write_validation_scenario_manifest": [],
+  "run_eyeprocess_stress_evidence": [
+    "expand_eyeprocess_stress_evidence_plan"
+  ],
+  "summarise_eyeprocess_stress_evidence": [],
+  "ablate_multimodal_channels": [],
+  "audit_multimodal_identifiability": [],
+  "audit_multimodal_measurement": [],
+  "multimodal_backend_status": [],
+  "multimodal_irt_spec": [],
+  "multimodal_ppc": [],
+  "prepare_multimodal_irt_data": [],
+  "process_information": [],
+  "simulate_multimodal_irt": [
+    "prepare_multimodal_irt_data"
+  ],
+  "validate_multimodal_irt": [],
+  "audit_multimodal_m2_identifiability": [],
+  "fit_multimodal_m2": [],
+  "multimodal_m2_ablation": [],
+  "multimodal_m2_negative_controls": [],
+  "multimodal_m2_ppc": [],
+  "multimodal_m2_process_information": [
+    "multimodal_m2_ablation"
+  ],
+  "multimodal_m2_recovery": [],
+  "multimodal_m2_spec": [],
+  "simulate_multimodal_m2": [],
+  "validate_multimodal_m2": [
+    "audit_multimodal_m2_identifiability",
+    "multimodal_m2_ppc"
+  ],
+  "audit_multimodal_m3_identifiability": [],
+  "fit_multimodal_m3": [
+    "audit_multimodal_m3_identifiability",
+    "multimodal_m3_spec"
+  ],
+  "multimodal_m3_ablation": [],
+  "multimodal_m3_functional_bridge": [],
+  "multimodal_m3_negative_controls": [],
+  "multimodal_m3_ppc": [],
+  "multimodal_m3_process_information": [
+    "multimodal_m3_ablation"
+  ],
+  "multimodal_m3_recovery": [],
+  "multimodal_m3_spec": [],
+  "simulate_multimodal_m3": [],
+  "validate_multimodal_m3": [
+    "audit_multimodal_m3_identifiability",
+    "multimodal_m3_ppc"
+  ],
+  "audit_multimodal_m4_identifiability": [
+    "multimodal_m4_spec"
+  ],
+  "fit_multimodal_m4": [
+    "audit_multimodal_m4_identifiability",
+    "multimodal_m4_spec"
+  ],
+  "multimodal_m4_ablation": [],
+  "multimodal_m4_negative_controls": [],
+  "multimodal_m4_ppc": [],
+  "multimodal_m4_process_information": [
+    "multimodal_m4_ablation",
+    "multimodal_m4_state_diagnostics"
+  ],
+  "multimodal_m4_recovery": [],
+  "multimodal_m4_sensitivity": [],
+  "multimodal_m4_spec": [],
+  "multimodal_m4_state_diagnostics": [],
+  "simulate_multimodal_m4": [],
+  "validate_multimodal_m4": [
+    "audit_multimodal_m4_identifiability",
+    "multimodal_m4_ppc",
+    "multimodal_m4_state_diagnostics"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "exports": 1182,
+  "s3": 435,
+  "r_files": 114,
+  "rd_files": 969,
+  "articles": 88,
+  "testthat_files": 113,
+  "stan_files": 13,
+  "inst_files": 405,
+  "plot_candidates": 341,
+  "extdata_files": 66,
+  "unresolved_export_definitions": 0
+}

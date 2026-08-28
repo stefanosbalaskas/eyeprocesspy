@@ -1,0 +1,10 @@
+extra,packages,purpose,status
+arrow,pyarrow,Arrow/Parquet storage,optional
+bids,pybids;mne-bids,BIDS interoperability,optional
+stan,cmdstanpy,canonical Stan backend,optional
+bayes,pymc;arviz;bambi,Python-native Bayesian extensions,optional
+physio,neurokit2;biosppy;heartpy;pyhrv,physiology interoperability,optional
+streaming,pylsl;pyxdf,LSL/XDF interoperability,optional
+gaze,pymovements;remodnav;multimatch-gaze,eye-movement interoperability,optional
+psychometrics,girth;catsim,IRT/CAT interoperability,optional
+plots,matplotlib,plotting,optional/core-decision-pending
