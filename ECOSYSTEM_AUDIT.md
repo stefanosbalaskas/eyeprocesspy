@@ -30,7 +30,7 @@ The core targets Python 3.11–3.14. Optional dependencies that lag Python 3.14 
 
 ## Naming check
 
-An exact-name web/PyPI search did not surface an established `eyeprocesspy` project during this audit, and the connected GitHub account currently has no `stefanosbalaskas/eyeprocesspy` repository. Re-check PyPI immediately before the first public publication.
+An exact-name web/PyPI search did not surface an established third-party `eyeprocesspy` project during this audit. The target repository `stefanosbalaskas/eyeprocesspy` now exists and is the designated Python port repository. Re-check PyPI immediately before the first public publication.
 
 ## Official/current sources consulted
 

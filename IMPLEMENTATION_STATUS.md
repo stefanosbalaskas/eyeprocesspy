@@ -19,8 +19,8 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API | 0 |
-| P2 structural | 0 |
+| P1 API | 27 |
+| P2 structural | 27 |
 | P3 semantic | 0 |
 | P4 numerical | 0 |
 | P5 algorithmic | 0 |
@@ -29,7 +29,7 @@
 
 Phase 0 manifests are generated. No generated placeholders are counted as implementations.
 
-Direct R definition lookup did not resolve 0 exported names; these require alias/generic/manual inspection rather than fabricated implementations.
+Direct R definition lookup resolved all 1,182 exported names to source definitions or registered generics/methods in the frozen source inventory.
 
 ## Milestone 1 initial foundational tranche
 

@@ -26,3 +26,22 @@ jobs:
       - run: python -m venv wheelcheck
       - run: wheelcheck/bin/pip install dist/*.whl
       - run: wheelcheck/bin/python -c "import eyeprocesspy; print(eyeprocesspy.__version__, eyeprocesspy.__r_reference_version__)"
+
+  r-oracle-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "release"
+      - name: Download frozen R reference
+        shell: bash
+        run: |
+          curl -L --fail --silent --show-error \
+            -o eyeprocess_0.11.1.tar.gz \
+            https://github.com/stefanosbalaskas/eyeprocess/releases/download/v0.11.1/eyeprocess_0.11.1.tar.gz
+          echo "fd2638d7ccf0c5dd5a18745aed59c2f647e142c1753a339a2ab8ca99c3fd5d0a  eyeprocess_0.11.1.tar.gz" | sha256sum -c -
+      - name: Install frozen R reference
+        run: R CMD INSTALL eyeprocess_0.11.1.tar.gz
+      - name: Verify R oracle
+        run: Rscript scripts/run_r_oracle.R
