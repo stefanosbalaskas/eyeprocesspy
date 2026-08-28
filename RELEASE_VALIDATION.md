@@ -19,7 +19,7 @@ This is **not a formal parity release**.
 
 ## Not yet validated
 
-- Cross-language R oracle.
+- Cross-language R oracle outputs beyond the smoke harness (a GitHub Actions R-oracle verification job is configured).
 - CI matrix on Linux/Windows/macOS and Python 3.11–3.14.
 - Optional backend lanes.
 - Full 1,182-function parity.
