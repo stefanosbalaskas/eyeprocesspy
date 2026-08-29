@@ -47,9 +47,9 @@ plot.eye_evidence_graph,R/046-evidence-provenance-graph.R,plot.eye_evidence_grap
 plot.eye_fairness_transportability,R/044-process-dif-fairness.R,plot.eye_fairness_transportability,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_fixation_point_process,R/040-fixation-point-process.R,plot.eye_fixation_point_process,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_format_validation,R/017-format-validation.R,plot.eye_format_validation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_functional_pupil_diagnostics,R/026-functional-pupil-engine.R,plot.eye_functional_pupil_diagnostics,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_functional_pupil_irt,R/022-advanced-models-v2.R,plot.eye_functional_pupil_irt,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_functional_pupil_sensitivity,R/026-functional-pupil-engine.R,plot.eye_functional_pupil_sensitivity,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_functional_pupil_diagnostics,R/026-functional-pupil-engine.R,plot_eye_functional_pupil_diagnostics,implemented,Matplotlib counterpart with attached gp3_data; tested in tests/test_functional_pupil.py.
+plot.eye_functional_pupil_irt,R/022-advanced-models-v2.R,plot_eye_functional_pupil_irt,implemented,Matplotlib counterpart with attached gp3_data; tested in tests/test_functional_pupil.py.
+plot.eye_functional_pupil_sensitivity,R/026-functional-pupil-engine.R,plot_eye_functional_pupil_sensitivity,implemented,Matplotlib counterpart with attached gp3_data; tested in tests/test_functional_pupil.py.
 plot.eye_gated_process_model,R/065-frontier-gates-0-8.R,plot_eye_gated_process_model,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_gaze_anchored_3pl_audit,R/068-bayesian-3pl-process-diagnostics-0-8.R,plot_eye_gaze_anchored_3pl_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_gaze_diffusion_irt,R/022-advanced-models-v2.R,plot.eye_gaze_diffusion_irt,not_started,heuristic candidate; confirm from source/Rd

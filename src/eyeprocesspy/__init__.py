@@ -51,3 +51,8 @@ from .legacy_models import *
 from .plots_legacy_models import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .functional_pupil import *
+from .plots_functional_pupil import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]

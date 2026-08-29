@@ -7810,11 +7810,16 @@
     "rd_help": "man/fit_dynamic_irtree.Rd"
   },
   "functional_pupil_irt_spec": {
-    "signature": "(df = 5L, response = \"score\", engine = c(\"two_stage_glm\", \"two_stage_lme4\", \"brms\"), include_response_time = TRUE)",
+    "signature": "(\n    df = 6L,\n    basis = c(\"natural_spline\", \"bspline\"),\n    response = \"score\",\n    engine = c(\"two_stage_glm\", \"two_stage_lme4\", \"brms\", \"stan\"),\n    alignment = c(\"trial\", \"event\"),\n    event_time_column = NULL,\n    latency_ms = 200,\n    baseline_window = c(-200, 0),\n    baseline_method = c(\"subtract\", \"percent\", \"zscore\"),\n    min_baseline_samples = 3L,\n    drop_invalid_baseline = TRUE,\n    time_window = NULL,\n    pupil_column = NULL,\n    time_column = NULL,\n    participant_column = \"participant_id\",\n    item_column = \"item_id\",\n    trial_column = \"trial_id\",\n    luminance_column = NULL,\n    gaze_x_column = NULL,\n    gaze_y_column = NULL,\n    blink_column = NULL,\n    interpolated_column = NULL,\n    max_interpolated_fraction = 0.20,\n    nuisance_by_participant = FALSE,\n    include_response_time = TRUE,\n    ar1 = TRUE,\n    participant_effect = TRUE,\n    item_effect = TRUE,\n    chains = 4L,\n    parallel_chains = chains,\n    iter_warmup = 1000L,\n    iter_sampling = 1000L,\n    adapt_delta = 0.95,\n    max_treedepth = 12L)",
     "args": [
       {
         "name": "df",
-        "default": "5L",
+        "default": "6L",
+        "required": false
+      },
+      {
+        "name": "basis",
+        "default": "c(\"natural_spline\", \"bspline\")",
         "required": false
       },
       {
@@ -7824,21 +7829,166 @@
       },
       {
         "name": "engine",
-        "default": "c(\"two_stage_glm\", \"two_stage_lme4\", \"brms\")",
+        "default": "c(\"two_stage_glm\", \"two_stage_lme4\", \"brms\", \"stan\")",
+        "required": false
+      },
+      {
+        "name": "alignment",
+        "default": "c(\"trial\", \"event\")",
+        "required": false
+      },
+      {
+        "name": "event_time_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "latency_ms",
+        "default": "200",
+        "required": false
+      },
+      {
+        "name": "baseline_window",
+        "default": "c(-200, 0)",
+        "required": false
+      },
+      {
+        "name": "baseline_method",
+        "default": "c(\"subtract\", \"percent\", \"zscore\")",
+        "required": false
+      },
+      {
+        "name": "min_baseline_samples",
+        "default": "3L",
+        "required": false
+      },
+      {
+        "name": "drop_invalid_baseline",
+        "default": "TRUE",
+        "required": false
+      },
+      {
+        "name": "time_window",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "pupil_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "time_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "participant_column",
+        "default": "\"participant_id\"",
+        "required": false
+      },
+      {
+        "name": "item_column",
+        "default": "\"item_id\"",
+        "required": false
+      },
+      {
+        "name": "trial_column",
+        "default": "\"trial_id\"",
+        "required": false
+      },
+      {
+        "name": "luminance_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "gaze_x_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "gaze_y_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "blink_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "interpolated_column",
+        "default": "NULL",
+        "required": false
+      },
+      {
+        "name": "max_interpolated_fraction",
+        "default": "0.20",
+        "required": false
+      },
+      {
+        "name": "nuisance_by_participant",
+        "default": "FALSE",
         "required": false
       },
       {
         "name": "include_response_time",
         "default": "TRUE",
         "required": false
+      },
+      {
+        "name": "ar1",
+        "default": "TRUE",
+        "required": false
+      },
+      {
+        "name": "participant_effect",
+        "default": "TRUE",
+        "required": false
+      },
+      {
+        "name": "item_effect",
+        "default": "TRUE",
+        "required": false
+      },
+      {
+        "name": "chains",
+        "default": "4L",
+        "required": false
+      },
+      {
+        "name": "parallel_chains",
+        "default": "chains",
+        "required": false
+      },
+      {
+        "name": "iter_warmup",
+        "default": "1000L",
+        "required": false
+      },
+      {
+        "name": "iter_sampling",
+        "default": "1000L",
+        "required": false
+      },
+      {
+        "name": "adapt_delta",
+        "default": "0.95",
+        "required": false
+      },
+      {
+        "name": "max_treedepth",
+        "default": "12L",
+        "required": false
       }
     ],
     "rd_usage": "functional_pupil_irt_spec(df = 6L, basis = c(\"natural_spline\", \"bspline\"),\n  response = \"score\", engine = c(\"two_stage_glm\", \"two_stage_lme4\", \"brms\", \"stan\"),\n  alignment = c(\"trial\", \"event\"), event_time_column = NULL, latency_ms = 200,\n  baseline_window = c(-200, 0), baseline_method = c(\"subtract\", \"percent\", \"zscore\"),\n  min_baseline_samples = 3L, drop_invalid_baseline = TRUE, time_window = NULL,\n  pupil_column = NULL, time_column = NULL, participant_column = \"participant_id\",\n  item_column = \"item_id\", trial_column = \"trial_id\", luminance_column = NULL,\n  gaze_x_column = NULL, gaze_y_column = NULL, blink_column = NULL,\n  interpolated_column = NULL, max_interpolated_fraction = 0.20,\n  nuisance_by_participant = FALSE, include_response_time = TRUE, ar1 = TRUE,\n  participant_effect = TRUE, item_effect = TRUE, chains = 4L,\n  parallel_chains = chains, iter_warmup = 1000L, iter_sampling = 1000L,\n  adapt_delta = 0.95, max_treedepth = 12L)",
-    "source_file": "R/022-advanced-models-v2.R",
+    "source_file": "R/026-functional-pupil-engine.R",
     "rd_help": "man/functional_pupil_irt_spec.Rd"
   },
   "fit_joint_functional_pupil_irt": {
-    "signature": "(x, spec = functional_pupil_irt_spec(), ...)",
+    "signature": "(x, spec = functional_pupil_irt_spec(), seed = 1L, ...)",
     "args": [
       {
         "name": "x",
@@ -7851,13 +8001,18 @@
         "required": false
       },
       {
+        "name": "seed",
+        "default": "1L",
+        "required": false
+      },
+      {
         "name": "...",
         "default": null,
         "required": false
       }
     ],
     "rd_usage": "fit_joint_functional_pupil_irt(x, spec = functional_pupil_irt_spec(), seed = 1L, ...)",
-    "source_file": "R/022-advanced-models-v2.R",
+    "source_file": "R/026-functional-pupil-engine.R",
     "rd_help": "man/fit_joint_functional_pupil_irt.Rd"
   },
   "theory_strategy_spec": {
