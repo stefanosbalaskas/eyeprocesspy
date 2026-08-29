@@ -47,5 +47,7 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .multimodal_staged import *
 from .plots_multimodal_staged import *
+from .legacy_models import *
+from .plots_legacy_models import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]

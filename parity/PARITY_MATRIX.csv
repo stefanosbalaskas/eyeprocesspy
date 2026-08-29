@@ -12,7 +12,7 @@ add_provenance,add_provenance,R/002-class.R,man/eyeprocess-class.Rd,"(
     warnings = NA_character_)",10,False,False,,,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 add_responses,add_responses,R/008-trials-aoi.R,man/eyeprocess-trials-aoi.Rd,"(x, responses, overwrite = FALSE)",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 align_clock,align_clock,R/007-coordinates-time.R,man/eyeprocess-coordinates-time.Rd,"(timestamp, offset = 0, slope = 1)",3,False,False,,,unclassified,False,src/eyeprocesspy/timebase.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
-align_response_matrices,align_response_matrices,R/013-models.R,man/eyeprocess-models.Rd,"(Y, RT)",2,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+align_response_matrices,align_response_matrices,R/013-models.R,man/eyeprocess-models.Rd,"(Y, RT)",2,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 analysis_readiness,analysis_readiness,R/011-quality-governance.R,man/eyeprocess-quality.Rd,(x),1,False,False,tests/testthat/test-quality-plots.R,vignettes/getting-started.Rmd|vignettes/responsible-use.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 anonymize_eye_dataset,anonymize_eye_dataset,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
     x,
@@ -70,7 +70,7 @@ build_trials,build_trials,R/008-trials-aoi.R,man/eyeprocess-trials-aoi.Rd,"(
     overwrite = FALSE)",7,False,False,tests/testthat/test-trials-aoi-features.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 canonical_table_names,canonical_table_names,R/001-schema.R,man/eyeprocess-schema.Rd,(),0,False,False,tests/testthat/test-format-validation.R|tests/testthat/test-schema-class.R,,unclassified,False,src/eyeprocesspy/schema.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 check_feature_level,check_feature_level,R/011-quality-governance.R,man/eyeprocess-quality.Rd,(x),1,False,False,,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-check_local_dependence,check_local_dependence,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+check_local_dependence,check_local_dependence,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 check_process_leakage,check_process_leakage,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(x, response_time_tolerance = 0)",2,False,False,,vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 combine_eye_datasets,combine_eye_datasets,R/003-mapping-adapters.R,man/eyeprocess-adapters.Rd,"(..., resolve_ids = TRUE)",2,True,False,,,unclassified,False,src/eyeprocesspy/adapters.py,tests/test_import_adapter_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 compact_eye_dataset,compact_eye_dataset,R/002-class.R,man/eyeprocess-class.Rd,"(x, drop_raw = FALSE, drop_empty = FALSE)",3,False,False,,,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
@@ -127,7 +127,7 @@ estimate_ez_diffusion,estimate_ez_diffusion,R/016-advanced-experimental.R,man/ey
     accuracy = ""score"",
     response_time = ""response_time"",
     by = c(""item_id""),
-    scale = 0.1)",5,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    scale = 0.1)",5,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 estimate_sampling_rate,estimate_sampling_rate,R/007-coordinates-time.R,man/eyeprocess-coordinates-time.Rd,"(timestamp_seconds, trim = 0.05)",2,False,False,,,unclassified,False,src/eyeprocesspy/timebase.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 export_canonical,export_canonical,R/015-export-report-bridges.R,man/eyeprocess-export-report.Rd,(...),1,True,False,tests/testthat/test-export-report.R,vignettes/getting-started.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 eye_format_profiles,eye_format_profiles,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,(),0,False,False,tests/testthat/test-format-validation.R,vignettes/validating-real-exports.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
@@ -190,9 +190,9 @@ fit_accuracy_rt,fit_accuracy_rt,R/013-models.R,man/eyeprocess-models.Rd,"(
     iterations = 1000,
     burnin = 10,
     residual = FALSE,
-    ...)",6,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-fit_dif,fit_dif,R/013-models.R,man/eyeprocess-models.Rd,"(x, group, engine = c(""logistic"", ""mirt""), items = NULL, ...)",5,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-fit_dynamic_aoi_model,fit_dynamic_aoi_model,R/013-models.R,man/eyeprocess-models.Rd,"(x, source = c(""visits"", ""fixations"", ""samples""), smoothing = 0.5)",3,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",6,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
+fit_dif,fit_dif,R/013-models.R,man/eyeprocess-models.Rd,"(x, group, engine = c(""logistic"", ""mirt""), items = NULL, ...)",5,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
+fit_dynamic_aoi_model,fit_dynamic_aoi_model,R/013-models.R,man/eyeprocess-models.Rd,"(x, source = c(""visits"", ""fixations"", ""samples""), smoothing = 0.5)",3,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 fit_explanatory_irt,fit_explanatory_irt,R/013-models.R,man/eyeprocess-models.Rd,"(
     x,
     formula,
@@ -200,35 +200,35 @@ fit_explanatory_irt,fit_explanatory_irt,R/013-models.R,man/eyeprocess-models.Rd,
     participant_random = TRUE,
     item_random = TRUE,
     family = ""binomial"",
-    ...)",7,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-fit_gaze_informed_irt,fit_gaze_informed_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", gaze_features, engine = c(""lme4"", ""glm"", ""brms""), ...)",5,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",7,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
+fit_gaze_informed_irt,fit_gaze_informed_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", gaze_features, engine = c(""lme4"", ""glm"", ""brms""), ...)",5,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 fit_gaze_weighted_choice,fit_gaze_weighted_choice,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(
     x,
     response = ""score"",
     dwell_features,
     engine = c(""glm"", ""lme4""),
-    ...)",5,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",5,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 fit_irt,fit_irt,R/013-models.R,man/eyeprocess-models.Rd,"(
     x,
     engine = c(""mirt"", ""TAM"", ""rasch_glm""),
     model = 1,
     itemtype = ""2PL"",
     value = ""score"",
-    ...)",6,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",6,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 fit_joint_process_model,fit_joint_process_model,R/013-models.R,man/eyeprocess-models.Rd,"(
     x,
     accuracy_formula,
     rt_formula,
     process_formulas = NULL,
     engine = c(""brms"", ""separate""),
-    ...)",6,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-fit_multimodal_irt,fit_multimodal_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", gaze_features = character(), pupil_features = character(), biometric_features = character(), engine = c(""lme4"", ""glm"", ""brms""), ...)",7,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",6,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
+fit_multimodal_irt,fit_multimodal_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", gaze_features = character(), pupil_features = character(), biometric_features = character(), engine = c(""lme4"", ""glm"", ""brms""), ...)",7,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 fit_process_irt,fit_process_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(
     x,
     spec,
     engine = c(""lme4"", ""glm"", ""brms""),
-    ...)",4,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-fit_pupil_informed_irt,fit_pupil_informed_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", pupil_features, engine = c(""lme4"", ""glm"", ""brms""), ...)",5,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",4,True,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
+fit_pupil_informed_irt,fit_pupil_informed_irt,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, response = ""score"", pupil_features, engine = c(""lme4"", ""glm"", ""brms""), ...)",5,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 fit_shared_process_factor,fit_shared_process_factor,R/013-models.R,man/eyeprocess-models.Rd,"(
     x,
     features,
@@ -236,14 +236,14 @@ fit_shared_process_factor,fit_shared_process_factor,R/013-models.R,man/eyeproces
     center = TRUE,
     scale. = TRUE,
     append = TRUE,
-    prefix = ""process_factor"")",7,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    prefix = ""process_factor"")",7,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 fit_strategy_mixture,fit_strategy_mixture,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(
     x,
     features,
     centers = 2L,
     response_formula = NULL,
     seed = 1,
-    append = TRUE)",6,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    append = TRUE)",6,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 flag_gaze_outliers,flag_gaze_outliers,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, method = c(""mad"", ""velocity"", ""bounds""), threshold = 6, max_velocity = NULL)",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 format_compatibility_matrix,format_compatibility_matrix,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,(validation = NULL),1,False,False,tests/testthat/test-format-validation.R,vignettes/validating-real-exports.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 format_validation_spec,format_validation_spec,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
@@ -261,7 +261,7 @@ functional_pupil_features,functional_pupil_features,R/016-advanced-experimental.
     df = 5L,
     grid_points = 100L,
     append = TRUE,
-    prefix = ""pupil_basis"")",5,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    prefix = ""pupil_basis"")",5,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 gaze_entropy,gaze_entropy,R/010-features.R,man/eyeprocess-features.Rd,"(x, level = c(""trial"", ""recording""), source = c(""visits"", ""fixations"", ""samples""), base = 2)",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 gaze_velocity,gaze_velocity,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,(data),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 gazepoint_analysis_tables,gazepoint_analysis_tables,R/019-gazepoint-downstream-workflow.R,man/gazepoint_analysis_tables.Rd,(x),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
@@ -322,10 +322,10 @@ is_gazepoint_export,is_gazepoint_export,R/005-import-gazepoint.R,man/eyeprocess-
 is_pupil_labs_export,is_pupil_labs_export,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,"(path, inspect_rows = 20L)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 is_smi_export,is_smi_export,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,"(path, inspect_rows = 20L)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 is_tobii_export,is_tobii_export,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,"(path, inspect_rows = 20L)",2,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-item_parameters,item_parameters,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-model_data,model_data,R/013-models.R,man/eyeprocess-models.Rd,"(x, include_features = TRUE, aggregate_features = mean)",3,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-model_fit_statistics,model_fit_statistics,R/013-models.R,man/eyeprocess-models.Rd,(model),1,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-model_missing_process,model_missing_process,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, feature_name, predictors = c(""score"", ""response_time""), engine = c(""glm"", ""lme4""), ...)",5,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+item_parameters,item_parameters,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
+model_data,model_data,R/013-models.R,man/eyeprocess-models.Rd,"(x, include_features = TRUE, aggregate_features = mean)",3,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
+model_fit_statistics,model_fit_statistics,R/013-models.R,man/eyeprocess-models.Rd,(model),1,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
+model_missing_process,model_missing_process,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, feature_name, predictors = c(""score"", ""response_time""), engine = c(""glm"", ""lme4""), ...)",5,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 new_aoi,new_aoi,R/008-trials-aoi.R,man/eyeprocess-trials-aoi.Rd,"(
     aoi_id,
     aoi_name = aoi_id,
@@ -394,8 +394,8 @@ parameter_recovery,parameter_recovery,R/014-simulation.R,man/eyeprocess-simulati
     truth_extractor,
     replications = 100,
     seed = 1,
-    ...)",7,True,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-person_scores,person_scores,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    ...)",7,True,False,,,unclassified,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
+person_scores,person_scores,R/013-models.R,man/eyeprocess-models.Rd,"(model, ...)",2,True,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 plot_aoi_dwell,plot_aoi_dwell,R/012-plots.R,man/eyeprocess-plots.Rd,"(x, feature = c(""dwell_time_ms"", ""dwell_proportion""), aggregate = mean, main = NULL, ...)",5,True,False,,,unclassified,True,,,yes,not_started,not_started,not_started,not_started,not_started,not_started,not_started,
 plot_biometrics,plot_biometrics,R/012-plots.R,man/eyeprocess-plots.Rd,"(x, channels = NULL, trial_id = NULL, recording_id = NULL, main = ""Biometric streams"", ...)",6,True,False,,,unclassified,True,,,yes,not_started,not_started,not_started,not_started,not_started,not_started,not_started,
 plot_clock_alignment,plot_clock_alignment,R/012-plots.R,man/eyeprocess-plots.Rd,"(x, channel = NULL, main = ""Gaze and biometric clocks"", ...)",4,True,False,,,unclassified,True,,,yes,not_started,not_started,not_started,not_started,not_started,not_started,not_started,
@@ -422,7 +422,7 @@ power_process_simulation,power_process_simulation,R/014-simulation.R,man/eyeproc
     effect,
     replications = 200,
     alpha = 0.05,
-    seed = 1)",6,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    seed = 1)",6,False,False,,,unclassified,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 preprocess_eye,preprocess_eye,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, spec = preprocess_spec())",2,False,False,tests/testthat/test-preprocessing.R,vignettes/getting-started.Rmd|vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 preprocess_spec,preprocess_spec,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(
     gaze_filter = ""none"",
@@ -437,7 +437,7 @@ preprocess_spec,preprocess_spec,R/009-preprocessing.R,man/eyeprocess-preprocessi
     fixation_parameters = list(),
     blink_detection = TRUE,
     exclusions = list())",12,False,False,tests/testthat/test-preprocessing.R,vignettes/getting-started.Rmd|vignettes/preprocessing-features.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-process_irt_diagnostics,process_irt_diagnostics,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,(model),1,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+process_irt_diagnostics,process_irt_diagnostics,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,(model),1,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 process_irt_spec,process_irt_spec,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(
     response = ""score"",
     response_time = ""response_time"",
@@ -447,7 +447,7 @@ process_irt_spec,process_irt_spec,R/016-advanced-experimental.R,man/eyeprocess-e
     participant_effect = TRUE,
     item_effect = TRUE,
     estimand = ""association"",
-    confirmatory = FALSE)",9,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    confirmatory = FALSE)",9,False,False,,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 provenance_manifest,provenance_manifest,R/002-class.R,man/eyeprocess-class.Rd,(x),1,False,False,,vignettes/getting-started.Rmd|vignettes/responsible-use.Rmd,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 pupil_deconvolve,pupil_deconvolve,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, tau = 0.9, regularization = 0.01, output_column = ""pupil_phasic"")",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 pupil_labs_format,pupil_labs_format,R/006-import-other-vendors.R,man/eyeprocess-import-vendors.Rd,(path),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
@@ -586,8 +586,8 @@ report_eye_dataset,report_eye_dataset,R/015-export-report-bridges.R,man/eyeproce
     include_plots = FALSE,
     plot_directory = NULL)",5,False,False,,vignettes/getting-started.Rmd|vignettes/responsible-use.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 report_processirt,report_processirt,R/015-export-report-bridges.R,man/eyeprocess-export-report.Rd,(...),1,True,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-response_matrix,response_matrix,R/013-models.R,man/eyeprocess-models.Rd,"(x, value = c(""score"", ""response""), duplicate = c(""error"", ""last"", ""mean""))",3,False,False,tests/testthat/test-simulation-model-data.R,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-response_time_matrix,response_time_matrix,R/013-models.R,man/eyeprocess-models.Rd,"(x, log_transform = FALSE, duplicate = c(""error"", ""last"", ""mean""))",3,False,False,tests/testthat/test-simulation-model-data.R,vignettes/psychometric-process-models.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+response_matrix,response_matrix,R/013-models.R,man/eyeprocess-models.Rd,"(x, value = c(""score"", ""response""), duplicate = c(""error"", ""last"", ""mean""))",3,False,False,tests/testthat/test-simulation-model-data.R,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
+response_time_matrix,response_time_matrix,R/013-models.R,man/eyeprocess-models.Rd,"(x, log_transform = FALSE, duplicate = c(""error"", ""last"", ""mean""))",3,False,False,tests/testthat/test-simulation-model-data.R,vignettes/psychometric-process-models.Rmd,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 rolling_apply,rolling_apply,R/009-preprocessing.R,man/eyeprocess-preprocessing.Rd,"(x, width = 5L, FUN = stats::median, na.rm = TRUE)",4,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 roundtrip_eye_dataset,roundtrip_eye_dataset,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(
     x,
@@ -608,7 +608,7 @@ scanpath_sequence,scanpath_sequence,R/010-features.R,man/eyeprocess-features.Rd,
 schema_coverage,schema_coverage,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(x, require_gaze = TRUE)",2,False,False,tests/testthat/test-format-validation.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 schema_coverage_summary,schema_coverage_summary,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,(x),1,False,False,tests/testthat/test-format-validation.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 schema_table,schema_table,R/001-schema.R,man/eyeprocess-schema.Rd,"(name, schema = eye_schema())",2,False,False,tests/testthat/test-schema-class.R,,unclassified,False,src/eyeprocesspy/schema.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
-sensitivity_missing_process,sensitivity_missing_process,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, feature_name, formula, methods = c(""complete_case"", ""median_indicator""))",4,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+sensitivity_missing_process,sensitivity_missing_process,R/016-advanced-experimental.R,man/eyeprocess-experimental.Rd,"(x, feature_name, formula, methods = c(""complete_case"", ""median_indicator""))",4,False,False,,,experimental,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,python_reference_differs,not_applicable,docstring_initial,Cross-language numerical parity and exact R-engine identity remain pending; Python reference/backend differs or exact R backend is explicitly gated.
 sensitivity_process,sensitivity_process,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(..., label = NULL)",2,True,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 set_eye_table,set_eye_table,R/002-class.R,man/eyeprocess-class.Rd,"(x, table, value, validate = TRUE)",4,False,False,,,unclassified,False,src/eyeprocesspy/dataset.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 simulate_eye_dataset,simulate_eye_dataset,R/014-simulation.R,man/eyeprocess-simulation.Rd,"(
@@ -621,7 +621,7 @@ simulate_eye_dataset,simulate_eye_dataset,R/014-simulation.R,man/eyeprocess-simu
     include_biometrics = TRUE,
     missing_gaze = 0.05,
     missing_pupil = 0.08,
-    seed = NULL)",10,False,False,tests/testthat/test-advanced-models-v2.R|tests/testthat/test-export-report.R|tests/testthat/test-format-validation.R|tests/testthat/test-interoperability-storage.R|tests/testthat/test-preprocessing.R|tests/testthat/test-quality-plots.R|tests/testthat/test-simulation-model-data.R|tests/testthat/test-validation-program.R,vignettes/getting-started.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    seed = NULL)",10,False,False,tests/testthat/test-advanced-models-v2.R|tests/testthat/test-export-report.R|tests/testthat/test-format-validation.R|tests/testthat/test-interoperability-storage.R|tests/testthat/test-preprocessing.R|tests/testthat/test-quality-plots.R|tests/testthat/test-simulation-model-data.R|tests/testthat/test-validation-program.R,vignettes/getting-started.Rmd,unclassified,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 simulate_process_irt,simulate_process_irt,R/014-simulation.R,man/eyeprocess-simulation.Rd,"(
     n_person = 200,
     n_item = 20,
@@ -629,7 +629,7 @@ simulate_process_irt,simulate_process_irt,R/014-simulation.R,man/eyeprocess-simu
     pupil_effect = 0.3,
     ability_speed_correlation = -0.3,
     missing_process = 0.1,
-    seed = NULL)",7,False,False,tests/testthat/test-simulation-model-data.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    seed = NULL)",7,False,False,tests/testthat/test-simulation-model-data.R,,unclassified,False,eyeprocesspy.legacy_models,tests/test_legacy_models.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,
 source_preservation_audit,source_preservation_audit,R/017-format-validation.R,man/eyeprocess-format-validation.Rd,"(x, require_raw = FALSE)",2,False,False,tests/testthat/test-format-validation.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
 standardize_eye_table,standardize_eye_table,R/001-schema.R,man/eyeprocess-schema.Rd,"(data, name, keep_extra = TRUE, schema = eye_schema())",4,False,False,tests/testthat/test-schema-class.R,,unclassified,False,src/eyeprocesspy/schema.py,tests/test_core_parity.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 store_quality,store_quality,R/011-quality-governance.R,man/eyeprocess-quality.Rd,"(x, report, replace_metric = FALSE)",3,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,

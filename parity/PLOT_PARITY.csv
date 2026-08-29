@@ -133,7 +133,7 @@ plot.eye_nominal_gaze_irt,R/053-process-irt-plots-0-7.R,plot.eye_nominal_gaze_ir
 plot.eye_nonparametric_rasch_audit,R/067-advanced-sensitivity-diagnostics-0-8.R,plot_eye_nonparametric_rasch_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_norm_transportability,R/045-process-norms.R,plot.eye_norm_transportability,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_omission_survival_irt,R/053-process-irt-plots-0-7.R,plot.eye_omission_survival_irt,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_parameter_recovery,R/014-simulation.R,plot.eye_parameter_recovery,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_parameter_recovery,R/014-simulation.R,plot_eye_parameter_recovery,implemented,Matplotlib counterpart with attached gp3_data; tested in tests/test_legacy_models.py.
 plot.eye_phase_amplitude_irt,R/037-pupil-registration.R,plot.eye_phase_amplitude_irt,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_pipeline_audit,R/080-plots-0-9.R,plot.eye_pipeline_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_preaction_process_features,R/066-process-decision-features-0-8.R,plot.eye_preaction_process_features,not_started,heuristic candidate; confirm from source/Rd
