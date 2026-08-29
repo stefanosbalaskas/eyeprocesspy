@@ -1,10 +1,12 @@
 # Test summary
 
-- Full local pytest suite: **96 passed**.
-- Focused requested-API/semantic-validation tests: **9 passed**.
-- Executable `irt_*.py` example smoke suite: **15 passed**.
+- Full local pytest suite: **114 passed**.
+- Focused 0.8 IRT/context/frontier/sensitivity tests: **12 passed**.
+- Executable `irt_*.py` example smoke suite: **21 passed**.
 - Installed-wheel smoke: PASS.
+- Frozen 0.8 tranche export smoke: **40/40**.
 - Packaged canonical Stan resources: **13/13**.
-- Wheel SHA-256: `6da3fc2a831fe2c4d5b404937e2a29b1d59b4b4bb9a485db51b88c0a998219ce`.
+- Wheel SHA-256: `ebf9d6938bd432f3d0a5c89086b58a3d5de85c2e25cf1eadeb78e3a3f695098d`.
 - Frozen R reference: `eyeprocess 0.11.1`.
 - Cross-language R-oracle numerical validation remains pending in this sandbox.
+- Ruff was not available in the current sandbox; CI remains responsible for the configured Ruff lane.

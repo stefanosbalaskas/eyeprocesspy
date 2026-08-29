@@ -36,3 +36,11 @@ from .semantic_validation_07 import *
 from .requested_api_07 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .context_structure_08 import *
+from .frontier_08 import *
+from .sensitivity_08 import *
+from .bayesian_3pl_08 import *
+from .plots_irt_08 import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]
