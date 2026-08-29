@@ -35,6 +35,15 @@ Use `fit_manyfacet_process_irt()`, `audit_process_measurement_invariance()`, and
 
 The broader stress-testing and flexible-IRF families are later source tranches. Exact GPIRT/dynamic GPIRT/flow-MIRT/continuous-time estimators remain behind explicit gates until validated implementations are available.
 
+
+## Requested API completion and semantic validation
+
+The 0.7 completion layer is now explicit in Python. `fit_gaze_informed_missingness_irt()` is a two-part conditional diagnostic with an explicitly labelled smoothed person-score proxy when theta is not supplied. `fit_event_time_irt()` is a theta-conditioned Cox-reference diagnostic, not a full joint continuous-time latent-trait estimator. `device_facet_effects()`, `session_facet_effects()`, and `algorithm_facet_effects()` expose named facet evidence from `fit_manyfacet_process_irt()`.
+
+For model-development validation, use `simulate_from_model()`, `extract_parameter_truth()`, and `fit_validation_replicate()` so recovery rows retain scenario, engine, convergence and truth metadata. For latent-distribution sensitivity, `audit_latent_distribution()`, `compare_latent_distribution_models()`, and `latent_distribution_stress_test()` separate descriptive distribution diagnostics from changes to the latent distribution inside a fitted IRT model.
+
+Interoperability claims should be paired with the semantic-fidelity programme in `validation-evidence-0-7.md`, including vendor contracts, event/HED round trips, BIDS callback audits and cross-version adapter regression.
+
 ## Promotion is evidence-based
 
 Retain recovery, bias/RMSE, interval coverage, convergence/failure classification, misspecification, preprocessing sensitivity, grouped/external validation, and—for Bayesian models—SBC/PPC evidence before promotion.

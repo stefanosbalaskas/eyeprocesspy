@@ -31,3 +31,8 @@ from .irt_validation_07 import *
 from .plots_process_irt_07 import *
 
 __all__ = [n for n in globals() if not n.startswith('_')]
+
+from .semantic_validation_07 import *
+from .requested_api_07 import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]

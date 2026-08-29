@@ -22,7 +22,7 @@ plot.eye_calibration_drift_profile,R/080-plots-0-9.R,plot.eye_calibration_drift_
 plot.eye_calibration_error_model,R/080-plots-0-9.R,plot.eye_calibration_error_model,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_candidate_item_bank_audit,R/064-next-generation-plots-0-8.R,plot.eye_candidate_item_bank_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_cdm_qmatrix_audit,R/092-plots-validation-irt-0-9.R,plot.eye_cdm_qmatrix_audit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_compatibility_evidence_matrix,R/048-semantic-validation-0-7.R,plot.eye_compatibility_evidence_matrix,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_compatibility_evidence_matrix,R/048-semantic-validation-0-7.R,plot_eye_compatibility_evidence_matrix,implemented,source contract inspected; plot-data smoke test added
 plot.eye_corpus_validation,R/017-format-validation.R,plot.eye_corpus_validation,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_cross_recurrence,R/039-recurrence-analysis.R,plot.eye_cross_recurrence,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_crossed_grouped_cv,R/021-validation-program.R,plot.eye_crossed_grouped_cv,not_started,heuristic candidate; confirm from source/Rd
@@ -197,7 +197,7 @@ plot.eye_sbc_diagnostics,R/081-validation-extras-0-9.R,plot.eye_sbc_diagnostics,
 plot.eye_scanpath_bootstrap,R/041-representative-scanpaths.R,plot.eye_scanpath_bootstrap,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_scanpath_comparison,R/041-representative-scanpaths.R,plot.eye_scanpath_comparison,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_scanpath_representative,R/041-representative-scanpaths.R,plot.eye_scanpath_representative,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_semantic_roundtrip,R/048-semantic-validation-0-7.R,plot.eye_semantic_roundtrip,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_semantic_roundtrip,R/048-semantic-validation-0-7.R,plot_eye_semantic_roundtrip,implemented,source contract inspected; plot-data smoke test added
 plot.eye_signal_filter_audit,R/064-next-generation-plots-0-8.R,plot.eye_signal_filter_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_software_paper_evidence,R/080-plots-0-9.R,plot.eye_software_paper_evidence,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_storage_benchmark,R/028-api-storage-adapters.R,plot.eye_storage_benchmark,not_started,heuristic candidate; confirm from source/Rd
@@ -251,7 +251,7 @@ plot_device_transfer_curve,R/036-device-linking.R,plot_device_transfer_curve,not
 plot_diagnostics,R/030-measurement-intelligence-utils.R,plot_diagnostics,not_started,heuristic candidate; confirm from source/Rd
 plot_diagonal_recurrence_profile,R/039-recurrence-analysis.R,plot_diagonal_recurrence_profile,not_started,heuristic candidate; confirm from source/Rd
 plot_dif_drift_heatmap,R/044-process-dif-fairness.R,plot_dif_drift_heatmap,not_started,heuristic candidate; confirm from source/Rd
-plot_distractor_information,R/055-requested-api-completion-0-7.R,plot_distractor_information,not_started,heuristic candidate; confirm from source/Rd
+plot_distractor_information,R/055-requested-api-completion-0-7.R,plot_distractor_information,implemented,source contract inspected; plot-data smoke test added
 plot_drift_over_time,R/034-calibration-recalibration.R,plot_drift_over_time,not_started,heuristic candidate; confirm from source/Rd
 plot_episode_duration_distribution,R/042-process-episodes.R,plot_episode_duration_distribution,not_started,heuristic candidate; confirm from source/Rd
 plot_episode_transition_graph,R/042-process-episodes.R,plot_episode_transition_graph,not_started,heuristic candidate; confirm from source/Rd
@@ -271,7 +271,7 @@ plot_gazepoint_workflow,R/019-gazepoint-downstream-workflow.R,plot_gazepoint_wor
 plot_group_icc_process_overlay,R/044-process-dif-fairness.R,plot_group_icc_process_overlay,not_started,heuristic candidate; confirm from source/Rd
 plot_group_scanpath_transport,R/041-representative-scanpaths.R,plot_group_scanpath_transport,not_started,heuristic candidate; confirm from source/Rd
 plot_interval_coverage,R/023-validation-orchestration.R,plot_interval_coverage,not_started,heuristic candidate; confirm from source/Rd
-plot_irf_uncertainty,R/055-requested-api-completion-0-7.R,plot_irf_uncertainty,not_started,heuristic candidate; confirm from source/Rd
+plot_irf_uncertainty,R/055-requested-api-completion-0-7.R,plot_irf_uncertainty,implemented,source contract inspected; plot-data smoke test added
 plot_item_decision_path,R/046-evidence-provenance-graph.R,plot_item_decision_path,not_started,heuristic candidate; confirm from source/Rd
 plot_item_difficulty,R/012-plots.R,plot_item_difficulty,not_started,heuristic candidate; confirm from source/Rd
 plot_item_group_process_curves,R/044-process-dif-fairness.R,plot_item_group_process_curves,not_started,heuristic candidate; confirm from source/Rd
@@ -291,12 +291,12 @@ plot_objective_tradeoffs,R/043-item-bank-optimization.R,plot_objective_tradeoffs
 plot_observation_probability,R/038-informative-missingness.R,plot_observation_probability,not_started,heuristic candidate; confirm from source/Rd
 plot_observed_expected_fixations,R/040-fixation-point-process.R,plot_observed_expected_fixations,not_started,heuristic candidate; confirm from source/Rd
 plot_parameter_recovery,R/023-validation-orchestration.R,plot_parameter_recovery,not_started,heuristic candidate; confirm from source/Rd
-plot_person_item_space,R/055-requested-api-completion-0-7.R,plot_person_item_space,not_started,heuristic candidate; confirm from source/Rd
+plot_person_item_space,R/055-requested-api-completion-0-7.R,plot_person_item_space,implemented,source contract inspected; plot-data smoke test added
 plot_person_normative_profile,R/045-process-norms.R,plot_person_normative_profile,not_started,heuristic candidate; confirm from source/Rd
 plot_phase_amplitude_scores,R/037-pupil-registration.R,plot_phase_amplitude_scores,not_started,heuristic candidate; confirm from source/Rd
 plot_probabilistic_scanpath,R/031-probabilistic-aoi.R,plot_probabilistic_scanpath,not_started,heuristic candidate; confirm from source/Rd
 plot_process_centiles,R/045-process-norms.R,plot_process_centiles,not_started,heuristic candidate; confirm from source/Rd
-plot_process_changepoint,R/055-requested-api-completion-0-7.R,plot_process_changepoint,not_started,heuristic candidate; confirm from source/Rd
+plot_process_changepoint,R/055-requested-api-completion-0-7.R,plot_process_changepoint,implemented,source contract inspected; plot-data smoke test added
 plot_process_channel_ablation_delta,R/064-next-generation-plots-0-8.R,plot_process_channel_ablation_delta,not_started,heuristic candidate; confirm from source/Rd
 plot_process_dif_forest,R/044-process-dif-fairness.R,plot_process_dif_forest,not_started,heuristic candidate; confirm from source/Rd
 plot_process_episodes,R/042-process-episodes.R,plot_process_episodes,not_started,heuristic candidate; confirm from source/Rd
