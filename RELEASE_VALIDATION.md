@@ -5,7 +5,7 @@ Development validation checkpoint for `eyeprocesspy 0.1.0.dev0`; this is not yet
 ## Frozen source
 
 - R reference: `eyeprocess 0.11.1`
-- R tarball SHA-256: `fd2638d7ccf0c5dd5a18745aed59c2f647e142c1753a339a2ab8ca99c3fd5d0a`
+- R tarball SHA-256: `08058e820011f5877603c93886a31295b50e29a461f364ab01604f8c38c09c63`
 - Frozen exports: 1,182
 - Frozen Stan programs: 13
 
@@ -31,7 +31,7 @@ The sandbox cannot download standard PEP 517 build requirements. The local insta
 - Process registry/reliability and calibration-quality installed smoke: PASS
 - Canonical Stan resources: **13/13**
 - Canonical M4 Stan MD5: `c5af3e5d25ff63db42c58573eb42124b`
-- Validation-wheel SHA-256: `8b635350be8250ae0fda01e82a651917da840bc440fe7125a2945639ce076217`
+- Validation-wheel SHA-256: `08058e820011f5877603c93886a31295b50e29a461f364ab01604f8c38c09c63`
 
 ## Scientific boundary
 

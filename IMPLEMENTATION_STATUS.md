@@ -62,7 +62,7 @@ Total frozen R exports with Python callables: **730 / 1182**.
 - Executable IRT example smoke suite: **44 passed**.
 - Installed-wheel import and staged M4 smoke: PASS.
 - Installed wheel contains **13/13** canonical Stan programs.
-- Current local validation-wheel SHA-256: `8b635350be8250ae0fda01e82a651917da840bc440fe7125a2945639ce076217`.
+- Current local validation-wheel SHA-256: `08058e820011f5877603c93886a31295b50e29a461f364ab01604f8c38c09c63`.
 - Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
 ## Staged M0-M4 scientific boundaries
