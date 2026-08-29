@@ -65,3 +65,10 @@ from .process_quality_09 import *
 from .plots_process_quality_09 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .measurement_quality_legacy import *
+from .pupil_missingness import *
+from .process_dynamics import *
+from .evidence_graph import *
+
+__all__ = [n for n in globals() if not n.startswith('_')]

@@ -18,16 +18,16 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API implemented | 569 |
-| P2 structural initial | 569 |
-| P3 semantic initial | 569 |
+| P1 API implemented | 660 |
+| P2 structural initial | 660 |
+| P3 semantic initial | 660 |
 | P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms/gates | 500 |
-| P5 Python reference/backend-different algorithms | 69 |
-| Public Python `plot_*` callables currently present | 123 |
-| Plot-ledger rows explicitly verified `implemented` | 61 / 341 |
-| Python article counterparts complete | 45 / 88 |
-| Executable `irt_*.py` examples | 32 |
+| P5 source-ported algorithms/gates | 587 |
+| P5 Python reference/backend-different algorithms | 73 |
+| Public Python `plot_*` callables currently present | 200 |
+| Plot-ledger rows explicitly verified `implemented` | 138 / 341 |
+| Python article counterparts complete | 51 / 88 |
+| Executable `irt_*.py` examples | 38 |
 
 No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
 
@@ -46,17 +46,21 @@ No generated placeholders are counted as implementations. P4 numerical parity is
 - **12** functional-pupil IRT and advanced validation/simulation exports, using the final overriding 0.11.1 contracts.
 - **27** stable external-engine/model-contract and sequence-interoperability exports, including exact-engine gates for mirt/TAM/brms/LNIRT/GDINA/OpenMx/diffIRT/TraMineR/seqHMM and the backend-neutral engine-equivalence harness.
 - **30** 0.9 process-measure registry/reliability and calibration-uncertainty/data-quality exports, including probabilistic AOI uncertainty and quality reporting.
+- **27** process uncertainty budgets, offline calibration/recalibration, and Generalizability-Theory/reliability exports.
+- **18** pupil phase-amplitude registration and informative-missingness/MNAR sensitivity exports.
+- **36** recurrence, fixation point-process, representative scanpath and process-episode exports.
+- **10** evidence/decision provenance and measurement-intelligence adapter exports.
 
-Total frozen R exports with Python callables: **569 / 1182**.
+Total frozen R exports with Python callables: **660 / 1182**.
 
 ## Current validation
 
-- Full local pytest suite: **167 passed**.
+- Full local pytest suite: **178 passed** (validated in split batches after runtime reconstruction).
 - Focused staged multimodal contract/article/signature suite: **11 passed**.
-- Executable IRT example smoke suite: **32 passed**.
+- Executable IRT example smoke suite: **38 passed**.
 - Installed-wheel import and staged M4 smoke: PASS.
 - Installed wheel contains **13/13** canonical Stan programs.
-- Current local validation-wheel SHA-256: `3689803ed8460c1256bcd4048994e5014556828a423b94fd953a19a6d543dc89`.
+- Current local validation-wheel SHA-256: `e9fe7b7834bc61f38a75d87b4cb3386514d5bcdb311db27a9908cb76117eda19`.
 - Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
 ## Staged M0-M4 scientific boundaries
@@ -69,6 +73,6 @@ Total frozen R exports with Python callables: **569 / 1182**.
 
 ## Important parity boundary
 
-69 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on an R-specific optional engine or where the Python reference contract cannot yet claim algorithmic identity. Exact specialist-engine methods remain explicit gates. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
+73 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on an R-specific optional engine or where the Python reference contract cannot yet claim algorithmic identity. Exact specialist-engine methods remain explicit gates. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
 
 The sandbox also lacks the normal `build`/`wheel` build dependencies and cannot resolve PyPI. The current installed-artifact check therefore used an offline PEP 427 validation wheel assembled directly from the pure-Python source tree. GitHub CI remains responsible for the standard PEP 517 wheel/sdist build lane.
