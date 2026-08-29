@@ -6842,15 +6842,15 @@
     "rd_help": "man/sequence_interoperability.Rd"
   },
   "fit_gdina_adapter": {
-    "signature": "(x, q_matrix, model = \"GDINA\", ...)",
+    "signature": "(data, Q, model = \"GDINA\", purpose = \"cognitive diagnosis\", ...)",
     "args": [
       {
-        "name": "x",
+        "name": "data",
         "default": null,
         "required": true
       },
       {
-        "name": "q_matrix",
+        "name": "Q",
         "default": null,
         "required": true
       },
@@ -6860,13 +6860,18 @@
         "required": false
       },
       {
+        "name": "purpose",
+        "default": "\"cognitive diagnosis\"",
+        "required": false
+      },
+      {
         "name": "...",
         "default": null,
         "required": false
       }
     ],
     "rd_usage": "fit_gdina_adapter(data, Q, model = \"GDINA\", purpose = \"cognitive diagnosis\", ...)",
-    "source_file": "R/020-interoperability-storage.R",
+    "source_file": "R/028-api-storage-adapters.R",
     "rd_help": "man/fit_gdina_adapter.Rd"
   },
   "fit_diffirt_adapter": {

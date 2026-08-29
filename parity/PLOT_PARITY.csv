@@ -39,7 +39,7 @@ plot.eye_dif_drift,R/044-process-dif-fairness.R,plot.eye_dif_drift,not_started,h
 plot.eye_dynamic_irtree,R/022-advanced-models-v2.R,plot.eye_dynamic_irtree,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_dynamic_ppc,R/024-dynamic-irtree-engine.R,plot.eye_dynamic_ppc,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_empirical_reproduction,R/021-validation-program.R,plot.eye_empirical_reproduction,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_engine_comparison,R/021-validation-program.R,plot.eye_engine_comparison,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_engine_comparison,R/021-validation-program.R,plot_eye_engine_comparison,implemented,Matplotlib counterpart with attached eyeprocess_plot_data; tested in tests/test_engine_adapters.py.
 plot.eye_episode_comparison,R/042-process-episodes.R,plot.eye_episode_comparison,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_event_roundtrip_audit,R/056-completion-plots-0-7.R,plot.eye_event_roundtrip_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_event_time_irt,R/056-completion-plots-0-7.R,plot.eye_event_time_irt,not_started,heuristic candidate; confirm from source/Rd

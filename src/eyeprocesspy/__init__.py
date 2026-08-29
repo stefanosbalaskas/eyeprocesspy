@@ -56,3 +56,7 @@ from .functional_pupil import *
 from .plots_functional_pupil import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .engine_adapters import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]

@@ -11,13 +11,13 @@ Development validation checkpoint for `eyeprocesspy 0.1.0.dev0`; this is not yet
 
 ## Python checkpoint
 
-- Frozen exports with Python callables: **512/1,182**
-- Source-ported algorithms/contracts: **457**
-- Python-reference/backend-different algorithms: **55**
-- Full pytest suite: **147 passed**
+- Frozen exports with Python callables: **539/1,182**
+- Source-ported algorithms/contracts: **470**
+- Python-reference/backend-different algorithms: **69**
+- Full pytest suite: **156 passed**
 - Article counterparts complete: **43/88**
-- Verified plot-ledger rows: **54/341**
-- Executable IRT examples: **29**
+- Verified plot-ledger rows: **55/341**
+- Executable IRT examples: **30**
 
 ## Installed artifact
 
@@ -25,10 +25,11 @@ The sandbox cannot download standard PEP 517 build requirements. The local insta
 
 - Installed wheel import: PASS
 - Functional-pupil specification/advanced-grid installed smoke: PASS
+- External-engine adapter and engine-equivalence installed smoke: PASS
 - Canonical Stan resources: **13/13**
 - Canonical M4 Stan MD5: `c5af3e5d25ff63db42c58573eb42124b`
-- Validation-wheel SHA-256: `ce76162b490a91ac5445638469bfa54c924cc085fa93c31a72c0c49b0ae6ae7c`
+- Validation-wheel SHA-256: `0ae7c56fa006c798e13f8adcf0f000aed57d5193da1fd29377ace8894d5a5365`
 
 ## Scientific boundary
 
-No P4 cross-language numerical parity is inferred from Python-only tests. Pupil trajectories remain physiological measurements rather than automatic psychological constructs. Exact R-specific `lme4`/`brms` paths are explicit backend boundaries; the canonical Stan route retains the bundled frozen Stan source. M4 remains REVIEW/evidence-gated.
+No P4 cross-language numerical parity is inferred from Python-only tests. Pupil trajectories remain physiological measurements rather than automatic psychological constructs. Exact R-specific `mirt`/`TAM`/`brms`/`LNIRT`/`GDINA`/`OpenMx`/`diffIRT` and related adapter paths are explicit backend boundaries; the canonical Stan route retains the bundled frozen Stan source. M4 remains REVIEW/evidence-gated.
