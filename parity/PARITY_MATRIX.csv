@@ -2429,10 +2429,10 @@ ablate_multimodal_channels,ablate_multimodal_channels,R/097-process-information-
     x,
     include = c(""response"",""rt"",""gaze"",""pupil""),
     include_response = TRUE
-)",3,False,False,tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-audit_multimodal_identifiability,audit_multimodal_identifiability,R/099-multimodal-validation-0-10.R,man/audit_multimodal_identifiability.Rd,"(x, min_person=30L, min_item=5L)",3,False,False,tests/testthat/test-0-10-multimodal-contract.R,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-audit_multimodal_measurement,audit_multimodal_measurement,R/095-multimodal-measurement-contract-0-10.R,man/audit_multimodal_measurement.Rd,(x),1,False,False,tests/testthat/test-0-10-multimodal-contract.R,vignettes/unified-multimodal-process-irt-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_backend_status,multimodal_backend_status,R/098-multimodal-fit-contract-0-10.R,man/multimodal_backend_status.Rd,(),0,False,False,tests/testthat/test-0-10-backend-gating.R,vignettes/manual-multimodal-backends-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",3,False,False,tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+audit_multimodal_identifiability,audit_multimodal_identifiability,R/099-multimodal-validation-0-10.R,man/audit_multimodal_identifiability.Rd,"(x, min_person=30L, min_item=5L)",3,False,False,tests/testthat/test-0-10-multimodal-contract.R,,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+audit_multimodal_measurement,audit_multimodal_measurement,R/095-multimodal-measurement-contract-0-10.R,man/audit_multimodal_measurement.Rd,(x),1,False,False,tests/testthat/test-0-10-multimodal-contract.R,vignettes/unified-multimodal-process-irt-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_backend_status,multimodal_backend_status,R/098-multimodal-fit-contract-0-10.R,man/multimodal_backend_status.Rd,(),0,False,False,tests/testthat/test-0-10-backend-gating.R,vignettes/manual-multimodal-backends-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_irt_spec,multimodal_irt_spec,R/095-multimodal-measurement-contract-0-10.R,man/multimodal_irt_spec.Rd,"(
     response = NULL,
     rt = NULL,
@@ -2442,8 +2442,8 @@ multimodal_irt_spec,multimodal_irt_spec,R/095-multimodal-measurement-contract-0-
     backend = c(""cmdstanr"", ""existing""),
     identification = list(),
     priors = list()
-)",8,False,False,tests/testthat/test-0-10-backend-gating.R|tests/testthat/test-0-10-spec-architecture.R,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_ppc,multimodal_ppc,R/098-multimodal-fit-contract-0-10.R,man/multimodal_ppc.Rd,"(object, variables = NULL)",2,False,False,,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",8,False,False,tests/testthat/test-0-10-backend-gating.R|tests/testthat/test-0-10-spec-architecture.R,,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_ppc,multimodal_ppc,R/098-multimodal-fit-contract-0-10.R,man/multimodal_ppc.Rd,"(object, variables = NULL)",2,False,False,,,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 prepare_multimodal_irt_data,prepare_multimodal_irt_data,R/095-multimodal-measurement-contract-0-10.R,man/prepare_multimodal_irt_data.Rd,"(
     data,
     person,
@@ -2457,12 +2457,12 @@ prepare_multimodal_irt_data,prepare_multimodal_irt_data,R/095-multimodal-measure
     device = NULL,
     payloads = list(),
     provenance = list()
-)",12,False,False,tests/testthat/test-0-10-multimodal-contract.R,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",12,False,False,tests/testthat/test-0-10-multimodal-contract.R,,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 process_information,process_information,R/097-process-information-0-10.R,man/process_information.Rd,"(
     baseline,
     augmented,
     metric = c(""variance_reduction"",""precision_gain"",""entropy_reduction"")
-)",3,False,False,tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",3,False,False,tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 simulate_multimodal_irt,simulate_multimodal_irt,R/096-multimodal-simulation-0-10.R,man/simulate_multimodal_irt.Rd,"(
     n_person = 120L,
     n_item = 20L,
@@ -2475,8 +2475,8 @@ simulate_multimodal_irt,simulate_multimodal_irt,R/096-multimodal-simulation-0-10
     gaze_x_effect = 0.08,
     gaze_y_effect = -0.05,
     missing_fraction = 0
-)",11,False,False,tests/testthat/test-0-10-backend-gating.R|tests/testthat/test-0-10-multimodal-contract.R|tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-multimodal-simulation.R|tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd|vignettes/pupil-measurement-boundaries-0-10.Rmd|vignettes/unified-multimodal-process-irt-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-validate_multimodal_irt,validate_multimodal_irt,R/099-multimodal-validation-0-10.R,man/validate_multimodal_irt.Rd,(x),1,False,False,tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-multimodal-simulation.R,,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",11,False,False,tests/testthat/test-0-10-backend-gating.R|tests/testthat/test-0-10-multimodal-contract.R|tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-multimodal-simulation.R|tests/testthat/test-0-10-process-information.R,vignettes/process-information-and-ablation-0-10.Rmd|vignettes/pupil-measurement-boundaries-0-10.Rmd|vignettes/unified-multimodal-process-irt-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+validate_multimodal_irt,validate_multimodal_irt,R/099-multimodal-validation-0-10.R,man/validate_multimodal_irt.Rd,(x),1,False,False,tests/testthat/test-0-10-multimodal-plots.R|tests/testthat/test-0-10-multimodal-simulation.R,,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 audit_multimodal_m2_identifiability,audit_multimodal_m2_identifiability,R/102-multimodal-m2-evidence-0-10.R,man/audit_multimodal_m2_identifiability.Rd,"(
     x,
     person = ""person_id"",
@@ -2487,7 +2487,7 @@ audit_multimodal_m2_identifiability,audit_multimodal_m2_identifiability,R/102-mu
     model = c(""M2"", ""M1"", ""M0""),
     min_persons = 20L,
     min_items = 5L
-)",9,False,False,tests/testthat/test-0-10-m2-identifiability.R,vignettes/m2-recovery-identifiability-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",9,False,False,tests/testthat/test-0-10-m2-identifiability.R,vignettes/m2-recovery-identifiability-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 fit_multimodal_m2,fit_multimodal_m2,R/101-multimodal-m2-reference-0-10.R,man/fit_multimodal_m2.Rd,"(
     x,
     person = ""person_id"",
@@ -2505,14 +2505,14 @@ fit_multimodal_m2,fit_multimodal_m2,R/101-multimodal-m2-reference-0-10.R,man/fit
     max_treedepth = 12L,
     refresh = 100L,
     quiet_compile = TRUE
-)",16,False,False,,vignettes/m2-ppc-negative-controls-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m2_ablation,multimodal_m2_ablation,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_ablation.Rd,"(x, ...)",2,True,False,,vignettes/m2-process-information-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",16,False,False,,vignettes/m2-ppc-negative-controls-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m2_ablation,multimodal_m2_ablation,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_ablation.Rd,"(x, ...)",2,True,False,,vignettes/m2-process-information-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m2_negative_controls,multimodal_m2_negative_controls,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_negative_controls.Rd,"(
     x,
     seed = 20260814L
-)",2,False,False,tests/testthat/test-0-10-m2-negative-controls.R|tests/testthat/test-0-10-m2-plots.R,vignettes/m2-ppc-negative-controls-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m2_ppc,multimodal_m2_ppc,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_ppc.Rd,(x),1,False,False,,vignettes/m2-ppc-negative-controls-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m2_process_information,multimodal_m2_process_information,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_process_information.Rd,(x),1,False,False,,vignettes/m2-process-information-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",2,False,False,tests/testthat/test-0-10-m2-negative-controls.R|tests/testthat/test-0-10-m2-plots.R,vignettes/m2-ppc-negative-controls-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m2_ppc,multimodal_m2_ppc,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_ppc.Rd,(x),1,False,False,,vignettes/m2-ppc-negative-controls-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m2_process_information,multimodal_m2_process_information,R/102-multimodal-m2-evidence-0-10.R,man/multimodal_m2_process_information.Rd,(x),1,False,False,,vignettes/m2-process-information-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m2_recovery,multimodal_m2_recovery,R/103-multimodal-m2-recovery-0-10.R,man/multimodal_m2_recovery.Rd,"(
     n_rep = 10L,
     n_person = 100L,
@@ -2534,12 +2534,12 @@ multimodal_m2_recovery,multimodal_m2_recovery,R/103-multimodal-m2-recovery-0-10.
     adapt_delta = 0.95,
     max_treedepth = 12L,
     refresh = 0L
-)",13,False,False,,vignettes/m2-recovery-identifiability-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",13,False,False,,vignettes/m2-recovery-identifiability-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m2_spec,multimodal_m2_spec,R/101-multimodal-m2-reference-0-10.R,man/multimodal_m2_spec.Rd,"(
     backend = ""cmdstanr"",
     prior_profile = c(""regularized"", ""paper_centered""),
     missingness = ""ignorable""
-)",3,False,False,tests/testthat/test-0-10-m2-spec.R,vignettes/m2-three-way-reference-model-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",3,False,False,tests/testthat/test-0-10-m2-spec.R,vignettes/m2-three-way-reference-model-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 simulate_multimodal_m2,simulate_multimodal_m2,R/103-multimodal-m2-recovery-0-10.R,man/simulate_multimodal_m2.Rd,"(
     n_person = 100L,
     n_item = 10L,
@@ -2586,13 +2586,13 @@ simulate_multimodal_m2,simulate_multimodal_m2,R/103-multimodal-m2-recovery-0-10.
         gaze = 0
     ),
     seed = 20260814L
-)",11,False,False,tests/testthat/test-0-10-m2-identifiability.R|tests/testthat/test-0-10-m2-negative-controls.R|tests/testthat/test-0-10-m2-plots.R|tests/testthat/test-0-10-m2-simulation.R,vignettes/m2-ppc-negative-controls-0-10.Rmd|vignettes/m2-process-information-ablation-0-10.Rmd|vignettes/m2-recovery-identifiability-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",11,False,False,tests/testthat/test-0-10-m2-identifiability.R|tests/testthat/test-0-10-m2-negative-controls.R|tests/testthat/test-0-10-m2-plots.R|tests/testthat/test-0-10-m2-simulation.R,vignettes/m2-ppc-negative-controls-0-10.Rmd|vignettes/m2-process-information-ablation-0-10.Rmd|vignettes/m2-recovery-identifiability-0-10.Rmd|vignettes/m2-three-way-reference-model-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 validate_multimodal_m2,validate_multimodal_m2,R/102-multimodal-m2-evidence-0-10.R,man/validate_multimodal_m2.Rd,"(
     x,
     include_ppc = TRUE,
     rhat_max = 1.01,
     ess_min = 200
-)",4,False,False,tests/testthat/test-0-10-m2-plots.R,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",4,False,False,tests/testthat/test-0-10-m2-plots.R,,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 audit_multimodal_m3_identifiability,audit_multimodal_m3_identifiability,R/106-multimodal-m3-evidence-0-10.R,man/audit_multimodal_m3_identifiability.Rd,"(
     x,
     pupil_scale = c(""z"", ""raw""),
@@ -2601,7 +2601,7 @@ audit_multimodal_m3_identifiability,audit_multimodal_m3_identifiability,R/106-mu
     max_pupil_missing = 0.50,
     max_blink_rate = 0.30,
     max_interpolation_rate = 0.30
-)",7,False,False,tests/testthat/test-0-10-m3-identifiability.R|tests/testthat/test-0-10-m3-plots.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-pupil-confounds-measurement-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",7,False,False,tests/testthat/test-0-10-m3-identifiability.R|tests/testthat/test-0-10-m3-plots.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-pupil-confounds-measurement-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 fit_multimodal_m3,fit_multimodal_m3,R/105-multimodal-m3-reference-0-10.R,man/fit_multimodal_m3.Rd,"(
     x,
     person = ""person_id"",
@@ -2634,16 +2634,16 @@ fit_multimodal_m3,fit_multimodal_m3,R/105-multimodal-m3-reference-0-10.R,man/fit
     refresh = 100L,
     quiet_compile = TRUE,
     init = 0
-)",31,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",31,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m3_ablation,multimodal_m3_ablation,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_ablation.Rd,"(
     x, models = NULL,
     nuisance = stats::setNames(rep(TRUE, 8L), .ep10_m3_nuisance_names),
     ...
-)",4,True,False,,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m3_functional_bridge,multimodal_m3_functional_bridge,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_functional_bridge.Rd,"(data, score, pupil = ""pupil"", provenance = NULL)",4,False,False,tests/testthat/test-0-10-m3-functional-bridge.R,vignettes/m3-functional-pupil-bridge-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m3_negative_controls,multimodal_m3_negative_controls,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_negative_controls.Rd,"(x, seed = 20260815L)",2,False,False,tests/testthat/test-0-10-m3-negative-controls.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m3_ppc,multimodal_m3_ppc,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_ppc.Rd,(x),1,False,False,,,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m3_process_information,multimodal_m3_process_information,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_process_information.Rd,"(x, pupil_cost = 1, decisive_z = 2)",3,False,False,,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-functional-pupil-bridge-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",4,True,False,,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m3_functional_bridge,multimodal_m3_functional_bridge,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_functional_bridge.Rd,"(data, score, pupil = ""pupil"", provenance = NULL)",4,False,False,tests/testthat/test-0-10-m3-functional-bridge.R,vignettes/m3-functional-pupil-bridge-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m3_negative_controls,multimodal_m3_negative_controls,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_negative_controls.Rd,"(x, seed = 20260815L)",2,False,False,tests/testthat/test-0-10-m3-negative-controls.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m3_ppc,multimodal_m3_ppc,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_ppc.Rd,(x),1,False,False,,,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m3_process_information,multimodal_m3_process_information,R/106-multimodal-m3-evidence-0-10.R,man/multimodal_m3_process_information.Rd,"(x, pupil_cost = 1, decisive_z = 2)",3,False,False,,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-functional-pupil-bridge-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m3_recovery,multimodal_m3_recovery,R/107-multimodal-m3-recovery-0-10.R,man/multimodal_m3_recovery.Rd,"(
     reps = 3L,
     pupil_signal = c(""informative"", ""weak"", ""null"", ""redundant"", ""confounded""),
@@ -2652,14 +2652,14 @@ multimodal_m3_recovery,multimodal_m3_recovery,R/107-multimodal-m3-recovery-0-10.
     n_item = 10L,
     seed = 20260815L,
     fit_args = list(chains = 2L, parallel_chains = 2L, iter_warmup = 500L, iter_sampling = 300L, refresh = 0L, init = 0)
-)",7,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",7,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m3_spec,multimodal_m3_spec,R/105-multimodal-m3-reference-0-10.R,man/multimodal_m3_spec.Rd,"(
     backend = ""cmdstanr"",
     prior_profile = c(""regularized"", ""paper_centered""),
     missingness = ""ignorable"",
     pupil_representation = c(""summary"", ""functional_score""),
     nuisance = stats::setNames(rep(TRUE, 8L), .ep10_m3_nuisance_names)
-)",5,False,False,tests/testthat/test-0-10-m3-spec.R,vignettes/m3-functional-pupil-bridge-0-10.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",5,False,False,tests/testthat/test-0-10-m3-spec.R,vignettes/m3-functional-pupil-bridge-0-10.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 simulate_multimodal_m3,simulate_multimodal_m3,R/107-multimodal-m3-recovery-0-10.R,man/simulate_multimodal_m3.Rd,"(
     n_person = 120L,
     n_item = 12L,
@@ -2691,8 +2691,8 @@ simulate_multimodal_m3,simulate_multimodal_m3,R/107-multimodal-m3-recovery-0-10.
     device_effect = 0,
     session_effect = 0,
     seed = 20260815L
-)",17,False,False,tests/testthat/test-0-10-m3-ablation-plan.R|tests/testthat/test-0-10-m3-functional-bridge.R|tests/testthat/test-0-10-m3-identifiability.R|tests/testthat/test-0-10-m3-negative-controls.R|tests/testthat/test-0-10-m3-plots.R|tests/testthat/test-0-10-m3-simulation.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-functional-pupil-bridge-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd|vignettes/m3-pupil-confounds-measurement-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-validate_multimodal_m3,validate_multimodal_m3,R/106-multimodal-m3-evidence-0-10.R,man/validate_multimodal_m3.Rd,"(x, include_ppc = TRUE, rhat_max = 1.05, ess_min = 50, ebfmi_min = 0.30)",5,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",17,False,False,tests/testthat/test-0-10-m3-ablation-plan.R|tests/testthat/test-0-10-m3-functional-bridge.R|tests/testthat/test-0-10-m3-identifiability.R|tests/testthat/test-0-10-m3-negative-controls.R|tests/testthat/test-0-10-m3-plots.R|tests/testthat/test-0-10-m3-simulation.R,vignettes/m3-device-transport-sensor-value-0-10.Rmd|vignettes/m3-four-channel-reference-model-0-10.Rmd|vignettes/m3-functional-pupil-bridge-0-10.Rmd|vignettes/m3-process-information-ablation-0-10.Rmd|vignettes/m3-pupil-confounds-measurement-0-10.Rmd|vignettes/m3-recovery-missingness-identifiability-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+validate_multimodal_m3,validate_multimodal_m3,R/106-multimodal-m3-evidence-0-10.R,man/validate_multimodal_m3.Rd,"(x, include_ppc = TRUE, rhat_max = 1.05, ess_min = 50, ebfmi_min = 0.30)",5,False,False,,vignettes/m3-four-channel-reference-model-0-10.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 audit_multimodal_m4_identifiability,audit_multimodal_m4_identifiability,R/110-multimodal-m4-evidence-0-11.R,man/audit_multimodal_m4_identifiability.Rd,"(
     x,
     spec = NULL,
@@ -2702,7 +2702,7 @@ audit_multimodal_m4_identifiability,audit_multimodal_m4_identifiability,R/110-mu
     ebfmi_min = 0.30,
     occupancy_min = 0.03,
     entropy_fraction_review = 0.80
-)",8,False,False,tests/testthat/test-0-11-m4-identifiability.R|tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-sequences.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd|vignettes/m4-reference-model-fitting-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",8,False,False,tests/testthat/test-0-11-m4-identifiability.R|tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-sequences.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd|vignettes/m4-reference-model-fitting-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 fit_multimodal_m4,fit_multimodal_m4,R/109-multimodal-m4-reference-0-11.R,man/fit_multimodal_m4.Rd,"(
     x,
     spec = NULL,
@@ -2744,17 +2744,17 @@ fit_multimodal_m4,fit_multimodal_m4,R/109-multimodal-m4-reference-0-11.R,man/fit
     refresh = 100L,
     quiet_compile = TRUE,
     init = 0
-)",40,False,False,,vignettes/m4-reference-model-fitting-0-11.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m4_ablation,multimodal_m4_ablation,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_ablation.Rd,"(x, run = FALSE, include_channel_ablations = FALSE, m3_fit = NULL, m4_fit = NULL, fit_args = list())",6,False,False,tests/testthat/test-0-11-m4-evidence.R,vignettes/m4-process-information-ablation-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",40,False,False,,vignettes/m4-reference-model-fitting-0-11.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m4_ablation,multimodal_m4_ablation,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_ablation.Rd,"(x, run = FALSE, include_channel_ablations = FALSE, m3_fit = NULL, m4_fit = NULL, fit_args = list())",6,False,False,tests/testthat/test-0-11-m4-evidence.R,vignettes/m4-process-information-ablation-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m4_negative_controls,multimodal_m4_negative_controls,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_negative_controls.Rd,"(
     x,
     controls = c(""order_shuffle"", ""process_shuffle"", ""state_independent"", ""nuisance_pseudostate"", ""device_session_pseudostate"", ""overfit_state_count""),
     seed = 20260820L,
     run = FALSE,
     fit_args = list()
-)",5,False,False,tests/testthat/test-0-11-m4-negative-controls.R,vignettes/m4-negative-controls-state-count-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m4_ppc,multimodal_m4_ppc,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_ppc.Rd,(x),1,False,False,,,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m4_process_information,multimodal_m4_process_information,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_process_information.Rd,"(x, decisive_z = 2)",2,False,False,,vignettes/m4-process-information-ablation-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",5,False,False,tests/testthat/test-0-11-m4-negative-controls.R,vignettes/m4-negative-controls-state-count-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m4_ppc,multimodal_m4_ppc,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_ppc.Rd,(x),1,False,False,,,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m4_process_information,multimodal_m4_process_information,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_process_information.Rd,"(x, decisive_z = 2)",2,False,False,,vignettes/m4-process-information-ablation-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m4_recovery,multimodal_m4_recovery,R/111-multimodal-m4-recovery-0-11.R,man/multimodal_m4_recovery.Rd,"(
     simulation = NULL,
     fit = NULL,
@@ -2762,8 +2762,8 @@ multimodal_m4_recovery,multimodal_m4_recovery,R/111-multimodal-m4-recovery-0-11.
     run = FALSE,
     simulation_args = list(n_person = 60L, n_item = 10L),
     fit_args = list()
-)",6,False,False,tests/testthat/test-0-11-m4-recovery.R,vignettes/m4-recovery-validation-0-11.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m4_sensitivity,multimodal_m4_sensitivity,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_sensitivity.Rd,"(x, n_states = 1:4, run = FALSE, fit_args = list())",4,False,False,tests/testthat/test-0-11-m4-evidence.R,vignettes/m4-negative-controls-state-count-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",6,False,False,tests/testthat/test-0-11-m4-recovery.R,vignettes/m4-recovery-validation-0-11.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m4_sensitivity,multimodal_m4_sensitivity,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_sensitivity.Rd,"(x, n_states = 1:4, run = FALSE, fit_args = list())",4,False,False,tests/testthat/test-0-11-m4-evidence.R,vignettes/m4-negative-controls-state-count-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 multimodal_m4_spec,multimodal_m4_spec,R/109-multimodal-m4-reference-0-11.R,man/multimodal_m4_spec.Rd,"(
     n_states = 2L,
     state_channels = c(""rt"", ""gaze"", ""pupil""),
@@ -2776,8 +2776,8 @@ multimodal_m4_spec,multimodal_m4_spec,R/109-multimodal-m4-reference-0-11.R,man/m
     missingness = ""ignorable"",
     nuisance = stats::setNames(rep(TRUE, 8L), .ep10_m3_nuisance_names),
     backend = ""cmdstanr""
-)",11,False,False,tests/testthat/test-0-11-m4-anchor-identification.R|tests/testthat/test-0-11-m4-spec.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-reference-model-fitting-0-11.Rmd|vignettes/m4-trait-conditioned-process-states-0-11.Rmd,experimental,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-multimodal_m4_state_diagnostics,multimodal_m4_state_diagnostics,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_state_diagnostics.Rd,(x),1,False,False,tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-state-inference.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",11,False,False,tests/testthat/test-0-11-m4-anchor-identification.R|tests/testthat/test-0-11-m4-spec.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-reference-model-fitting-0-11.Rmd|vignettes/m4-trait-conditioned-process-states-0-11.Rmd,experimental,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+multimodal_m4_state_diagnostics,multimodal_m4_state_diagnostics,R/110-multimodal-m4-evidence-0-11.R,man/multimodal_m4_state_diagnostics.Rd,(x),1,False,False,tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-state-inference.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
 simulate_multimodal_m4,simulate_multimodal_m4,R/111-multimodal-m4-recovery-0-11.R,man/simulate_multimodal_m4.Rd,"(
     n_person = 80L,
     n_item = 12L,
@@ -2791,5 +2791,5 @@ simulate_multimodal_m4,simulate_multimodal_m4,R/111-multimodal-m4-recovery-0-11.
     missingness = c(""none"", ""mcar"", ""quality"", ""gaze"", ""pupil_quality"", ""device"", ""state_dependent""),
     missing_rate = 0.08,
     seed = 20260820L
-)",8,False,False,tests/testthat/test-0-11-m4-evidence.R|tests/testthat/test-0-11-m4-identifiability.R|tests/testthat/test-0-11-m4-negative-controls.R|tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-sequences.R|tests/testthat/test-0-11-m4-simulation.R|tests/testthat/test-0-11-m4-state-inference.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd|vignettes/m4-negative-controls-state-count-0-11.Rmd|vignettes/m4-process-information-ablation-0-11.Rmd|vignettes/m4-reference-model-fitting-0-11.Rmd|vignettes/m4-trait-conditioned-process-states-0-11.Rmd,unclassified,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-validate_multimodal_m4,validate_multimodal_m4,R/110-multimodal-m4-evidence-0-11.R,man/validate_multimodal_m4.Rd,"(x, information = NULL, negative_controls = NULL, sensitivity = NULL, recovery = NULL, include_ppc = TRUE)",6,False,False,,,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+)",8,False,False,tests/testthat/test-0-11-m4-evidence.R|tests/testthat/test-0-11-m4-identifiability.R|tests/testthat/test-0-11-m4-negative-controls.R|tests/testthat/test-0-11-m4-plots.R|tests/testthat/test-0-11-m4-sequences.R|tests/testthat/test-0-11-m4-simulation.R|tests/testthat/test-0-11-m4-state-inference.R|tests/testthat/test-0-11-m4-trait-conditioned-markov-gate.R,vignettes/m4-identifiability-state-uncertainty-0-11.Rmd|vignettes/m4-negative-controls-state-count-0-11.Rmd|vignettes/m4-process-information-ablation-0-11.Rmd|vignettes/m4-reference-model-fitting-0-11.Rmd|vignettes/m4-trait-conditioned-process-states-0-11.Rmd,unclassified,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.
+validate_multimodal_m4,validate_multimodal_m4,R/110-multimodal-m4-evidence-0-11.R,man/validate_multimodal_m4.Rd,"(x, information = NULL, negative_controls = NULL, sensitivity = NULL, recovery = NULL, include_ppc = TRUE)",6,False,False,,,review-gated,False,src/eyeprocesspy/multimodal_staged.py,tests/test_multimodal_staged.py,yes,implemented,implemented,implemented_initial,not_started,source_ported,not_applicable,docstring_initial,R oracle numerical parity pending; canonical CmdStan fitters additionally require CmdStanPy/CmdStan where applicable.

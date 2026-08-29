@@ -44,3 +44,8 @@ from .bayesian_3pl_08 import *
 from .plots_irt_08 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .multimodal_staged import *
+from .plots_multimodal_staged import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]

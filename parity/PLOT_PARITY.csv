@@ -100,34 +100,34 @@ plot.eye_mnar_tipping_point,R/038-informative-missingness.R,plot.eye_mnar_tippin
 plot.eye_model_promotion_audit,R/023-validation-orchestration.R,plot.eye_model_promotion_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_model_validation,R/021-validation-program.R,plot.eye_model_validation,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_multiblock_process_map,R/064-next-generation-plots-0-8.R,plot_eye_multiblock_process_map,implemented,Matplotlib counterpart; plot-data smoke tested.
-plot.eye_multimodal_m2_fit,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_fit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_information,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_information,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_negative_controls,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_negative_controls,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_ppc,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_ppc,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_recovery,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_recovery,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_simulation,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_simulation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m2_validation,R/104-multimodal-m2-plots-0-10.R,plot.eye_multimodal_m2_validation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_fit,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_fit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_identifiability,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_identifiability,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_information,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_information,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_negative_controls,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_negative_controls,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_ppc,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_ppc,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_recovery,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_recovery,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_simulation,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_simulation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m3_validation,R/108-multimodal-m3-plots-0-10.R,plot.eye_multimodal_m3_validation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_fit,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_fit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_identifiability,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_identifiability,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_information,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_information,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_negative_controls,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_negative_controls,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_ppc,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_ppc,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_recovery,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_recovery,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_sensitivity,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_sensitivity,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_simulation,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_simulation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_states,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_states,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_m4_validation,R/112-multimodal-m4-plots-0-11.R,plot.eye_multimodal_m4_validation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_measurement,R/100-multimodal-plots-0-10.R,plot.eye_multimodal_measurement,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_simulation,R/100-multimodal-plots-0-10.R,plot.eye_multimodal_simulation,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_multimodal_validation,R/100-multimodal-plots-0-10.R,plot.eye_multimodal_validation,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_multimodal_m2_fit,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_fit,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_information,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_information,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_negative_controls,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_negative_controls,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_ppc,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_ppc,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_recovery,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_recovery,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_simulation,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_simulation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m2_validation,R/104-multimodal-m2-plots-0-10.R,plot_eye_multimodal_m2_validation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_fit,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_fit,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_identifiability,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_identifiability,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_information,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_information,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_negative_controls,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_negative_controls,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_ppc,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_ppc,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_recovery,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_recovery,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_simulation,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_simulation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m3_validation,R/108-multimodal-m3-plots-0-10.R,plot_eye_multimodal_m3_validation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_fit,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_fit,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_identifiability,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_identifiability,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_information,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_information,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_negative_controls,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_negative_controls,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_ppc,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_ppc,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_recovery,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_recovery,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_sensitivity,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_sensitivity,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_simulation,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_simulation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_states,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_states,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_m4_validation,R/112-multimodal-m4-plots-0-11.R,plot_eye_multimodal_m4_validation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_measurement,R/100-multimodal-plots-0-10.R,plot_eye_multimodal_measurement,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_simulation,R/100-multimodal-plots-0-10.R,plot_eye_multimodal_simulation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
+plot.eye_multimodal_validation,R/100-multimodal-plots-0-10.R,plot_eye_multimodal_validation,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
 plot.eye_multiverse,R/021-validation-program.R,plot.eye_multiverse,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_nominal_gaze_irt,R/053-process-irt-plots-0-7.R,plot.eye_nominal_gaze_irt,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_nonparametric_rasch_audit,R/067-advanced-sensitivity-diagnostics-0-8.R,plot_eye_nonparametric_rasch_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
@@ -156,7 +156,7 @@ plot.eye_process_feature_blocks,R/064-next-generation-plots-0-8.R,plot.eye_proce
 plot.eye_process_g_study,R/054-additional-process-measurement-0-7.R,plot.eye_process_g_study,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_gstudy,R/035-process-reliability.R,plot.eye_process_gstudy,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_hmm_irt,R/053-process-irt-plots-0-7.R,plot.eye_process_hmm_irt,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_process_information,R/100-multimodal-plots-0-10.R,plot.eye_process_information,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_process_information,R/100-multimodal-plots-0-10.R,plot_eye_process_information,implemented,Matplotlib counterpart; data layer asserted by smoke tests; exact typography is not a parity target.
 plot.eye_process_local_dependence_audit,R/057-emerging-process-irt-0-7.R,plot.eye_process_local_dependence_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_negative_control,R/053-process-irt-plots-0-7.R,plot.eye_process_negative_control,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_negative_controls,R/080-plots-0-9.R,plot.eye_process_negative_controls,not_started,heuristic candidate; confirm from source/Rd

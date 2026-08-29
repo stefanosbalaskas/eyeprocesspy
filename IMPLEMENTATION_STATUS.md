@@ -18,16 +18,16 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API implemented | 426 |
-| P2 structural initial | 426 |
-| P3 semantic initial | 426 |
+| P1 API implemented | 469 |
+| P2 structural initial | 469 |
+| P3 semantic initial | 469 |
 | P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms/gates | 389 |
+| P5 source-ported algorithms/gates | 432 |
 | P5 Python reference/backend-different algorithms | 37 |
-| Public Python `plot_*` callables currently present | 83 |
-| Plot-ledger rows explicitly verified `implemented` | 21 / 341 |
-| Python article counterparts complete | 19 / 88 |
-| Executable `irt_*.py` examples | 21 |
+| Public Python `plot_*` callables currently present | 112 |
+| Plot-ledger rows explicitly verified `implemented` | 50 / 341 |
+| Python article counterparts complete | 39 / 88 |
+| Executable `irt_*.py` examples | 26 |
 
 No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
 
@@ -41,18 +41,30 @@ No generated placeholders are counted as implementations. P4 numerical parity is
 - **63** advanced process-IRT + validation exports.
 - **37** requested-API completion + semantic-validation exports.
 - **40** frozen 0.8 context/frontier/sensitivity/Bayesian-3PL exports.
+- **43** staged multimodal M0/M2/M3/M4 measurement, simulation, evidence, recovery and gated canonical-fit exports.
 
-Total frozen R exports with Python callables: **426 / 1182**.
+Total frozen R exports with Python callables: **469 / 1182**.
 
 ## Current validation
 
-- Full local pytest suite: **114 passed**.
-- Executable IRT example smoke suite: **21 passed**.
-- Installed-wheel import and 0.8 frozen-export smoke: PASS.
+- Full local pytest suite: **130 passed**.
+- Focused staged multimodal contract/article/signature suite: **11 passed**.
+- Executable IRT example smoke suite: **26 passed**.
+- Installed-wheel import and staged M4 smoke: PASS.
 - Installed wheel contains **13/13** canonical Stan programs.
-- Current wheel SHA-256: `ebf9d6938bd432f3d0a5c89086b58a3d5de85c2e25cf1eadeb78e3a3f695098d`.
+- Current local validation-wheel SHA-256: `e3b15ab79c2e93b846dbc7a528e8eeb8f190ddae12d9fd26a367f38729307e3f`.
 - Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
+
+## Staged M0-M4 scientific boundaries
+
+- M2 retains the frozen three-channel response/RT/gaze model contract.
+- M3 treats pupil as a measurement channel with explicit nuisance/confound handling; a scalar pupil summary is not automatically a cognitive-load measure.
+- M4 retains REVIEW/evidence gating for trait-conditioned Markov latent process states.
+- M4 state probabilities are primary uncertainty-bearing summaries; MAP labels are secondary summaries and do not automatically denote attention, strategy, effort, guessing, misconduct, comprehension or other psychological constructs.
+- Canonical M2/M3/M4 fitters preserve CmdStan-backed model identity and do not silently fall back to unrelated Python estimators.
 
 ## Important parity boundary
 
 37 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on an R-specific optional engine or where the Python reference contract cannot yet claim algorithmic identity. Exact specialist-engine methods remain explicit gates. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
+
+The sandbox also lacks the normal `build`/`wheel` build dependencies and cannot resolve PyPI. The current installed-artifact check therefore used an offline PEP 427 validation wheel assembled directly from the pure-Python source tree. GitHub CI remains responsible for the standard PEP 517 wheel/sdist build lane.
