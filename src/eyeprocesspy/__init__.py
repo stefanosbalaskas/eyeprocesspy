@@ -78,3 +78,8 @@ from .process_governance_08 import *
 __all__ = [n for n in globals() if not n.startswith('_')]
 from .plots_governance_08 import *
 __all__ = [n for n in globals() if not n.startswith('_')]
+
+from .operational_validation_08 import *
+from .plots_operational_08 import *
+
+__all__ = [n for n in globals() if not n.startswith('_')]

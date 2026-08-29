@@ -18,16 +18,16 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API implemented | 715 |
-| P2 structural initial | 715 |
-| P3 semantic initial | 715 |
+| P1 API implemented | 730 |
+| P2 structural initial | 730 |
+| P3 semantic initial | 730 |
 | P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms/gates | 637 |
-| P5 Python reference/backend-different algorithms | 78 |
-| Public Python `plot_*` callables currently present | 221 |
-| Plot-ledger rows explicitly verified `implemented` | 158 / 341 |
-| Python article counterparts complete | 55 / 88 |
-| Executable `irt_*.py` examples | 42 |
+| P5 source-ported algorithms/gates | 648 |
+| P5 Python reference/backend-different algorithms | 82 |
+| Public Python `plot_*` callables currently present | 226 |
+| Plot-ledger rows explicitly verified `implemented` | 163 / 341 |
+| Python article counterparts complete | 56 / 88 |
+| Executable `irt_*.py` examples | 44 |
 
 No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
 
@@ -51,17 +51,18 @@ No generated placeholders are counted as implementations. P4 numerical parity is
 - **36** recurrence, fixation point-process, representative scanpath and process-episode exports.
 - **10** evidence/decision provenance and measurement-intelligence adapter exports.
 - **55** 0.8 preflight/anomaly governance, deployment drift, temporal process-window/AOI trajectory, advanced pupillometry, and standalone process/pupil plotting exports.
+- **15** 0.8 streaming/partial-scoring, validation-bundle, process-decision feature/stability and operational plotting exports.
 
-Total frozen R exports with Python callables: **715 / 1182**.
+Total frozen R exports with Python callables: **730 / 1182**.
 
 ## Current validation
 
-- Full local pytest surface: **197/197 passed** (validated in deterministic split batches because the monolithic invocation exceeds the sandbox process-time ceiling).
+- Full local pytest surface: **206/206 passed** (validated in deterministic split batches because the monolithic invocation exceeds the sandbox process-time ceiling).
 - Focused staged multimodal contract/article/signature suite: **11 passed**.
-- Executable IRT example smoke suite: **42 passed**.
+- Executable IRT example smoke suite: **44 passed**.
 - Installed-wheel import and staged M4 smoke: PASS.
 - Installed wheel contains **13/13** canonical Stan programs.
-- Current local validation-wheel SHA-256: `255045c596faaf0798e1bd83f06cea6e24b91e569a112cb301a5433a30641c87`.
+- Current local validation-wheel SHA-256: `8b635350be8250ae0fda01e82a651917da840bc440fe7125a2945639ce076217`.
 - Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
 ## Staged M0-M4 scientific boundaries
@@ -74,6 +75,6 @@ Total frozen R exports with Python callables: **715 / 1182**.
 
 ## Important parity boundary
 
-78 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on an R-specific optional engine or where the Python reference contract cannot yet claim algorithmic identity. Exact specialist-engine methods remain explicit gates. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
+82 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on an R-specific optional engine or where the Python reference contract cannot yet claim algorithmic identity. Exact specialist-engine methods remain explicit gates. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
 
 The sandbox also lacks the normal `build`/`wheel` build dependencies and cannot resolve PyPI. The current installed-artifact check therefore used an offline PEP 427 validation wheel assembled directly from the pure-Python source tree. GitHub CI remains responsible for the standard PEP 517 wheel/sdist build lane.
