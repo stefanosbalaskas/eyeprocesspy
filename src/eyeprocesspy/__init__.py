@@ -72,3 +72,9 @@ from .process_dynamics import *
 from .evidence_graph import *
 
 __all__ = [n for n in globals() if not n.startswith('_')]
+
+from .process_governance_08 import *
+
+__all__ = [n for n in globals() if not n.startswith('_')]
+from .plots_governance_08 import *
+__all__ = [n for n in globals() if not n.startswith('_')]

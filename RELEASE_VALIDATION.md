@@ -11,13 +11,13 @@ Development validation checkpoint for `eyeprocesspy 0.1.0.dev0`; this is not yet
 
 ## Python checkpoint
 
-- Frozen exports with Python callables: **660/1,182**
-- Source-ported algorithms/contracts: **587**
-- Python-reference/backend-different algorithms: **73**
-- Full pytest suite: **178 passed**
-- Article counterparts complete: **51/88**
-- Verified plot-ledger rows: **138/341**
-- Executable IRT examples: **38**
+- Frozen exports with Python callables: **715/1,182**
+- Source-ported algorithms/contracts: **637**
+- Python-reference/backend-different algorithms: **78**
+- Full pytest suite: **197/197 passed in deterministic split batches**
+- Article counterparts complete: **55/88**
+- Verified plot-ledger rows: **158/341**
+- Executable IRT examples: **42**
 
 ## Installed artifact
 
@@ -25,11 +25,12 @@ The sandbox cannot download standard PEP 517 build requirements. The local insta
 
 - Installed wheel import: PASS
 - Functional-pupil specification/advanced-grid installed smoke: PASS
+- Process preflight/drift/window/advanced-pupil installed smoke: PASS
 - External-engine adapter and engine-equivalence installed smoke: PASS
 - Process registry/reliability and calibration-quality installed smoke: PASS
 - Canonical Stan resources: **13/13**
 - Canonical M4 Stan MD5: `c5af3e5d25ff63db42c58573eb42124b`
-- Validation-wheel SHA-256: `e9fe7b7834bc61f38a75d87b4cb3386514d5bcdb311db27a9908cb76117eda19`
+- Validation-wheel SHA-256: `255045c596faaf0798e1bd83f06cea6e24b91e569a112cb301a5433a30641c87`
 
 ## Scientific boundary
 

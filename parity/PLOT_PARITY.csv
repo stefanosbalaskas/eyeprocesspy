@@ -5,9 +5,9 @@ plot.eye_analysis_pipeline,R/080-plots-0-9.R,plot.eye_analysis_pipeline,not_star
 plot.eye_aoi_composition,R/032-compositional-aoi.R,plot.eye_aoi_composition,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_aoi_composition_comparison,R/032-compositional-aoi.R,plot.eye_aoi_composition_comparison,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_aoi_composition_model,R/032-compositional-aoi.R,plot.eye_aoi_composition_model,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_aoi_growth_curve,R/064-next-generation-plots-0-8.R,plot.eye_aoi_growth_curve,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_aoi_growth_curve,R/064-next-generation-plots-0-8.R,plot_eye_aoi_growth_curve,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_aoi_separation_audit,R/031-probabilistic-aoi.R,plot.eye_aoi_separation_audit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_aoi_trajectory,R/064-next-generation-plots-0-8.R,plot.eye_aoi_trajectory,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_aoi_trajectory,R/064-next-generation-plots-0-8.R,plot_eye_aoi_trajectory,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_aoi_uncertainty,R/031-probabilistic-aoi.R,plot.eye_aoi_uncertainty,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_api_audit,R/080-plots-0-9.R,plot.eye_api_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_bank_decision_stability,R/043-item-bank-optimization.R,plot.eye_bank_decision_stability,not_started,heuristic candidate; confirm from source/Rd
@@ -16,7 +16,7 @@ plot.eye_benchmark,R/021-validation-program.R,plot.eye_benchmark,not_started,heu
 plot.eye_benchmark_result,R/080-plots-0-9.R,plot.eye_benchmark_result,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_bids_roundtrip,R/056-completion-plots-0-7.R,plot.eye_bids_roundtrip,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_biometric_imputation_sensitivity,R/067-advanced-sensitivity-diagnostics-0-8.R,plot_eye_biometric_imputation_sensitivity,implemented,Matplotlib counterpart; plot-data smoke tested.
-plot.eye_biometric_preflight,R/064-next-generation-plots-0-8.R,plot.eye_biometric_preflight,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_biometric_preflight,R/064-next-generation-plots-0-8.R,plot_eye_biometric_preflight,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_calibration_drift,R/034-calibration-recalibration.R,plot_eye_calibration_drift,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_calibration_drift_profile,R/080-plots-0-9.R,plot_eye_calibration_drift_profile,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_calibration_error_model,R/080-plots-0-9.R,plot_eye_calibration_error_model,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
@@ -137,17 +137,17 @@ plot.eye_parameter_recovery,R/014-simulation.R,plot_eye_parameter_recovery,imple
 plot.eye_phase_amplitude_irt,R/037-pupil-registration.R,plot_eye_phase_amplitude_irt,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_pipeline_audit,R/080-plots-0-9.R,plot.eye_pipeline_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_preaction_process_features,R/066-process-decision-features-0-8.R,plot.eye_preaction_process_features,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_presentation_accessibility,R/064-next-generation-plots-0-8.R,plot.eye_presentation_accessibility,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_presentation_fairness_comparison,R/064-next-generation-plots-0-8.R,plot.eye_presentation_fairness_comparison,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_presentation_accessibility,R/064-next-generation-plots-0-8.R,plot_eye_presentation_accessibility,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_presentation_fairness_comparison,R/064-next-generation-plots-0-8.R,plot_eye_presentation_fairness_comparison,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_probabilistic_aoi,R/031-probabilistic-aoi.R,plot.eye_probabilistic_aoi,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_probabilistic_aoi_assignment,R/080-plots-0-9.R,plot_eye_probabilistic_aoi_assignment,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
-plot.eye_process_anomaly_audit,R/064-next-generation-plots-0-8.R,plot.eye_process_anomaly_audit,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_process_anomaly_audit,R/064-next-generation-plots-0-8.R,plot_eye_process_anomaly_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_process_cat_simulation,R/053-process-irt-plots-0-7.R,plot.eye_process_cat_simulation,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_changepoints,R/042-process-episodes.R,plot_eye_process_changepoints,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_process_channel_ablation,R/054-additional-process-measurement-0-7.R,plot.eye_process_channel_ablation,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_dependent_discrimination,R/054-additional-process-measurement-0-7.R,plot.eye_process_dependent_discrimination,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_dif,R/044-process-dif-fairness.R,plot.eye_process_dif,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_process_drift_audit,R/064-next-generation-plots-0-8.R,plot.eye_process_drift_audit,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_process_drift_audit,R/064-next-generation-plots-0-8.R,plot_eye_process_drift_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_process_dstudy,R/035-process-reliability.R,plot_eye_process_dstudy,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_process_episodes,R/042-process-episodes.R,plot_eye_process_episodes,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_process_external_validity,R/064-next-generation-plots-0-8.R,plot_eye_process_external_validity,implemented,Matplotlib counterpart; plot-data smoke tested.
@@ -173,16 +173,16 @@ plot.eye_process_uncertainty,R/033-process-uncertainty.R,plot_eye_process_uncert
 plot.eye_process_uncertainty_propagation,R/033-process-uncertainty.R,plot_eye_process_uncertainty_propagation,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_process_validation_design,R/080-plots-0-9.R,plot.eye_process_validation_design,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_validation_result,R/080-plots-0-9.R,plot.eye_process_validation_result,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_process_window_sensitivity,R/064-next-generation-plots-0-8.R,plot.eye_process_window_sensitivity,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_process_windows,R/064-next-generation-plots-0-8.R,plot.eye_process_windows,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_process_window_sensitivity,R/064-next-generation-plots-0-8.R,plot_eye_process_window_sensitivity,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_process_windows,R/064-next-generation-plots-0-8.R,plot_eye_process_windows,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_prov_graph,R/080-plots-0-9.R,plot.eye_prov_graph,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_provenance_comparison,R/046-evidence-provenance-graph.R,plot_eye_provenance_comparison,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_pupil_baseline_sensitivity,R/081-validation-extras-0-9.R,plot.eye_pupil_baseline_sensitivity,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_pupil_confound_model,R/064-next-generation-plots-0-8.R,plot.eye_pupil_confound_model,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_pupil_deconvolution,R/064-next-generation-plots-0-8.R,plot.eye_pupil_deconvolution,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_pupil_fatigue_drift,R/064-next-generation-plots-0-8.R,plot.eye_pupil_fatigue_drift,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_pupil_frequency_features,R/064-next-generation-plots-0-8.R,plot.eye_pupil_frequency_features,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_pupil_frequency_stability,R/064-next-generation-plots-0-8.R,plot.eye_pupil_frequency_stability,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_pupil_confound_model,R/064-next-generation-plots-0-8.R,plot_eye_pupil_confound_model,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_pupil_deconvolution,R/064-next-generation-plots-0-8.R,plot_eye_pupil_deconvolution,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_pupil_fatigue_drift,R/064-next-generation-plots-0-8.R,plot_eye_pupil_fatigue_drift,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_pupil_frequency_features,R/064-next-generation-plots-0-8.R,plot_eye_pupil_frequency_features,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot.eye_pupil_frequency_stability,R/064-next-generation-plots-0-8.R,plot_eye_pupil_frequency_stability,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_pupil_phase_amplitude,R/037-pupil-registration.R,plot_eye_pupil_phase_amplitude,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_pupil_registration,R/037-pupil-registration.R,plot_eye_pupil_registration,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_recalibration_audit,R/034-calibration-recalibration.R,plot_eye_recalibration_audit,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
@@ -198,7 +198,7 @@ plot.eye_scanpath_bootstrap,R/041-representative-scanpaths.R,plot_eye_scanpath_b
 plot.eye_scanpath_comparison,R/041-representative-scanpaths.R,plot_eye_scanpath_comparison,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_scanpath_representative,R/041-representative-scanpaths.R,plot_eye_scanpath_representative,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot.eye_semantic_roundtrip,R/048-semantic-validation-0-7.R,plot_eye_semantic_roundtrip,implemented,source contract inspected; plot-data smoke test added
-plot.eye_signal_filter_audit,R/064-next-generation-plots-0-8.R,plot.eye_signal_filter_audit,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_signal_filter_audit,R/064-next-generation-plots-0-8.R,plot_eye_signal_filter_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_software_paper_evidence,R/080-plots-0-9.R,plot.eye_software_paper_evidence,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_storage_benchmark,R/028-api-storage-adapters.R,plot.eye_storage_benchmark,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_strategy_aoi_sensitivity,R/027-strategy-diffusion-engines.R,plot.eye_strategy_aoi_sensitivity,not_started,heuristic candidate; confirm from source/Rd
@@ -301,14 +301,14 @@ plot_process_channel_ablation_delta,R/064-next-generation-plots-0-8.R,plot_proce
 plot_process_dif_forest,R/044-process-dif-fairness.R,plot_process_dif_forest,not_started,heuristic candidate; confirm from source/Rd
 plot_process_episodes,R/042-process-episodes.R,plot_process_episodes,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot_process_feature_stability,R/064-next-generation-plots-0-8.R,plot_process_feature_stability,not_started,heuristic candidate; confirm from source/Rd
-plot_process_window_sensitivity,R/064-next-generation-plots-0-8.R,plot_process_window_sensitivity,not_started,heuristic candidate; confirm from source/Rd
-plot_pupil_activity_sensitivity,R/064-next-generation-plots-0-8.R,plot_pupil_activity_sensitivity,not_started,heuristic candidate; confirm from source/Rd
-plot_pupil_activity_windows,R/064-next-generation-plots-0-8.R,plot_pupil_activity_windows,not_started,heuristic candidate; confirm from source/Rd
-plot_pupil_band_power,R/064-next-generation-plots-0-8.R,plot_pupil_band_power,not_started,heuristic candidate; confirm from source/Rd
+plot_process_window_sensitivity,R/064-next-generation-plots-0-8.R,plot_process_window_sensitivity,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot_pupil_activity_sensitivity,R/064-next-generation-plots-0-8.R,plot_pupil_activity_sensitivity,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot_pupil_activity_windows,R/064-next-generation-plots-0-8.R,plot_pupil_activity_windows,implemented,Matplotlib counterpart; plot-data smoke tested.
+plot_pupil_band_power,R/064-next-generation-plots-0-8.R,plot_pupil_band_power,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot_pupil_components,R/064-next-generation-plots-0-8.R,plot_pupil_components,not_started,heuristic candidate; confirm from source/Rd
 plot_pupil_preprocessing_audit,R/064-next-generation-plots-0-8.R,plot_pupil_preprocessing_audit,not_started,heuristic candidate; confirm from source/Rd
 plot_pupil_registration,R/037-pupil-registration.R,plot_pupil_registration,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
-plot_pupil_spectrum,R/064-next-generation-plots-0-8.R,plot_pupil_spectrum,not_started,heuristic candidate; confirm from source/Rd
+plot_pupil_spectrum,R/064-next-generation-plots-0-8.R,plot_pupil_spectrum,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot_pupil_timeseries,R/012-plots.R,plot_pupil_timeseries,not_started,heuristic candidate; confirm from source/Rd
 plot_recalibration_before_after,R/034-calibration-recalibration.R,plot_recalibration_before_after,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.
 plot_recurrence_matrix,R/039-recurrence-analysis.R,plot_recurrence_matrix,implemented,Data-bearing Matplotlib counterpart; reconstructed from frozen 0.11.1 source contract.

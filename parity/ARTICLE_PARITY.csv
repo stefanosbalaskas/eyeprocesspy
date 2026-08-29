@@ -2,7 +2,7 @@ r_article,python_article,status
 vignettes/adaptive-testing-governance.Rmd,docs/articles/adaptive-testing-governance.md,complete
 vignettes/advanced-model-validation-0-7.Rmd,docs/articles/advanced-model-validation-0-7.md,complete
 vignettes/advanced-model-validation.Rmd,docs/articles/advanced-model-validation.md,complete
-vignettes/advanced-pupillometry-representations.Rmd,docs/articles/advanced-pupillometry-representations.md,not_started
+vignettes/advanced-pupillometry-representations.Rmd,docs/articles/advanced-pupillometry-representations.md,complete
 vignettes/advanced-rasch-mixture-and-imputation-sensitivity.Rmd,docs/articles/advanced-rasch-mixture-and-imputation-sensitivity.md,complete
 vignettes/api-lifecycle-and-canonical-interfaces.Rmd,docs/articles/api-lifecycle-and-canonical-interfaces.md,not_started
 vignettes/api-storage-adapters.Rmd,docs/articles/api-storage-adapters.md,not_started
@@ -11,7 +11,7 @@ vignettes/benchmark-reproduction.Rmd,docs/articles/benchmark-reproduction.md,not
 vignettes/benchmarking-and-stress-testing.Rmd,docs/articles/benchmarking-and-stress-testing.md,not_started
 vignettes/calibration-uncertainty-and-data-quality.Rmd,docs/articles/calibration-uncertainty-and-data-quality.md,complete
 vignettes/cognitive-diagnosis-qmatrix-governance.Rmd,docs/articles/cognitive-diagnosis-qmatrix-governance.md,complete
-vignettes/deployment-drift-monitoring.Rmd,docs/articles/deployment-drift-monitoring.md,not_started
+vignettes/deployment-drift-monitoring.Rmd,docs/articles/deployment-drift-monitoring.md,complete
 vignettes/dynamic-irtree-hardening.Rmd,docs/articles/dynamic-irtree-hardening.md,not_started
 vignettes/empirical-validation-programme.Rmd,docs/articles/empirical-validation-programme.md,not_started
 vignettes/evidence-decision-provenance.Rmd,docs/articles/evidence-decision-provenance.md,complete
@@ -63,7 +63,7 @@ vignettes/process-decision-proxies-and-frontier-gates.Rmd,docs/articles/process-
 vignettes/process-information-and-ablation-0-10.Rmd,docs/articles/process-information-and-ablation-0-10.md,complete
 vignettes/process-irt-model-atlas-0-7.Rmd,docs/articles/process-irt-model-atlas-0-7.md,complete
 vignettes/process-measure-registry-and-reliability.Rmd,docs/articles/process-measure-registry-and-reliability.md,complete
-vignettes/process-preflight-and-anomaly-governance.Rmd,docs/articles/process-preflight-and-anomaly-governance.md,not_started
+vignettes/process-preflight-and-anomaly-governance.Rmd,docs/articles/process-preflight-and-anomaly-governance.md,complete
 vignettes/process-response-time-irt.Rmd,docs/articles/process-response-time-irt.md,not_started
 vignettes/psychometric-process-models.Rmd,docs/articles/psychometric-process-models.md,complete
 vignettes/pupil-measurement-boundaries-0-10.Rmd,docs/articles/pupil-measurement-boundaries-0-10.md,complete
@@ -77,7 +77,7 @@ vignettes/simulation-calibration-and-resolution-guards.Rmd,docs/articles/simulat
 vignettes/software-paper-evidence-bundle.Rmd,docs/articles/software-paper-evidence-bundle.md,not_started
 vignettes/streaming-scoring-and-validation-bundles.Rmd,docs/articles/streaming-scoring-and-validation-bundles.md,not_started
 vignettes/targets-interoperability.Rmd,docs/articles/targets-interoperability.md,not_started
-vignettes/temporal-process-representations.Rmd,docs/articles/temporal-process-representations.md,not_started
+vignettes/temporal-process-representations.Rmd,docs/articles/temporal-process-representations.md,complete
 vignettes/temporal-spatial-process-science.Rmd,docs/articles/temporal-spatial-process-science.md,complete
 vignettes/theory-strategy-mixtures.Rmd,docs/articles/theory-strategy-mixtures.md,not_started
 vignettes/uncertainty-calibration.Rmd,docs/articles/uncertainty-calibration.md,complete
