@@ -60,3 +60,8 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .engine_adapters import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .process_quality_09 import *
+from .plots_process_quality_09 import *
+
+__all__ = [n for n in globals() if not n.startswith("_")]

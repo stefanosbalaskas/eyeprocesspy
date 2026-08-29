@@ -18,8 +18,8 @@ plot.eye_bids_roundtrip,R/056-completion-plots-0-7.R,plot.eye_bids_roundtrip,not
 plot.eye_biometric_imputation_sensitivity,R/067-advanced-sensitivity-diagnostics-0-8.R,plot_eye_biometric_imputation_sensitivity,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_biometric_preflight,R/064-next-generation-plots-0-8.R,plot.eye_biometric_preflight,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_calibration_drift,R/034-calibration-recalibration.R,plot.eye_calibration_drift,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_calibration_drift_profile,R/080-plots-0-9.R,plot.eye_calibration_drift_profile,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_calibration_error_model,R/080-plots-0-9.R,plot.eye_calibration_error_model,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_calibration_drift_profile,R/080-plots-0-9.R,plot_eye_calibration_drift_profile,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
+plot.eye_calibration_error_model,R/080-plots-0-9.R,plot_eye_calibration_error_model,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_candidate_item_bank_audit,R/064-next-generation-plots-0-8.R,plot_eye_candidate_item_bank_audit,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_cdm_qmatrix_audit,R/092-plots-validation-irt-0-9.R,plot.eye_cdm_qmatrix_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_compatibility_evidence_matrix,R/048-semantic-validation-0-7.R,plot_eye_compatibility_evidence_matrix,implemented,source contract inspected; plot-data smoke test added
@@ -27,7 +27,7 @@ plot.eye_corpus_validation,R/017-format-validation.R,plot.eye_corpus_validation,
 plot.eye_cross_recurrence,R/039-recurrence-analysis.R,plot.eye_cross_recurrence,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_crossed_grouped_cv,R/021-validation-program.R,plot.eye_crossed_grouped_cv,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_crossmodal_recurrence_model,R/047-measurement-intelligence-adapters.R,plot.eye_crossmodal_recurrence_model,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_data_quality_profile,R/080-plots-0-9.R,plot.eye_data_quality_profile,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_data_quality_profile,R/080-plots-0-9.R,plot_eye_data_quality_profile,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_dataset,R/012-plots.R,plot.eye_dataset,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_decision_manifest,R/080-plots-0-9.R,plot.eye_decision_manifest,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_decision_process_proxy,R/066-process-decision-features-0-8.R,plot.eye_decision_process_proxy,not_started,heuristic candidate; confirm from source/Rd
@@ -140,7 +140,7 @@ plot.eye_preaction_process_features,R/066-process-decision-features-0-8.R,plot.e
 plot.eye_presentation_accessibility,R/064-next-generation-plots-0-8.R,plot.eye_presentation_accessibility,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_presentation_fairness_comparison,R/064-next-generation-plots-0-8.R,plot.eye_presentation_fairness_comparison,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_probabilistic_aoi,R/031-probabilistic-aoi.R,plot.eye_probabilistic_aoi,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_probabilistic_aoi_assignment,R/080-plots-0-9.R,plot.eye_probabilistic_aoi_assignment,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_probabilistic_aoi_assignment,R/080-plots-0-9.R,plot_eye_probabilistic_aoi_assignment,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_process_anomaly_audit,R/064-next-generation-plots-0-8.R,plot.eye_process_anomaly_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_cat_simulation,R/053-process-irt-plots-0-7.R,plot.eye_process_cat_simulation,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_changepoints,R/042-process-episodes.R,plot.eye_process_changepoints,not_started,heuristic candidate; confirm from source/Rd
@@ -166,7 +166,7 @@ plot.eye_process_person_fit,R/053-process-irt-plots-0-7.R,plot.eye_process_perso
 plot.eye_process_profile_mixture,R/064-next-generation-plots-0-8.R,plot_eye_process_profile_mixture,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_process_rasch_tree,R/067-advanced-sensitivity-diagnostics-0-8.R,plot_eye_process_rasch_tree,implemented,Matplotlib counterpart; plot-data smoke tested.
 plot.eye_process_reliability_audit,R/035-process-reliability.R,plot.eye_process_reliability_audit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_process_reliability_profile,R/080-plots-0-9.R,plot.eye_process_reliability_profile,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_process_reliability_profile,R/080-plots-0-9.R,plot_eye_process_reliability_profile,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_process_sensitivity,R/080-plots-0-9.R,plot.eye_process_sensitivity,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_stress_test,R/080-plots-0-9.R,plot.eye_process_stress_test,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_process_uncertainty,R/033-process-uncertainty.R,plot.eye_process_uncertainty,not_started,heuristic candidate; confirm from source/Rd
@@ -190,7 +190,7 @@ plot.eye_recurrence,R/039-recurrence-analysis.R,plot.eye_recurrence,not_started,
 plot.eye_reporting_audit,R/021-validation-program.R,plot.eye_reporting_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_reproducibility_comparison,R/080-plots-0-9.R,plot.eye_reproducibility_comparison,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_roundtrip_loss_audit,R/025-vendor-corpus.R,plot.eye_roundtrip_loss_audit,not_started,heuristic candidate; confirm from source/Rd
-plot.eye_sampling_irregularity_audit,R/080-plots-0-9.R,plot.eye_sampling_irregularity_audit,not_started,heuristic candidate; confirm from source/Rd
+plot.eye_sampling_irregularity_audit,R/080-plots-0-9.R,plot_eye_sampling_irregularity_audit,implemented,verified against frozen R/080 plot data contract; Matplotlib axis exposes eyeprocess_plot_data
 plot.eye_sbc,R/021-validation-program.R,plot.eye_sbc,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_sbc_audit,R/053-process-irt-plots-0-7.R,plot.eye_sbc_audit,not_started,heuristic candidate; confirm from source/Rd
 plot.eye_sbc_diagnostics,R/081-validation-extras-0-9.R,plot.eye_sbc_diagnostics,not_started,heuristic candidate; confirm from source/Rd

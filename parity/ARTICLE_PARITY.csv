@@ -9,7 +9,7 @@ vignettes/api-storage-adapters.Rmd,docs/articles/api-storage-adapters.md,not_sta
 vignettes/bayesian-and-3pl-process-diagnostics.Rmd,docs/articles/bayesian-and-3pl-process-diagnostics.md,complete
 vignettes/benchmark-reproduction.Rmd,docs/articles/benchmark-reproduction.md,not_started
 vignettes/benchmarking-and-stress-testing.Rmd,docs/articles/benchmarking-and-stress-testing.md,not_started
-vignettes/calibration-uncertainty-and-data-quality.Rmd,docs/articles/calibration-uncertainty-and-data-quality.md,not_started
+vignettes/calibration-uncertainty-and-data-quality.Rmd,docs/articles/calibration-uncertainty-and-data-quality.md,complete
 vignettes/cognitive-diagnosis-qmatrix-governance.Rmd,docs/articles/cognitive-diagnosis-qmatrix-governance.md,complete
 vignettes/deployment-drift-monitoring.Rmd,docs/articles/deployment-drift-monitoring.md,not_started
 vignettes/dynamic-irtree-hardening.Rmd,docs/articles/dynamic-irtree-hardening.md,not_started
@@ -62,7 +62,7 @@ vignettes/probabilistic-aoi-compositions.Rmd,docs/articles/probabilistic-aoi-com
 vignettes/process-decision-proxies-and-frontier-gates.Rmd,docs/articles/process-decision-proxies-and-frontier-gates.md,complete
 vignettes/process-information-and-ablation-0-10.Rmd,docs/articles/process-information-and-ablation-0-10.md,complete
 vignettes/process-irt-model-atlas-0-7.Rmd,docs/articles/process-irt-model-atlas-0-7.md,complete
-vignettes/process-measure-registry-and-reliability.Rmd,docs/articles/process-measure-registry-and-reliability.md,not_started
+vignettes/process-measure-registry-and-reliability.Rmd,docs/articles/process-measure-registry-and-reliability.md,complete
 vignettes/process-preflight-and-anomaly-governance.Rmd,docs/articles/process-preflight-and-anomaly-governance.md,not_started
 vignettes/process-response-time-irt.Rmd,docs/articles/process-response-time-irt.md,not_started
 vignettes/psychometric-process-models.Rmd,docs/articles/psychometric-process-models.md,complete

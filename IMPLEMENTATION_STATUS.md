@@ -18,16 +18,16 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API implemented | 539 |
-| P2 structural initial | 539 |
-| P3 semantic initial | 539 |
+| P1 API implemented | 569 |
+| P2 structural initial | 569 |
+| P3 semantic initial | 569 |
 | P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms/gates | 470 |
+| P5 source-ported algorithms/gates | 500 |
 | P5 Python reference/backend-different algorithms | 69 |
-| Public Python `plot_*` callables currently present | 117 |
-| Plot-ledger rows explicitly verified `implemented` | 55 / 341 |
-| Python article counterparts complete | 43 / 88 |
-| Executable `irt_*.py` examples | 30 |
+| Public Python `plot_*` callables currently present | 123 |
+| Plot-ledger rows explicitly verified `implemented` | 61 / 341 |
+| Python article counterparts complete | 45 / 88 |
+| Executable `irt_*.py` examples | 32 |
 
 No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
 
@@ -45,17 +45,18 @@ No generated placeholders are counted as implementations. P4 numerical parity is
 - **31** legacy/core IRT, response-time, process-IRT, simulation, recovery and experimental-reference exports.
 - **12** functional-pupil IRT and advanced validation/simulation exports, using the final overriding 0.11.1 contracts.
 - **27** stable external-engine/model-contract and sequence-interoperability exports, including exact-engine gates for mirt/TAM/brms/LNIRT/GDINA/OpenMx/diffIRT/TraMineR/seqHMM and the backend-neutral engine-equivalence harness.
+- **30** 0.9 process-measure registry/reliability and calibration-uncertainty/data-quality exports, including probabilistic AOI uncertainty and quality reporting.
 
-Total frozen R exports with Python callables: **539 / 1182**.
+Total frozen R exports with Python callables: **569 / 1182**.
 
 ## Current validation
 
-- Full local pytest suite: **156 passed**.
+- Full local pytest suite: **167 passed**.
 - Focused staged multimodal contract/article/signature suite: **11 passed**.
-- Executable IRT example smoke suite: **30 passed**.
+- Executable IRT example smoke suite: **32 passed**.
 - Installed-wheel import and staged M4 smoke: PASS.
 - Installed wheel contains **13/13** canonical Stan programs.
-- Current local validation-wheel SHA-256: `0ae7c56fa006c798e13f8adcf0f000aed57d5193da1fd29377ace8894d5a5365`.
+- Current local validation-wheel SHA-256: `3689803ed8460c1256bcd4048994e5014556828a423b94fd953a19a6d543dc89`.
 - Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
 ## Staged M0-M4 scientific boundaries
