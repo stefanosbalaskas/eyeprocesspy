@@ -26,3 +26,8 @@ __all__ = [n for n in globals() if not n.startswith('_')]
 from .process_irt_07 import *
 
 __all__ = [n for n in globals() if not n.startswith('_')]
+from .advanced_process_irt_07 import *
+from .irt_validation_07 import *
+from .plots_process_irt_07 import *
+
+__all__ = [n for n in globals() if not n.startswith('_')]

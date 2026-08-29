@@ -11,17 +11,20 @@ This is **not a formal parity release**.
 
 ## Current checkpoint
 
-- **286** frozen exports have genuine Python implementations.
-- No generated placeholder exports are counted.
-- **72** local pytest tests pass.
-- **11** Python article counterparts are complete in the parity ledger.
-- **11** executable IRT examples pass.
-- **44** explicit IRT/process plot counterparts are currently exported.
-- M4 remains evidence-gated and its canonical Stan source MD5 is `c5af3e5d25ff63db42c58573eb42124b`.
+- **349** frozen exports have genuine Python implementations.
+- **85** local pytest tests pass.
+- **12** Python article counterparts are complete.
+- **13** executable IRT examples pass.
+- **62** explicit plot counterparts are exported.
+- Wheel build + installed-wheel smoke: PASS.
+- Installed wheel contains **13/13** Stan resources.
+- Wheel SHA-256: `0df0ee5098b85f7ca38ff3f14e4d77e3a69d7beaff29a10827f488cb90bdf681`.
+- M4 remains evidence-gated; canonical Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
-## Parity caveats
+## Not yet a parity release because
 
-- Cross-language numerical R-oracle validation is pending for the extended IRT/process surface.
-- 13 process-model functions currently use documented Python reference estimators where the R implementation delegates to optional R-only engines; they are marked `python_reference_differs` rather than algorithmically identical.
-- Full 1,182-export, 88-article and 435-S3 parity remains incomplete.
-- Clean networked dependency installation and multi-platform CI must pass before a formal release.
+- 833 frozen exports remain outside the implemented API.
+- 76/88 article counterparts remain incomplete.
+- Cross-language numerical validation is incomplete for the expanded statistical surface.
+- 24 functions intentionally use Python reference estimators differing from R optional-engine algorithms and require backend-specific validation.
+- Full multi-platform CI, documentation-site parity and optional-backend lanes are not yet frozen green.

@@ -18,36 +18,38 @@
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API implemented | 286 |
-| P2 structural initial | 286 |
-| P3 semantic initial | 286 |
+| P1 API implemented | 349 |
+| P2 structural initial | 349 |
+| P3 semantic initial | 349 |
 | P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms | 273 |
-| P5 Python reference algorithms differing from R optional engines | 13 |
-| Explicit Python IRT/process plot counterparts currently exported | 44 |
-| Python article counterparts complete | 11 / 88 |
-| Executable `irt_*.py` examples | 11 |
+| P5 source-ported algorithms/gates | 325 |
+| P5 Python reference algorithms differing from R optional engines | 24 |
+| Explicit exported `plot_*` counterparts | 62 |
+| Python article counterparts complete | 12 / 88 |
+| Executable `irt_*.py` examples | 13 |
 
-No generated placeholders are counted as implementations. Cross-language numerical parity is never inferred merely from a passing Python test.
+No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
 
-## Completed implementation families
+## Implemented families
 
-- **56** foundational/core/Gazepoint exports: schemas, provenance, timebase, coordinates, generic import/adapters and first-class Gazepoint ingestion.
-- **115** frozen 0.9 IRT exports: dichotomous/polytomous models, information/scoring/diagnostics, CAT, linking/DIF, multidimensional/testlet/CDM, recovery/SBC, engine governance and joint-process contracts.
-- **35** measurement-intelligence exports: device linking/equivalence, multi-objective item-bank selection, process DIF/fairness drift and conditional process norms.
-- **35** dynamic/strategy/diffusion exports: dynamic IRTree, theory-constrained strategy mixtures and gaze-diffusion infrastructure.
-- **45** frozen 0.7 process-IRT exports: multimodal registry/channels, joint/graded/nominal/omission/many-facet process models, changepoints, continuous-process calibration, ablation/equating, multiple-response and revisiting workflows.
+- **56** foundational/core/Gazepoint exports.
+- **115** frozen 0.9 IRT exports.
+- **35** measurement-intelligence exports: device linking/equivalence, item-bank Pareto selection, process DIF/fairness drift and conditional process norms.
+- **35** dynamic/strategy/diffusion exports.
+- **45** frozen 0.7 process-IRT registry/model/continuous/multiple-response exports.
+- **63** advanced process-IRT + validation exports, plus 18 corresponding S3 plot counterparts.
 
-Total frozen R exports with Python callables: **286 / 1182**.
+Total frozen R exports with Python callables: **349 / 1182**.
 
 ## Current validation
 
-- Full local pytest suite: **72 passed**.
-- Process-IRT 0.7 focused suite: **11 passed**.
-- Executable IRT example smoke suite: **11 passed**.
-- All 13 canonical Stan sources remain packaged.
-- Canonical M4 Stan source MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
+- Full local pytest suite: **85 passed**.
+- Executable IRT example smoke suite: **13 passed**.
+- Installed-wheel import and frozen-export smoke: PASS.
+- Installed wheel contains **13/13** canonical Stan programs.
+- Current wheel SHA-256: `0df0ee5098b85f7ca38ff3f14e4d77e3a69d7beaff29a10827f488cb90bdf681`.
+- Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
 
 ## Important parity boundary
 
-Functions that are direct dependency-light translations are marked `source_ported`. Thirteen functions whose R implementations rely on optional engines such as `lme4`, `brms`, `nnet`, `MASS`, or `survival` currently expose transparent Python reference estimators and are marked `python_reference_differs`; they are not claimed to be algorithmically identical to those R engines. Extended R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
+24 functions are deliberately marked `python_reference_differs` where the frozen R implementation depends on optional R engines/mixed models or an R-specific smoother/reference implementation. Exact specialist-engine methods remain explicit gates where appropriate. Extended cross-language R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.
