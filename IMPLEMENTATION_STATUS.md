@@ -11,30 +11,43 @@
 | R testthat files | 113 |
 | Articles/vignettes | 88 |
 | Stan programs | 13 |
-| External/data resources | 66 |
 | Plot candidates (initial heuristic) | 341 |
 
-## Python parity
+## Python parity checkpoint
 
 | Stage | Count |
 |---|---:|
 | P0 discovered | 1182 |
-| P1 API | 56 |
-| P2 structural | 56 |
-| P3 semantic | 0 |
-| P4 numerical | 0 |
-| P5 algorithmic | 0 |
-| P6 plot | 0 |
-| P7 docs/examples | 0 |
+| P1 API implemented | 286 |
+| P2 structural initial | 286 |
+| P3 semantic initial | 286 |
+| P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
+| P5 source-ported algorithms | 273 |
+| P5 Python reference algorithms differing from R optional engines | 13 |
+| Explicit Python IRT/process plot counterparts currently exported | 44 |
+| Python article counterparts complete | 11 / 88 |
+| Executable `irt_*.py` examples | 11 |
 
-Phase 0 manifests are generated. No generated placeholders are counted as implementations.
+No generated placeholders are counted as implementations. Cross-language numerical parity is never inferred merely from a passing Python test.
 
-Direct R definition lookup resolved all 1,182 exported names to source definitions or registered generics/methods in the frozen source inventory.
+## Completed implementation families
 
-## Milestone 1 initial foundational tranche
+- **56** foundational/core/Gazepoint exports: schemas, provenance, timebase, coordinates, generic import/adapters and first-class Gazepoint ingestion.
+- **115** frozen 0.9 IRT exports: dichotomous/polytomous models, information/scoring/diagnostics, CAT, linking/DIF, multidimensional/testlet/CDM, recovery/SBC, engine governance and joint-process contracts.
+- **35** measurement-intelligence exports: device linking/equivalence, multi-objective item-bank selection, process DIF/fairness drift and conditional process norms.
+- **35** dynamic/strategy/diffusion exports: dynamic IRTree, theory-constrained strategy mixtures and gaze-diffusion infrastructure.
+- **45** frozen 0.7 process-IRT exports: multimodal registry/channels, joint/graded/nominal/omission/many-facet process models, changepoints, continuous-process calibration, ablation/equating, multiple-response and revisiting workflows.
 
-Implemented without placeholders: **56** frozen exports.
+Total frozen R exports with Python callables: **286 / 1182**.
 
-Families: canonical schema, generic mapping/inference/validation, canonical dataset construction/validation, table mutation/provenance, timebase primitives, clock transforms, coordinate-space registration/conversion/audit, generic import, adapter registry/detection, folder import, dataset combining and recording-ID remapping, and first-class Gazepoint 7.x gaze/fixation/biometric ingestion, pairing, profiling and event parsing.
+## Current validation
 
-These are **initial source-level ports**; cross-language R-oracle verification remains required before promoting them to final P3/P4/P5 status.
+- Full local pytest suite: **72 passed**.
+- Process-IRT 0.7 focused suite: **11 passed**.
+- Executable IRT example smoke suite: **11 passed**.
+- All 13 canonical Stan sources remain packaged.
+- Canonical M4 Stan source MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
+
+## Important parity boundary
+
+Functions that are direct dependency-light translations are marked `source_ported`. Thirteen functions whose R implementations rely on optional engines such as `lme4`, `brms`, `nnet`, `MASS`, or `survival` currently expose transparent Python reference estimators and are marked `python_reference_differs`; they are not claimed to be algorithmically identical to those R engines. Extended R-oracle numerical validation remains pending because `Rscript` is unavailable in this sandbox.

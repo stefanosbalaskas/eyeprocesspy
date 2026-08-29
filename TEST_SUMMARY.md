@@ -1,12 +1,13 @@
-# Test summary — 0.1.0.dev0 initial tranche
+# Test summary — 0.1.0.dev0 current development checkpoint
 
-- Local runtime: Python 3.13.5
-- pytest: **26 passed**
-- Python compileall: PASS
-- Wheel build: PASS using installed setuptools/wheel without network isolation
-- Wheel artifact: `eyeprocesspy-0.1.0.dev0-py3-none-any.whl`
-- Installed-wheel import from isolated target directory: PASS
-- Packaged Stan resources: **13/13**
-- Full clean dependency installation: **not executable in this sandbox** because outbound PyPI DNS is unavailable. This is not marked PASS; GitHub CI must perform it.
-- Ruff/mypy: configuration added, but local executables are unavailable in this sandbox; CI must perform them.
-- R oracle execution: harness + GitHub Actions frozen-reference smoke lane added; local execution remains unavailable because `Rscript` is not installed in this sandbox. Cross-language numerical parity remains pending.
+- Local runtime: Python 3.13
+- Full pytest suite: **72 passed**
+- Focused process-IRT 0.7 tests: **11 passed**
+- Executable `irt_*.py` example smoke tests: **11 passed**
+- Frozen exports with implemented Python callables: **286 / 1182**
+- Explicit exported IRT/process plot counterparts: **44**
+- Python article counterparts currently complete: **11 / 88**
+- Python compile/import smoke: PASS
+- Canonical Stan resources expected: **13/13**
+- Full clean dependency installation cannot be performed locally because outbound PyPI DNS is unavailable; installed-wheel validation uses the already available scientific runtime and GitHub CI is responsible for a clean networked installation.
+- R oracle execution remains unavailable locally because `Rscript` is not installed. No extended cross-language P4 numerical parity is claimed.

@@ -23,3 +23,6 @@ __all__ = [n for n in globals() if not n.startswith('_')]
 from .dynamic_irt import *
 
 __all__ = [n for n in globals() if not n.startswith('_')]
+from .process_irt_07 import *
+
+__all__ = [n for n in globals() if not n.startswith('_')]

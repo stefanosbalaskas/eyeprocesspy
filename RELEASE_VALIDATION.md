@@ -4,24 +4,24 @@ This is **not a formal parity release**.
 
 ## Frozen source
 
-- R reference: eyeprocess 0.11.1
+- R reference: `eyeprocess` 0.11.1
 - SHA-256: `fd2638d7ccf0c5dd5a18745aed59c2f647e142c1753a339a2ab8ca99c3fd5d0a`
 - Tag commit: `d867555eecae46f262843501c07074cebe1f7aa9`
-- 1,182 exports / 435 S3 / 88 articles / 113 testthat files / 13 Stan programs
+- Frozen scope: 1,182 exports / 435 S3 registrations / 88 articles / 113 testthat files / 13 Stan programs
 
-## Development checkpoint
+## Current checkpoint
 
-- 56 frozen exports have real initial implementations.
+- **286** frozen exports have genuine Python implementations.
 - No generated placeholder exports are counted.
-- 26 local pytest tests pass.
-- Wheel builds and contains all 13 Stan resources.
-- M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
+- **72** local pytest tests pass.
+- **11** Python article counterparts are complete in the parity ledger.
+- **11** executable IRT examples pass.
+- **44** explicit IRT/process plot counterparts are currently exported.
+- M4 remains evidence-gated and its canonical Stan source MD5 is `c5af3e5d25ff63db42c58573eb42124b`.
 
-## Not yet validated
+## Parity caveats
 
-- Cross-language R oracle outputs beyond the smoke harness (a GitHub Actions R-oracle verification job is configured).
-- CI matrix on Linux/Windows/macOS and Python 3.11–3.14.
-- Optional backend lanes.
-- Full 1,182-function parity.
-- 88-article parity.
-- Plot parity.
+- Cross-language numerical R-oracle validation is pending for the extended IRT/process surface.
+- 13 process-model functions currently use documented Python reference estimators where the R implementation delegates to optional R-only engines; they are marked `python_reference_differs` rather than algorithmically identical.
+- Full 1,182-export, 88-article and 435-S3 parity remains incomplete.
+- Clean networked dependency installation and multi-platform CI must pass before a formal release.
