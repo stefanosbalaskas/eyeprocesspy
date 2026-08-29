@@ -4,7 +4,7 @@ vignettes/advanced-model-validation-0-7.Rmd,docs/articles/advanced-model-validat
 vignettes/advanced-model-validation.Rmd,docs/articles/advanced-model-validation.md,complete
 vignettes/advanced-pupillometry-representations.Rmd,docs/articles/advanced-pupillometry-representations.md,complete
 vignettes/advanced-rasch-mixture-and-imputation-sensitivity.Rmd,docs/articles/advanced-rasch-mixture-and-imputation-sensitivity.md,complete
-vignettes/api-lifecycle-and-canonical-interfaces.Rmd,docs/articles/api-lifecycle-and-canonical-interfaces.md,not_started
+vignettes/api-lifecycle-and-canonical-interfaces.Rmd,docs/articles/api-lifecycle-and-canonical-interfaces.md,complete
 vignettes/api-storage-adapters.Rmd,docs/articles/api-storage-adapters.md,not_started
 vignettes/bayesian-and-3pl-process-diagnostics.Rmd,docs/articles/bayesian-and-3pl-process-diagnostics.md,complete
 vignettes/benchmark-reproduction.Rmd,docs/articles/benchmark-reproduction.md,not_started
@@ -13,7 +13,7 @@ vignettes/calibration-uncertainty-and-data-quality.Rmd,docs/articles/calibration
 vignettes/cognitive-diagnosis-qmatrix-governance.Rmd,docs/articles/cognitive-diagnosis-qmatrix-governance.md,complete
 vignettes/deployment-drift-monitoring.Rmd,docs/articles/deployment-drift-monitoring.md,complete
 vignettes/dynamic-irtree-hardening.Rmd,docs/articles/dynamic-irtree-hardening.md,not_started
-vignettes/empirical-validation-programme.Rmd,docs/articles/empirical-validation-programme.md,not_started
+vignettes/empirical-validation-programme.Rmd,docs/articles/empirical-validation-programme.md,complete
 vignettes/evidence-decision-provenance.Rmd,docs/articles/evidence-decision-provenance.md,complete
 vignettes/experimental-process-irt-0-7.Rmd,docs/articles/experimental-process-irt-0-7.md,complete
 vignettes/frozen-validation-evidence-programme.Rmd,docs/articles/frozen-validation-evidence-programme.md,not_started
@@ -22,7 +22,7 @@ vignettes/gaze-diffusion-irt.Rmd,docs/articles/gaze-diffusion-irt.md,not_started
 vignettes/gazepoint-downstream-workflow.Rmd,docs/articles/gazepoint-downstream-workflow.md,not_started
 vignettes/gazepoint-workflows.Rmd,docs/articles/gazepoint-workflows.md,not_started
 vignettes/getting-started.Rmd,docs/articles/getting-started.md,not_started
-vignettes/governed-end-to-end-pipelines.Rmd,docs/articles/governed-end-to-end-pipelines.md,not_started
+vignettes/governed-end-to-end-pipelines.Rmd,docs/articles/governed-end-to-end-pipelines.md,complete
 vignettes/importing-and-harmonizing.Rmd,docs/articles/importing-and-harmonizing.md,not_started
 vignettes/independent-vendor-corpus.Rmd,docs/articles/independent-vendor-corpus.md,not_started
 vignettes/interoperability-storage.Rmd,docs/articles/interoperability-storage.md,not_started
@@ -55,7 +55,7 @@ vignettes/multiblock-profiles-and-external-validity.Rmd,docs/articles/multiblock
 vignettes/multidimensional-testlet-latent-regression-irt.Rmd,docs/articles/multidimensional-testlet-latent-regression-irt.md,complete
 vignettes/multimodal-process-irt-0-7.Rmd,docs/articles/multimodal-process-irt-0-7.md,complete
 vignettes/multiple-response-and-revisiting-irt-0-7.Rmd,docs/articles/multiple-response-and-revisiting-irt-0-7.md,complete
-vignettes/multiverse-sensitivity-and-decision-stability.Rmd,docs/articles/multiverse-sensitivity-and-decision-stability.md,not_started
+vignettes/multiverse-sensitivity-and-decision-stability.Rmd,docs/articles/multiverse-sensitivity-and-decision-stability.md,complete
 vignettes/negative-controls-and-temporal-leakage.Rmd,docs/articles/negative-controls-and-temporal-leakage.md,not_started
 vignettes/preprocessing-features.Rmd,docs/articles/preprocessing-features.md,not_started
 vignettes/probabilistic-aoi-compositions.Rmd,docs/articles/probabilistic-aoi-compositions.md,not_started
@@ -76,7 +76,7 @@ vignettes/scanpaths-and-cognitive-episodes.Rmd,docs/articles/scanpaths-and-cogni
 vignettes/simulation-calibration-and-resolution-guards.Rmd,docs/articles/simulation-calibration-and-resolution-guards.md,not_started
 vignettes/software-paper-evidence-bundle.Rmd,docs/articles/software-paper-evidence-bundle.md,not_started
 vignettes/streaming-scoring-and-validation-bundles.Rmd,docs/articles/streaming-scoring-and-validation-bundles.md,complete
-vignettes/targets-interoperability.Rmd,docs/articles/targets-interoperability.md,not_started
+vignettes/targets-interoperability.Rmd,docs/articles/targets-interoperability.md,complete
 vignettes/temporal-process-representations.Rmd,docs/articles/temporal-process-representations.md,complete
 vignettes/temporal-spatial-process-science.Rmd,docs/articles/temporal-spatial-process-science.md,complete
 vignettes/theory-strategy-mixtures.Rmd,docs/articles/theory-strategy-mixtures.md,not_started

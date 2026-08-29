@@ -18,7 +18,7 @@
 
 This repository is in **Milestone 0/1 development**. The full frozen API is inventoried before implementation. No placeholder functions are counted as parity. See `IMPLEMENTATION_STATUS.md` and `parity/PARITY_MATRIX.csv`.
 
-The current validated development checkpoint implements **730/1,182 frozen R exports**. It includes the canonical schema/import/Gazepoint foundation, extensive IRT and multimodal M0–M4 measurement APIs, reliability/calibration/uncertainty infrastructure, temporal/spatial process dynamics, evidence provenance, process preflight and drift governance, temporal process-window/AOI trajectory representations, and advanced pupillometry. No generated placeholders are counted as parity.
+The current validated development checkpoint implements **810/1,182 frozen R exports**. It includes the canonical schema/import/Gazepoint foundation, extensive IRT and multimodal M0–M4 measurement APIs, reliability/calibration/uncertainty infrastructure, temporal/spatial process dynamics, evidence provenance, process preflight and drift governance, temporal process-window/AOI trajectory representations, advanced pupillometry, empirical validation programmes, governed pipelines, API lifecycle governance, multiverse/sensitivity analysis, and decision manifests. No generated placeholders are counted as parity.
 
 ## Scientific commitments
 

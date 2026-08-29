@@ -263,7 +263,7 @@ def prepare_dynamic_irtree_data(
     d["item_index"] = pd.factorize(d["item_id"], sort=False)[0] + 1
     trial_key = d["participant_id"].astype(str) + "\r" + d["trial_id"].astype(str)
     d["trial_index"] = pd.factorize(trial_key, sort=False)[0] + 1
-    gap = pd.to_numeric(d["time_gap"], errors="coerce").to_numpy(float)
+    gap = pd.to_numeric(d["time_gap"], errors="coerce").to_numpy(dtype=float, copy=True)
     gap[(~np.isfinite(gap)) | (gap <= 0)] = 1.0
     d["time_gap"] = gap
     if spec.uncertain_state_probability:
