@@ -100,3 +100,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .gazepoint_real_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .gazepoint_workflow_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
