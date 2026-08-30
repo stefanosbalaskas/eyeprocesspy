@@ -741,15 +741,15 @@ vendor_validation_spec,vendor_validation_spec,R/021-validation-program.R,man/ven
     require_versions = TRUE,
     require_devices = TRUE,
     require_independent_sources = TRUE,
-    require_licence_reviewed = TRUE)",7,False,False,tests/testthat/test-validation-program.R,vignettes/multi-vendor-validation.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-audit_vendor_validation,audit_vendor_validation,R/021-validation-program.R,man/audit_vendor_validation.Rd,"(x, spec = vendor_validation_spec())",2,False,False,tests/testthat/test-validation-program.R,vignettes/multi-vendor-validation.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-write_vendor_validation_report,write_vendor_validation_report,R/021-validation-program.R,man/write_vendor_validation_report.Rd,"(x, path)",2,False,False,,vignettes/multi-vendor-validation.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    require_licence_reviewed = TRUE)",7,False,False,tests/testthat/test-validation-program.R,vignettes/multi-vendor-validation.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
+audit_vendor_validation,audit_vendor_validation,R/021-validation-program.R,man/audit_vendor_validation.Rd,"(x, spec = vendor_validation_spec())",2,False,False,tests/testthat/test-validation-program.R,vignettes/multi-vendor-validation.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
+write_vendor_validation_report,write_vendor_validation_report,R/021-validation-program.R,man/write_vendor_validation_report.Rd,"(x, path)",2,False,False,,vignettes/multi-vendor-validation.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 model_validation_spec,model_validation_spec,R/021-validation-program.R,man/model_validation_spec.Rd,"(
     replications = 100L,
     confidence = 0.95,
     max_abs_bias = 0.10,
     min_coverage = 0.90,
-    max_failure_rate = 0.05)",5,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    max_failure_rate = 0.05)",5,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 run_model_validation,run_model_validation,R/021-validation-program.R,man/run_model_validation.Rd,"(
     simulator,
     fitter,
@@ -758,8 +758,8 @@ run_model_validation,run_model_validation,R/021-validation-program.R,man/run_mod
     grid = NULL,
     spec = model_validation_spec(),
     seed = 1L,
-    continue_on_error = TRUE)",8,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
-model_validation_summary,model_validation_summary,R/021-validation-program.R,man/model_validation_summary.Rd,(x),1,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,,,yes,not_started,not_started,not_started,not_started,not_started,not_applicable,not_started,
+    continue_on_error = TRUE)",8,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
+model_validation_summary,model_validation_summary,R/021-validation-program.R,man/model_validation_summary.Rd,(x),1,False,False,tests/testthat/test-validation-program.R,vignettes/research-validation-program.Rmd,review-gated,False,eyeprocesspy.validation_program_10,tests/test_validation_program_10.py,yes,implemented,implemented,implemented_initial,tested_initial,source_ported,not_applicable,docstring_initial,
 advanced_model_evidence_spec,advanced_model_evidence_spec,R/021-validation-program.R,man/advanced_model_evidence_spec.Rd,"(
     models = c(
       ""fit_joint_process_model"", ""fit_shared_process_factor"", ""fit_strategy_mixture"",
