@@ -1,14 +1,10 @@
 """Grouped validation and leakage audits from frozen ``R/021-validation-program.R``."""
-
 from __future__ import annotations
 
 from typing import Any, Sequence
 
 import numpy as np
 import pandas as pd
-import patsy
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
 
 from .exceptions import EyeProcessValidationError
 
@@ -45,6 +41,20 @@ class EyeCrossedGroupedCV(dict):
     eyeprocess_class = "eye_crossed_grouped_cv"
 
 
+def _load_model_backend():
+    """Load optional GLM/formula dependencies only when grouped CV is used."""
+    try:
+        import patsy
+        import statsmodels.api as sm
+        import statsmodels.formula.api as smf
+    except ImportError as exc:
+        raise EyeProcessValidationError(
+            "Grouped cross-validation requires the optional psychometrics "
+            "dependencies. Install `eyeprocesspy[psychometrics]`."
+        ) from exc
+    return patsy, sm, smf
+
+
 def _stop(message: str) -> None:
     raise EyeProcessValidationError(message)
 
@@ -62,10 +72,15 @@ def _names(value: Any, name: str, minimum: int = 1) -> tuple[str, ...]:
         try:
             values = tuple(str(item).strip() for item in value)
         except TypeError as exc:
-            raise EyeProcessValidationError(f"`{name}` must contain non-empty column names.") from exc
+            raise EyeProcessValidationError(
+                f"`{name}` must contain non-empty column names."
+            ) from exc
     if len(values) < minimum or any(not item or item.lower() == "nan" for item in values):
         if minimum > 1:
-            _stop(f"`{name}` must contain at least {minimum} non-empty crossed grouping columns.")
+            _stop(
+                f"`{name}` must contain at least {minimum} non-empty crossed "
+                "grouping columns."
+            )
         _stop(f"`{name}` must contain non-empty column names.")
     return values
 
@@ -80,7 +95,9 @@ def _fold_count(v: Any) -> int:
     try:
         number = int(v)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError("`v` must be an integer of at least two.") from exc
+        raise EyeProcessValidationError(
+            "`v` must be an integer of at least two."
+        ) from exc
     try:
         exact = float(v) == float(number)
     except (TypeError, ValueError):
@@ -146,6 +163,7 @@ def grouped_folds(
 
 
 def _family(value: Any):
+    _, sm, _ = _load_model_backend()
     if value is None:
         return sm.families.Binomial()
     if isinstance(value, str):
@@ -166,6 +184,7 @@ def _metric(value: Any) -> str:
 
 
 def _response_values(formula: Any, data: pd.DataFrame) -> np.ndarray:
+    patsy, _, _ = _load_model_backend()
     try:
         response, _ = patsy.dmatrices(
             formula,
@@ -174,7 +193,9 @@ def _response_values(formula: Any, data: pd.DataFrame) -> np.ndarray:
             NA_action="drop",
         )
     except Exception as exc:
-        raise EyeProcessValidationError(f"Could not evaluate model formula: {exc}") from exc
+        raise EyeProcessValidationError(
+            f"Could not evaluate model formula: {exc}"
+        ) from exc
     if response.shape[1] != 1:
         _stop("Grouped validation currently requires a scalar response.")
     values = pd.to_numeric(response.iloc[:, 0], errors="coerce").to_numpy(dtype=float)
@@ -211,6 +232,7 @@ def _fit_and_score(
     test = data.iloc[assessment].copy()
     if train.empty or test.empty:
         raise ValueError("empty analysis or assessment set")
+    _, _, smf = _load_model_backend()
     fitted = smf.glm(
         formula=formula,
         data=train,
@@ -293,7 +315,9 @@ def crossed_grouped_folds(
             _stop("Crossed grouping columns cannot contain missing or empty values.")
         levels = as_text.astype(str).drop_duplicates().tolist()
         if len(levels) < v:
-            _stop(f"Grouping column `{group}` has fewer levels than requested folds.")
+            _stop(
+                f"Grouping column `{group}` has fewer levels than requested folds."
+            )
 
         fold_values = np.resize(np.arange(1, v + 1, dtype=int), len(levels))
         fold_values = rng.permutation(fold_values)
@@ -303,11 +327,15 @@ def crossed_grouped_folds(
             dtype="int64",
         )
         assignments[group] = level_assignment
-        row_assignments[group] = as_text.astype(str).map(level_assignment.to_dict()).to_numpy(dtype=int)
+        row_assignments[group] = (
+            as_text.astype(str).map(level_assignment.to_dict()).to_numpy(dtype=int)
+        )
 
     folds = []
     for fold in range(1, v + 1):
-        held = np.column_stack([row_assignments[group] == fold for group in groups])
+        held = np.column_stack(
+            [row_assignments[group] == fold for group in groups]
+        )
         assessment_mask = held.all(axis=1)
         analysis_mask = (~held).all(axis=1)
         buffer_mask = ~(assessment_mask | analysis_mask)
@@ -426,13 +454,15 @@ def quantify_process_leakage(
         ),
     }
     for name in groups:
-        jobs[f"held_{name}"] = lambda group_name=name: grouped_cv(
-            data,
-            formula,
-            group=group_name,
-            v=v,
-            metric="log_loss",
-            seed=seed,
+        jobs[f"held_{name}"] = (
+            lambda group_name=name: grouped_cv(
+                data,
+                formula,
+                group=group_name,
+                v=v,
+                metric="log_loss",
+                seed=seed,
+            )
         )
     if len(groups) >= 2:
         jobs["cross_classified"] = lambda: crossed_grouped_cv(
@@ -458,7 +488,9 @@ def quantify_process_leakage(
                     "scheme": scheme,
                     "folds": int(len(scores)),
                     "successful_folds": int(finite.sum()),
-                    "mean_log_loss": (float(np.mean(scores[finite])) if finite.any() else np.nan),
+                    "mean_log_loss": (
+                        float(np.mean(scores[finite])) if finite.any() else np.nan
+                    ),
                     "error": pd.NA,
                 }
             )
@@ -478,6 +510,12 @@ def quantify_process_leakage(
         output.loc[output["scheme"].eq("row_wise"), "mean_log_loss"],
         errors="coerce",
     )
-    reference = float(row_reference.iloc[0]) if len(row_reference) and np.isfinite(row_reference.iloc[0]) else np.nan
-    output["optimistic_difference"] = output["mean_log_loss"] - reference if np.isfinite(reference) else np.nan
+    reference = (
+        float(row_reference.iloc[0])
+        if len(row_reference) and np.isfinite(row_reference.iloc[0])
+        else np.nan
+    )
+    output["optimistic_difference"] = (
+        output["mean_log_loss"] - reference if np.isfinite(reference) else np.nan
+    )
     return output
