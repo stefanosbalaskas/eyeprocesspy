@@ -314,7 +314,7 @@ def fit_dynamic_aoi_model(x: Any, source: str = "visits", smoothing: float = 0.5
     if d.empty or label is None: raise EyeProcessValidationError("No AOI transitions are available.")
     order_col="timestamp_seconds" if "timestamp_seconds" in d else None; group_cols=[c for c in ["recording_id","trial_id"] if c in d]
     levels=sorted(d[label].dropna().astype(str).unique()); counts=pd.DataFrame(0.0,index=levels,columns=levels)
-    groups=[(_,d)] if not group_cols else d.groupby(group_cols,sort=False,dropna=False)
+    groups=[(None,d)] if not group_cols else d.groupby(group_cols,sort=False,dropna=False)
     seq_rows=[]
     for key,g in groups:
         if order_col: g=g.sort_values(order_col,kind="stable")
