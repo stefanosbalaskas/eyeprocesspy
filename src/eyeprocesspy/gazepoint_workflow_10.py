@@ -293,7 +293,7 @@ def build_gazepoint_media_trials(x, item_map=None, overwrite=True):
 
         stimulus = z["stimulus_id"].astype("string")
         changed = stimulus.ne(stimulus.shift()).fillna(True)
-        run_id = changed.cumsum()
+        run_id = np.cumsum(changed.to_numpy(dtype=bool))
 
         participant = _first_nonmissing(
             x["recordings"].loc[

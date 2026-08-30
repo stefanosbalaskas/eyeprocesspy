@@ -397,7 +397,7 @@ def build_stimulus_intervals(x, source="gaze_samples", overwrite=False):
             if z.empty:
                 continue
             change = z["stimulus_id"].astype("string").ne(z["stimulus_id"].astype("string").shift())
-            run = change.cumsum()
+            run = np.cumsum(change.fillna(True).to_numpy(dtype=bool))
             for _, q in z.groupby(run, sort=False):
                 k += 1
                 times = _finite_numeric(q["timestamp_seconds"])
