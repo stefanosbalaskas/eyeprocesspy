@@ -145,3 +145,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .probabilistic_aoi_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .compositional_aoi_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
