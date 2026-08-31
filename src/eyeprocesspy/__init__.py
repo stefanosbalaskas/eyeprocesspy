@@ -133,3 +133,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .benchmark_reproducibility_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .vendor_importers_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
