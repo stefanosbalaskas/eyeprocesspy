@@ -127,3 +127,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .vendor_corpus_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .partitioned_storage_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
