@@ -1,0 +1,4 @@
+# Frozen benchmark-study resources are byte-level validation fixtures.
+# Disable text/EOL normalization so MD5 and byte counts remain identical on
+# Linux, macOS, and Windows checkouts.
+src/eyeprocesspy/resources/extdata/benchmark-study/** -text
