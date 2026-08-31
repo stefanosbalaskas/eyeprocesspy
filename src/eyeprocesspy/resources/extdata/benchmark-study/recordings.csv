@@ -1,0 +1,13 @@
+recording_id,participant_id,session_id,sampling_rate_hz,device
+R01,P01,S01,60.0,synthetic-benchmark
+R02,P02,S02,60.0,synthetic-benchmark
+R03,P03,S03,60.0,synthetic-benchmark
+R04,P04,S04,60.0,synthetic-benchmark
+R05,P05,S05,60.0,synthetic-benchmark
+R06,P06,S06,60.0,synthetic-benchmark
+R07,P07,S07,60.0,synthetic-benchmark
+R08,P08,S08,60.0,synthetic-benchmark
+R09,P09,S09,60.0,synthetic-benchmark
+R10,P10,S10,60.0,synthetic-benchmark
+R11,P11,S11,60.0,synthetic-benchmark
+R12,P12,S12,60.0,synthetic-benchmark

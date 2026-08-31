@@ -1,0 +1,12 @@
+metric,expected,tolerance
+participants,12.0,0.0
+items,8.0,0.0
+trials,96.0,0.0
+accuracy,0.5520833333333334,1e-10
+mean_response_time,1.3480609359840592,1e-10
+gaze_samples,4800.0,0.0
+pupil_samples,3840.0,0.0
+valid_gaze_fraction,0.96375,1e-10
+mean_pupil,3.2497871635732736,1e-10
+quality_rows,96.0,0.0
+aoi_count,3.0,0.0

@@ -32,7 +32,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-eyeprocesspy = ["resources/stan/*.stan", "resources/extdata/*.csv"]
+eyeprocesspy = ["resources/stan/*.stan", "resources/extdata/*.csv", "resources/extdata/benchmark-study/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

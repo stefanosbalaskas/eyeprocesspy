@@ -1,0 +1,4 @@
+aoi_id,x_min,x_max,y_min,y_max,coordinate_space
+prompt,0.05,0.95,0.05,0.45,normalized_top_left
+option_left,0.05,0.45,0.55,0.95,normalized_top_left
+option_right,0.55,0.95,0.55,0.95,normalized_top_left

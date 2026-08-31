@@ -1,0 +1,9 @@
+item_id,condition,correct_option,difficulty_design
+I01,control,left,-1.2
+I02,control,right,-0.8571428571428571
+I03,control,left,-0.5142857142857142
+I04,control,right,-0.17142857142857149
+I05,experimental,left,0.17142857142857149
+I06,experimental,right,0.5142857142857145
+I07,experimental,left,0.857142857142857
+I08,experimental,right,1.2

@@ -1,0 +1,13 @@
+participant_id,age_years,declared_group,session_id
+P01,23,A,S01
+P02,26,B,S02
+P03,47,A,S03
+P04,44,B,S04
+P05,25,A,S05
+P06,45,B,S06
+P07,25,A,S07
+P08,51,B,S08
+P09,27,A,S09
+P10,38,B,S10
+P11,32,A,S11
+P12,45,B,S12

@@ -1,0 +1,7 @@
+provenance_id,operation,software,version,timestamp_utc,note
+PV01,simulate participants,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.
+PV02,simulate items,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.
+PV03,simulate responses,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.
+PV04,simulate gaze,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.
+PV05,simulate pupil,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.
+PV06,derive quality,eyeprocess benchmark generator,1.0.0,2026-08-05 00:00:00 UTC,Synthetic and openly redistributable; not vendor validation.

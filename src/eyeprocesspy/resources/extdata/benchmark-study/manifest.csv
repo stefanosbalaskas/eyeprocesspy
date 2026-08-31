@@ -1,0 +1,11 @@
+table,file,rows,columns,bytes,md5
+participants,participants.csv,12,4,207,da97b920ced70f3840bda23d435cc145
+items,items.csv,8,4,338,5aef983975f293b14a011504cff08d46
+recordings,recordings.csv,12,5,507,76cab7d902f31b434d2330b922d53ef4
+responses,responses.csv,96,7,4902,ee850fbba6a5128315e3ff33613e14a4
+gaze_samples,gaze_samples.csv,4800,10,464553,8b698043aac0f9f53a4e097b87bbb36c
+events,events.csv,192,7,10705,9e814bbfd9aa07d33c41b3349abee142
+aoi_definitions,aoi_definitions.csv,3,6,200,418a6bb1cc4208fae550c17349bde79f
+pupil_samples,pupil_samples.csv,3840,10,348571,18985b52fa3ab8f0225c67ee01363307
+quality,quality.csv,96,7,3342,98cee4574fbf6c8c2bc89daeb065f23e
+provenance,provenance.csv,6,6,922,2a4da461573797094ddfea1ebbd3a8ff
