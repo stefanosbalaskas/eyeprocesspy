@@ -142,3 +142,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .measurement_intelligence_utils_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .probabilistic_aoi_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
