@@ -45,6 +45,18 @@ def _print_counts(rows: list[dict[str, str]]) -> None:
             print(f"{source}|{summary}")
 
 
+def _linked_frozen_article_names(rows: list[dict[str, str]]) -> set[str]:
+    names: set[str] = set()
+    for row in rows:
+        for raw in row.get("related_articles", "").split("|"):
+            raw = raw.strip().replace("\\", "/")
+            if not raw or not raw.startswith("vignettes/"):
+                continue
+            path = Path(raw)
+            names.add(f"{path.stem}.md")
+    return names
+
+
 def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
     p4_not_started = [row for row in rows if row["p4_numerical"] == "not_started"]
     print(f"P4_NOT_STARTED={len(p4_not_started)}")
@@ -84,8 +96,17 @@ def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
         )
 
     article_files = sorted(DOCS_ARTICLES.glob("*.md")) if DOCS_ARTICLES.exists() else []
+    article_names = {path.name for path in article_files}
+    linked_frozen = _linked_frozen_article_names(rows)
+    linked_missing = sorted(linked_frozen - article_names)
+
     print(f"DOC_ARTICLE_FILES={len(article_files)}")
     print(f"FROZEN_ARTICLE_REFERENCE={EXPECTED_FROZEN_ARTICLES}")
+    print(f"LINKED_FROZEN_ARTICLES={len(linked_frozen)}")
+    print(f"LINKED_ARTICLES_PRESENT={len(linked_frozen) - len(linked_missing)}")
+    print(f"LINKED_ARTICLES_MISSING={len(linked_missing)}")
+    for name in linked_missing:
+        print(f"LINKED_ARTICLE_MISSING={name}")
 
     return {
         "p4_not_started": len(p4_not_started),
@@ -93,6 +114,7 @@ def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
         "p6_not_started": len(p6_not_started),
         "p7_blank": len(p7_blank),
         "article_files": len(article_files),
+        "linked_articles_missing": len(linked_missing),
     }
 
 
@@ -114,6 +136,11 @@ def _release_gate(rows: list[dict[str, str]], debt: dict[str, int]) -> None:
         failures.append(f"{debt['p6_not_started']} plot candidates remain p6_plot=not_started")
     if debt["p7_blank"]:
         failures.append(f"{debt['p7_blank']} APIs have no documentation/example status")
+    if debt["linked_articles_missing"]:
+        failures.append(
+            f"{debt['linked_articles_missing']} frozen R vignettes referenced by the API ledger "
+            "have no same-name Markdown migration"
+        )
     if debt["article_files"] < EXPECTED_FROZEN_ARTICLES:
         failures.append(
             f"only {debt['article_files']} Markdown article files are present; "
