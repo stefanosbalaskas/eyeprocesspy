@@ -19,30 +19,39 @@ SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     ),
     "R/083-irt-foundations-information-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/084-irt-diagnostics-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/085-irt-scoring-adaptive-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/086-irt-linking-invariance-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/087-irt-process-joint-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/088-irt-engine-adapters-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/089-irt-validation-evidence-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/090-irt-multidimensional-cdm-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
     "R/093-irt-advanced-diagnostics-governance-0-9.R": (
         "tests/test_irt_0_9_parity.py",
+        "tests/test_irt_p4_numerical_parity.py",
     ),
 }
 
