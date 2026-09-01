@@ -20,6 +20,7 @@ SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     "R/083-irt-foundations-information-0-9.R": (
         "tests/test_irt_0_9_parity.py",
         "tests/test_irt_p4_numerical_parity.py",
+        "tests/test_irt_p4_model_spec.py",
     ),
     "R/084-irt-diagnostics-0-9.R": (
         "tests/test_irt_0_9_parity.py",
