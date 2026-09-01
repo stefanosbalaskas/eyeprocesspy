@@ -1,63 +1,58 @@
-# Implementation status
+# eyeprocesspy implementation and release status
 
-## Frozen scope
+## Frozen reference
 
-| Metric | Count |
-|---|---:|
-| R exports | 1182 |
-| S3 registrations | 435 |
-| R source files | 114 |
-| Rd files | 969 |
-| R testthat files | 113 |
-| Articles/vignettes | 88 |
-| Stan programs | 13 |
-| Plot candidates (initial heuristic) | 341 |
+- R package: `eyeprocess` 0.11.1
+- Frozen R commit: `d867555eecae46f262843501c07074cebe1f7aa9`
+- Frozen public exports: **1,182**
+- Frozen articles/vignettes: 88
+- Frozen testthat files: 113
+- Frozen Stan programs: 13
 
-## Python parity checkpoint
+## API milestone
 
-| Stage | Count |
-|---|---:|
-| P0 discovered | 1182 |
-| P1 API implemented | 810 |
-| P2 structural initial | 810 |
-| P3 semantic initial | 810 |
-| P4 cross-language numerical tested | 56 initial only; extended R oracle pending |
-| P5 source-ported algorithms/gates | 724 |
-| P5 Python reference/backend-different algorithms | 86 |
-| Public Python `plot_*` callables currently present | 235 |
-| Plot-ledger rows explicitly verified `implemented` | 172 / 341 |
-| Python article counterparts complete | 61 / 88 |
-| Executable `irt_*.py` examples | 49 |
+The public API surface is complete:
 
-No generated placeholders are counted as implementations. P4 numerical parity is never inferred from Python-only tests.
+- `p1_api`: **1,182 / 1,182 implemented**
+- public API remaining: **0**
+- final API parity commit: `d1d38d6db8cb49ca6ec47b610b528422946a55be`
+- hosted CI run: `33478160191` — green on the frozen API checkpoint
 
-## Implemented families
+The hosted API-freeze matrix passed the frozen-R oracle smoke test, wheel build/install/import, Ruff, and pytest on Ubuntu, Windows, and macOS with Python 3.11–3.14.
 
-The previously validated 730-export surface remains intact: canonical schema/import/Gazepoint infrastructure; IRT, process-IRT and multimodal M0-M4 modelling; measurement intelligence; reliability/calibration/uncertainty; dynamic strategy/diffusion; process dynamics; evidence provenance; process governance/window representations; advanced pupil methods; and operational validation/decision-process features.
+## Current release phase
 
-This checkpoint adds **80 frozen 0.9 governance exports** from the validation-programme, governed-pipeline, API-lifecycle, multiverse/sensitivity and decision-manifest families. The packaged lifecycle resources preserve the frozen 1,182-row API registry and 108-row module policy.
+Branch: `release/0.1.0-deep-parity`
 
-Total frozen R exports with Python callables: **810 / 1182**.
+The release phase audits and closes the remaining evidence behind the API surface rather than treating callable-name parity as sufficient. Release is gated on all of the following:
 
-## Current validation
+1. no `p4_numerical == not_started` rows;
+2. every `python_reference_differs` row has an explicit reason and conformance test;
+3. semantic/algorithmic edge-case regression suites are green;
+4. plot functions have stable data-contract tests and backend-safe render smoke tests;
+5. the documentation/article corpus builds successfully;
+6. package-wide statement and branch coverage reach the declared 100% release gate;
+7. source distribution and wheel build, install, import, and `twine check` cleanly;
+8. the frozen-R oracle and Python 3.11–3.14 cross-platform CI matrix remain green;
+9. GitHub Pages documentation deploys successfully;
+10. GitHub release, PyPI publication, and Zenodo archival are verified after publication.
 
-- Full source pytest surface: **219/219 passed** in deterministic split batches because a single monolithic invocation exceeds the sandbox process-time ceiling.
-- Governance 0.9 focused contract/export/signature/plot suite: **8/8 passed**.
-- Executable IRT example surface: **49 examples**, including five new governance examples.
-- CI-portability regression for dynamic IRTree, functional pupil and legacy-model paths: **21/21 passed**; the seven previously failing/example paths also pass locally.
-- Canonical M4 Stan MD5 remains `c5af3e5d25ff63db42c58573eb42124b`.
-- Installed validation-wheel smoke: **PASS**, including the packaged 1,182-row lifecycle registry and both lifecycle CSV resources.
-- Installed wheel contains **13/13** canonical Stan programs.
-- Validation-wheel SHA-256: `621c74a77e7a6137701e8d0c2ca7fe27b982ced4d000f6667331b120ba80429b`.
+## Cross-language policy
 
-## Scientific boundaries
+`eyeprocesspy` does not fabricate equality where R and Python cannot be byte-identical. Explicitly governed cases include:
 
-- M2 retains the frozen response/RT/gaze contract; M3 treats pupil as a measurement channel with explicit nuisance/confound handling.
-- M4 remains REVIEW/evidence-gated; latent state probabilities are uncertainty-bearing statistical summaries and are not automatic labels for attention, strategy, effort, guessing, misconduct or comprehension.
-- Exact R-specific specialist engines remain explicit backend boundaries rather than silent Python substitutions.
-- Four governance I/O/inventory functions are marked `python_reference_differs` where Python serialization or namespace semantics necessarily differ from R.
-- Extended R-oracle P4 numerical validation remains pending; Python-only tests do not upgrade P4 status.
+- native RDS serialization;
+- R package/namespace-specific estimators;
+- R and NumPy random-number streams;
+- language-specific object serialization/hashes;
+- wall-clock timings and memory estimates;
+- renderer-specific graphics pixels;
+- optional external backends that do not have the exact same implementation contract.
 
-## CI portability
+Those rows may be marked `python_reference_differs` only when the parity matrix contains a concrete blocker and the Python behavior is independently tested against the shared scientific contract.
 
-The fresh GitHub environment identified dependency declarations that were implicit in the earlier development sandbox. The development extra now includes Matplotlib, patsy and statsmodels, and dynamic-IRTree NumPy conversion explicitly requests a writable copy for pandas 3 compatibility. These repairs do not alter frozen API counts.
+## Release target
+
+Target public release: **eyeprocesspy 0.1.0**.
+
+The version identifies the first public Python release; the frozen scientific source reference remains R `eyeprocess` 0.11.1 and is reported separately as `eyeprocesspy.__r_reference_version__`.
