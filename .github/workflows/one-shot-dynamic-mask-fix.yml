@@ -1,0 +1,51 @@
+name: One-shot dynamic mask fix
+
+on:
+  push:
+    branches:
+      - release/0.1.0-deep-parity
+    paths:
+      - .github/workflows/one-shot-dynamic-mask-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/0.1.0-deep-parity
+          fetch-depth: 0
+      - name: Apply exact compatibility and contract fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          src = Path('src/eyeprocesspy/dynamic_irt.py')
+          text = src.read_text(encoding='utf-8')
+          old = '''    mask = pd.DataFrame(True, index=levels, columns=levels)\n    if not allow_self:\n        np.fill_diagonal(mask.values, False)\n'''
+          new = '''    mask = pd.DataFrame(True, index=levels, columns=levels)\n    if not allow_self:\n        for level in levels:\n            mask.loc[level, level] = False\n'''
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one dynamic-mask target, found {text.count(old)}')
+          src.write_text(text.replace(old, new), encoding='utf-8')
+
+          test = Path('tests/test_dynamic_irt_branch_coverage.py')
+          text = test.read_text(encoding='utf-8')
+          old = '''    with pytest.raises(EyeProcessValidationError, match="dynamic IRTree"):\n        ep.compare_dynamic_transition_models(dynamic_mod._result("wrong"))\n'''
+          new = '''    with pytest.raises(EyeProcessValidationError, match="At least one"):\n        ep.compare_dynamic_transition_models(dynamic_mod._result("wrong"))\n'''
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one comparison-test target, found {text.count(old)}')
+          test.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+      - name: Remove one-shot workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-dynamic-mask-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/eyeprocesspy/dynamic_irt.py tests/test_dynamic_irt_branch_coverage.py .github/workflows/one-shot-dynamic-mask-fix.yml
+          git commit -m "fix: make dynamic transition masks pandas 3 compatible"
+          git push origin HEAD:release/0.1.0-deep-parity
