@@ -68,7 +68,7 @@ def test_dynamic_stan_gate_ppc_guard_and_recovery_plan(monkeypatch):
         base_seed=7,
     )
     assert recovery.eyeprocess_class == "eye_dynamic_recovery"
-    assert len(recovery.jobs) == 1
+    assert len(recovery.plan.jobs) == 1
 
 
 def test_strategy_signatures_normalized_and_zero_rejected():
