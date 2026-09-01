@@ -1,0 +1,37 @@
+name: Deep parity audit
+
+on:
+  push:
+    branches:
+      - release/0.1.0-deep-parity
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Sync development environment
+        run: uv sync --extra dev --extra arrow
+      - name: Parity debt audit
+        run: uv run python tools/deep_parity_audit.py
+      - name: Coverage baseline
+        run: |
+          uv run --with coverage coverage erase
+          uv run --with coverage coverage run --branch --source=eyeprocesspy -m pytest -q
+          uv run --with coverage coverage report -m
+          uv run --with coverage coverage json -o coverage.json
+      - name: Coverage summary
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open('coverage.json', encoding='utf-8'))
+          totals = data['totals']
+          print(f"COVERAGE_PERCENT={totals['percent_covered']}")
+          print(f"COVERAGE_STATEMENTS={totals['covered_lines']}/{totals['num_statements']}")
+          print(f"COVERAGE_BRANCHES={totals.get('covered_branches', 0)}/{totals.get('num_branches', 0)}")
+          PY
