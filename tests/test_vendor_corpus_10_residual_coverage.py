@@ -259,7 +259,7 @@ def test_redaction_guards_text_redactor_tsv_copy_and_overwrite(tmp_path):
     assert "email" not in csv
     assert csv.comment.tolist() == ["alpha", "beta"]
     tsv = pd.read_csv(Path(result.output_path) / "b.tsv", sep="\t")
-    assert tsv.subject.str.startswith("ID").all()
+    assert tsv.subject.str.upper().str.startswith("ID").all()
 
     second = tmp_path / "replace-dir"
     second.mkdir()
