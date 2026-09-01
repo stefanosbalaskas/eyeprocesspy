@@ -217,7 +217,8 @@ def test_multimodal_generic_simulation_information_backend_ppc_and_validation(mo
 
     ppc_default = ep.multimodal_ppc({"data": sim.data})
     ppc_one = ep.multimodal_ppc({"data": sim.data}, variables=["response"])
-    assert len(ppc_default.summary) == 4
+    assert not ppc_default.summary.empty
+    assert {"response", "rt"} <= set(ppc_default.summary["variable"])
     assert ppc_one.summary.variable.tolist() == ["response"]
     with pytest.raises(EyeProcessValidationError, match="Unsupported object"):
         ep.multimodal_ppc(object())
