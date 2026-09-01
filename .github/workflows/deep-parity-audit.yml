@@ -19,12 +19,14 @@ jobs:
         run: uv sync --extra dev --extra arrow
       - name: Parity debt audit
         run: uv run python tools/deep_parity_audit.py
+      - name: Public API documentation audit
+        run: uv run python tools/api_documentation_audit.py
       - name: Coverage baseline
         run: |
-          uv run --with coverage coverage erase
-          uv run --with coverage coverage run --branch --source=eyeprocesspy -m pytest -q
-          uv run --with coverage coverage report -m
-          uv run --with coverage coverage json -o coverage.json
+          uv run coverage erase
+          uv run coverage run --branch --source=eyeprocesspy -m pytest -q
+          uv run coverage report -m
+          uv run coverage json -o coverage.json
       - name: Coverage summary
         run: |
           python - <<'PY'
@@ -35,3 +37,8 @@ jobs:
           print(f"COVERAGE_STATEMENTS={totals['covered_lines']}/{totals['num_statements']}")
           print(f"COVERAGE_BRANCHES={totals.get('covered_branches', 0)}/{totals.get('num_branches', 0)}")
           PY
+      - name: Upload coverage evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: deep-parity-coverage
+          path: coverage.json
