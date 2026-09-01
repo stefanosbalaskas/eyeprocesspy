@@ -151,3 +151,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .plots_completion_08 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .validation_extras_09 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
