@@ -6,6 +6,10 @@ on:
       - release/0.1.0-deep-parity
   workflow_dispatch:
 
+concurrency:
+  group: "deep-parity-${{ github.ref }}"
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
