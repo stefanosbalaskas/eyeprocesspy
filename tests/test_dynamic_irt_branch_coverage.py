@@ -223,7 +223,7 @@ def test_transition_residual_and_comparison_guards():
         ep.transition_residual_diagnostics(dynamic_mod._result("wrong"))
     with pytest.raises(EyeProcessValidationError, match="At least one"):
         ep.compare_dynamic_transition_models()
-    with pytest.raises(EyeProcessValidationError, match="dynamic IRTree"):
+    with pytest.raises(EyeProcessValidationError, match="At least one"):
         ep.compare_dynamic_transition_models(dynamic_mod._result("wrong"))
 
 

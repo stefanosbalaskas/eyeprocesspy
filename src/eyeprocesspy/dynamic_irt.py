@@ -293,7 +293,8 @@ def structural_transition_mask(
         raise EyeProcessValidationError("At least two states are required.")
     mask = pd.DataFrame(True, index=levels, columns=levels)
     if not allow_self:
-        np.fill_diagonal(mask.values, False)
+        for level in levels:
+            mask.loc[level, level] = False
 
     def apply_pairs(pairs: Any, value: bool) -> None:
         nonlocal mask
