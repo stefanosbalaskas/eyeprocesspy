@@ -455,7 +455,7 @@ def test_api_lifecycle_inventory_family_and_recommendation_edge_paths():
 
     badreg = ep.register_eye_api_status(reg, "a", "deprecated", replacement="missing")
     bad = ep.audit_eye_api(pd.DataFrame({"name": ["a", "b"]}), badreg)
-    assert ep.eye_api_recommendation(bad).set_index("name").loc["a"] == "repair_replacement"
+    assert ep.eye_api_recommendation(bad).set_index("name").loc["a", "recommendation"] == "repair_replacement"
 
     with pytest.raises(EyeProcessValidationError):
         ep.eye_api_recommendation({})
@@ -489,14 +489,14 @@ def test_sensitivity_grid_runner_and_stability_error_paths(capsys):
         ep.run_process_sensitivity({}, pd.DataFrame({"x": [1]}), lambda d, s: 1)
 
     def analysis(data, spec):
-        mode = str(spec.iloc[0].mode)
+        mode = str(spec.iloc[0]["mode"])
         if mode == "analysis_fail":
             raise RuntimeError("analysis failed")
         warnings.warn("analysis warning", RuntimeWarning)
         return 0.25 if mode != "empty" else 0.0
 
     def extract(fit, spec):
-        mode = str(spec.iloc[0].mode)
+        mode = str(spec.iloc[0]["mode"])
         if mode == "extract_fail":
             raise RuntimeError("extract failed")
         warnings.warn("extract warning", RuntimeWarning)
