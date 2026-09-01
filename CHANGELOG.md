@@ -22,6 +22,7 @@ First public Python release aligned to the frozen R `eyeprocess` 0.11.1 referenc
 
 - IRT, process IRT, advanced IRT, dynamic IRT, functional pupil/IRT, model validation, and controlled optional-engine adapters.
 - Multimodal, pupil, reliability, process-dynamics, validation, sensitivity, benchmark, negative-control, and evidence-governance families.
+- Hardened dynamic transition masks for pandas 3 / NumPy read-only array semantics while preserving structural-zero and self-transition behavior.
 
 ### Validation and reproducibility
 
