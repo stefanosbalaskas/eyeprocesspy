@@ -25,8 +25,8 @@ jobs:
         run: |
           uv run coverage erase
           uv run coverage run --branch --source=eyeprocesspy -m pytest -q
-          uv run coverage report -m
           uv run coverage json -o coverage.json
+          uv run coverage report -m --fail-under=0
       - name: Coverage summary
         run: |
           python - <<'PY'
@@ -42,3 +42,20 @@ jobs:
         with:
           name: deep-parity-coverage
           path: coverage.json
+          if-no-files-found: error
+      - name: Enforce true 100 percent statement and branch coverage
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open('coverage.json', encoding='utf-8'))
+          totals = data['totals']
+          lines_ok = totals['covered_lines'] == totals['num_statements']
+          branches_ok = totals.get('covered_branches', 0) == totals.get('num_branches', 0)
+          if not lines_ok or not branches_ok:
+              raise SystemExit(
+                  'Coverage gate failed: '
+                  f"lines {totals['covered_lines']}/{totals['num_statements']}; "
+                  f"branches {totals.get('covered_branches', 0)}/{totals.get('num_branches', 0)}"
+              )
+          print('COVERAGE_GATE=PASS')
+          PY
