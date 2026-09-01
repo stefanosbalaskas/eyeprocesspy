@@ -7,6 +7,8 @@ from pathlib import Path
 
 MATRIX = Path("parity/PARITY_MATRIX.csv")
 
+RECONSTRUCTED_P4_TEST = "tests/test_reconstructed_measurement_p4.py"
+
 SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     "R/022-advanced-models-v2.R": (
         "tests/test_dynamic_strategy_diffusion.py",
@@ -17,6 +19,16 @@ SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     "R/027-strategy-diffusion-engines.R": (
         "tests/test_dynamic_strategy_diffusion.py",
     ),
+    "R/033-process-uncertainty.R": (RECONSTRUCTED_P4_TEST,),
+    "R/034-offline-recalibration.R": (RECONSTRUCTED_P4_TEST,),
+    "R/035-process-reliability.R": (RECONSTRUCTED_P4_TEST,),
+    "R/037-pupil-registration.R": (RECONSTRUCTED_P4_TEST,),
+    "R/038-process-missingness.R": (RECONSTRUCTED_P4_TEST,),
+    "R/039-recurrence-process.R": (RECONSTRUCTED_P4_TEST,),
+    "R/040-fixation-point-process.R": (RECONSTRUCTED_P4_TEST,),
+    "R/041-scanpath-population.R": (RECONSTRUCTED_P4_TEST,),
+    "R/042-process-episodes.R": (RECONSTRUCTED_P4_TEST,),
+    "R/046-evidence-graph.R": (RECONSTRUCTED_P4_TEST,),
     "R/083-irt-foundations-information-0-9.R": (
         "tests/test_irt_0_9_parity.py",
         "tests/test_irt_p4_numerical_parity.py",
