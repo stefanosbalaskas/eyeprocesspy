@@ -335,7 +335,6 @@ def test_full_default_output_run_covers_plots_html_raw_and_reproducibility(tmp_p
         {
             "participant_id": trials["participant_id"].tolist(),
             "item_id": trials["item_id"].tolist(),
-            "trial_id": trials["trial_id"].tolist(),
             "response": ["yes"] * len(trials),
             "response_time": [0.8] * len(trials),
         }
