@@ -1,11 +1,29 @@
 cff-version: 1.2.0
 title: eyeprocesspy
-message: "Please cite the Python package version and its frozen R reference version."
+message: "If you use eyeprocesspy, cite the software release and report both the eyeprocesspy version and frozen R reference version."
 type: software
 authors:
   - family-names: Balaskas
     given-names: Stefanos
     orcid: https://orcid.org/0000-0003-2444-9796
-version: 0.1.0.dev0
+version: 0.1.0
+date-released: 2026-09-01
 repository-code: https://github.com/stefanosbalaskas/eyeprocesspy
+url: https://stefanosbalaskas.github.io/eyeprocesspy/
 license: MIT
+keywords:
+  - eye-tracking
+  - pupillometry
+  - biometrics
+  - psychometrics
+  - item response theory
+  - multimodal process data
+  - reproducible research
+abstract: >-
+  eyeprocesspy is vendor-neutral Python infrastructure for harmonizing,
+  validating, processing, analysing, and documenting eye-tracking,
+  pupillometry, biometric, psychometric, and multimodal process data. Version
+  0.1.0 ports the complete 1,182-function public API of the frozen R
+  eyeprocess 0.11.1 reference and preserves explicit governance for
+  cross-language numerical, serialization, random-number, and backend
+  differences.
