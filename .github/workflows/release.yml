@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Sync release environment
+        run: uv sync --extra dev --extra arrow
+      - name: Verify tag matches package version
+        if: github.event_name == 'release'
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          import tomllib
+          version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          tag = '${{ github.event.release.tag_name }}'
+          expected = f'v{version}'
+          if tag != expected:
+              raise SystemExit(f'Release tag {tag!r} does not match package version {expected!r}')
+          init_text = Path('src/eyeprocesspy/__init__.py').read_text(encoding='utf-8')
+          match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', init_text, re.MULTILINE)
+          if not match or match.group(1) != version:
+              raise SystemExit('pyproject.toml and eyeprocesspy.__version__ disagree')
+          print('release version:', version)
+          PY
+      - name: Ruff
+        run: uv run ruff check src tests
+      - name: Full tests and 100% branch coverage
+        run: uv run pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100
+      - name: Deep parity release gate
+        run: uv run python tools/deep_parity_audit.py --release-gate
+      - name: Build documentation strictly
+        run: uv run mkdocs build --strict
+      - name: Build distributions
+        run: uv build
+      - name: Validate distributions
+        run: uv run python -m twine check dist/*
+      - name: Clean wheel install smoke
+        run: |
+          python -m venv wheelcheck
+          wheelcheck/bin/pip install dist/*.whl
+          wheelcheck/bin/python - <<'PY'
+          import eyeprocesspy as ep
+          assert ep.__version__ == '0.1.0'
+          assert ep.__r_reference_version__ == '0.11.1'
+          print(ep.__version__, ep.__r_reference_version__)
+          PY
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/*
+
+  publish-pypi:
+    if: github.event_name == 'release'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/eyeprocesspy
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist
+      - name: Publish to PyPI using Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  attest:
+    if: github.event_name == 'release'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*"
