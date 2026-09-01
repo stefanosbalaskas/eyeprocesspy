@@ -162,7 +162,7 @@ def dynamic_irtree_spec(
 
 def _long_to_transitions(d: pd.DataFrame, person: str, item: str, trial: str, state: str, time: str | None) -> pd.DataFrame:
     _required(d, [person, item, state], "long state data")
-    if d[[person]].isna().any() or d[[item]].isna().any():
+    if d[person].isna().any() or d[item].isna().any():
         raise EyeProcessValidationError("Participant and item identifiers must be non-missing.")
     if trial not in d:
         d[trial] = d[person].astype(str) + "::" + d[item].astype(str)
@@ -934,7 +934,9 @@ def extract_diffusion_parameters(object:EyeResult,variables:Sequence[str]=("beta
     s=object.model.summary.copy(); keep=np.zeros(len(s),bool)
     namecol="variable" if "variable" in s else s.index.astype(str)
     vals=s["variable"].astype(str) if "variable" in s else pd.Series(s.index.astype(str),index=s.index)
-    for prefix in variables: keep|=vals.str.startswith(prefix).to_numpy(); return s.loc[keep].copy()
+    for prefix in variables:
+        keep |= vals.str.startswith(prefix).to_numpy()
+    return s.loc[keep].copy()
 
 
 def diffusion_parameter_diagnostics(object:EyeResult,correlation_threshold:float=.85)->EyeResult:
