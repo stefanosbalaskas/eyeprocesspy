@@ -123,7 +123,7 @@ def test_build_trials_requires_events_and_rejects_invalid_regex():
     no_events["events"] = no_events["events"].iloc[0:0].copy()
     with pytest.raises(ValueError, match="No events"):
         ep.build_trials(no_events)
-    with pytest.raises(ValueError, match="Invalid event pattern"):
+    with pytest.raises(ValueError, match="Invalid regular expression"):
         ep.build_trials(x, start_events=("[",))
 
 
