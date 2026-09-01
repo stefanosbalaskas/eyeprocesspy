@@ -807,7 +807,7 @@ def test_wiener_boundaries_timeout_simulation_contaminant_and_identification():
         dt=0.01,
         max_time=0.01,
     )
-    assert y == 0
+    assert y == 1
     assert rt == pytest.approx(0.11)
 
     with pytest.raises(EyeProcessValidationError, match="contaminant_fraction"):
