@@ -1,0 +1,35 @@
+name: Refresh parity evidence
+
+on:
+  push:
+    branches:
+      - release/0.1.0-deep-parity
+    paths:
+      - "tools/refresh_parity_from_tests.py"
+      - ".github/workflows/parity-evidence-refresh.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Refresh p4/p6 evidence from declared direct tests
+        run: uv run python tools/refresh_parity_from_tests.py --apply
+      - name: Verify ledger remains structurally complete
+        run: uv run python tools/deep_parity_audit.py
+      - name: Commit evidence-only ledger refresh
+        run: |
+          if git diff --quiet -- parity/PARITY_MATRIX.csv; then
+            echo "No parity evidence changes were necessary."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add parity/PARITY_MATRIX.csv
+          git commit -m "test: refresh parity evidence from direct tests"
+          git push origin HEAD:release/0.1.0-deep-parity
