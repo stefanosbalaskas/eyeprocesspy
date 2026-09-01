@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/stefanosbalaskas/eyeprocesspy/main/docs/assets/python-suite-logo.png" width="260" alt="Python Suite research packages logo">
+</p>
+
 # eyeprocesspy
 
 **Python parity implementation of R `eyeprocess` 0.11.1.**
