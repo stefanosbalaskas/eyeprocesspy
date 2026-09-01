@@ -213,7 +213,7 @@ def test_multimodal_generic_simulation_information_backend_ppc_and_validation(mo
     assert status.loc["cmdstanpy", "installed"]
     assert status.loc["cmdstanpy", "version"] == "9.9.9"
     assert status.loc["arviz", "installed"]
-    assert status.loc["arviz", "version"] is None
+    assert pd.isna(status.loc["arviz", "version"])
 
     ppc_default = ep.multimodal_ppc({"data": sim.data})
     ppc_one = ep.multimodal_ppc({"data": sim.data}, variables=["response"])
