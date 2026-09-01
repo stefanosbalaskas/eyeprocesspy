@@ -18,6 +18,7 @@ First public Python release aligned to the frozen R `eyeprocess` 0.11.1 referenc
 - Canonical vendor-neutral data model, mappings, adapters, schema validation, provenance, timebase and coordinate-space handling.
 - Gazepoint import, pairing, downstream workflows, real-export validation, and benchmark corpus support.
 - Pupil, gaze, AOI, trial, preprocessing, quality-control, and governance workflows.
+- Added branch-focused preprocessing conformance tests for outlier handling, interpolation, blink/fixation/saccade detection, AOI sequences, transition/entropy summaries, and feature derivation without excluding scientific code from coverage.
 
 ### Psychometrics and modelling
 
