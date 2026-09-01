@@ -67,7 +67,7 @@ def test_dynamic_stan_gate_ppc_guard_and_recovery_plan(monkeypatch):
         spec=spec,
         base_seed=7,
     )
-    assert recovery.eyeprocess_class == "eye_validation_job_plan"
+    assert recovery.eyeprocess_class == "eye_dynamic_recovery"
     assert len(recovery.jobs) == 1
 
 
