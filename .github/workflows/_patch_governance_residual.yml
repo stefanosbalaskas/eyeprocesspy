@@ -1,0 +1,45 @@
+name: One-shot governance residual test patch
+
+on:
+  push:
+    branches:
+      - release/0.1.0-deep-parity
+    paths:
+      - .github/workflows/_patch_governance_residual.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/0.1.0-deep-parity
+          fetch-depth: 0
+      - name: Patch two test assumptions and self-delete
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tests/test_governance_residual_coverage.py')
+          text = p.read_text(encoding='utf-8')
+          replacements = {
+              'assert ep.eye_api_recommendation(bad).set_index("name").loc["a"] == "repair_replacement"': 'assert ep.eye_api_recommendation(bad).set_index("name").loc["a", "recommendation"] == "repair_replacement"',
+              'mode = str(spec.iloc[0].mode)': 'mode = str(spec.iloc[0]["mode"])',
+          }
+          for old, new in replacements.items():
+              count = text.count(old)
+              expected = 1 if 'repair_replacement' in old else 2
+              if count != expected:
+                  raise SystemExit(f'guard failed for {old!r}: expected {expected}, found {count}')
+              text = text.replace(old, new)
+          p.write_text(text, encoding='utf-8')
+          Path('.github/workflows/_patch_governance_residual.yml').unlink()
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/test_governance_residual_coverage.py .github/workflows/_patch_governance_residual.yml
+          git commit -m "test: repair governance residual assertions"
+          git push origin HEAD:release/0.1.0-deep-parity
