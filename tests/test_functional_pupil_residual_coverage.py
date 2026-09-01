@@ -110,7 +110,7 @@ def test_prepare_frame_guards_timestamp_scaling_and_response_contracts():
     spec = _event_spec()
     with pytest.raises(ep.EyeProcessValidationError, match="eye dataset or a long pupil data frame"):
         fp._prepare_frame(object(), spec)
-    with pytest.raises(ep.EyeProcessValidationError, match="Could not identify pupil column"):
+    with pytest.raises(ep.EyeProcessValidationError, match="Pupil column `pupil` is unavailable"):
         fp._prepare_frame(pd.DataFrame({"time_ms": [0.0]}), spec)
 
     base = _long_pupil(n_person=2, n_item=2, n_time=5)
