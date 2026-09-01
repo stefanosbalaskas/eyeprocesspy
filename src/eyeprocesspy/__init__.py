@@ -157,3 +157,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .negative_controls_09 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .benchmark_stress_09 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
