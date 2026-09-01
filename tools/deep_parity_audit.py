@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 MATRIX = Path("parity/PARITY_MATRIX.csv")
+ARTICLE_MANIFEST = Path("reference/R_ARTICLE_MANIFEST.csv")
 DOCS_ARTICLES = Path("docs/articles")
 EXPECTED_EXPORTS = 1182
 EXPECTED_FROZEN_ARTICLES = 88
@@ -13,6 +14,11 @@ EXPECTED_FROZEN_ARTICLES = 88
 
 def _load_rows() -> list[dict[str, str]]:
     with MATRIX.open(encoding="utf-8-sig", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _load_article_manifest() -> list[dict[str, str]]:
+    with ARTICLE_MANIFEST.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
 
 
@@ -57,6 +63,16 @@ def _linked_frozen_article_names(rows: list[dict[str, str]]) -> set[str]:
     return names
 
 
+def _manifest_article_paths() -> tuple[list[dict[str, str]], set[str]]:
+    manifest = _load_article_manifest()
+    paths = {
+        Path(row["python_article"].strip()).as_posix()
+        for row in manifest
+        if row.get("python_article", "").strip()
+    }
+    return manifest, paths
+
+
 def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
     p4_not_started = [row for row in rows if row["p4_numerical"] == "not_started"]
     print(f"P4_NOT_STARTED={len(p4_not_started)}")
@@ -97,11 +113,23 @@ def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
 
     article_files = sorted(DOCS_ARTICLES.glob("*.md")) if DOCS_ARTICLES.exists() else []
     article_names = {path.name for path in article_files}
+    article_paths = {path.as_posix() for path in article_files}
+
     linked_frozen = _linked_frozen_article_names(rows)
     linked_missing = sorted(linked_frozen - article_names)
 
+    manifest, manifest_paths = _manifest_article_paths()
+    manifest_missing = sorted(manifest_paths - article_paths)
+
     print(f"DOC_ARTICLE_FILES={len(article_files)}")
     print(f"FROZEN_ARTICLE_REFERENCE={EXPECTED_FROZEN_ARTICLES}")
+    print(f"ARTICLE_MANIFEST_ROWS={len(manifest)}")
+    print(f"ARTICLE_MANIFEST_UNIQUE_PATHS={len(manifest_paths)}")
+    print(f"MANIFEST_ARTICLES_PRESENT={len(manifest_paths) - len(manifest_missing)}")
+    print(f"MANIFEST_ARTICLES_MISSING={len(manifest_missing)}")
+    for path in manifest_missing:
+        print(f"MANIFEST_ARTICLE_MISSING={path}")
+
     print(f"LINKED_FROZEN_ARTICLES={len(linked_frozen)}")
     print(f"LINKED_ARTICLES_PRESENT={len(linked_frozen) - len(linked_missing)}")
     print(f"LINKED_ARTICLES_MISSING={len(linked_missing)}")
@@ -115,6 +143,9 @@ def _print_debt(rows: list[dict[str, str]]) -> dict[str, int]:
         "p7_blank": len(p7_blank),
         "article_files": len(article_files),
         "linked_articles_missing": len(linked_missing),
+        "article_manifest_rows": len(manifest),
+        "article_manifest_unique": len(manifest_paths),
+        "manifest_articles_missing": len(manifest_missing),
     }
 
 
@@ -136,6 +167,20 @@ def _release_gate(rows: list[dict[str, str]], debt: dict[str, int]) -> None:
         failures.append(f"{debt['p6_not_started']} plot candidates remain p6_plot=not_started")
     if debt["p7_blank"]:
         failures.append(f"{debt['p7_blank']} APIs have no documentation/example status")
+    if debt["article_manifest_rows"] != EXPECTED_FROZEN_ARTICLES:
+        failures.append(
+            f"frozen article manifest has {debt['article_manifest_rows']} rows; "
+            f"expected {EXPECTED_FROZEN_ARTICLES}"
+        )
+    if debt["article_manifest_unique"] != EXPECTED_FROZEN_ARTICLES:
+        failures.append(
+            f"frozen article manifest has {debt['article_manifest_unique']} unique Python paths; "
+            f"expected {EXPECTED_FROZEN_ARTICLES}"
+        )
+    if debt["manifest_articles_missing"]:
+        failures.append(
+            f"{debt['manifest_articles_missing']} frozen article-manifest paths are missing from docs/articles"
+        )
     if debt["linked_articles_missing"]:
         failures.append(
             f"{debt['linked_articles_missing']} frozen R vignettes referenced by the API ledger "
