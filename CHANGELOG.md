@@ -10,6 +10,7 @@ First public Python release aligned to the frozen R `eyeprocess` 0.11.1 referenc
 
 - Implemented **1,182 / 1,182** frozen public R exports.
 - Preserved the frozen R 0.11.1 source commit and function-level parity ledger.
+- Closed the P4 numerical evidence ledger with zero `not_started` rows; all 49 final process-IRT rows were promoted only after exact public API names were found in the mapped scientific completion suite.
 - Added explicit gates for R-specific serialization, estimator backends, RNG streams, and other cases where byte-identical cross-language output is not scientifically defensible.
 
 ### Data and preprocessing
