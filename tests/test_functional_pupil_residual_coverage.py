@@ -173,7 +173,7 @@ def test_prepare_data_trial_alignment_blink_time_and_interpolation_paths():
     assert prepared.data[".time"].min() == pytest.approx(0.0)
     assert prepared.data.interpolated_fraction.max() <= 0.5
 
-    clipped = _event_spec(time_window=(-50, 50))
+    clipped = _event_spec(time_window=(1000, 1100))
     with pytest.raises(ep.EyeProcessValidationError, match="No pupil samples remain"):
         ep.prepare_functional_pupil_data(d, clipped)
 
