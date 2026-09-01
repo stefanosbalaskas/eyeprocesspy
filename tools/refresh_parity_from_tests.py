@@ -8,6 +8,7 @@ from pathlib import Path
 MATRIX = Path("parity/PARITY_MATRIX.csv")
 
 RECONSTRUCTED_P4_TEST = "tests/test_reconstructed_measurement_p4.py"
+PROCESS_IRT_P4_TEST = "tests/test_process_irt_p4_completion.py"
 
 SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     "R/022-advanced-models-v2.R": (
@@ -34,6 +35,12 @@ SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
     "R/042-process-episodes.R": (RECONSTRUCTED_P4_TEST,),
     "R/046-evidence-graph.R": (RECONSTRUCTED_P4_TEST,),
     "R/046-evidence-provenance-graph.R": (RECONSTRUCTED_P4_TEST,),
+    "R/049-multimodal-irt-registry.R": (PROCESS_IRT_P4_TEST,),
+    "R/050-process-irt-models-0-7.R": (PROCESS_IRT_P4_TEST,),
+    "R/051-advanced-process-irt-0-7.R": (PROCESS_IRT_P4_TEST,),
+    "R/052-irt-validation-0-7.R": (PROCESS_IRT_P4_TEST,),
+    "R/054-additional-process-measurement-0-7.R": (PROCESS_IRT_P4_TEST,),
+    "R/057-emerging-process-irt-0-7.R": (PROCESS_IRT_P4_TEST,),
     "R/083-irt-foundations-information-0-9.R": (
         "tests/test_irt_0_9_parity.py",
         "tests/test_irt_p4_numerical_parity.py",
