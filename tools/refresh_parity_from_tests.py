@@ -7,20 +7,63 @@ from pathlib import Path
 
 MATRIX = Path("parity/PARITY_MATRIX.csv")
 
+SOURCE_TEST_FALLBACKS: dict[str, tuple[str, ...]] = {
+    "R/022-advanced-models-v2.R": (
+        "tests/test_dynamic_strategy_diffusion.py",
+    ),
+    "R/024-dynamic-irtree-engine.R": (
+        "tests/test_dynamic_strategy_diffusion.py",
+    ),
+    "R/027-strategy-diffusion-engines.R": (
+        "tests/test_dynamic_strategy_diffusion.py",
+    ),
+    "R/083-irt-foundations-information-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/084-irt-diagnostics-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/085-irt-scoring-adaptive-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/086-irt-linking-invariance-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/087-irt-process-joint-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/088-irt-engine-adapters-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/089-irt-validation-evidence-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/090-irt-multidimensional-cdm-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+    "R/093-irt-advanced-diagnostics-governance-0-9.R": (
+        "tests/test_irt_0_9_parity.py",
+    ),
+}
 
-def _test_paths(value: str) -> list[Path]:
+
+def _test_paths(value: str, source_file: str) -> list[Path]:
+    values = [part.strip() for part in value.split("|") if part.strip()]
+    values.extend(SOURCE_TEST_FALLBACKS.get(source_file, ()))
     paths: list[Path] = []
-    for part in value.split("|"):
-        part = part.strip()
-        if part:
-            paths.append(Path(part))
+    seen: set[str] = set()
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        paths.append(Path(value))
     return paths
 
 
-def _mentions(name: str, test_file: str) -> tuple[bool, list[str]]:
+def _mentions(name: str, test_file: str, source_file: str) -> tuple[bool, list[str]]:
     checked: list[str] = []
     pattern = re.compile(rf"(?<![A-Za-z0-9_]){re.escape(name)}(?![A-Za-z0-9_])")
-    for path in _test_paths(test_file):
+    for path in _test_paths(test_file, source_file):
         if not path.exists():
             continue
         checked.append(path.as_posix())
@@ -32,7 +75,10 @@ def _mentions(name: str, test_file: str) -> tuple[bool, list[str]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Refresh initial p4/p6 evidence only when a declared Python test file names the exact API."
+        description=(
+            "Refresh initial p4/p6 evidence only when an exact public API name is present in a declared "
+            "or source-family fallback scientific test file."
+        )
     )
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
@@ -51,7 +97,11 @@ def main() -> None:
 
     for row in rows:
         name = row["python_name"] or row["r_name"]
-        referenced, checked = _mentions(name, row.get("python_test_file", ""))
+        referenced, checked = _mentions(
+            name,
+            row.get("python_test_file", ""),
+            row["source_file"],
+        )
 
         if row["p4_numerical"] == "not_started":
             if referenced:
