@@ -14,21 +14,28 @@
 
 ## Install
 
-### Manual wheel — recommended for the current release candidate
+### Manual Windows bundle — recommended for the current release candidate
 
-The Windows manual-install bundle has now been verified on **Python 3.11.9**. Inside the extracted bundle:
+Extract the manual-install ZIP and run inside that directory:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\install_eyeprocesspy.ps1
 ```
 
-Successful verification should report:
+To install the wheel together with the recommended plotting, psychometrics, machine-learning and Arrow backends:
 
-```text
-eyeprocesspy: 0.1.0
-R reference: 0.11.1
+```powershell
+.\install_eyeprocesspy.ps1 -WithAllRecommended
 ```
+
+You can also select a supported interpreter and only the extras you need:
+
+```powershell
+.\install_eyeprocesspy.ps1 -PythonVersion 3.12 -WithPlots -WithPsychometrics
+```
+
+Successful verification reports `eyeprocesspy 0.1.0` and frozen R reference `0.11.1`. The installer source is versioned in [`scripts/install_eyeprocesspy.ps1`](scripts/install_eyeprocesspy.ps1), with an additional benchmark smoke check in [`scripts/verify_manual_install.py`](scripts/verify_manual_install.py).
 
 Or install the canonical wheel directly:
 
@@ -36,7 +43,7 @@ Or install the canonical wheel directly:
 python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
 ```
 
-> **Windows download note:** if a browser renames the wheel to `eyeprocesspy-0.1.0-py3-none-any (1).whl`, rename it back to the canonical filename before calling `pip`. The inserted ` (1)` makes the filename fail wheel-tag parsing even though the wheel itself is valid.
+> **Windows download note:** if a browser renames the wheel to `eyeprocesspy-0.1.0-py3-none-any (1).whl`, rename it back to the canonical filename before calling `pip`. The inserted ` (1)` makes the filename fail wheel-tag parsing even though the wheel itself can be valid.
 
 The CI workflow publishes a fresh `eyeprocesspy-manual-install-<commit>` artifact containing the wheel and source distribution **after** a clean install/import check.
 
@@ -71,7 +78,7 @@ For plotting examples, install Matplotlib through the plotting extra or your env
 | --- | --- |
 | ![Process reliability](docs/assets/gallery/process-reliability.svg) | ![IRT information](docs/assets/gallery/irt-information.svg) |
 
-**[Open the complete visual gallery →](docs/gallery.md)** — 15 previews paired with deterministic scripts that generate the Matplotlib figures through the package API.
+**[Open the complete visual gallery →](docs/gallery.md)** — 15 package-generated previews paired with deterministic scripts that render through the public plotting API.
 
 ## 30-second reproducible check
 
@@ -109,18 +116,34 @@ issues = ep.validate_eye_dataset(eye)
 | **Reproducibility** | Bundled benchmarks, provenance, manifests, software-paper evidence, frozen-R oracle and release audits |
 | **Plots & reporting** | Publication-oriented Matplotlib plots, validation visualizations, scientific evidence/reporting helpers |
 
-## Runnable examples
+## Worked workflows
 
-The repository includes deterministic examples that require no private research data:
+Four focused examples have been validated against the CI-built `0.1.0` wheel and can be run without private data:
+
+```bash
+python examples/complete_workflow.py
+python examples/calibration_probabilistic_aoi.py
+python examples/process_reliability.py
+python examples/irt_diagnostics.py
+```
+
+| Workflow | What it demonstrates |
+| --- | --- |
+| [Core gaze/AOI/provenance](docs/examples/core-workflow.md) | canonical `EyeDataset`, validation, scanpaths, transitions, entropy, plots and provenance |
+| [Calibration uncertainty & probabilistic AOIs](docs/examples/calibration-probabilistic-aoi.md) | empirical calibration error, uncertainty ellipse and boundary-sensitive AOI assignment |
+| [Process reliability](docs/examples/process-reliability.md) | ICC, Bland–Altman agreement and temporal stability |
+| [IRT diagnostics](docs/examples/irt-diagnostics.md) | information/SEM, item fit and DIF plotting |
+
+For shorter copy/paste tasks, use the **[Cookbook](docs/cookbook.md)**. For broader walkthroughs, use the **[Python-native guides](docs/guides/)** and **[88-article workflow library](docs/articles/)**.
+
+## Gallery generators
 
 ```bash
 python examples/core_gallery.py
 python examples/advanced_gallery.py
 ```
 
-They generate the gallery figures and demonstrate canonical datasets, gaze/AOI/pupil plots, process reliability, calibration uncertainty, probabilistic AOIs, sampling irregularity and IRT diagnostics.
-
-See **[Runnable examples](docs/examples/index.md)**, the **[Python-native guides](docs/guides/)** and the **[Featured workflow map](docs/articles/featured-workflows.md)**.
+These generate the documentation gallery and demonstrate canonical datasets, gaze/AOI/pupil plots, process reliability, calibration uncertainty, probabilistic AOIs, sampling irregularity and IRT diagnostics.
 
 ## Deep-parity state
 
@@ -141,6 +164,7 @@ The release evidence gate requires the full pytest suite, **100% statement cover
 - [Getting started](docs/getting-started.md)
 - [Manual installation](docs/manual-install.md)
 - [Runnable examples](docs/examples/index.md)
+- [Practical cookbook](docs/cookbook.md)
 - [Visual gallery](docs/gallery.md)
 - [Python-native guides](docs/guides/)
 - [88-article workflow library](docs/articles/)
@@ -151,7 +175,7 @@ The release evidence gate requires the full pytest suite, **100% statement cover
 
 ## Scientific boundary
 
-`eyeprocesspy` provides **measurement and analysis infrastructure**. A metric is not automatically a validated psychological construct, diagnosis, or causal explanation. Reliability does not establish construct validity; prediction does not establish causation; and gaze/pupil/biometric measures require an appropriate design, measurement model and ethical interpretation.
+`eyeprocesspy` provides **measurement and analysis infrastructure**. A metric is not automatically a validated psychological construct, diagnosis, or causal explanation. Reliability does not establish construct validity; prediction does not establish causation; probabilistic AOI membership reflects modeled coordinate uncertainty rather than probability of attention; and gaze/pupil/biometric measures require an appropriate design, measurement model and ethical interpretation.
 
 ## Relationship to the R package
 
