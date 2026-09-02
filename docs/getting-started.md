@@ -1,27 +1,37 @@
 # Getting started
 
-## Install
+## Install the current release candidate
 
-```bash
-python -m pip install eyeprocesspy
-```
+Until the first archival/PyPI release is approved, use the CI-tested wheel or the deep-parity branch rather than an unversioned package-index install.
 
-or:
+=== "Manual wheel"
 
-```bash
-uv add eyeprocesspy
-```
+    Download the `eyeprocesspy-manual-install-<commit>` CI artifact, extract it, and install the wheel:
 
-For a development checkout:
+    ```powershell
+    py -3 -m pip install .\eyeprocesspy-0.1.0-py3-none-any.whl
+    py -3 -c "import eyeprocesspy as ep; print(ep.__version__, ep.__r_reference_version__)"
+    ```
 
-```bash
-git clone https://github.com/stefanosbalaskas/eyeprocesspy.git
-cd eyeprocesspy
-uv sync --extra dev
-uv run pytest
-```
+=== "Release branch"
 
-## Import
+    ```bash
+    pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
+    ```
+
+=== "Development checkout"
+
+    ```bash
+    git clone https://github.com/stefanosbalaskas/eyeprocesspy.git
+    cd eyeprocesspy
+    git checkout release/0.1.0-deep-parity
+    uv sync --extra dev
+    uv run pytest
+    ```
+
+For plotting workflows, install the plotting dependencies through the package extra or development environment.
+
+## Import and verify versions
 
 ```python
 import eyeprocesspy as ep
@@ -30,7 +40,20 @@ print(ep.__version__)
 print(ep.__r_reference_version__)
 ```
 
-The 0.1.0 Python release is tied to the frozen R `eyeprocess` 0.11.1 scientific reference.
+The Python 0.1.0 release candidate is tied to frozen R `eyeprocess` **0.11.1** as its scientific reference.
+
+## Verify the installation without external data
+
+```python
+study = ep.eyeprocess_benchmark_study()
+audit = ep.validate_benchmark_study(study)
+data = ep.import_benchmark_study(study)
+
+print(audit["valid"])
+print(data)
+```
+
+The deterministic benchmark is the fastest installation and reproducibility check.
 
 ## Canonical schema
 
@@ -38,36 +61,54 @@ The 0.1.0 Python release is tied to the frozen R `eyeprocess` 0.11.1 scientific 
 schema = ep.eye_schema()
 ```
 
-The package uses a vendor-neutral representation so that imported files retain their source fields and provenance while downstream analyses operate on explicit semantic mappings.
+`eyeprocesspy` uses a vendor-neutral `EyeDataset` so imported files can retain their source fields and provenance while downstream analyses operate on explicit semantic mappings. Canonical components cover recordings, streams, gaze samples, eye/pupil samples, episodes, events, intervals, responses, coordinate spaces, AOIs, biometrics, features, quality and provenance.
 
 ## Import a supported export
 
 ```python
-data = ep.read_eye_export("path/to/export")
+data = ep.read_eye_export("path/to/export", vendor="auto")
+issues = ep.validate_eye_dataset(data)
 ```
 
-For Gazepoint data, dedicated helpers are available for gaze, fixations, events, biometrics, file pairing, validation, and downstream media/trial workflows.
+For Gazepoint data, dedicated helpers cover gaze, fixations, events, biometrics, file pairing, validation, media/trial workflows and real-export handling.
+
+## Start with a visual workflow
+
+```python
+import matplotlib.pyplot as plt
+
+ax = ep.plot_eye_trace(data, trial_id="trial-01")
+plt.show()
+
+ax = ep.plot_scanpath(data, trial_id="trial-01")
+plt.show()
+```
+
+Then explore the [visual gallery](gallery.md) and [runnable examples](examples/index.md).
 
 ## Audit before analysis
 
-```python
-readiness = ep.analysis_readiness(data)
-```
-
 Quality and governance functions are designed to make transformations, missingness, sampling assumptions, coordinate conversions, exclusions and feature levels visible rather than silently changing the data.
 
-## Optional backends
-
-Install only the scientific backends you need, for example:
-
-```bash
-python -m pip install "eyeprocesspy[plots]"
-python -m pip install "eyeprocesspy[psychometrics]"
-python -m pip install "eyeprocesspy[stan]"
+```python
+readiness = ep.analysis_readiness(data)
+manifest = ep.provenance_manifest(data)
 ```
 
-Unavailable exact R engines remain gated. `eyeprocesspy` does not silently replace an unavailable estimator with a different model and call it parity.
+## Advanced analysis routes
 
-## Next steps
+- **Gaze/AOI process structure:** scanpaths, transitions, entropy, recurrence, probabilistic/compositional AOIs.
+- **Pupillometry:** baseline correction, pupil features, functional pupil and missingness workflows.
+- **Measurement quality:** calibration error, sampling irregularity, reliability and process-measure guardrails.
+- **Psychometrics:** IRT foundations, fit, score uncertainty, DIF/DTF, process-informed/dynamic/advanced models.
+- **Validation:** recovery, SBC-style evidence, stress tests, negative controls and grouped/leakage-aware validation.
+- **Reproducibility:** benchmarks, provenance, manifests, software-paper evidence and frozen-R parity audits.
 
-The `docs/articles/` directory contains source-ported workflows covering preprocessing, IRT, pupillometry, multimodal measurement, validation, reproducibility, negative controls, benchmarking, evidence governance, and advanced model families.
+Use the [featured workflow map](articles/featured-workflows.md) to choose a scientific route across the full article library.
+
+## Optional backends and parity discipline
+
+Install only the scientific backends required by your workflow. Unavailable exact R engines remain explicitly gated: `eyeprocesspy` does not silently replace an unavailable estimator with a different model and call it parity.
+
+!!! warning "Interpretation boundary"
+    Gaze, pupil, biometric and psychometric outputs are measurement evidence, not automatic psychological labels. Use validation, uncertainty, provenance and an appropriate study design when making substantive claims.
