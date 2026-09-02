@@ -160,9 +160,7 @@ def test_response_time_matrix_duplicate_and_alignment_edges():
 def test_model_data_and_explanatory_irt_validation_branches():
     x = _dataset_with_features()
     with pytest.raises(ep.EyeProcessValidationError, match="No responses"):
-        empty = x.copy()
-        empty["responses"] = x["responses"].iloc[0:0].copy()
-        ep.model_data(empty)
+        empty = x.copy(); empty["responses"] = x["responses"].iloc[0:0].copy(); ep.model_data(empty)
 
     with pytest.raises(ep.EyeProcessValidationError, match="Formula response"):
         ep.fit_explanatory_irt(x, "missing_response ~ gaze_feature", engine="glm")
@@ -219,7 +217,9 @@ def test_fit_irt_accuracy_and_dif_guard_failure_paths(monkeypatch):
         include_biometrics=False,
         seed=703,
     )
-    groups = np.tile(["A", "B"], len(enough["responses"]) // 2)
+    participants = list(pd.unique(enough["responses"]["participant_id"]))
+    group_map = {pid: ("A" if i < len(participants) // 2 else "B") for i, pid in enumerate(participants)}
+    groups = enough["responses"]["participant_id"].map(group_map).to_numpy()
     with monkeypatch.context() as patch:
         patch.setattr(lm, "_fit_binomial", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("fit failed")))
         failed = ep.fit_dif(enough, group=groups, engine="logistic", items=["I001"])
@@ -296,14 +296,11 @@ def test_joint_dynamic_and_simulation_alternate_paths():
     with pytest.raises(ep.EyeProcessValidationError, match="Invalid dynamic AOI"):
         ep.fit_dynamic_aoi_model(x, source="bad")
 
-    empty = x.copy()
-    empty["gaze_samples"] = x["gaze_samples"].iloc[0:0].copy()
+    empty = x.copy(); empty["gaze_samples"] = x["gaze_samples"].iloc[0:0].copy()
     with pytest.raises(ep.EyeProcessValidationError, match="No AOI transitions"):
         ep.fit_dynamic_aoi_model(empty, source="samples")
 
-    constant = x.copy()
-    constant["gaze_samples"] = x["gaze_samples"].copy()
-    constant["gaze_samples"]["true_aoi"] = "prompt"
+    constant = x.copy(); constant["gaze_samples"] = x["gaze_samples"].copy(); constant["gaze_samples"]["true_aoi"] = "prompt"
     with pytest.raises(ep.EyeProcessValidationError, match="No AOI transitions"):
         ep.fit_dynamic_aoi_model(constant, source="samples")
 
@@ -372,8 +369,7 @@ def test_process_diagnostics_functional_pupil_and_strategy_guards(monkeypatch):
     assert {"w1", "w2"} <= set(diag.warnings)
 
     x = _dataset()
-    empty_eye = x.copy()
-    empty_eye["eye_samples"] = x["eye_samples"].iloc[0:0].copy()
+    empty_eye = x.copy(); empty_eye["eye_samples"] = x["eye_samples"].iloc[0:0].copy()
     assert ep.functional_pupil_features(empty_eye, append=False).empty
     assert ep.functional_pupil_features(empty_eye, append=True) is empty_eye
 
