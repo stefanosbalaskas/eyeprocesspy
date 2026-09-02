@@ -309,8 +309,8 @@ def test_summary_object_threshold_empty_finite_and_null_benchmark_edges():
     summary = ep.summarise_process_negative_controls(c, threshold=0.5)
     p = summary.loc[summary.control.eq("p")].iloc[0]
     q = summary.loc[summary.control.eq("q")].iloc[0]
-    assert p.n_finite == 0 and math.isnan(p.mean) and math.isnan(p.exceedance_rate)
-    assert q.n_finite == 1 and math.isnan(q.sd)
+    assert p["n_finite"] == 0 and math.isnan(p["mean"]) and math.isnan(p["exceedance_rate"])
+    assert q["n_finite"] == 1 and math.isnan(q["sd"])
 
     empty = ep.process_null_benchmark(np.nan, [])
     assert empty["n_null"] == 0 and math.isnan(empty["percentile"])
