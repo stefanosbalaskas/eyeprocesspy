@@ -259,7 +259,7 @@ def test_legacy_bridge_all_engine_paths_and_non_eye_reraise(monkeypatch):
         ep.fit_joint_functional_pupil_irt(x, _trial_spec(engine="two_stage_glm"))
 
     no_time = _long_pupil(2, 2, 6).drop(columns=["time_ms"])
-    with pytest.raises(ep.EyeProcessValidationError, match="time column"):
+    with pytest.raises(ep.EyeProcessValidationError, match="Time column"):
         ep.fit_joint_functional_pupil_irt(no_time, _trial_spec())
 
 
