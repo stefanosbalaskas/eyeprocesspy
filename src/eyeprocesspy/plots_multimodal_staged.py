@@ -74,7 +74,7 @@ def plot_eye_multimodal_m2_simulation(x, type="person_latent", ax=None):
     if type=="channel_distributions":
         out=pd.DataFrame({"channel":["response","rt","gaze"],"mean":[d.response.mean(),d.rt.mean(),d.gaze.mean()]}); ax.bar(out.channel,out["mean"]); ax.set_title("M2 channel summaries"); return _attach(ax,out)
     if type=="missingness":
-        out=d[["response","rt","gaze"]].isna().mean().rename("missing_fraction").reset_index(names="channel"); ax.bar(out.channel,out.missing_fraction); ax.set_ylim(0,1); ax.set_title("M2 channel missingness"); return _attach(ax,out)
+        out=d[["response","rt","gaze"]].isna().mean().rename("missing_fraction").reset_index(name="channel"); ax.bar(out.channel,out.missing_fraction); ax.set_ylim(0,1); ax.set_title("M2 channel missingness"); return _attach(ax,out)
     raise EyeProcessValidationError("Unknown M2 simulation plot type.")
 
 
@@ -111,7 +111,7 @@ def plot_eye_multimodal_m3_simulation(x, type="pupil_nuisance", ax=None):
     if type=="pupil_nuisance":
         out=d[["pupil","pupil_nuisance_effect"]].dropna(); ax.scatter(out.pupil_nuisance_effect,out.pupil,alpha=.5); ax.set(xlabel="Pupil nuisance effect",ylabel="Pupil",title="M3 pupil nuisance structure"); return _attach(ax,out)
     if type=="missingness":
-        cols=["response","rt","gaze","pupil"]; out=d[cols].isna().mean().rename("missing_fraction").reset_index(names="channel"); ax.bar(out.channel,out.missing_fraction); ax.set_ylim(0,1); ax.set_title("M3 channel missingness"); return _attach(ax,out)
+        cols=["response","rt","gaze","pupil"]; out=d[cols].isna().mean().rename("missing_fraction").reset_index(name="channel"); ax.bar(out.channel,out.missing_fraction); ax.set_ylim(0,1); ax.set_title("M3 channel missingness"); return _attach(ax,out)
     raise EyeProcessValidationError("Unknown M3 simulation plot type.")
 
 
@@ -148,7 +148,7 @@ def plot_eye_multimodal_m3_negative_controls(x, type="pupil_alignment", ax=None)
 def plot_eye_multimodal_m3_identifiability(x, type="checks", ax=None):
     ax=_ax(ax)
     if type=="missingness":
-        d=x.missing_fraction.rename("missing_fraction").reset_index(names="channel"); ax.bar(d.channel,d.missing_fraction); ax.set_ylim(0,1)
+        d=x.missing_fraction.rename("missing_fraction").reset_index(name="channel"); ax.bar(d.channel,d.missing_fraction); ax.set_ylim(0,1)
     else:
         d=x.checks.copy(); ax.barh(np.arange(len(d)),d["pass"].astype(int)); ax.set_yticks(np.arange(len(d)),d.criterion); ax.set_xlim(0,1)
     ax.set_title(f"M3 identifiability: {type}"); return _attach(ax,d)
@@ -162,7 +162,7 @@ def plot_eye_multimodal_m4_simulation(x, type="state_sequence", person=None, ax=
     elif type=="channel_profile":
         z=d.groupby("state")[["rt","gaze","pupil"]].mean().reset_index(); z.set_index("state").plot(kind="bar",ax=ax); d=z
     elif type=="missingness":
-        z=d[["rt","gaze","pupil"]].isna().mean().rename("missing_fraction").reset_index(names="channel"); ax.bar(z.channel,z.missing_fraction); d=z
+        z=d[["rt","gaze","pupil"]].isna().mean().rename("missing_fraction").reset_index(name="channel"); ax.bar(z.channel,z.missing_fraction); d=z
     else: raise EyeProcessValidationError("Unknown M4 simulation plot type.")
     ax.set_title(f"M4 simulation: {type}"); return _attach(ax,d)
 
