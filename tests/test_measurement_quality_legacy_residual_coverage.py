@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from types import SimpleNamespace
 
 import matplotlib
 matplotlib.use("Agg")
@@ -71,7 +72,7 @@ def test_uncertainty_spec_sequence_vector_and_estimation_guards_cluster_paths():
     assert spec.source_sd["preprocessing"] == pytest.approx(0.3)
 
     with pytest.raises(ep.EyeProcessValidationError, match="spec"):
-        ep.estimate_process_uncertainty([1.0, 2.0], spec={})
+        ep.estimate_process_uncertainty([1.0, 2.0], spec=SimpleNamespace(eyeprocess_class="bad"))
     with pytest.raises(ep.EyeProcessValidationError, match="No numeric"):
         ep.estimate_process_uncertainty(pd.DataFrame({"label": ["a", "b"]}))
 
@@ -97,7 +98,9 @@ def test_uncertainty_propagation_invalid_posterior_empty_simulation_and_failed_e
         ep.propagate_process_uncertainty([], method="bootstrap", draws=2)
 
     unc = ep.estimate_process_uncertainty(_unc_data(), metrics=["metric"])
-    sim = ep.propagate_process_uncertainty(unc, method="simulation", draws=3, seed=3)
+    sim = ep.propagate_process_uncertainty(
+        unc, method="simulation", draws=3, seed=3, estimand=lambda z: pd.to_numeric(z["metric"]).mean()
+    )
     assert sim.summary.loc[0, "draws"] == 3
     bad = ep.propagate_process_uncertainty(
         _unc_data()[["metric"]],
