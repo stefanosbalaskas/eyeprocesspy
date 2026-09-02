@@ -236,7 +236,7 @@ def test_software_claim_validation_coverage_and_readiness_residuals(tmp_path, mo
     with pytest.raises(ep.EyeProcessValidationError, match="must be named"):
         ep.software_paper_validation_table({"": pd.DataFrame({"x": [1]})})
 
-    with pytest.raises(ep.EyeProcessValidationError, match="eye_software_paper_evidence"):
+    with pytest.raises(ep.EyeProcessValidationError, match="missing required column"):
         ep.software_paper_coverage({})
 
     report = tmp_path / "no-coverage.md"
