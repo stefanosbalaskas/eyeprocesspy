@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -10,8 +9,6 @@ import pytest
 import eyeprocesspy as ep
 import eyeprocesspy.adapters as ad
 import eyeprocesspy.coordinates as co
-import eyeprocesspy.dataset as ds
-import eyeprocesspy.schema as sc
 
 
 def _dataset(recording_id="R1", coordinate_spaces=None, gaze_samples=None, episodes=None, aoi_geometry=None, raw=None, metadata=None):
@@ -168,7 +165,8 @@ def test_convert_coordinates_all_component_and_overwrite_paths():
     episodes = ep.convert_coordinates(x, "norm", "pix", components="episodes")
     assert episodes["episodes"].coordinate_space_id.iloc[0] == "pix"
     geometry = ep.convert_coordinates(x, "norm", "pix", components="aoi_geometry")
-    assert geometry["aoi_geometry"].width.iloc[0] == pytest.approx(40)
+    assert geometry["aoi_geometry"].coordinate_space_id.iloc[0] == "pix"
+    assert geometry["aoi_geometry"].width.iloc[0] == pytest.approx(0.4)
     surface_geometry = ep.convert_coordinates(x, "norm", "surf", components="aoi_geometry")
     assert surface_geometry["aoi_geometry"].coordinate_space_id.iloc[0] == "surf"
 
@@ -181,7 +179,8 @@ def test_convert_coordinates_all_component_and_overwrite_paths():
         gaze_samples=pd.DataFrame({"recording_id": ["R1"], "sample_id": ["S"], "coordinate_space_id": ["ghost"]})
     )
     audit = ep.audit_coordinate_spaces(unregistered)
-    assert audit.loc[0, "registered"] == False and audit.loc[0, "status"] == "error"
+    assert not bool(audit.loc[0, "registered"])
+    assert audit.loc[0, "status"] == "error"
 
 
 def test_adapter_registration_detection_and_read_guards(tmp_path: Path):
