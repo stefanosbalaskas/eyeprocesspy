@@ -1,0 +1,28 @@
+.ep-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+.ep-gallery figure {
+  margin: 0;
+  padding: .75rem;
+  border: .05rem solid var(--md-default-fg-color--lightest);
+  border-radius: .45rem;
+  background: var(--md-default-bg-color);
+}
+.ep-gallery img { width: 100%; height: auto; display: block; }
+.ep-gallery figcaption {
+  margin-top: .55rem;
+  color: var(--md-default-fg-color--light);
+  font-size: .82rem;
+  line-height: 1.45;
+}
+.ep-hero { padding: 1rem 0 .5rem; }
+.ep-kicker {
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: .72rem;
+  opacity: .72;
+}
