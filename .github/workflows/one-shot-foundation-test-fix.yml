@@ -26,16 +26,25 @@ jobs:
 
           path = Path('tests/test_foundation_09_residual_coverage.py')
           text = path.read_text(encoding='utf-8')
-          replacements = {
-              '    with pytest.raises(ValueError, match="Invalid event pattern"):\n        fd._event_matches(("[",), values)\n': '    with pytest.raises(ValueError, match="Invalid regular expression"):\n        fd._event_matches(("[",), values)\n',
-              '    assert fd._aoi_contains([0.5], [0.5], [0.5], definition, geometry).all()\n': '    assert fd._aoi_contains([0.0], [0.0], [0.5], definition, geometry).all()\n',
-              '    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [False]))\n': '    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [True]))\n',
-          }
-          for old, new in replacements.items():
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f'exact target count was {count}, expected 1: {old!r}')
-              text = text.replace(old, new)
+
+          old = '    with pytest.raises(ValueError, match="Invalid event pattern"):\n        fd._event_matches(("[",), values)\n'
+          new = '    with pytest.raises(ValueError, match="Invalid regular expression"):\n        fd._event_matches(("[",), values)\n'
+          if text.count(old) != 1:
+              raise SystemExit(f'invalid-regex target count was {text.count(old)}, expected 1')
+          text = text.replace(old, new)
+
+          old = '    geometry["visible"] = True\n    definition["shape_type"] = "circle"\n    assert fd._aoi_contains([0.5], [0.5], [0.5], definition, geometry).all()\n    definition["shape_type"] = "polygon"\n'
+          new = '    geometry["visible"] = True\n    definition["shape_type"] = "circle"\n    assert fd._aoi_contains([0.0], [0.0], [0.5], definition, geometry).all()\n    definition["shape_type"] = "polygon"\n'
+          if text.count(old) != 1:
+              raise SystemExit(f'circle-context target count was {text.count(old)}, expected 1')
+          text = text.replace(old, new)
+
+          old = '    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [False]))\n'
+          new = '    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [True]))\n'
+          if text.count(old) != 1:
+              raise SystemExit(f'nullable target count was {text.count(old)}, expected 1')
+          text = text.replace(old, new)
+
           path.write_text(text, encoding='utf-8')
           Path('.github/workflows/one-shot-foundation-test-fix.yml').unlink()
           PY
