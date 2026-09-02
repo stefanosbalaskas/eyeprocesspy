@@ -196,7 +196,7 @@ def test_latent_space_map_and_similarity_all_guards_entities_and_empty_distance(
     person = ep.validate_latent_space_process_similarity(obj, [[0, 0], [1, 1], [2, 3]], entity="person")
     item = ep.validate_latent_space_process_similarity(obj, [[0, 1], [1, 2]], entity="item")
     assert np.isfinite(person.spearman_distance_correlation)
-    assert np.isfinite(item.spearman_distance_correlation)
+    assert np.isnan(item.spearman_distance_correlation)
 
     singleton = SimpleNamespace(
         eyeprocess_class="eye_latent_space_irt",
