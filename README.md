@@ -16,14 +16,29 @@
 
 ### Manual wheel — recommended for the current release candidate
 
-Download the CI-tested manual bundle or wheel and install locally:
+The Windows manual-install bundle has now been verified on **Python 3.11.9**. Inside the extracted bundle:
 
 ```powershell
-py -3 -m pip install .\eyeprocesspy-0.1.0-py3-none-any.whl
-py -3 -c "import eyeprocesspy as ep; print(ep.__version__, ep.__r_reference_version__)"
+Set-ExecutionPolicy -Scope Process Bypass
+.\install_eyeprocesspy.ps1
 ```
 
-The CI workflow publishes a fresh `eyeprocesspy-manual-install-<commit>` artifact containing the wheel and source distribution **after** the wheel has been installed and import-checked in a clean environment.
+Successful verification should report:
+
+```text
+eyeprocesspy: 0.1.0
+R reference: 0.11.1
+```
+
+Or install the canonical wheel directly:
+
+```powershell
+python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
+```
+
+> **Windows download note:** if a browser renames the wheel to `eyeprocesspy-0.1.0-py3-none-any (1).whl`, rename it back to the canonical filename before calling `pip`. The inserted ` (1)` makes the filename fail wheel-tag parsing even though the wheel itself is valid.
+
+The CI workflow publishes a fresh `eyeprocesspy-manual-install-<commit>` artifact containing the wheel and source distribution **after** a clean install/import check.
 
 ### Directly from the release branch
 
@@ -56,7 +71,7 @@ For plotting examples, install Matplotlib through the plotting extra or your env
 | --- | --- |
 | ![Process reliability](docs/assets/gallery/process-reliability.svg) | ![IRT information](docs/assets/gallery/irt-information.svg) |
 
-**[Open the complete visual gallery →](docs/gallery.md)** — 15 lightweight previews paired with deterministic scripts that generate the full Matplotlib figures through the package API.
+**[Open the complete visual gallery →](docs/gallery.md)** — 15 previews paired with deterministic scripts that generate the Matplotlib figures through the package API.
 
 ## 30-second reproducible check
 
@@ -96,7 +111,7 @@ issues = ep.validate_eye_dataset(eye)
 
 ## Runnable examples
 
-The repository now includes deterministic examples that require no private research data:
+The repository includes deterministic examples that require no private research data:
 
 ```bash
 python examples/core_gallery.py
@@ -105,7 +120,7 @@ python examples/advanced_gallery.py
 
 They generate the gallery figures and demonstrate canonical datasets, gaze/AOI/pupil plots, process reliability, calibration uncertainty, probabilistic AOIs, sampling irregularity and IRT diagnostics.
 
-See **[Runnable examples](docs/examples/index.md)** and **[Featured workflow map](docs/articles/featured-workflows.md)**.
+See **[Runnable examples](docs/examples/index.md)**, the **[Python-native guides](docs/guides/)** and the **[Featured workflow map](docs/articles/featured-workflows.md)**.
 
 ## Deep-parity state
 
@@ -124,10 +139,13 @@ The release evidence gate requires the full pytest suite, **100% statement cover
 
 - **Website:** https://stefanosbalaskas.github.io/eyeprocesspy/
 - [Getting started](docs/getting-started.md)
+- [Manual installation](docs/manual-install.md)
 - [Runnable examples](docs/examples/index.md)
 - [Visual gallery](docs/gallery.md)
-- [Articles and workflows](docs/articles/)
-- [API reference](docs/reference/)
+- [Python-native guides](docs/guides/)
+- [88-article workflow library](docs/articles/)
+- [Plotting and API reference](docs/reference/)
+- [FAQ](docs/faq.md)
 - [Parity and validation](docs/parity-and-validation.md)
 - [Release and reproducibility](docs/release-and-reproducibility.md)
 
