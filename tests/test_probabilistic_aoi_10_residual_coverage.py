@@ -117,7 +117,8 @@ def test_assignment_validation_tuple_ellipse_and_degenerate_geometry_paths():
     assert ellipse.error_model == "ellipse"
     np.testing.assert_allclose(ellipse.spread, [0.04, 0.08])
     np.testing.assert_allclose(ellipse.accuracy, [0.01, -0.02])
-    assert list(ellipse.membership.columns).count("person_id") == 1
+    assert list(ellipse.wide.columns).count("person_id") == 1
+    assert list(ellipse.membership.columns).count("person_id") == 2
 
     degenerate_aois = pd.DataFrame(
         {
