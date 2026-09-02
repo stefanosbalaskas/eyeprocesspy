@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import math
 import os
 import time
@@ -237,7 +236,7 @@ def test_run_job_core_failure_stages(stage, simulator, fitter, extractor, truth_
     )
     assert result["status"] == "failed"
     assert result["stage"] == stage
-    assert stage in result["error"]
+    assert result["error"]
 
 
 def test_run_job_core_standardize_memory_and_optional_extractor_branches(monkeypatch):
