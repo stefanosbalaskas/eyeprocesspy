@@ -285,7 +285,7 @@ def test_sbc_invalid_draw_truth_name_no_finite_and_tie_paths():
         lambda sim: sim["truth"],
         replications=1,
     )
-    assert pd.isna(no_finite["ranks"].rank.iloc[0])
+    assert pd.isna(no_finite["ranks"]["rank"].iloc[0])
     assert np.isnan(no_finite["ranks"].posterior_mean.iloc[0])
 
     tied = ep.simulation_based_calibration(
