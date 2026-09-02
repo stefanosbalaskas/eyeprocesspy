@@ -53,4 +53,4 @@ DIF is a measurement-invariance diagnostic. Statistical DIF is not itself proof 
 
 ## Wider IRT surface
 
-The package also exposes score uncertainty, Q3/local-dependence diagnostics, adaptive traces, link stability, DTF, recovery and SBC evidence, bank coverage, process alignment, sparse-design audits, prior sensitivity and advanced process-informed models. See the [IRT and psychometrics guide](../guides/irt-and-psychometrics.md) and the [API reference](../reference/index.md).
+The package also exposes score uncertainty, Q3/local-dependence diagnostics, adaptive traces, link stability, DTF, recovery and SBC evidence, bank coverage, process alignment, sparse-design audits, prior sensitivity and advanced process-informed models. See the [IRT and psychometrics guide](../guides/psychometrics-irt.md) and the [API reference](../reference/index.md).
