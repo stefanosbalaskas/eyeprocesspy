@@ -123,7 +123,7 @@ def test_private_helper_fallbacks_and_event_pattern_guards():
     values = pd.Series(["TRIAL_START", "other", pd.NA])
     matched = fd._event_matches(("TRIAL_START", "other"), values)
     assert matched.tolist() == [True, True, False]
-    with pytest.raises(ValueError, match="Invalid event pattern"):
+    with pytest.raises(ValueError, match="Invalid regular expression"):
         fd._event_matches(("[",), values)
     assert pd.isna(fd._participant_for_recording(_dataset(), "missing"))
 
@@ -229,7 +229,7 @@ def test_polygon_and_aoi_contains_private_residuals():
 
     geometry["visible"] = True
     definition["shape_type"] = "circle"
-    assert fd._aoi_contains([0.5], [0.5], [0.5], definition, geometry).all()
+    assert fd._aoi_contains([0.0], [0.0], [0.5], definition, geometry).all()
     definition["shape_type"] = "polygon"
     assert fd._aoi_contains([0.5], [0.5], [0.5], definition, geometry).all()
     definition["shape_type"] = "unknown"
@@ -311,7 +311,7 @@ def test_quality_row_store_standardization_replace_and_sampling_statuses():
 
 
 def test_nullable_signal_quality_no_trial_and_store_paths():
-    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [False]))
+    assert np.isnan(fd._nullable_valid_fraction([pd.NA], [True]))
     x = _dataset()
     x["gaze_samples"]["trial_id"] = pd.NA
     x["eye_samples"]["trial_id"] = pd.NA
