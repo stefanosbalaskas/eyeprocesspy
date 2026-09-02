@@ -1,114 +1,130 @@
 # eyeprocesspy
 
 [![CI](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml/badge.svg)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/eyeprocesspy.svg)](https://pypi.org/project/eyeprocesspy/)
-[![Python](https://img.shields.io/pypi/pyversions/eyeprocesspy.svg)](https://pypi.org/project/eyeprocesspy/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://stefanosbalaskas.github.io/eyeprocesspy/)
+[![Documentation](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml/badge.svg)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml)
+[![Deep parity audit](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml/badge.svg)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml)
+[![Python 3.11–3.14](https://img.shields.io/badge/Python-3.11%E2%80%933.14-blue)](https://www.python.org/)
+[![R reference 0.11.1](https://img.shields.io/badge/R%20reference-0.11.1-276DC3)](docs/parity-and-validation.md)
 
-**Vendor-neutral Python infrastructure for eye-tracking, pupillometry, biometrics, psychometrics, and multimodal process data.**
+**Reproducible Python infrastructure for eye-tracking, pupillometry, process data, psychometrics, and multimodal behavioral measurement.**
 
-`eyeprocesspy` is the Python port of the frozen R package **`eyeprocess` 0.11.1**. It provides a common data model, import/harmonization tools, quality-control and governance workflows, gaze and pupil processing, multimodal measurement tools, psychometric and IRT infrastructure, validation/evidence tooling, plotting, reproducibility utilities, and controlled interoperability with external scientific backends.
+`eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with the frozen R **0.11.1** release used as the scientific reference. It brings vendor import, data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, and reporting into one auditable Python package.
 
-## Frozen reference and parity
+> **Release-candidate status:** the `release/0.1.0-deep-parity` branch is being hardened against a true 100% statement-and-branch coverage gate before release. No reduced coverage threshold is used.
 
-| Contract | Frozen reference |
+## Why eyeprocesspy?
+
+- **One coherent data model** for recordings, gaze samples, fixations, events, AOIs, pupil signals, responses, and provenance.
+- **Scientific parity first:** 1,182 frozen APIs are resolved against eyeprocess 0.11.1, with documented differences where Python and R ecosystems cannot be identical.
+- **Beyond descriptive eye-tracking:** process psychometrics, IRT, sequence/process models, calibration uncertainty, reliability, leakage-aware validation, and multimodal measurement are first-class workflows.
+- **Reproducibility by construction:** provenance, benchmark studies, validation evidence, manifests, software-paper evidence, and deterministic release audits are built into the package.
+- **Cross-platform release discipline:** the release matrix covers Ubuntu, macOS, and Windows on Python 3.11, 3.12, 3.13, and 3.14, plus a frozen-R oracle and clean-wheel validation.
+
+## At a glance
+
+| Release dimension | Current deep-parity state |
 | --- | ---: |
-| R package | `eyeprocess` 0.11.1 |
-| Frozen R commit | `d867555eecae46f262843501c07074cebe1f7aa9` |
-| Public R exports | **1,182** |
-| Python API exports implemented | **1,182 / 1,182** |
-| Public API remaining | **0** |
-| R articles/vignettes | 88 |
-| R testthat files | 113 |
-| R Stan programs | 13 |
-
-The API surface reached 1,182/1,182 at commit `d1d38d6db8cb49ca6ec47b610b528422946a55be`, with the hosted Linux/macOS/Windows Python 3.11–3.14 matrix and the frozen-R oracle smoke test green. The release branch additionally audits numerical/oracle parity, documentation coverage, plot/data contracts, and package-wide test coverage before the `v0.1.0` release is published.
-
-See [`parity/PARITY_MATRIX.csv`](parity/PARITY_MATRIX.csv) for the function-level ledger and [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md) for the release-readiness view.
+| Frozen public APIs resolved | **1,182 / 1,182** |
+| Frozen R reference | **eyeprocess 0.11.1** |
+| Frozen articles linked | **88 / 88** |
+| Python versions in CI | **3.11–3.14** |
+| Operating systems in CI | **Ubuntu / macOS / Windows** |
+| P4 numerical parity debt marked `not_started` | **0** |
+| P6 plot parity debt marked `not_started` | **0** |
 
 ## Installation
 
-### PyPI
+For the current release candidate, install directly from the deep-parity branch:
 
 ```bash
-python -m pip install eyeprocesspy
+pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
 ```
 
-or with `uv`:
-
-```bash
-uv add eyeprocesspy
-```
-
-### Development checkout
+For local development:
 
 ```bash
 git clone https://github.com/stefanosbalaskas/eyeprocesspy.git
 cd eyeprocesspy
-uv sync --extra dev
-uv run pytest
+git checkout release/0.1.0-deep-parity
+python -m pip install -e ".[dev,docs]"
 ```
 
-Optional dependency groups are available for Arrow storage, Stan, Bayesian backends, physiology, streaming, gaze tooling, psychometrics, plotting, machine learning, and documentation.
+The final PyPI command will be documented after the release evidence gate is fully green.
 
-## Minimal workflow
+## 30-second reproducible workflow
+
+The bundled benchmark is the fastest way to verify an installation and exercise the package without external data:
 
 ```python
 import eyeprocesspy as ep
 
-# Inspect the canonical schema.
-schema = ep.eye_schema()
+study = ep.eyeprocess_benchmark_study()
+audit = ep.validate_benchmark_study(study)
+data = ep.import_benchmark_study(study)
 
-# Read a supported export through the vendor-neutral adapter layer.
-data = ep.read_eye_export("path/to/export")
-
-# Audit the imported dataset before analysis.
-report = ep.analysis_readiness(data)
+print(audit["valid"])
+print(data)
 ```
 
-For Gazepoint exports, IRT workflows, pupil preprocessing, multimodal measurement, validation evidence, reproducibility, storage/interoperability, and plotting examples, see the [documentation site](https://stefanosbalaskas.github.io/eyeprocesspy/) and the source articles under [`docs/articles/`](docs/articles/).
+For real exports, use the vendor-aware import surface and continue in the same canonical data model:
 
-## Scientific commitments
+```python
+import eyeprocesspy as ep
 
-`eyeprocesspy` follows the frozen R package's core rules:
-
-- harmonize semantics rather than only renaming columns;
-- retain native timing/source information and make transformations explicit;
-- preserve provenance and validation evidence;
-- never silently interpolate, resample, exclude, or infer scientific meaning;
-- distinguish software-validation evidence from construct validity;
-- gate unavailable exact backends instead of substituting a different estimator;
-- never disguise another serialization format as native RDS;
-- keep optional scientific backends lazy so the base package remains lightweight.
-
-Some R-specific engines, random-number streams, object serialization/hashing, platform timings, and external backend outputs cannot be byte-identical in Python. Those cases are marked explicitly as `python_reference_differs` in the parity ledger and require a documented blocker plus a Python conformance test rather than a fabricated equality claim.
-
-## Verification
-
-The release gate runs:
-
-```bash
-uv run ruff check src tests
-uv run pytest
-uv run pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-fail-under=100
-uv build
-python -m twine check dist/*
+eye = ep.read_eye_export("participant_001.csv", vendor="auto")
+issues = ep.validate_eye_dataset(eye)
 ```
 
-CI also installs and verifies the frozen R 0.11.1 oracle and tests Python 3.11–3.14 on Ubuntu, Windows, and macOS.
+## What is included?
+
+| Area | Representative capabilities |
+| --- | --- |
+| **Import & canonicalization** | Generic and vendor-aware readers, Gazepoint workflows, schema validation, coordinate systems, event/timebase handling |
+| **Gaze & AOIs** | Fixations, saccades, dwell, transitions, probabilistic/compositional AOIs, scanpaths, recurrence, spatial/process features |
+| **Pupil & physiology-facing process analysis** | Baseline correction, pupil features, functional pupil models, registration, missingness, uncertainty, sensitivity workflows |
+| **Psychometrics & IRT** | Binary/polytomous IRT utilities, process-informed models, adaptive/scoring diagnostics, DIF, validation, multidimensional and advanced process models |
+| **Measurement intelligence** | Reliability, calibration uncertainty, cross-device linking, process norms, fairness, item-bank optimization, leakage-aware validation |
+| **Reproducibility & validation** | Benchmarks, recovery/SBC/stress evidence, provenance, reproducibility manifests, validation atlases, software-paper evidence |
+| **Plots & reporting** | Scientific diagnostic plots, validation visualizations, evidence/reporting helpers, publication-oriented reproducibility outputs |
+
+## Scientific boundary
+
+`eyeprocesspy` provides **measurement and analysis infrastructure**. A computed metric is not automatically a validated psychological construct, diagnosis, or causal explanation. Reliability does not establish construct validity; prediction does not establish causation; and biometrics should be interpreted only within an appropriate study design, measurement model, and ethical framework.
+
+This boundary is explicit throughout the package through validation guardrails, caveats, provenance, and evidence objects.
 
 ## Documentation
 
-- Documentation: https://stefanosbalaskas.github.io/eyeprocesspy/
-- Source: https://github.com/stefanosbalaskas/eyeprocesspy
-- Issues: https://github.com/stefanosbalaskas/eyeprocesspy/issues
-- Changelog: [`CHANGELOG.md`](CHANGELOG.md)
+- **Package website:** https://stefanosbalaskas.github.io/eyeprocesspy/
+- [Getting started](docs/getting-started.md)
+- [Parity and validation](docs/parity-and-validation.md)
+- [Release and reproducibility](docs/release-and-reproducibility.md)
+- [API reference](docs/reference/)
+- [Articles](docs/articles/)
+
+## Deep-parity release discipline
+
+The release branch is not considered complete merely because tests pass. The release evidence gate requires:
+
+1. the complete pytest suite to pass;
+2. **100% statement coverage**;
+3. **100% branch coverage**;
+4. the full Ubuntu/macOS/Windows × Python 3.11–3.14 matrix to pass;
+5. Ruff to pass;
+6. a clean wheel to build, install, and import;
+7. the frozen R 0.11.1 oracle to pass; and
+8. the documentation site to build strictly.
+
+The deep-parity audit intentionally remains red until the coverage conditions are genuinely satisfied.
+
+## Relationship to the R package
+
+The Python implementation is designed from the frozen eyeprocess 0.11.1 source, API, tests, articles, examples, and expected scientific behavior rather than from function names alone. Where an R dependency or runtime behavior has no faithful Python equivalent, the parity ledger records the difference instead of silently substituting a different estimator.
+
+## Contributing
+
+Issues and pull requests that improve scientific correctness, parity, validation, documentation, interoperability, or reproducibility are welcome. For changes affecting numerical behavior, include a focused test and describe whether the behavior matches, intentionally differs from, or extends the frozen R reference.
 
 ## Citation
 
-Citation metadata is provided in [`CITATION.cff`](CITATION.cff). The repository also ships Zenodo metadata in [`.zenodo.json`](.zenodo.json). A Zenodo DOI is added only after an actual archived release exists; no placeholder DOI is used.
-
-## License
-
-MIT. See [`LICENSE`](LICENSE).
+A formal citation for `eyeprocesspy` will be added with the first archival software release. Until then, cite the repository and the exact version/commit used in your analysis so that the computational environment is reproducible.
