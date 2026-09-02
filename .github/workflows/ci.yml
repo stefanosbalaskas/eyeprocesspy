@@ -22,6 +22,7 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run pytest
       - run: uv run ruff check src tests
+
   build-wheel:
     runs-on: ubuntu-latest
     steps:
@@ -31,6 +32,15 @@ jobs:
       - run: python -m venv wheelcheck
       - run: wheelcheck/bin/pip install dist/*.whl
       - run: wheelcheck/bin/python -c "import eyeprocesspy; print(eyeprocesspy.__version__, eyeprocesspy.__r_reference_version__)"
+      - name: Upload manual-install distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: eyeprocesspy-manual-install-${{ github.sha }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 90
 
   r-oracle-smoke:
     runs-on: ubuntu-latest
