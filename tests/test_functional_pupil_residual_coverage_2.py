@@ -177,12 +177,12 @@ def test_prepare_guards_valid_percent_zscore_nuisance_fallback_and_zero_time(mon
 
     flat_time = pd.DataFrame(
         {
-            "participant_id": ["P1"] * 4,
-            "item_id": ["I1"] * 4,
-            "trial_id": ["T1"] * 4,
-            "time_ms": [0.0] * 4,
-            "pupil": [3.0, 3.1, 3.2, 3.3],
-            "score": [0, 1, 0, 1],
+            "participant_id": ["P1"] * 3 + ["P2"] * 3,
+            "item_id": ["I1"] * 3 + ["I2"] * 3,
+            "trial_id": ["T1"] * 3 + ["T2"] * 3,
+            "time_ms": [0.0] * 6,
+            "pupil": [3.0, 3.1, 3.2, 3.3, 3.4, 3.5],
+            "score": [0, 0, 0, 1, 1, 1],
         }
     )
     with pytest.raises(ep.EyeProcessValidationError, match="times must vary"):
