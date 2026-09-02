@@ -26,15 +26,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-nav:
-  - Home: index.md
-  - Getting started: getting-started.md
-  - Parity & validation: parity-and-validation.md
-  - Release & reproducibility: release-and-reproducibility.md
-  - API reference: reference/index.md
-  - Articles:
-      - Overview: articles/index.md
-
 plugins:
   - search
   - mkdocstrings:
@@ -58,5 +49,4 @@ markdown_extensions:
       alternate_style: true
   - tables
 
-author: Stefanos Balaskas
 copyright: Copyright &copy; Stefanos Balaskas
