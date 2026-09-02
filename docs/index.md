@@ -1,48 +1,81 @@
+<div class="ep-hero" markdown>
+
+<div class="ep-kicker">Scientific Python infrastructure for behavioral process data</div>
+
 # eyeprocesspy
 
-**Reproducible Python infrastructure for eye-tracking, pupillometry, process data, psychometrics, and multimodal behavioral measurement.**
+**Eye-tracking, pupillometry, AOIs, process measurement, psychometrics, validation and reproducibility in one auditable package.**
 
-`eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, using the frozen **0.11.1** R release as its scientific reference. It is designed for researchers who need more than a collection of gaze utilities: one package connects import, canonical data contracts, preprocessing, gaze/AOI and pupil analysis, process measurement, psychometrics, validation, reproducibility, and publication-ready evidence.
+`eyeprocesspy` is the Python companion and deep-parity port of **eyeprocess**, using frozen R **0.11.1** as its scientific reference. The package is designed for researchers who need a governed workflow from raw exports to validated measurement evidence—not a loose collection of gaze utilities.
 
 [Get started](getting-started.md){ .md-button .md-button--primary }
-[Explore the API](reference/index.md){ .md-button }
-[Parity & validation](parity-and-validation.md){ .md-button }
+[Runnable examples](examples/index.md){ .md-button }
+[Visual gallery](gallery.md){ .md-button }
+[Browse 88 articles](articles/index.md){ .md-button }
 
-## What makes it different
+</div>
+
+## See the package in action
+
+<div class="ep-gallery" markdown>
+
+<figure><img src="assets/gallery/gaze-trace.svg" alt="Gaze trace"><figcaption>Canonical gaze trace with validity-aware sample selection.</figcaption></figure>
+<figure><img src="assets/gallery/pupil-timeseries.svg" alt="Pupil time series"><figcaption>Eye-specific pupil streams aligned on a shared timebase.</figcaption></figure>
+<figure><img src="assets/gallery/probabilistic-aoi.svg" alt="Probabilistic AOI membership"><figcaption>AOI membership after propagating empirical calibration uncertainty.</figcaption></figure>
+<figure><img src="assets/gallery/process-reliability.svg" alt="Process reliability"><figcaption>Repeated-measure reliability with Bland–Altman evidence.</figcaption></figure>
+
+</div>
+
+[Explore all package-generated figures →](gallery.md)
+
+## One package, multiple research layers
 
 <div class="grid cards" markdown>
 
--   :material-eye: **Eye-tracking as process data**
+-   :material-database-import: **Import → canonical data**
 
-    Fixations, saccades, AOIs, scanpaths, transitions, recurrence, temporal structure, and uncertainty are treated as analyzable behavioral processes rather than isolated summary metrics.
+    Vendor/generic readers, Gazepoint workflows, schema validation, coordinate spaces, timebase/event handling and provenance.
 
--   :material-chart-bell-curve-cumulative: **Psychometrics and measurement**
+-   :material-eye: **Gaze → process structure**
 
-    IRT, process-informed measurement, DIF, conditional norms, reliability, calibration uncertainty, cross-device linking, and validation live in the same analysis ecosystem.
+    Fixations, saccades, AOIs, dwell, scanpaths, transitions, entropy, recurrence, context and uncertainty.
 
--   :material-shield-check: **Reproducibility first**
+-   :material-chart-line: **Pupil → multimodal measurement**
 
-    Provenance, deterministic benchmarks, validation evidence, manifests, software-paper evidence, and explicit guardrails make analysis decisions auditable.
+    Baseline correction, pupil features, functional pupil models, missingness, synchronized streams and process quality.
 
--   :material-language-python: **Deep Python parity**
+-   :material-chart-bell-curve-cumulative: **Features → psychometrics**
 
-    The frozen reference contains **1,182 resolved APIs** and **88 linked articles**, with explicit parity records where R and Python cannot be scientifically identical.
+    IRT, process-informed measurement, DIF, conditional norms, reliability, calibration uncertainty, cross-device linking and validation live in the same analysis ecosystem.
+
+-   :material-shield-check: **Models → validation evidence**
+
+    Recovery, SBC-style evidence, stress tests, negative controls, leakage-aware validation and evidence atlases.
+
+-   :material-source-branch: **Analysis → reproducibility**
+
+    Deterministic benchmarks, manifests, software-paper evidence, frozen-R oracle checks and release audits.
 
 </div>
 
 ## Install the release candidate
 
-The release candidate is currently hardened on `release/0.1.0-deep-parity`:
+=== "Manual wheel"
 
-```bash
-pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
-```
+    ```powershell
+    py -3 -m pip install .\eyeprocesspy-0.1.0-py3-none-any.whl
+    py -3 -c "import eyeprocesspy as ep; print(ep.__version__, ep.__r_reference_version__)"
+    ```
 
-The final PyPI installation command will be promoted here only after the complete release evidence gate is green.
+    CI publishes the tested wheel and source distribution as `eyeprocesspy-manual-install-<commit>` after a clean install/import check.
 
-## Verify your installation in 30 seconds
+=== "Release branch"
 
-The package ships a benchmark study so a clean installation can be checked without downloading external data:
+    ```bash
+    pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
+    ```
+
+## Verify in 30 seconds
 
 ```python
 import eyeprocesspy as ep
@@ -55,56 +88,27 @@ print(audit["valid"])
 print(data)
 ```
 
-For a real export:
+## Deep-parity evidence
 
-```python
-import eyeprocesspy as ep
-
-eye = ep.read_eye_export("participant_001.csv", vendor="auto")
-issues = ep.validate_eye_dataset(eye)
-```
-
-## Capability map
-
-| Workflow | What eyeprocesspy provides |
-| --- | --- |
-| **Import & data contracts** | Vendor/generic readers, Gazepoint workflows, canonical schema, coordinate spaces, timebase and event handling |
-| **Preprocessing & features** | Fixation/saccade workflows, pupil preprocessing, gaze/AOI metrics, temporal and sequence features |
-| **Advanced process analysis** | Probabilistic/compositional AOIs, scanpaths, recurrence, process episodes, functional pupil, missingness and uncertainty |
-| **Psychometrics & IRT** | IRT foundations, diagnostics, scoring, DIF, adaptive/process-informed models, multidimensional and advanced measurement tools |
-| **Measurement intelligence** | Reliability, calibration uncertainty, device linking, fairness, process norms, item-bank optimization, grouped validation |
-| **Validation & reproducibility** | Recovery, SBC, stress tests, negative controls, benchmarks, evidence atlases, provenance and reproducibility manifests |
-| **Communication** | Scientific plots, reporting helpers, software-paper evidence and release-validation artifacts |
-
-## Deep-parity release state
-
-| Dimension | State |
+| Dimension | Current state |
 | --- | ---: |
 | Frozen APIs resolved | **1,182 / 1,182** |
-| R reference | **0.11.1** |
+| Frozen R reference | **0.11.1** |
 | Frozen articles linked | **88 / 88** |
 | P4 numerical `not_started` debt | **0** |
 | P6 plot `not_started` debt | **0** |
-| CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
+| Release CI | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
 
-The deep-parity gate is intentionally strict: a release requires the complete tests, **100% statement coverage**, **100% branch coverage**, Ruff, clean-wheel installation, the frozen-R oracle, and a strict documentation build. The project does not lower the threshold to manufacture a green badge.
+The deep-parity gate remains intentionally strict: full tests, **100% statements**, **100% branches**, Ruff, clean-wheel verification, frozen-R oracle and strict docs build.
 
-## Scientific boundary
+## Choose your route
 
-`eyeprocesspy` provides measurement and analysis infrastructure; it does not turn a process metric into a validated psychological construct by itself. Reliability is not construct validity, prediction is not causation, and biometric/process measures require a defensible study design, measurement model, and ethical interpretation.
+- **First analysis:** [Getting started](getting-started.md) → [Runnable examples](examples/index.md)
+- **Visual capabilities:** [Gallery](gallery.md)
+- **Full scientific workflows:** [Featured workflow map](articles/featured-workflows.md) → [88-article library](articles/index.md)
+- **API lookup:** [Reference](reference/index.md)
+- **Scientific fidelity:** [Parity and validation](parity-and-validation.md)
+- **Release audit:** [Release and reproducibility](release-and-reproducibility.md)
 
-The package therefore exposes caveats, validation objects, provenance, uncertainty and evidence structures alongside analytical results.
-
-## Start here
-
-- **New to the package?** Read [Getting started](getting-started.md).
-- **Evaluating scientific fidelity?** Read [Parity and validation](parity-and-validation.md).
-- **Reproducing or auditing a release?** Read [Release and reproducibility](release-and-reproducibility.md).
-- **Looking for functions?** Browse the [API reference](reference/index.md).
-- **Looking for complete workflows?** Browse the [articles](articles/).
-
-## Project links
-
-- [GitHub repository](https://github.com/stefanosbalaskas/eyeprocesspy)
-- [Release branch](https://github.com/stefanosbalaskas/eyeprocesspy/tree/release/0.1.0-deep-parity)
-- [Deep-parity audit](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml)
+!!! warning "Interpretation boundary"
+    `eyeprocesspy` provides measurement and analysis infrastructure. Reliability is not construct validity, prediction is not causation, and gaze/pupil/process metrics should not be interpreted as psychological states without external validity evidence and an appropriate study design.
