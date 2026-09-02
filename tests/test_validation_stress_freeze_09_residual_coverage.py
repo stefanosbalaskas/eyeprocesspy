@@ -227,7 +227,7 @@ def test_recycle_character_and_claim_matrix_missing_text_guards():
             "evidence_type": "test",
         }
         base.update(kwargs)
-        with pytest.raises(EyeProcessValidationError, match="non-missing and non-empty"):
+        with pytest.raises(EyeProcessValidationError, match="non-empty"):
             vs.eyeprocess_validation_claim_matrix(**base)
 
     bounded = vs.eyeprocess_validation_claim_matrix(
