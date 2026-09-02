@@ -38,7 +38,7 @@ def _long_pupil(n_person: int = 4, n_item: int = 3, n_time: int = 6) -> pd.DataF
 
 def _trial_spec(**kwargs):
     args = dict(
-        df=2,
+        df=3,
         alignment="trial",
         latency_ms=0,
         baseline_window=(0, 200),
@@ -69,26 +69,26 @@ def test_numeric_fallthrough_and_eye_dataset_response_merge_branches():
 
     samples = pd.DataFrame(
         {
-            "recording_id": ["R1", "R1"],
-            "trial_id": ["T1", "T1"],
-            "pupil": [3.0, 3.1],
-            "time_ms": [0.0, 100.0],
+            "recording_id": ["R1", "R1", "R2", "R2"],
+            "trial_id": ["T1", "T1", "T2", "T2"],
+            "pupil": [3.0, 3.1, 3.2, 3.3],
+            "time_ms": [0.0, 100.0, 0.0, 100.0],
         }
     )
     responses = pd.DataFrame(
         {
-            "recording_id": ["R1"],
-            "trial_id": ["T1"],
-            "participant_id": ["P1"],
-            "item_id": ["I1"],
-            "score": [1],
-            "response_time": [0.8],
+            "recording_id": ["R1", "R2"],
+            "trial_id": ["T1", "T2"],
+            "participant_id": ["P1", "P2"],
+            "item_id": ["I1", "I2"],
+            "score": [0, 1],
+            "response_time": [0.8, 0.9],
         }
     )
     merged = fp._prepare_frame(_eye(samples, responses), spec)
-    assert merged["participant_id"].eq("P1").all()
-    assert merged["item_id"].eq("I1").all()
-    assert merged["score"].eq(1).all()
+    assert set(merged["participant_id"]) == {"P1", "P2"}
+    assert set(merged["item_id"]) == {"I1", "I2"}
+    assert set(merged["score"]) == {0, 1}
 
     no_keys = pd.DataFrame({"pupil": [3.0], "time_ms": [0.0]})
     with pytest.raises(ep.EyeProcessValidationError, match="missing identifiers"):
@@ -96,16 +96,16 @@ def test_numeric_fallthrough_and_eye_dataset_response_merge_branches():
 
     canonical = pd.DataFrame(
         {
-            "participant_id": ["P1", "P1"],
-            "item_id": ["I1", "I1"],
-            "trial_id": ["T1", "T1"],
-            "pupil": [3.0, 3.1],
-            "time_ms": [0.0, 100.0],
+            "participant_id": ["P1", "P1", "P2", "P2"],
+            "item_id": ["I1", "I1", "I2", "I2"],
+            "trial_id": ["T1", "T1", "T2", "T2"],
+            "pupil": [3.0, 3.1, 3.2, 3.3],
+            "time_ms": [0.0, 100.0, 0.0, 100.0],
         }
     )
-    response_only = pd.DataFrame({"trial_id": ["T1"], "score": [1]})
+    response_only = pd.DataFrame({"trial_id": ["T1", "T2"], "score": [0, 1]})
     second_merge = fp._prepare_frame(_eye(canonical, response_only), spec)
-    assert second_merge["score"].eq(1).all()
+    assert set(second_merge["score"]) == {0, 1}
 
     with pytest.raises(ep.EyeProcessValidationError, match="Response field"):
         fp._prepare_frame(_eye(canonical, pd.DataFrame({"score": [1]})), spec)
@@ -168,10 +168,7 @@ def test_prepare_guards_valid_percent_zscore_nuisance_fallback_and_zero_time(mon
         raise RuntimeError("forced nuisance failure")
 
     monkeypatch.setattr(smf, "ols", broken_ols)
-    nuisance = ep.prepare_functional_pupil_data(
-        d,
-        _trial_spec(luminance_column="luminance"),
-    )
+    nuisance = ep.prepare_functional_pupil_data(d, _trial_spec(luminance_column="luminance"))
     assert nuisance.nuisance_model is None
     assert np.allclose(
         nuisance.data["pupil_adjusted"].to_numpy(float),
@@ -185,7 +182,7 @@ def test_prepare_guards_valid_percent_zscore_nuisance_fallback_and_zero_time(mon
             "trial_id": ["T1"] * 4,
             "time_ms": [0.0] * 4,
             "pupil": [3.0, 3.1, 3.2, 3.3],
-            "score": [1] * 4,
+            "score": [0, 1, 0, 1],
         }
     )
     with pytest.raises(ep.EyeProcessValidationError, match="times must vary"):
@@ -215,7 +212,7 @@ def test_basis_and_stan_backend_residual_guards(monkeypatch):
         fp.fit_functional_pupil_stan(object())
 
     prepared = ep.prepare_functional_pupil_data(_long_pupil(2, 2, 6), _trial_spec(engine="stan"))
-    basis = ep.functional_pupil_basis(prepared, df=2)
+    basis = ep.functional_pupil_basis(prepared, df=3)
 
     class BrokenCmdStanModel:
         def __init__(self, *args, **kwargs):
