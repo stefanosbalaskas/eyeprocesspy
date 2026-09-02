@@ -220,8 +220,8 @@ def test_preaction_feature_window_optional_channel_and_group_skip_paths():
 
 def test_addm_proxy_empty_and_feature_family_registry_residual_paths():
     empty = pd.DataFrame(columns=["person_id", "trial_id", "time_ms", "aoi"])
-    proxy = ep.addm_glam_proxy_features(empty)
-    assert proxy.features.empty
+    with pytest.raises(ep.EyeProcessValidationError, match="at least one row"):
+        ep.addm_glam_proxy_features(empty)
 
     default_registry = ep.process_feature_family_registry()
     assert {"pattern", "family", "warning"}.issubset(default_registry.columns)
