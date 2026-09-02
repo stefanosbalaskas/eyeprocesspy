@@ -94,6 +94,8 @@ def test_private_coercion_collection_group_and_capture_paths(monkeypatch):
         calls.append(kwargs)
         if "method" in kwargs:
             raise TypeError("legacy")
+        if "interpolation" in kwargs:
+            return real_quantile(a, q)
         return real_quantile(a, q, **kwargs)
 
     monkeypatch.setattr(nc.np, "quantile", legacy_quantile)
