@@ -43,7 +43,15 @@ def test_private_coercion_collection_group_and_capture_paths(monkeypatch):
     np.testing.assert_allclose(nc._numeric_vector(np.array([3, 4])), [3, 4])
     assert math.isnan(nc._numeric_vector("bad")[0])
     np.testing.assert_allclose(nc._numeric_vector(5), [5])
-    assert math.isnan(nc._numeric_vector(_BadArray())[0])
+    sentinel = object()
+    real_asarray = np.asarray
+    with monkeypatch.context() as mp:
+        def flaky_asarray(value, *args, **kwargs):
+            if value is sentinel:
+                raise RuntimeError("first coercion fails")
+            return real_asarray(value, *args, **kwargs)
+        mp.setattr(nc.np, "asarray", flaky_asarray)
+        assert math.isnan(nc._numeric_vector(sentinel)[0])
     assert math.isnan(nc._first_numeric([]))
 
     assert nc._as_list(None) == []
