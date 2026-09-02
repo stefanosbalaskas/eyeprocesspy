@@ -8,52 +8,57 @@
 
 **Reproducible Python infrastructure for eye-tracking, pupillometry, process data, psychometrics, and multimodal behavioral measurement.**
 
-`eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with the frozen R **0.11.1** release used as the scientific reference. It brings vendor import, data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, and reporting into one auditable Python package.
+`eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It joins vendor import, canonical data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, scientific plots, and reporting in one auditable package.
 
-> **Release-candidate status:** the `release/0.1.0-deep-parity` branch is being hardened against a true 100% statement-and-branch coverage gate before release. No reduced coverage threshold is used.
+> **Release-candidate status:** `release/0.1.0-deep-parity` is being hardened against a genuine 100% statement-and-branch coverage gate. The threshold is not reduced to manufacture a green release.
 
-## Why eyeprocesspy?
+## Install
 
-- **One coherent data model** for recordings, gaze samples, fixations, events, AOIs, pupil signals, responses, and provenance.
-- **Scientific parity first:** 1,182 frozen APIs are resolved against eyeprocess 0.11.1, with documented differences where Python and R ecosystems cannot be identical.
-- **Beyond descriptive eye-tracking:** process psychometrics, IRT, sequence/process models, calibration uncertainty, reliability, leakage-aware validation, and multimodal measurement are first-class workflows.
-- **Reproducibility by construction:** provenance, benchmark studies, validation evidence, manifests, software-paper evidence, and deterministic release audits are built into the package.
-- **Cross-platform release discipline:** the release matrix covers Ubuntu, macOS, and Windows on Python 3.11, 3.12, 3.13, and 3.14, plus a frozen-R oracle and clean-wheel validation.
+### Manual wheel — recommended for the current release candidate
 
-## At a glance
+Download the CI-tested manual bundle or wheel and install locally:
 
-| Release dimension | Current deep-parity state |
-| --- | ---: |
-| Frozen public APIs resolved | **1,182 / 1,182** |
-| Frozen R reference | **eyeprocess 0.11.1** |
-| Frozen articles linked | **88 / 88** |
-| Python versions in CI | **3.11–3.14** |
-| Operating systems in CI | **Ubuntu / macOS / Windows** |
-| P4 numerical parity debt marked `not_started` | **0** |
-| P6 plot parity debt marked `not_started` | **0** |
+```powershell
+py -3 -m pip install .\eyeprocesspy-0.1.0-py3-none-any.whl
+py -3 -c "import eyeprocesspy as ep; print(ep.__version__, ep.__r_reference_version__)"
+```
 
-## Installation
+The CI workflow publishes a fresh `eyeprocesspy-manual-install-<commit>` artifact containing the wheel and source distribution **after** the wheel has been installed and import-checked in a clean environment.
 
-For the current release candidate, install directly from the deep-parity branch:
+### Directly from the release branch
 
 ```bash
 pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
 ```
 
-For local development:
+For plotting examples, install Matplotlib through the plotting extra or your environment's equivalent.
 
-```bash
-git clone https://github.com/stefanosbalaskas/eyeprocesspy.git
-cd eyeprocesspy
-git checkout release/0.1.0-deep-parity
-python -m pip install -e ".[dev,docs]"
-```
+## Why eyeprocesspy?
 
-The final PyPI command will be documented after the release evidence gate is fully green.
+- **One coherent data model** for recordings, gaze samples, eye/pupil samples, fixations and other episodes, events, intervals, AOIs, responses, features, quality and provenance.
+- **Scientific parity first:** **1,182 / 1,182** frozen APIs are resolved against eyeprocess 0.11.1, with explicit records for unavoidable cross-language differences.
+- **Process data, not only summaries:** scanpaths, transitions, temporal structure, uncertainty, reliability and psychometrics are first-class analytical objects.
+- **Measurement guardrails:** calibration uncertainty, quality, reliability, DIF/fairness and process metrics carry explicit interpretation boundaries.
+- **Reproducibility by construction:** deterministic benchmarks, provenance, validation evidence, software-paper evidence and release audits are built in.
+- **Broad scientific plotting surface:** gaze, AOI, pupil, quality, IRT, process-measurement, validation and model-diagnostic graphics use Matplotlib and retain underlying plot data where applicable.
 
-## 30-second reproducible workflow
+## Visual tour
 
-The bundled benchmark is the fastest way to verify an installation and exercise the package without external data:
+| Gaze trace | Scanpath |
+| --- | --- |
+| ![Gaze trace](docs/assets/gallery/gaze-trace.svg) | ![Scanpath](docs/assets/gallery/scanpath.svg) |
+
+| Pupil time series | Probabilistic AOI membership |
+| --- | --- |
+| ![Pupil time series](docs/assets/gallery/pupil-timeseries.svg) | ![Probabilistic AOI](docs/assets/gallery/probabilistic-aoi.svg) |
+
+| Process reliability | IRT information |
+| --- | --- |
+| ![Process reliability](docs/assets/gallery/process-reliability.svg) | ![IRT information](docs/assets/gallery/irt-information.svg) |
+
+**[Open the complete visual gallery →](docs/gallery.md)** — 15 lightweight previews paired with deterministic scripts that generate the full Matplotlib figures through the package API.
+
+## 30-second reproducible check
 
 ```python
 import eyeprocesspy as ep
@@ -66,7 +71,7 @@ print(audit["valid"])
 print(data)
 ```
 
-For real exports, use the vendor-aware import surface and continue in the same canonical data model:
+For a real export:
 
 ```python
 import eyeprocesspy as ep
@@ -75,56 +80,67 @@ eye = ep.read_eye_export("participant_001.csv", vendor="auto")
 issues = ep.validate_eye_dataset(eye)
 ```
 
-## What is included?
+## Capability map
 
 | Area | Representative capabilities |
 | --- | --- |
-| **Import & canonicalization** | Generic and vendor-aware readers, Gazepoint workflows, schema validation, coordinate systems, event/timebase handling |
-| **Gaze & AOIs** | Fixations, saccades, dwell, transitions, probabilistic/compositional AOIs, scanpaths, recurrence, spatial/process features |
-| **Pupil & physiology-facing process analysis** | Baseline correction, pupil features, functional pupil models, registration, missingness, uncertainty, sensitivity workflows |
-| **Psychometrics & IRT** | Binary/polytomous IRT utilities, process-informed models, adaptive/scoring diagnostics, DIF, validation, multidimensional and advanced process models |
-| **Measurement intelligence** | Reliability, calibration uncertainty, cross-device linking, process norms, fairness, item-bank optimization, leakage-aware validation |
-| **Reproducibility & validation** | Benchmarks, recovery/SBC/stress evidence, provenance, reproducibility manifests, validation atlases, software-paper evidence |
-| **Plots & reporting** | Scientific diagnostic plots, validation visualizations, evidence/reporting helpers, publication-oriented reproducibility outputs |
+| **Import & canonicalization** | Generic/vendor-aware readers, Gazepoint workflows, schema validation, coordinates, events/timebase, file pairing |
+| **Preprocessing & gaze** | Fixations, saccades, dwell, scanpaths, transitions, entropy, recurrence, spatial/process features |
+| **AOI uncertainty** | Hard, probabilistic and compositional AOI workflows; calibration-error propagation and sensitivity |
+| **Pupil & multimodal process analysis** | Baselines, pupil features, functional pupil, missingness, synchronized streams, staged multimodal models |
+| **Psychometrics & IRT** | Foundations, scoring, fit, Q3, DIF/DTF, process-informed/dynamic/advanced IRT, Bayesian/3PL diagnostics |
+| **Measurement intelligence** | Reliability, calibration uncertainty, process registry/guardrails, linking, norms, fairness, item-bank optimization |
+| **Validation** | Recovery, SBC-style evidence, stress tests, negative controls, grouped/leakage-aware validation, evidence atlases |
+| **Reproducibility** | Bundled benchmarks, provenance, manifests, software-paper evidence, frozen-R oracle and release audits |
+| **Plots & reporting** | Publication-oriented Matplotlib plots, validation visualizations, scientific evidence/reporting helpers |
 
-## Scientific boundary
+## Runnable examples
 
-`eyeprocesspy` provides **measurement and analysis infrastructure**. A computed metric is not automatically a validated psychological construct, diagnosis, or causal explanation. Reliability does not establish construct validity; prediction does not establish causation; and biometrics should be interpreted only within an appropriate study design, measurement model, and ethical framework.
+The repository now includes deterministic examples that require no private research data:
 
-This boundary is explicit throughout the package through validation guardrails, caveats, provenance, and evidence objects.
+```bash
+python examples/core_gallery.py
+python examples/advanced_gallery.py
+```
+
+They generate the gallery figures and demonstrate canonical datasets, gaze/AOI/pupil plots, process reliability, calibration uncertainty, probabilistic AOIs, sampling irregularity and IRT diagnostics.
+
+See **[Runnable examples](docs/examples/index.md)** and **[Featured workflow map](docs/articles/featured-workflows.md)**.
+
+## Deep-parity state
+
+| Dimension | State |
+| --- | ---: |
+| Frozen public APIs resolved | **1,182 / 1,182** |
+| Frozen R reference | **0.11.1** |
+| Frozen articles linked | **88 / 88** |
+| P4 numerical `not_started` debt | **0** |
+| P6 plot `not_started` debt | **0** |
+| CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
+
+The release evidence gate requires the full pytest suite, **100% statement coverage**, **100% branch coverage**, Ruff, a clean wheel install/import, the frozen-R oracle, and a strict documentation build.
 
 ## Documentation
 
-- **Package website:** https://stefanosbalaskas.github.io/eyeprocesspy/
+- **Website:** https://stefanosbalaskas.github.io/eyeprocesspy/
 - [Getting started](docs/getting-started.md)
+- [Runnable examples](docs/examples/index.md)
+- [Visual gallery](docs/gallery.md)
+- [Articles and workflows](docs/articles/)
+- [API reference](docs/reference/)
 - [Parity and validation](docs/parity-and-validation.md)
 - [Release and reproducibility](docs/release-and-reproducibility.md)
-- [API reference](docs/reference/)
-- [Articles](docs/articles/)
 
-## Deep-parity release discipline
+## Scientific boundary
 
-The release branch is not considered complete merely because tests pass. The release evidence gate requires:
-
-1. the complete pytest suite to pass;
-2. **100% statement coverage**;
-3. **100% branch coverage**;
-4. the full Ubuntu/macOS/Windows × Python 3.11–3.14 matrix to pass;
-5. Ruff to pass;
-6. a clean wheel to build, install, and import;
-7. the frozen R 0.11.1 oracle to pass; and
-8. the documentation site to build strictly.
-
-The deep-parity audit intentionally remains red until the coverage conditions are genuinely satisfied.
+`eyeprocesspy` provides **measurement and analysis infrastructure**. A metric is not automatically a validated psychological construct, diagnosis, or causal explanation. Reliability does not establish construct validity; prediction does not establish causation; and gaze/pupil/biometric measures require an appropriate design, measurement model and ethical interpretation.
 
 ## Relationship to the R package
 
-The Python implementation is designed from the frozen eyeprocess 0.11.1 source, API, tests, articles, examples, and expected scientific behavior rather than from function names alone. Where an R dependency or runtime behavior has no faithful Python equivalent, the parity ledger records the difference instead of silently substituting a different estimator.
+The Python implementation is designed from the frozen eyeprocess 0.11.1 source, public API, tests, articles, examples and expected scientific behavior rather than from function names alone. Where an R dependency/runtime has no faithful Python equivalent, the parity ledger records that difference instead of silently substituting a different estimator.
 
-## Contributing
+## Contributing and citation
 
-Issues and pull requests that improve scientific correctness, parity, validation, documentation, interoperability, or reproducibility are welcome. For changes affecting numerical behavior, include a focused test and describe whether the behavior matches, intentionally differs from, or extends the frozen R reference.
+Issues and pull requests that improve scientific correctness, parity, validation, documentation, interoperability or reproducibility are welcome. For numerical changes, include a focused test and state whether the behavior matches, intentionally differs from, or extends the frozen R reference.
 
-## Citation
-
-A formal citation for `eyeprocesspy` will be added with the first archival software release. Until then, cite the repository and the exact version/commit used in your analysis so that the computational environment is reproducible.
+A formal citation will accompany the first archival software release. Until then, cite the repository and exact commit used so the computational environment is reproducible.
