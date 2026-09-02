@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import builtins
 import shutil
 from pathlib import Path
 
@@ -102,7 +101,8 @@ def test_benchmark_reproduction_validation_guards(tmp_path: Path):
     root = _benchmark_copy(tmp_path)
     gaze_path = root / "gaze_samples.csv"
     gaze = pd.read_csv(gaze_path)
-    gaze.loc[0, "valid"] = np.nan
+    gaze["valid"] = gaze["valid"].astype(object)
+    gaze.loc[0, "valid"] = None
     gaze.to_csv(gaze_path, index=False)
     with pytest.raises(ep.EyeProcessValidationError, match="complete logical"):
         ep.run_benchmark_reproduction(ep.eyeprocess_benchmark_study(root))
@@ -115,7 +115,7 @@ def test_benchmark_reproduction_validation_guards(tmp_path: Path):
         ep.run_benchmark_reproduction(ep.eyeprocess_benchmark_study(root2))
 
 
-def test_reproducibility_path_manifest_and_scaffold_residuals(tmp_path: Path, monkeypatch):
+def test_reproducibility_path_manifest_and_scaffold_residuals(tmp_path: Path):
     folder = tmp_path / "payload"
     nested = folder / "nested"
     nested.mkdir(parents=True)
@@ -140,8 +140,8 @@ def test_reproducibility_path_manifest_and_scaffold_residuals(tmp_path: Path, mo
         [{"path": str(tmp_path / "gone.txt"), "bytes": 1, "md5": "x"}]
     )
     checked = ep.verify_reproducibility_manifest({"files": fake_files})
-    assert checked.loc[0, "exists"] == False
-    assert checked.loc[0, "unchanged"] == False
+    assert not bool(checked.loc[0, "exists"])
+    assert not bool(checked.loc[0, "unchanged"])
 
     root = _benchmark_copy(tmp_path / "with-dir")
     extra = root / "nested_resource"
@@ -328,7 +328,7 @@ def test_process_quality_group_calibration_and_sampling_residuals(monkeypatch):
     model = ep.calibration_error_model(fit_data)
     with pytest.raises(ep.EyeProcessValidationError, match="calibration_error_model"):
         ep.gaze_uncertainty_ellipse({})
-    with pytest.raises(ep.EyeProcessValidationError, match="\(0,1\)"):
+    with pytest.raises(ep.EyeProcessValidationError, match=r"\(0,1\)"):
         ep.gaze_uncertainty_ellipse(model, level=1.0)
     with pytest.raises(ep.EyeProcessValidationError, match="two finite"):
         ep.gaze_uncertainty_ellipse(model, center=[np.nan, 0])
@@ -341,7 +341,7 @@ def test_process_quality_group_calibration_and_sampling_residuals(monkeypatch):
         ep.propagate_calibration_uncertainty(fit_data, model, draws=0)
     with pytest.raises(ep.EyeProcessValidationError, match="non-negative"):
         ep.propagate_calibration_uncertainty(fit_data, model, seed=-1)
-    bad_model = dict(model)
+    bad_model = pq.EyeResult(model, eyeprocess_class=model.eyeprocess_class)
     bad_model["covariance"] = np.array([[np.nan, 0], [0, 1]])
     with pytest.raises(ep.EyeProcessValidationError, match="non-finite"):
         ep.propagate_calibration_uncertainty(fit_data, bad_model)
