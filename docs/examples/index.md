@@ -1,8 +1,38 @@
 # Runnable examples
 
-This page provides short, copy-paste workflows that exercise distinct parts of `eyeprocesspy`. The full scripts used for the documentation gallery live in the repository `examples/` directory.
+`eyeprocesspy` ships deterministic examples that require no private participant data. The focused workflows below have been executed against the CI-built `0.1.0` wheel; the gallery generators produce the figures shown throughout this site.
 
-## 1. Verify the installation
+<div class="grid cards" markdown>
+
+-   :material-eye: **Core gaze, AOI and provenance**
+
+    Validate a canonical `EyeDataset`, recover scanpaths and transitions, compute gaze entropy, render auditable plots and inspect provenance.
+
+    [Open worked workflow](core-workflow.md)
+
+-   :material-target: **Calibration uncertainty → probabilistic AOIs**
+
+    Fit an empirical calibration-error model, propagate coordinate uncertainty and diagnose boundary-sensitive AOI assignments.
+
+    [Open worked workflow](calibration-probabilistic-aoi.md)
+
+-   :material-chart-timeline-variant: **Process-measure reliability**
+
+    Estimate repeated-measure ICC, Bland–Altman agreement and temporal stability without confusing reliability with construct validity.
+
+    [Open worked workflow](process-reliability.md)
+
+-   :material-chart-bell-curve-cumulative: **IRT diagnostics**
+
+    Inspect conditional information, item fit and DIF with publication-ready Matplotlib diagnostics.
+
+    [Open worked workflow](irt-diagnostics.md)
+
+</div>
+
+For short task-oriented snippets, use the [Cookbook](../cookbook.md). For visual output, browse the [15-figure gallery](../gallery.md).
+
+## Verify the installation
 
 ```python
 import eyeprocesspy as ep
@@ -15,7 +45,7 @@ audit = ep.validate_benchmark_study(study)
 print(audit["valid"])
 ```
 
-## 2. Import and validate an export
+## Import and validate an export
 
 ```python
 import eyeprocesspy as ep
@@ -29,7 +59,7 @@ if not issues.empty:
 
 The canonical `EyeDataset` keeps recordings, streams, gaze, eye samples, episodes, events, intervals, responses, coordinate spaces, AOIs, features, quality and provenance in explicit tables.
 
-## 3. Scanpath and transition analysis
+## Scanpath and transition analysis
 
 ```python
 sequence = ep.scanpath_sequence(
@@ -45,11 +75,14 @@ matrix = ep.transition_matrix(
     normalize="row",
 )
 
-print(sequence)
-print(matrix)
+entropy = ep.gaze_entropy(
+    eye,
+    level="trial",
+    source="samples",
+)
 ```
 
-## 4. Plot gaze, fixations and pupil data
+## Plot gaze, fixations and pupil data
 
 ```python
 import matplotlib.pyplot as plt
@@ -65,35 +98,31 @@ ax = ep.plot_pupil_timeseries(eye, trial_id="trial-01")
 plt.show()
 ```
 
-See the [visual gallery](../gallery.md) for package-generated examples.
-
-## 5. Process-measure reliability
+The plotting surface preserves its numerical payload on the returned axes where relevant:
 
 ```python
-import pandas as pd
-import eyeprocesspy as ep
+plot_data = ax.eyeprocess_plot_data
+```
 
-repeated = pd.DataFrame(
-    {
-        "person": ["P1", "P1", "P2", "P2", "P3", "P3", "P4", "P4"],
-        "session": ["S1", "S2"] * 4,
-        "dwell_score": [0.10, 0.14, 0.60, 0.55, -0.30, -0.25, 1.10, 1.03],
-    }
-)
+Matrix plots additionally expose `ax.eyeprocess_plot_matrix`.
 
+## Process-measure reliability
+
+```python
 profile = ep.process_reliability_profile(
     repeated,
     person="person",
     session="session",
     measure="dwell_score",
 )
+
 print(profile["icc"])
 print(profile["bland_altman"]["summary"])
 ```
 
 Reliability is population- and design-dependent; it does not establish construct validity.
 
-## 6. Calibration uncertainty and probabilistic AOIs
+## Calibration uncertainty and probabilistic AOIs
 
 ```python
 model = ep.calibration_error_model(calibration_validation_data)
@@ -107,23 +136,21 @@ assignment = ep.probabilistic_aoi_assignment(
     seed=1,
     min_probability=0.50,
 )
-
-print(uncertainty)
-print(assignment["assignments"])
 ```
 
-This workflow quantifies uncertainty due to the fitted calibration-error model; it does **not** estimate a posterior probability of psychological attention.
+This workflow quantifies coordinate uncertainty under the fitted calibration-error model; it does **not** estimate a posterior probability of psychological attention.
 
-## 7. IRT diagnostic plotting
+## IRT diagnostic plotting
 
 ```python
-profile = ep.eye_irt_information_profile(model)
-ax = ep.plot_eye_irt_information_profile(profile)
+ax = ep.plot_eye_irt_information_profile(information_profile)
+ax = ep.plot_eye_irt_item_fit(item_fit, statistic="infit")
+ax = ep.plot_eye_irt_dif_curve(dif_curve)
 ```
 
-The IRT surface also includes item/person fit, Q3/local dependence, score uncertainty, adaptive traces, DIF/DTF, recovery/SBC evidence, bank coverage and process-alignment diagnostics.
+The wider IRT surface also includes person fit, Q3/local dependence, score uncertainty, adaptive traces, link stability, DTF, recovery/SBC evidence, bank coverage, prior sensitivity and process-alignment diagnostics.
 
-## 8. Provenance and reproducibility
+## Provenance and reproducibility
 
 ```python
 manifest = ep.provenance_manifest(eye)
@@ -134,9 +161,15 @@ print(manifest["validation"])
 
 For release-level verification, use the deterministic benchmark, validation evidence, reproducibility manifest and software-paper evidence workflows documented in the article library.
 
-## Full example programs
+## Executable programs
 
-- `examples/core_gallery.py` — constructs and validates a complete synthetic `EyeDataset`, then renders eight core plots.
-- `examples/advanced_gallery.py` — reliability, calibration uncertainty, probabilistic AOIs, sampling irregularity and IRT diagnostic plots.
+| Script | Purpose | Output |
+| --- | --- | --- |
+| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
+| `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
+| `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
+| `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
+| `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
 
-Both are deterministic and use no private participant data.
+All six are deterministic and use no private participant data.
