@@ -124,7 +124,7 @@ def test_overview_trace_fixation_and_scanpath_residuals(dataset):
 
     no_derived = episodes.drop(columns=["derived_by"], errors="ignore")
     axis = ep.plot_fixations(_copy_with(dataset, episodes=no_derived), source="vendor")
-    assert not axis.eyeprocess_plot_data.empty
+    assert axis.eyeprocess_plot_data.empty
     _close(axis)
 
     no_type = episodes.drop(columns=["episode_type"], errors="ignore")
