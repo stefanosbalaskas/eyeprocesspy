@@ -296,7 +296,7 @@ def test_sbc_invalid_draw_truth_name_no_finite_and_tie_paths():
         replications=1,
         seed=3,
     )
-    assert 1 <= tied["ranks"].rank.iloc[0] <= 3
+    assert 1 <= tied["ranks"]["rank"].iloc[0] <= 3
     assert np.isfinite(tied["ranks"].normalized_rank.iloc[0])
 
 

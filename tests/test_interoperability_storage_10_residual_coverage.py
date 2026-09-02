@@ -289,11 +289,11 @@ def test_write_storage_existing_target_and_empty_arrow_dataset(tmp_path):
         x,
         empty_path,
         format="arrow_dataset",
-        tables=["fixations"],
+        tables=["episodes"],
         partitioning=["recording_id", "not_a_column"],
         overwrite=True,
     )
-    assert (empty_path / "fixations" / "part-0.parquet").is_file()
+    assert (empty_path / "episodes" / "part-0.parquet").is_file()
     assert empty.manifest.rows.iloc[0] == 0
 
 
@@ -475,7 +475,7 @@ def test_import_bids_root_and_sidecar_guards(tmp_path):
 )
 def test_import_bids_sidecar_validation_branches(tmp_path, meta, message):
     root = tmp_path / message.replace(" ", "_").replace("`", "")
-    if meta.get("Columns") is None:
+    if "Columns" in meta and meta["Columns"] is None:
         path = _write_physio(root)
         sidecar = Path(str(path)[:-7] + ".json")
         payload = json.loads(sidecar.read_text(encoding="utf-8"))
