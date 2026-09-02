@@ -49,6 +49,7 @@ def test_private_validation_numeric_scale_and_softmax_residuals():
         pa._first_column(pd.DataFrame({"z": [1]}), ("x", "y"), label="coordinate")
 
     assert np.isnan(pa._safe_quantile([np.nan], 0.5))
+    assert pa._entropy([0.0, np.nan, -1.0]) == pytest.approx(0.0)
 
     with pytest.raises(ep.EyeProcessValidationError, match="two-dimensional"):
         pa._softmax(np.asarray([1.0, 2.0]))
