@@ -11,7 +11,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\install_eyeprocesspy.ps1
 ```
 
-The installer automatically finds a supported Python **3.11–3.14**, upgrades `pip`, installs the canonical wheel, and verifies both package versions.
+The installer automatically finds a supported Python **3.11–3.14**, upgrades `pip`, installs the canonical wheel, and verifies both package versions. It prefers the Windows `py` launcher when available and safely falls back to a supported `python` executable when the launcher is absent.
 
 Successful verification reports:
 
