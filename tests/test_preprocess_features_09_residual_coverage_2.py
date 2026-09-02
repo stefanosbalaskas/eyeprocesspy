@@ -185,7 +185,7 @@ def test_ivt_list_empty_short_no_rows_overwrite_and_defensive_pos(monkeypatch):
         assert not bool(defensive["episodes"]["episode_type"].eq("fixation").any())
 
 
-def test_idt_break_dispersion_continue_and_no_rows():
+def test_idt_frozen_end_of_trace_and_dispersion_continue_paths():
     x = _dataset()
 
     too_short = ep.detect_fixations_idt(
@@ -194,7 +194,9 @@ def test_idt_break_dispersion_continue_and_no_rows():
         minimum_duration_ms=10000,
         coordinate_units="degrees",
     )
-    assert not bool(too_short["episodes"]["episode_type"].eq("fixation").any())
+    # Frozen R 0.11.1 reaches the final sample and emits this fixation even
+    # when the requested minimum duration exceeds the remaining trace.
+    assert bool(too_short["episodes"]["episode_type"].eq("fixation").any())
 
     rejected = ep.detect_fixations_idt(
         x,
