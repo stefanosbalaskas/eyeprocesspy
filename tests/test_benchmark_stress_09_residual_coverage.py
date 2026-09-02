@@ -10,11 +10,6 @@ import eyeprocesspy as ep
 import eyeprocesspy.benchmark_stress_09 as bs
 
 
-class _BadArray:
-    def __array__(self, *args, **kwargs):
-        raise RuntimeError("array conversion failed")
-
-
 class _Unpickleable:
     def __reduce_ex__(self, protocol):
         raise RuntimeError("no pickle")
@@ -37,7 +32,7 @@ def _benchmark_result(results: pd.DataFrame) -> dict[str, object]:
     }
 
 
-def test_private_coercion_and_validation_residual_paths():
+def test_private_coercion_and_validation_residual_paths(monkeypatch):
     with pytest.raises(ep.EyeProcessValidationError, match="coercible"):
         bs._as_frame(object(), name="broken")
 
@@ -53,7 +48,20 @@ def test_private_coercion_and_validation_residual_paths():
     np.testing.assert_allclose(bs._numeric(np.asarray([1, 2])), [1.0, 2.0])
     np.testing.assert_allclose(bs._numeric("3"), [3.0])
     np.testing.assert_allclose(bs._numeric(4), [4.0])
-    assert np.isnan(bs._numeric(_BadArray())[0])
+
+    real_asarray = np.asarray
+    calls = 0
+
+    def flaky_asarray(value, *args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("array conversion failed")
+        return real_asarray(value, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(bs.np, "asarray", flaky_asarray)
+        assert np.isnan(bs._numeric(object())[0])
 
     with pytest.raises(ep.EyeProcessValidationError, match="positive integer"):
         bs._positive_integer(np.nan, name="n")
