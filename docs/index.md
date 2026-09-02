@@ -10,7 +10,8 @@
 
 [Get started](getting-started.md){ .md-button .md-button--primary }
 [Manual install](manual-install.md){ .md-button }
-[Python guides](guides/index.md){ .md-button }
+[Worked examples](examples/index.md){ .md-button }
+[Cookbook](cookbook.md){ .md-button }
 [Visual gallery](gallery.md){ .md-button }
 [Browse 88 articles](articles/index.md){ .md-button }
 
@@ -35,6 +36,45 @@
 </div>
 
 [Explore all package-generated figures →](gallery.md)
+
+## Start with a tested workflow
+
+<div class="ep-grid" markdown>
+<div class="ep-card" markdown>
+
+### Core gaze, AOI & provenance
+Validate a canonical dataset, recover scanpaths and transitions, compute entropy, plot the process and retain provenance.
+
+[Open worked example](examples/core-workflow.md)
+
+</div>
+<div class="ep-card" markdown>
+
+### Calibration uncertainty → AOIs
+Estimate empirical calibration error, propagate coordinate uncertainty and inspect boundary-sensitive AOI assignments.
+
+[Open worked example](examples/calibration-probabilistic-aoi.md)
+
+</div>
+<div class="ep-card" markdown>
+
+### Process-measure reliability
+Estimate ICC, Bland–Altman agreement and temporal stability while keeping reliability distinct from validity.
+
+[Open worked example](examples/process-reliability.md)
+
+</div>
+<div class="ep-card" markdown>
+
+### IRT diagnostics
+Visualize information/SEM, item fit and DIF, with links into the wider process-psychometrics surface.
+
+[Open worked example](examples/irt-diagnostics.md)
+
+</div>
+</div>
+
+All four focused examples are deterministic, require no private data, and have been run against the CI-built `0.1.0` wheel. For compact snippets, use the [Cookbook](cookbook.md).
 
 ## One package, multiple research layers
 
@@ -75,7 +115,13 @@
     .\install_eyeprocesspy.ps1
     ```
 
-    The bundled installer has been verified on Windows with Python 3.11.9 and reports `eyeprocesspy 0.1.0` with frozen R reference `0.11.1`.
+    Install the most useful optional backends at the same time:
+
+    ```powershell
+    .\install_eyeprocesspy.ps1 -WithAllRecommended
+    ```
+
+    The installer can target Python 3.11–3.14 and selectively add plotting, psychometrics, ML and Arrow support. See [Manual installation](manual-install.md).
 
 === "Canonical wheel"
 
@@ -83,7 +129,7 @@
     python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
     ```
 
-    If a browser adds ` (1)` to the wheel name, rename the file back before running `pip`. See [Manual installation](manual-install.md).
+    If a browser adds ` (1)` to the wheel name, rename the file back before running `pip`.
 
 === "Release branch"
 
@@ -104,7 +150,7 @@ print(audit["valid"])
 print(data)
 ```
 
-## Choose a scientific workflow
+## Choose a scientific guide
 
 <div class="ep-grid" markdown>
 <div class="ep-card" markdown>
@@ -172,7 +218,7 @@ The deep-parity gate remains intentionally strict: full tests, **100% statements
 
 ## Documentation routes
 
-- **Start working:** [Getting started](getting-started.md) → [Runnable examples](examples/index.md)
+- **Start working:** [Getting started](getting-started.md) → [Worked examples](examples/index.md) → [Cookbook](cookbook.md)
 - **Install without PyPI:** [Manual installation](manual-install.md)
 - **Choose by research question:** [Python-native guides](guides/index.md)
 - **Visual capabilities:** [15-figure gallery](gallery.md) → [Plotting reference](reference/plotting.md)
@@ -183,4 +229,4 @@ The deep-parity gate remains intentionally strict: full tests, **100% statements
 - **Release audit:** [Release and reproducibility](release-and-reproducibility.md)
 
 !!! warning "Interpretation boundary"
-    `eyeprocesspy` provides measurement and analysis infrastructure. Reliability is not construct validity, prediction is not causation, and gaze/pupil/process metrics should not be interpreted as psychological states without external validity evidence and an appropriate study design.
+    `eyeprocesspy` provides measurement and analysis infrastructure. Reliability is not construct validity, prediction is not causation, probabilistic AOI membership is modeled coordinate uncertainty rather than probability of attention, and gaze/pupil/process metrics should not be interpreted as psychological states without external validity evidence and an appropriate study design.
