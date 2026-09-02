@@ -11,7 +11,10 @@ theme:
     - navigation.instant
     - navigation.sections
     - navigation.top
+    - navigation.tracking
+    - toc.follow
     - content.code.copy
+    - content.tabs.link
     - search.suggest
     - search.highlight
   palette:
@@ -48,5 +51,8 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - tables
+
+extra_css:
+  - stylesheets/extra.css
 
 copyright: Copyright &copy; Stefanos Balaskas
