@@ -21,7 +21,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: uv sync --extra dev
       - run: uv run pytest
-      - run: uv run ruff check src tests
+      - run: uv run --no-sync ruff check src tests
 
   build-wheel:
     runs-on: ubuntu-latest
