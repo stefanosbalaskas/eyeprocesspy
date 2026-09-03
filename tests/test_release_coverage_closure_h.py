@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -20,7 +21,7 @@ def test_partition_source_class_and_existing_file_backup_cleanup(tmp_path):
     target = tmp_path / "file-target"
     target.write_text("old", encoding="utf-8")
     store = ps.write_partitioned_eye_storage(_tables(), target, spec, overwrite=True)
-    assert target.is_dir() and store.path == str(target.resolve())
+    assert target.is_dir() and Path(store.path).resolve() == target.resolve()
 
 
 def test_partition_preexisting_backup_file_and_directory(monkeypatch, tmp_path):
