@@ -5,17 +5,17 @@
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="../assets/gallery/irt-information.svg" alt="IRT information curve">
+  <img src="../../assets/gallery/irt-information.svg" alt="IRT information curve">
   <figcaption><strong>Information profile.</strong> Test information across the latent continuum.</figcaption>
 </figure>
 
 <figure>
-  <img src="../assets/gallery/irt-item-fit.svg" alt="IRT item fit">
+  <img src="../../assets/gallery/irt-item-fit.svg" alt="IRT item fit">
   <figcaption><strong>Item fit.</strong> Item-level fit statistic relative to the reference value.</figcaption>
 </figure>
 
 <figure>
-  <img src="../assets/gallery/irt-dif.svg" alt="IRT DIF curve">
+  <img src="../../assets/gallery/irt-dif.svg" alt="IRT DIF curve">
   <figcaption><strong>DIF curve.</strong> Signed focal-reference probability difference across theta.</figcaption>
 </figure>
 
