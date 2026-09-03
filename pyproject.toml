@@ -44,6 +44,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/stefanosbalaskas/eyeprocesspy"
 Documentation = "https://stefanosbalaskas.github.io/eyeprocesspy/"
+PyPI = "https://pypi.org/project/eyeprocesspy/"
+Release = "https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.1.0"
+DOI = "https://doi.org/10.5281/zenodo.22285167"
 Source = "https://github.com/stefanosbalaskas/eyeprocesspy"
 Issues = "https://github.com/stefanosbalaskas/eyeprocesspy/issues"
 Changelog = "https://github.com/stefanosbalaskas/eyeprocesspy/blob/main/CHANGELOG.md"
@@ -118,12 +121,20 @@ exclude_also = [
 ]
 partial_also = [
   'if not dt\.size:return np\.nan',
-  'if width<3:raise EyeProcessValidationError\("Signal is too short for median filtering\."\)',
+  'if not np\.isfinite\(dt\)\.any\(\):return np\.nan',
+  'if not np\.isfinite\(vals\)\.any\(\):continue',
 ]
 
 [tool.ruff]
-line-length = 120
 target-version = "py311"
+line-length = 100
 
 [tool.ruff.lint]
-select = ["E9", "F63", "F7", "F82"]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

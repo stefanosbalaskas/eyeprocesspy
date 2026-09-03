@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: eyeprocesspy
-message: "If you use eyeprocesspy, cite the software release and report both the eyeprocesspy version and frozen R reference version."
+message: "If you use eyeprocesspy, cite the archived software release DOI and report both the eyeprocesspy version and frozen R reference version."
 type: software
 authors:
   - family-names: Balaskas
@@ -8,6 +8,7 @@ authors:
     orcid: https://orcid.org/0000-0003-2444-9796
 version: 0.1.0
 date-released: 2026-09-03
+doi: 10.5281/zenodo.22285167
 repository-code: https://github.com/stefanosbalaskas/eyeprocesspy
 url: https://stefanosbalaskas.github.io/eyeprocesspy/
 license: MIT

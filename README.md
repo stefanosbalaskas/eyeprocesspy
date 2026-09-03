@@ -10,14 +10,17 @@
 
 <p align="center">
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/">Documentation</a> ·
-  <a href="https://stefanosbalaskas.github.io/eyeprocesspy/getting-started/">Getting started</a> ·
-  <a href="https://stefanosbalaskas.github.io/eyeprocesspy/gallery/">Visual gallery</a> ·
+  <a href="https://pypi.org/project/eyeprocesspy/">PyPI</a> ·
+  <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.1.0">v0.1.0 release</a> ·
+  <a href="https://doi.org/10.5281/zenodo.22285167">Zenodo DOI</a> ·
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/articles/">88 workflow articles</a>
 </p>
 
 [![CI](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml)
 [![Documentation](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml)
 [![Deep parity audit](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml)
+[![PyPI](https://img.shields.io/pypi/v/eyeprocesspy.svg)](https://pypi.org/project/eyeprocesspy/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22285167.svg)](https://doi.org/10.5281/zenodo.22285167)
 [![Frozen API](https://img.shields.io/badge/frozen%20API-1182%20%2F%201182-success)](IMPLEMENTATION_STATUS.md)
 [![Coverage](https://img.shields.io/badge/statements%20%2B%20branches-100%25-success)](RELEASE_VALIDATION.md)
 [![Python 3.11–3.14](https://img.shields.io/badge/Python-3.11%E2%80%933.14-blue)](https://www.python.org/)
@@ -25,7 +28,7 @@
 
 `eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It brings vendor import, canonical data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, scientific plots, provenance, and reporting into one auditable package.
 
-> **0.1.0 release evidence:** the controlling deep-parity gate passed with **1,458 tests**, **23,085 / 23,085 statements**, and **9,680 / 9,680 branches** covered. The frozen API and article ledgers are complete, and the cross-platform release matrix is green.
+> **0.1.0 release evidence:** the controlling deep-parity gate passed with **1,458 tests**, **23,085 / 23,085 statements**, and **9,680 / 9,680 branches** covered. The frozen API and article ledgers are complete, the cross-platform release matrix is green, the package is published on PyPI, and the release is archived on Zenodo as **DOI 10.5281/zenodo.22285167**.
 
 ## Release snapshot
 
@@ -40,15 +43,23 @@
 | Statement coverage | **23,085 / 23,085 (100%)** |
 | Branch coverage | **9,680 / 9,680 (100%)** |
 | CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
+| PyPI release | **eyeprocesspy 0.1.0** |
+| Zenodo archive | **10.5281/zenodo.22285167** |
 
 The exact evidence is recorded in [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md) and [`TEST_SUMMARY.md`](TEST_SUMMARY.md).
 
 ## Installation
 
-After publication to PyPI:
+Install the published release from PyPI:
 
 ```bash
 pip install eyeprocesspy
+```
+
+To pin the initial scientific release explicitly:
+
+```bash
+pip install eyeprocesspy==0.1.0
 ```
 
 For development or source installation:
@@ -134,6 +145,9 @@ issues = ep.validate_eye_dataset(eye)
 ## Documentation
 
 - **Website:** https://stefanosbalaskas.github.io/eyeprocesspy/
+- **PyPI:** https://pypi.org/project/eyeprocesspy/
+- **GitHub release:** https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.1.0
+- **Zenodo DOI:** https://doi.org/10.5281/zenodo.22285167
 - [Getting started](docs/getting-started.md)
 - [Manual installation](docs/manual-install.md)
 - [Runnable examples](docs/examples/index.md)
@@ -153,6 +167,14 @@ issues = ep.validate_eye_dataset(eye)
 ## Relationship to R eyeprocess
 
 The Python package is developed against the frozen `eyeprocess 0.11.1` reference. API, articles, data, plots, backends, numerical evidence, and unavoidable language-specific divergences are tracked explicitly. Python-native extensions are separated from reference parity so they do not masquerade as R-equivalent behavior.
+
+## Citation
+
+If you use `eyeprocesspy 0.1.0`, cite the archived software release:
+
+> Balaskas, S. (2026). *eyeprocesspy: Vendor-neutral Python infrastructure for eye-tracking and multimodal process data* (Version 0.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22285167
+
+For reproducibility, also report `eyeprocesspy.__version__` and the frozen R reference exposed as `eyeprocesspy.__r_reference_version__`.
 
 ## License
 
