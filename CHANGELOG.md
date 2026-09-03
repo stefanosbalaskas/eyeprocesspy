@@ -38,6 +38,7 @@ First public Python release aligned to the frozen R `eyeprocess` 0.11.1 referenc
 
 - Frozen workflow article counterparts: **88 / 88**.
 - GitHub Pages documentation and article corpus.
+- Published-release front page with direct PyPI, GitHub Release, and Zenodo DOI access; redesigned responsive documentation landing page with install, workflow, validation, and capability entry points.
 - PEP 639 SPDX-style license metadata.
 - `CITATION.cff` and `.zenodo.json` release metadata.
 - PyPI Trusted Publishing, provenance attestation, and GitHub Release automation.
