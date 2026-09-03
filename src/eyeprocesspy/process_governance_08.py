@@ -233,7 +233,7 @@ def audit_process_anomalies(data: Any, person: str = "person_id", metrics: Seque
     if len(metrics)<2: raise EyeProcessValidationError("At least two usable numeric metrics are required.")
     q=d[[person,*metrics]].copy(); q[metrics]=q[metrics].apply(pd.to_numeric,errors="coerce")
     if aggregate: q=q.groupby(person,sort=True,as_index=False)[metrics].mean()
-    X=q[metrics].to_numpy(float)
+    X=q[metrics].to_numpy(float).copy()
     for j in range(X.shape[1]):
         mu=np.nanmean(X[:,j]) if np.isfinite(X[:,j]).any() else 0.0; X[~np.isfinite(X[:,j]),j]=mu
     center=X.mean(axis=0); V=np.cov(X,rowvar=False)

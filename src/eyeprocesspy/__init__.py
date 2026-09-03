@@ -1,5 +1,5 @@
 """eyeprocesspy: Python parity implementation of R eyeprocess 0.11.1."""
-__version__ = "0.1.0.dev0"
+__version__ = "0.1.0"
 __r_reference_version__ = "0.11.1"
 
 from .exceptions import *
@@ -125,9 +125,6 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .validation_orchestration_completion_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-from .vendor_corpus_10 import *
-__all__ = [n for n in globals() if not n.startswith("_")]
-
 from .partitioned_storage_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
@@ -135,6 +132,9 @@ from .benchmark_reproducibility_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .vendor_importers_10 import *
+__all__ = [n for n in globals() if not n.startswith("_")]
+
+from .vendor_corpus_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .core_plots_10 import *

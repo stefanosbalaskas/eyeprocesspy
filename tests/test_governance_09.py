@@ -67,9 +67,11 @@ def _small_design(misspec=False, reps=2, seed=9):
 
 def test_validation_design_expands_runs_freezes_and_matches_reference():
     d = _small_design()
+    assert ep.validate_process_validation_design(d) is True
     g = ep.expand_process_validation_design(d)
     assert d.eyeprocess_class == "eye_process_validation_design"
     assert len(g) == 1
+    assert ep.validation_condition_id(g) == g.condition_id.astype(str).tolist()
     x = ep.run_process_validation(g)
     assert x.eyeprocess_class == "eye_process_validation_result"
     assert len(x.estimates) > 0
@@ -77,6 +79,8 @@ def test_validation_design_expands_runs_freezes_and_matches_reference():
     assert len(ep.validation_recovery_table(x)) == 1
     assert len(ep.validation_coverage_table(x)) == 1
     assert len(ep.validation_summary_mcse(x)) == 1
+    assert isinstance(ep.validation_condition_ranking(x), pd.DataFrame)
+    assert isinstance(ep.validation_failure_profile(x), pd.DataFrame)
     assert np.isfinite(ep.validation_robustness_score(x))
     ref = ep.freeze_validation_reference(x)
     cmp = ep.validate_against_reference(x, ref, tolerance=1e-8)
@@ -117,7 +121,15 @@ def test_governed_pipeline_dependencies_outputs_resumption_and_exports(tmp_path)
         spec=spec,
     )
     assert ep.validate_eye_pipeline(p) is True
+    graph = ep.eye_pipeline_graph(p)
+    assert graph.vertices.step.tolist() == ["a", "b"]
+    assert len(graph.edges) == 1
+    manifest = ep.eye_pipeline_manifest(p)
+    assert manifest.execution_order.tolist() == [1, 2]
     r = ep.run_eye_pipeline(p)
+    status = ep.pipeline_step_status(r)
+    assert set(status.status) == {"success"}
+    assert ep.pipeline_failures(r).empty
     assert ep.pipeline_result(r, "b") == 5
     assert r.completed is True
     assert ep.audit_eye_pipeline(r).valid is True
@@ -154,6 +166,10 @@ def test_api_lifecycle_registry_is_frozen_complete_and_auditable(tmp_path):
     assert ep.eye_api_status("run_eye_pipeline", reg2).status.iloc[0] == "workflow"
     assert ep.eye_api_status("unknown_symbol", reg2).status.iloc[0] == "unreviewed"
     assert "run_eye_pipeline" in set(ep.canonical_eye_api(reg2).name)
+    lifecycle_diff = ep.api_lifecycle_diff(reg, reg2)
+    assert len(lifecycle_diff) == 1182
+    assert {"name", "old_status", "new_status", "changed"}.issubset(lifecycle_diff.columns)
+    assert isinstance(ep.eye_api_superseded(reg2), pd.DataFrame)
     inv = ep.eye_api_inventory()
     assert len(inv) == 1182
     audit = ep.audit_eye_api(inv, reg)
@@ -184,6 +200,8 @@ def test_sensitivity_grid_run_summary_stability_and_comparison_helpers():
     s = ep.summarise_process_sensitivity(x, p_value="p_value")
     assert s.specifications.iloc[0] == 3
     assert np.isfinite(ep.sensitivity_sign_stability(x))
+    assert ep.sensitivity_significance_stability(x, alpha=.05) == pytest.approx(2 / 3)
+    assert ep.sensitivity_threshold_stability(x, threshold=.15) == pytest.approx(2 / 3)
     assert ep.decision_stability(x, p_value="p_value").eyeprocess_class == "eye_decision_stability"
     assert ep.sensitivity_rank_stability([(1, 2, 3), (1, 3, 2)]) == pytest.approx(.5)
     assert len(ep.specification_curve_data(x)) == 3
@@ -197,13 +215,17 @@ def test_sensitivity_grid_run_summary_stability_and_comparison_helpers():
     run = ep.run_process_sensitivity(data, g, lambda d, spec: float({"a": .2, "b": .3, "c": .1}[spec.method.iloc[0]]))
     assert len(run.results) == 3
     methods = {"m1": 1, "m2": 2}
-    cmp = ep.compare_aoi_methods(data, methods, lambda d, method, spec: float(method))
-    assert len(cmp.results) == 2
+    analysis = lambda d, method, spec: float(method)
+    assert len(ep.compare_aoi_methods(data, methods, analysis).results) == 2
+    assert len(ep.compare_fixation_methods(data, methods, analysis).results) == 2
+    assert len(ep.compare_pupil_preprocessing(data, methods, analysis).results) == 2
+    assert len(ep.compare_process_models(data, methods, analysis).results) == 2
 
 
 def test_decision_manifests_hash_lock_compare_io_blinding_entropy_and_coverage(tmp_path):
     x = ep.eye_decision_manifest(preprocessing={"blink": "linear"}, model={"family": "gaussian"})
     assert x.eyeprocess_class == "eye_decision_manifest"
+    assert ep.validate_decision_manifest(x) is True
     assert ep.decision_manifest_hash(x)
     lock = ep.lock_decision_manifest(x)
     assert ep.verify_decision_manifest_lock(lock) is True

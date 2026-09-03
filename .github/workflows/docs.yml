@@ -5,6 +5,19 @@ on:
     branches:
       - main
     paths:
+      - "docs/**"
+      - "src/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
+      - "README.md"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
+      - "README.md"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
@@ -14,19 +27,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-main
+  group: "docs-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}"
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out release-candidate documentation source
-        uses: actions/checkout@v4
-        with:
-          ref: release/0.1.0-deep-parity
+      - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Configure GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -35,11 +46,13 @@ jobs:
       - name: Build documentation strictly
         run: uv run mkdocs build --strict
       - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:

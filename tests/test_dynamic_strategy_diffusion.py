@@ -3,6 +3,8 @@ import pandas as pd
 import pytest
 
 import eyeprocesspy as ep
+import eyeprocesspy.dynamic_irt as dynamic_mod
+from eyeprocesspy.exceptions import EyeProcessBackendError, EyeProcessModelError
 
 
 def test_dynamic_irtree_simulation_and_design_preserve_transitions():
@@ -25,7 +27,12 @@ def test_structural_zeros_are_enforced():
 
 def test_multinomial_transition_returns_probabilities_and_diagnostics():
     sim = ep.simulate_dynamic_irtree_data(n_person=15, n_item=5, transitions_per_trial=7, seed=4)
-    fit = ep.fit_dynamic_irtree(sim.transitions, ep.dynamic_irtree_spec(engine="multinomial"), min_transitions=2)
+    spec = ep.dynamic_irtree_spec(engine="multinomial")
+    prepared = ep.prepare_dynamic_irtree_data(sim.transitions, spec)
+    design = ep.dynamic_transition_design(prepared, spec)
+    direct = ep.fit_multinomial_transition(design, ridge=spec.ridge)
+    assert direct.eyeprocess_class == "eye_multinomial_transition"
+    fit = ep.fit_dynamic_irtree(sim.transitions, spec, min_transitions=2)
     assert fit.eyeprocess_class == "eye_dynamic_irtree"
     probability = ep.decode_dynamic_states(fit, "probability")
     assert len(probability) == len(fit.transitions)
@@ -35,6 +42,33 @@ def test_multinomial_transition_returns_probabilities_and_diagnostics():
     assert diagnostic.eyeprocess_class == "eye_transition_diagnostics"
     comparison = ep.compare_dynamic_transition_models({"multinomial": fit})
     assert {"model", "engine", "AIC", "BIC"}.issubset(comparison.columns)
+
+
+def test_dynamic_stan_gate_ppc_guard_and_recovery_plan(monkeypatch):
+    sim = ep.simulate_dynamic_irtree_data(n_person=8, n_item=4, transitions_per_trial=5, seed=33)
+    spec = ep.dynamic_irtree_spec(engine="multinomial")
+    prepared = ep.prepare_dynamic_irtree_data(sim.transitions, spec)
+    design = ep.dynamic_transition_design(prepared, spec)
+
+    def unavailable():
+        raise EyeProcessBackendError("stan backend intentionally unavailable in parity-core test")
+
+    monkeypatch.setattr(dynamic_mod, "_cmdstanpy", unavailable)
+    with pytest.raises(EyeProcessBackendError, match="intentionally unavailable"):
+        ep.fit_dynamic_irtree_stan(design, ep.dynamic_irtree_spec(engine="stan"))
+
+    fitted = ep.fit_dynamic_irtree(sim.transitions, spec, min_transitions=2)
+    with pytest.raises(EyeProcessModelError, match="Stan dynamic IRTree fit"):
+        ep.dynamic_posterior_predictive_check(fitted)
+
+    recovery = ep.dynamic_irtree_recovery(
+        grid=pd.DataFrame({"state_misclassification": [0.0], "missing_state": [0.0]}),
+        replications=1,
+        spec=spec,
+        base_seed=7,
+    )
+    assert recovery.eyeprocess_class == "eye_dynamic_recovery"
+    assert len(recovery.plan.jobs) == 1
 
 
 def test_strategy_signatures_normalized_and_zero_rejected():
@@ -55,6 +89,9 @@ def test_strategy_em_returns_anchored_probabilities():
         {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": .2}},
         engine="em", multiple_starts=2,
     )
+    prepared = ep.prepare_strategy_mixture_data(sim, spec)
+    direct = ep.fit_strategy_mixture_em(prepared, starts=2, max_iter=30, seed=5)
+    assert direct.eyeprocess_class == "eye_strategy_mixture_em"
     fit = ep.fit_theory_strategy_irt(sim, spec, seed=5, max_iter=30)
     assert fit.eyeprocess_class == "eye_theory_strategy_irt"
     probability = ep.strategy_posterior_probabilities(fit)
@@ -62,6 +99,37 @@ def test_strategy_em_returns_anchored_probabilities():
     np.testing.assert_allclose(probability[spec.strategies].sum(axis=1), 1, atol=1e-6)
     uncertainty = ep.strategy_classification_uncertainty(fit)
     assert float(uncertainty.summary.iloc[0].uncertain_fraction) >= 0
+    labels = ep.strategy_label_switching_diagnostics(fit)
+    assert {"start", "delta_best", "equivalent_optimum", "label_anchor"}.issubset(labels.columns)
+    heterogeneity = ep.compare_strategy_heterogeneity(fit)
+    assert set(heterogeneity.strategy) == set(spec.strategies)
+
+
+def test_strategy_stan_gate_aoi_sensitivity_and_manipulation(monkeypatch):
+    signatures = pd.DataFrame([[1, 1], [-1, .2]], index=["analytic", "heuristic"], columns=["prompt", "evidence"])
+    sim = ep.simulate_strategy_mixture_data(8, 3, signatures, seed=21)
+    sim["condition"] = np.where(np.arange(len(sim)) % 2 == 0, "A", "B")
+    spec = ep.theory_strategy_spec(
+        {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": .2}},
+        condition="condition", engine="em", multiple_starts=1,
+    )
+    prepared = ep.prepare_strategy_mixture_data(sim, spec)
+
+    def unavailable():
+        raise EyeProcessBackendError("stan backend intentionally unavailable in strategy parity test")
+
+    monkeypatch.setattr(dynamic_mod, "_cmdstanpy", unavailable)
+    with pytest.raises(EyeProcessBackendError, match="intentionally unavailable"):
+        ep.fit_strategy_mixture_stan(prepared)
+
+    fit = ep.fit_theory_strategy_irt(sim, spec, seed=3, max_iter=15)
+    validation = ep.validate_strategy_manipulation(fit, "condition", "analytic", minimum_contrast=0)
+    assert validation.supported is True
+    assert len(validation.summary) == 2
+
+    sensitivity = ep.strategy_aoi_sensitivity({"base": sim}, spec, seed=3, max_iter=15)
+    assert sensitivity.eyeprocess_class == "eye_strategy_aoi_sensitivity"
+    assert len(sensitivity.summary) == len(spec.strategies)
 
 
 def test_gaze_diffusion_data_and_baseline_fit():
@@ -80,6 +148,34 @@ def test_gaze_diffusion_data_and_baseline_fit():
     assert {"component", "term", "estimate"}.issubset(parameters.columns)
     diagnostic = ep.diffusion_parameter_diagnostics(fit)
     assert diagnostic.engine == "baseline"
+    ppc = ep.diffusion_posterior_predictive(fit, draws=5, seed=2)
+    assert ppc.eyeprocess_class == "eye_diffusion_ppc"
+    assert ppc.method == "baseline descriptive"
+    comparison = ep.compare_diffusion_accuracy_rt(fit)
+    assert comparison.model.tolist() == ["gaze_diffusion", "separate_accuracy_log_rt"]
+
+
+def test_diffusion_identification_plan_and_stan_gate(monkeypatch):
+    spec = ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline")
+    study = ep.diffusion_identification_study(
+        conditions={"n_person": [8], "n_item": [4], "gaze_effect": [0.2], "contaminant_fraction": [0.0]},
+        replications=1,
+        base_seed=11,
+        spec=spec,
+    )
+    assert study.eyeprocess_class == "eye_diffusion_identification_study"
+    assert len(study.plan.jobs) == 1
+
+    sim = ep.simulate_gaze_diffusion_data(8, 4, seed=12, time_step=.01, max_decision_time=2)
+    stan_spec = ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="stan")
+    prepared = ep.prepare_gaze_diffusion_data(sim, stan_spec)
+
+    def unavailable():
+        raise EyeProcessBackendError("stan backend intentionally unavailable in diffusion parity test")
+
+    monkeypatch.setattr(dynamic_mod, "_cmdstanpy", unavailable)
+    with pytest.raises(EyeProcessBackendError, match="intentionally unavailable"):
+        ep.fit_gaze_diffusion_stan(prepared)
 
 
 def test_advanced_stan_resources_present_and_syntax_guarded():

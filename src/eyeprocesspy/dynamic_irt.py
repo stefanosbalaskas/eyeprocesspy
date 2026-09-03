@@ -162,7 +162,7 @@ def dynamic_irtree_spec(
 
 def _long_to_transitions(d: pd.DataFrame, person: str, item: str, trial: str, state: str, time: str | None) -> pd.DataFrame:
     _required(d, [person, item, state], "long state data")
-    if d[[person]].isna().any() or d[[item]].isna().any():
+    if d[person].isna().any() or d[item].isna().any():
         raise EyeProcessValidationError("Participant and item identifiers must be non-missing.")
     if trial not in d:
         d[trial] = d[person].astype(str) + "::" + d[item].astype(str)
@@ -293,7 +293,8 @@ def structural_transition_mask(
         raise EyeProcessValidationError("At least two states are required.")
     mask = pd.DataFrame(True, index=levels, columns=levels)
     if not allow_self:
-        np.fill_diagonal(mask.values, False)
+        for level in levels:
+            mask.loc[level, level] = False
 
     def apply_pairs(pairs: Any, value: bool) -> None:
         nonlocal mask
@@ -469,7 +470,7 @@ def fit_dynamic_irtree_stan(design: EyeResult, spec: EyeResult, seed: int = 1, r
                          sequence_start=starts.astype(int), sequence_length=lengths, allowed_hidden=hmask, emission_prior=emission)
         filename, hidden = "dynamic_irtree_hidden.stan", True
     else:
-        stan_data = dict(N=design.X.shape[0], K=len(design.states), D=design.X.shape[1], P=len(design.participants), J=len(design.items),
+        stan_data = dict(N=design.X.shape[0], K=len(design.states), D=design.X.shape[1], P=len(design.participants), J=len(design["items"]),
                          X=design.X.to_numpy(float), y=np.asarray(design.y, int), person=np.asarray(design.data["person_index"], int),
                          item=np.asarray(design.data["item_index"], int), from_state=np.asarray(design.data["from_index"], int),
                          allowed=np.asarray(design.allowed, int), observation_weight=np.asarray(design.data["state_probability"], float),
@@ -934,7 +935,9 @@ def extract_diffusion_parameters(object:EyeResult,variables:Sequence[str]=("beta
     s=object.model.summary.copy(); keep=np.zeros(len(s),bool)
     namecol="variable" if "variable" in s else s.index.astype(str)
     vals=s["variable"].astype(str) if "variable" in s else pd.Series(s.index.astype(str),index=s.index)
-    for prefix in variables: keep|=vals.str.startswith(prefix).to_numpy(); return s.loc[keep].copy()
+    for prefix in variables:
+        keep |= vals.str.startswith(prefix).to_numpy()
+    return s.loc[keep].copy()
 
 
 def diffusion_parameter_diagnostics(object:EyeResult,correlation_threshold:float=.85)->EyeResult:

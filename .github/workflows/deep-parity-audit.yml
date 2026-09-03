@@ -1,0 +1,85 @@
+name: Deep parity audit
+
+on:
+  push:
+    branches:
+      - release/0.1.0-deep-parity
+  workflow_dispatch:
+
+concurrency:
+  group: "deep-parity-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Sync development environment
+        run: uv sync --extra dev --extra arrow
+      - name: Parity debt audit
+        run: uv run python tools/deep_parity_audit.py
+      - name: Public API documentation audit
+        run: uv run python tools/api_documentation_audit.py
+      - name: Coverage baseline
+        id: coverage
+        if: always()
+        run: |
+          uv run coverage erase
+          set +e
+          uv run coverage run --branch --source=eyeprocesspy -m pytest -q
+          test_exit=$?
+          set -e
+          echo "pytest_exit=${test_exit}" >> "$GITHUB_OUTPUT"
+          uv run coverage json -o coverage.json
+          uv run coverage report -m --fail-under=0
+      - name: Coverage summary
+        if: always() && hashFiles('coverage.json') != ''
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open('coverage.json', encoding='utf-8'))
+          totals = data['totals']
+          print(f"COVERAGE_PERCENT={totals['percent_covered']}")
+          print(f"COVERAGE_STATEMENTS={totals['covered_lines']}/{totals['num_statements']}")
+          print(f"COVERAGE_BRANCHES={totals.get('covered_branches', 0)}/{totals.get('num_branches', 0)}")
+          PY
+      - name: Upload coverage evidence
+        if: always() && hashFiles('coverage.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: deep-parity-coverage
+          path: coverage.json
+          if-no-files-found: error
+      - name: Enforce tests and true 100 percent statement and branch coverage
+        if: always()
+        env:
+          PYTEST_EXIT: ${{ steps.coverage.outputs.pytest_exit }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path('coverage.json')
+          if not path.exists():
+              raise SystemExit('Coverage gate failed: coverage.json was not produced.')
+
+          test_exit = int(os.environ.get('PYTEST_EXIT') or 1)
+          data = json.loads(path.read_text(encoding='utf-8'))
+          totals = data['totals']
+          lines_ok = totals['covered_lines'] == totals['num_statements']
+          branches_ok = totals.get('covered_branches', 0) == totals.get('num_branches', 0)
+          if test_exit != 0 or not lines_ok or not branches_ok:
+              raise SystemExit(
+                  'Release evidence gate failed: '
+                  f"pytest_exit={test_exit}; "
+                  f"lines {totals['covered_lines']}/{totals['num_statements']}; "
+                  f"branches {totals.get('covered_branches', 0)}/{totals.get('num_branches', 0)}"
+              )
+          print('TEST_AND_COVERAGE_GATE=PASS')
+          PY
