@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -176,7 +177,7 @@ def test_partitioned_storage_overwrite_and_atomic_restore(monkeypatch, tmp_path)
     target = tmp_path / "store"
     ps.write_partitioned_eye_storage(tables, target, spec)
     updated = ps.write_partitioned_eye_storage(tables, target, spec, overwrite=True)
-    assert updated.path == str(target.resolve())
+    assert Path(updated.path).resolve() == target.resolve()
 
     # Force the staging->target rename to fail after target->backup. The
     # transactional exception branch must restore the original target.
@@ -186,8 +187,7 @@ def test_partitioned_storage_overwrite_and_atomic_restore(monkeypatch, tmp_path)
 
     def flaky_rename(self, destination):
         src = str(self)
-        dst = str(destination)
-        if ".staging-" in src and dst == str(target2.resolve()):
+        if ".staging-" in src and Path(destination).resolve() == target2.resolve():
             raise OSError("forced atomic commit failure")
         return original_rename(self, destination)
 
