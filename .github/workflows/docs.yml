@@ -3,12 +3,13 @@ name: Documentation
 on:
   push:
     branches:
-      - release/0.1.0-deep-parity
+      - main
     paths:
       - "docs/**"
       - "src/**"
       - "mkdocs.yml"
       - "pyproject.toml"
+      - "README.md"
       - ".github/workflows/docs.yml"
   pull_request:
     paths:
@@ -16,15 +17,17 @@ on:
       - "src/**"
       - "mkdocs.yml"
       - "pyproject.toml"
+      - "README.md"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: "docs-validation-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}"
+  group: "docs-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}"
   cancel-in-progress: true
 
 jobs:
@@ -33,12 +36,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      - name: Configure GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Install package and documentation dependencies
         run: uv sync --extra docs
       - name: Build documentation strictly
         run: uv run mkdocs build --strict
-      - name: Request protected Pages deployment
-        if: github.event_name == 'push' && github.ref == 'refs/heads/release/0.1.0-deep-parity'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run docs.yml --ref main
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

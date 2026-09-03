@@ -10,72 +10,65 @@
 
 <p align="center">
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/">Documentation</a> ·
-  <a href="docs/getting-started.md">Getting started</a> ·
-  <a href="docs/gallery.md">Visual gallery</a> ·
-  <a href="docs/articles/index.md">88 workflow articles</a>
+  <a href="https://stefanosbalaskas.github.io/eyeprocesspy/getting-started/">Getting started</a> ·
+  <a href="https://stefanosbalaskas.github.io/eyeprocesspy/gallery/">Visual gallery</a> ·
+  <a href="https://stefanosbalaskas.github.io/eyeprocesspy/articles/">88 workflow articles</a>
 </p>
 
-[![CI](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml/badge.svg?branch=release%2F0.1.0-deep-parity)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml)
-[![Documentation](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml/badge.svg?branch=release%2F0.1.0-deep-parity)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml)
-[![Deep parity audit](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml/badge.svg?branch=release%2F0.1.0-deep-parity)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml)
+[![CI](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/ci.yml)
+[![Documentation](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/docs.yml)
+[![Deep parity audit](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml/badge.svg?branch=main)](https://github.com/stefanosbalaskas/eyeprocesspy/actions/workflows/deep-parity-audit.yml)
 [![Frozen API](https://img.shields.io/badge/frozen%20API-1182%20%2F%201182-success)](IMPLEMENTATION_STATUS.md)
+[![Coverage](https://img.shields.io/badge/statements%20%2B%20branches-100%25-success)](RELEASE_VALIDATION.md)
 [![Python 3.11–3.14](https://img.shields.io/badge/Python-3.11%E2%80%933.14-blue)](https://www.python.org/)
 [![R reference 0.11.1](https://img.shields.io/badge/R%20reference-0.11.1-276DC3)](docs/parity-and-validation.md)
 
 `eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It brings vendor import, canonical data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, scientific plots, provenance, and reporting into one auditable package.
 
-> **Release-candidate status:** API parity is complete, while `release/0.1.0-deep-parity` remains deliberately gated on the final evidence, coverage, CI, artifact, and documentation checks. The coverage threshold is not reduced to manufacture a green release.
+> **0.1.0 release evidence:** the controlling deep-parity gate passed with **1,458 tests**, **23,085 / 23,085 statements**, and **9,680 / 9,680 branches** covered. The frozen API and article ledgers are complete, and the cross-platform release matrix is green.
 
-## Release-candidate snapshot
+## Release snapshot
 
-| Dimension | Current state |
+| Dimension | Verified state |
 | --- | ---: |
 | Frozen R public APIs resolved | **1,182 / 1,182** |
 | Frozen R reference | **0.11.1** |
 | Frozen workflow articles linked | **88 / 88** |
 | P4 numerical `not_started` debt | **0** |
 | P6 plot `not_started` debt | **0** |
-| CI target | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
-| Public release | **Not yet tagged or published** |
+| Full deep-parity tests | **1,458 passed** |
+| Statement coverage | **23,085 / 23,085 (100%)** |
+| Branch coverage | **9,680 / 9,680 (100%)** |
+| CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
 
-The release evidence gate requires the full pytest suite, **100% statement coverage**, **100% branch coverage**, Ruff, clean wheel/sdist install checks, the frozen-R oracle, and a strict documentation build.
+The exact evidence is recorded in [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md) and [`TEST_SUMMARY.md`](TEST_SUMMARY.md).
 
-## Windows manual installation — verified
+## Installation
 
-The hardened installer has now been exercised successfully on a real Windows installation with **Python 3.11.9**. Package verification passed, the recommended extras installed, and `python -m pip check` reported **No broken requirements found**.
+After publication to PyPI:
 
-Extract the manual-install ZIP and either double-click:
-
-```text
-RUN_INSTALL_RECOMMENDED.cmd
+```bash
+pip install eyeprocesspy
 ```
 
-or run:
+For development or source installation:
+
+```bash
+pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@v0.1.0"
+```
+
+### Windows manual installation
+
+The hardened installer has been exercised successfully on a real Windows installation with **Python 3.11.9**. Package verification passed, the recommended extras installed, and `python -m pip check` reported **No broken requirements found**.
+
+From the extracted manual-install bundle:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\install_eyeprocesspy.ps1 -WithAllRecommended
 ```
 
-The installer does **not** require the Windows `py` launcher. It detects supported Python 3.11–3.14 installations through available launchers, active virtual/Conda environments, common Conda paths, and standard per-user Python locations. An interpreter can also be supplied explicitly:
-
-```powershell
-.\install_eyeprocesspy.ps1 -PythonCommand "C:\Path\To\python.exe" -WithAllRecommended
-```
-
-The recommended bundle installs `plots`, `psychometrics`, `ml`, `arrow`, `physio`, and `docs`. See the full [manual-install guide](docs/manual-install.md).
-
-Direct wheel installation remains available:
-
-```powershell
-python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
-```
-
-Or install directly from this branch:
-
-```bash
-pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.1.0-deep-parity"
-```
+The installer does **not** require the Windows `py` launcher and can also use an explicitly supplied interpreter path. See the [manual-install guide](https://stefanosbalaskas.github.io/eyeprocesspy/manual-install/).
 
 ## Why eyeprocesspy?
 
@@ -100,7 +93,7 @@ pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@release/0.
 | --- | --- |
 | ![Process reliability](docs/assets/gallery/process-reliability.svg) | ![IRT information](docs/assets/gallery/irt-information.svg) |
 
-**[Open the complete visual gallery →](docs/gallery.md)**
+**[Open the complete visual gallery →](https://stefanosbalaskas.github.io/eyeprocesspy/gallery/)**
 
 ## 30-second reproducible check
 
@@ -138,24 +131,6 @@ issues = ep.validate_eye_dataset(eye)
 | **Reproducibility** | Bundled benchmarks, provenance, manifests, frozen-R oracle, software-paper and release evidence |
 | **Plots & reporting** | Publication-oriented plots, validation visualizations, scientific evidence/reporting helpers |
 
-## Tested workflows
-
-```bash
-python examples/complete_workflow.py
-python examples/calibration_probabilistic_aoi.py
-python examples/process_reliability.py
-python examples/irt_diagnostics.py
-```
-
-| Workflow | What it demonstrates |
-| --- | --- |
-| [Core gaze/AOI/provenance](docs/examples/core-workflow.md) | canonical dataset, validation, scanpaths, transitions, entropy, plots and provenance |
-| [Calibration uncertainty & probabilistic AOIs](docs/examples/calibration-probabilistic-aoi.md) | empirical calibration error, uncertainty ellipse and boundary-sensitive AOI assignment |
-| [Process reliability](docs/examples/process-reliability.md) | ICC, Bland–Altman agreement and temporal stability |
-| [IRT diagnostics](docs/examples/irt-diagnostics.md) | information/SEM, item fit and DIF plotting |
-
-For shorter tasks use the **[Cookbook](docs/cookbook.md)**; for broader walkthroughs use the **[Python-native guides](docs/guides/)** and **[88-article workflow library](docs/articles/)**.
-
 ## Documentation
 
 - **Website:** https://stefanosbalaskas.github.io/eyeprocesspy/
@@ -178,10 +153,6 @@ For shorter tasks use the **[Cookbook](docs/cookbook.md)**; for broader walkthro
 ## Relationship to R eyeprocess
 
 The Python package is developed against the frozen `eyeprocess 0.11.1` reference. API, articles, data, plots, backends, numerical evidence, and unavoidable language-specific divergences are tracked explicitly. Python-native extensions are separated from reference parity so they do not masquerade as R-equivalent behavior.
-
-## Release discipline
-
-`eyeprocesspy 0.1.0` remains deliberately unreleased while the deep-parity gate is open. GitHub Release, PyPI publication, and archival actions should occur only after the controlling release head satisfies the declared evidence requirements.
 
 ## License
 
