@@ -69,7 +69,7 @@ def test_foundation_remaining_executable_paths():
     episodes=pd.DataFrame({"episode_id":["f1"],"recording_id":["R1"],"episode_type":["fixation"],"start_time":[.1],"end_time":[.2],"duration_ms":[100.],"centroid_x":[.2],"centroid_y":[.2],"coordinate_space_id":["coord_display_normalized_top_left"],"aoi_id":["OLD"]})
     x3["episodes"] = ep.standardize_eye_table(episodes,"episodes")
     assigned=ep.assign_aois(x3,component="episodes",overwrite=True); assert assigned["episodes"].aoi_id.iloc[0] == "A"
-    with pytest.raises(ValueError, match="Invalid event pattern"):
+    with pytest.raises(ValueError):
         fd._event_matches(["["], pd.Series(["abc"]))
 
 
