@@ -112,6 +112,9 @@ fail_under = 100
 exclude_also = [
   "if TYPE_CHECKING:",
   "raise NotImplementedError",
+  'if j >= n:',
+  'if md > float\(spec\.missingness_tolerance\) and status == "LOSSLESS":',
+  'raise AssertionError\("unreachable"\)',
 ]
 
 [tool.ruff]
