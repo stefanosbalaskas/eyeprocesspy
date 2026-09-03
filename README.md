@@ -16,17 +16,25 @@
 
 ### Manual Windows bundle — recommended for the current release candidate
 
-Extract the manual-install ZIP and run inside that directory:
+Extract the manual-install ZIP. The easiest route is to double-click:
+
+```text
+RUN_INSTALL_RECOMMENDED.cmd
+```
+
+Or open PowerShell in the extracted directory and run:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\install_eyeprocesspy.ps1
+.\install_eyeprocesspy.ps1 -WithAllRecommended
 ```
 
-To install the wheel together with the recommended plotting, psychometrics, machine-learning and Arrow backends:
+The current installer **does not require the Windows `py` launcher**. It detects supported Python 3.11–3.14 installations through `py` when available, `python`, `python3`, active virtual/Conda environments, common Miniconda/Anaconda paths, and standard per-user python.org install locations.
+
+If Python is installed but not detected, pass the executable explicitly:
 
 ```powershell
-.\install_eyeprocesspy.ps1 -WithAllRecommended
+.\install_eyeprocesspy.ps1 -PythonCommand "C:\Path\To\python.exe" -WithAllRecommended
 ```
 
 You can also select a supported interpreter and only the extras you need:
@@ -35,7 +43,7 @@ You can also select a supported interpreter and only the extras you need:
 .\install_eyeprocesspy.ps1 -PythonVersion 3.12 -WithPlots -WithPsychometrics
 ```
 
-Successful verification reports `eyeprocesspy 0.1.0` and frozen R reference `0.11.1`. The installer source is versioned in [`scripts/install_eyeprocesspy.ps1`](scripts/install_eyeprocesspy.ps1), with an additional benchmark smoke check in [`scripts/verify_manual_install.py`](scripts/verify_manual_install.py).
+Successful verification reports `eyeprocesspy 0.1.0` and frozen R reference `0.11.1`. The canonical installer is versioned in [`scripts/install_eyeprocesspy.ps1`](scripts/install_eyeprocesspy.ps1), the one-click launcher in [`scripts/RUN_INSTALL_RECOMMENDED.cmd`](scripts/RUN_INSTALL_RECOMMENDED.cmd), and the full troubleshooting guide in [`docs/manual-install.md`](docs/manual-install.md).
 
 Or install the canonical wheel directly:
 
@@ -179,10 +187,12 @@ The release evidence gate requires the full pytest suite, **100% statement cover
 
 ## Relationship to the R package
 
-The Python implementation is designed from the frozen eyeprocess 0.11.1 source, public API, tests, articles, examples and expected scientific behavior rather than from function names alone. Where an R dependency/runtime has no faithful Python equivalent, the parity ledger records that difference instead of silently substituting a different estimator.
+The Python package is built against the frozen eyeprocess 0.11.1 reference and preserves explicit parity ledgers for API, articles, data, plots, backends and unavoidable language-specific divergences. Python-native extensions are tracked separately so they do not masquerade as reference parity.
 
-## Contributing and citation
+## Release discipline
 
-Issues and pull requests that improve scientific correctness, parity, validation, documentation, interoperability or reproducibility are welcome. For numerical changes, include a focused test and state whether the behavior matches, intentionally differs from, or extends the frozen R reference.
+The `0.1.0` release remains intentionally gated. A public tag, PyPI upload, GitHub Release or archival action should occur only after the deep-parity gate is genuinely green on the controlling release head.
 
-A formal citation will accompany the first archival software release. Until then, cite the repository and exact commit used so the computational environment is reproducible.
+## License
+
+See [`LICENSE`](LICENSE).
