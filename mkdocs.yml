@@ -5,6 +5,11 @@ repo_url: https://github.com/stefanosbalaskas/eyeprocesspy
 repo_name: stefanosbalaskas/eyeprocesspy
 edit_uri: edit/release/0.1.0-deep-parity/docs/
 
+# The complete 88-article corpus remains built and searchable, but only its
+# curated entry points are exposed in the primary navigation.
+not_in_nav: |
+  /articles/*.md
+
 nav:
   - Home: index.md
   - Start:
