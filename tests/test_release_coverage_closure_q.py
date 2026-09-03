@@ -70,14 +70,21 @@ def test_gazepoint_residual_false_paths(monkeypatch,tmp_path):
     r=gp.read_gazepoint_folder(tmp_path,include=("gaze",)); assert ep.is_eye_dataset(r)
 
 
-def test_gazepoint_summary_metadata_false_paths(monkeypatch,tmp_path):
-    monkeypatch.setattr(gr,"_gp_is_summary_report",lambda p: True)
-    one=tmp_path/"one.csv"; one.write_text("Gazepoint Analysis,7.2.0\n",encoding="utf-8")
-    a=gr.read_gazepoint_summary(one); assert pd.isna(a.processed_on)
-    two=tmp_path/"two.csv"; two.write_text("Gazepoint Analysis,7.2.0\nProcessed On\n",encoding="utf-8")
-    b=gr.read_gazepoint_summary(two); assert pd.isna(b.processed_on)
+def test_gazepoint_summary_metadata_false_paths(monkeypatch, tmp_path):
+    monkeypatch.setattr(gr, "_gp_is_summary_report", lambda p: True)
 
+    one = tmp_path / "one.csv"
+    one.write_text("Gazepoint Analysis,7.2.0\n", encoding="utf-8")
+    first = gr.read_gazepoint_summary(one)
+    assert pd.isna(first.processed_on)
 
+    two = tmp_path / "two.csv"
+    two.write_text(
+        "Gazepoint Analysis,7.2.0\nProcessed On\n",
+        encoding="utf-8",
+    )
+    second = gr.read_gazepoint_summary(two)
+    assert pd.isna(second.processed_on)
 def test_preprocess_bounds_existing_mark_and_empty_ivt_group(monkeypatch):
     def ds(unit,width=np.nan,height=np.nan):
         x=_empty(); x["coordinate_spaces"]=ep.standardize_eye_table(pd.DataFrame({"coordinate_space_id":["c"],"space_type":["display_pixels_top_left"],"x_unit":[unit],"y_unit":[unit],"width":[width],"height":[height]}),"coordinate_spaces")
