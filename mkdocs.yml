@@ -14,7 +14,7 @@ not_in_nav: |
 
 nav:
   - Home: index.md
-  - Start here:
+  - Start Here:
       - Getting started: getting-started.md
       - Manual installation: manual-install.md
       - Cookbook: cookbook.md
@@ -37,7 +37,7 @@ nav:
   - Articles:
       - 88-workflow library: articles/index.md
       - Featured workflows: articles/featured-workflows.md
-  - API:
+  - Reference:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
@@ -51,38 +51,41 @@ theme:
   logo: https://raw.githubusercontent.com/stefanosbalaskas/gpbiometricspy/main/docs/assets/python-suite-logo.png
   icon:
     repo: fontawesome/brands/github
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: teal
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
   features:
     - navigation.instant
+    - navigation.instant.prefetch
     - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.expand
     - navigation.indexes
     - navigation.top
     - navigation.footer
     - content.action.edit
+    - content.action.view
     - content.code.copy
+    - content.code.annotate
     - content.tabs.link
+    - content.tooltips
     - toc.follow
     - search.suggest
     - search.highlight
     - search.share
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 plugins:
   - search
@@ -99,6 +102,7 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - tables
+  - footnotes
   - toc:
       permalink: true
   - pymdownx.details
