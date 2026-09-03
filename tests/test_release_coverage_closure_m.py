@@ -81,10 +81,10 @@ def test_vendor_companion_keep_raw_and_edf_finally(monkeypatch,tmp_path):
     core=tmp_path/"core"; core.mkdir(); pd.DataFrame({"start_timestamp":[0.],"duration":[.1],"norm_pos_x":[.2],"norm_pos_y":[.3]}).to_csv(core/"fixations.csv",index=False)
     vi._read_core_companions(x,core,keep_raw=True); assert "core_fixations" in x.raw
     edf=tmp_path/"x.edf"; edf.write_bytes(b"edf"); converter=tmp_path/"edf2asc"; converter.write_text("x",encoding="utf-8")
-    real_mkstemp=vi.tempfile.mkstemp
-    def missing_mkstemp(*a,**k):
-        fd,path=real_mkstemp(*a,**k); os.unlink(path); return fd,path
-    monkeypatch.setattr(vi.tempfile,"mkstemp",missing_mkstemp); monkeypatch.setattr(vi.subprocess,"run",lambda *a,**k: SimpleNamespace(returncode=1,stdout="",stderr="failed"))
+    def failing_run(command,*a,**k):
+        Path(command[-1]).unlink(missing_ok=True)
+        return SimpleNamespace(returncode=1,stdout="",stderr="failed")
+    monkeypatch.setattr(vi.subprocess,"run",failing_run)
     with pytest.raises(ep.EyeProcessBackendError,match="conversion failed"):
         vi.read_eyelink_edf(edf,edf2asc=str(converter),keep_asc=False)
 
