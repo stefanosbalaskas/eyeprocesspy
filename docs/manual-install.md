@@ -1,6 +1,9 @@
 # Manual installation
 
-The `0.1.0` release candidate can be installed directly from the project-built wheel before any public PyPI release. The manual-install route is intended to make the exact CI-built package easy to validate on a real workstation while the deep-parity branch remains under release gating.
+The `0.1.0` release candidate can be installed directly from the project-built wheel before any public PyPI release. The manual-install route makes the exact built package easy to validate on a real workstation while the deep-parity branch remains under release gating.
+
+!!! success "Windows verification completed"
+    The hardened installer has now been exercised successfully on a real Windows installation with **Python 3.11.9**. `eyeprocesspy 0.1.0` imported successfully against frozen R reference **0.11.1**; the bundled verifier reported **PASS**; the recommended `plots`, `psychometrics`, `ml`, `arrow`, `physio`, and `docs` extras installed; and `python -m pip check` reported **No broken requirements found**.
 
 ## Windows: recommended route
 
@@ -115,7 +118,10 @@ A basic verification is:
 
 ```powershell
 python -c "import eyeprocesspy as ep; print('eyeprocesspy', ep.__version__); print('R reference', ep.__r_reference_version__)"
+python -m pip check
 ```
+
+A successful installation should report `eyeprocesspy 0.1.0`; `pip check` should report no broken requirements.
 
 The bundled `verify_eyeprocesspy.py` performs the deeper manual-install smoke check. From a repository checkout, the equivalent repository verifier is:
 
@@ -134,6 +140,10 @@ Use the current `scripts/install_eyeprocesspy.ps1` or a manual-install bundle pr
 ### `py` is not recognized
 
 That is no longer a blocker. The current installer automatically tries other supported interpreter locations. Do not install the Windows launcher solely for eyeprocesspy if a supported Python interpreter is already present.
+
+### `tqdm.exe` or another helper script is not on PATH
+
+Some optional dependencies install command-line helpers into the per-user Python `Scripts` directory. A pip warning about that directory not being on `PATH` does **not** mean the corresponding Python library failed to install. For eyeprocesspy itself, the package verifier and `python -m pip check` are the relevant checks.
 
 ### An optional backend fails to install
 
