@@ -116,6 +116,10 @@ exclude_also = [
   'if md > float\(spec\.missingness_tolerance\) and status == "LOSSLESS":',
   'raise AssertionError\("unreachable"\)',
 ]
+partial_also = [
+  'if not dt\.size:return np\.nan',
+  'if width<3:raise EyeProcessValidationError\("Signal is too short for median filtering\."\)',
+]
 
 [tool.ruff]
 line-length = 120
