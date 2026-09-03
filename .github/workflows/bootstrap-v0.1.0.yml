@@ -1,0 +1,50 @@
+name: Bootstrap v0.1.0 tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bootstrap-v0.1.0.yml"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  tag-and-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create the validated release tag
+        env:
+          TARGET_SHA: 3afa99597c3505372cabb76ef05099f8c9d0735e
+          RELEASE_TAG: v0.1.0
+        run: |
+          set -euo pipefail
+          git cat-file -e "${TARGET_SHA}^{commit}"
+          existing="$(git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" || true)"
+          if [ -n "${existing}" ]; then
+            if [ "${existing}" != "${TARGET_SHA}" ]; then
+              echo "${RELEASE_TAG} already points to ${existing}, expected ${TARGET_SHA}" >&2
+              exit 1
+            fi
+            echo "${RELEASE_TAG} already points to the validated release commit."
+          else
+            git tag "${RELEASE_TAG}" "${TARGET_SHA}"
+            git push origin "refs/tags/${RELEASE_TAG}"
+          fi
+
+      - name: Dispatch the release workflow at the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: v0.1.0
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/release.yml/dispatches" \
+            -f ref="${RELEASE_TAG}"
