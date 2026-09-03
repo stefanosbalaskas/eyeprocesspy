@@ -22,6 +22,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -59,6 +60,45 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Wait for legacy Jekyll Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          legacy_run=""
+          for attempt in {1..8}; do
+            legacy_run="$(
+              gh api "repos/${REPOSITORY}/actions/runs?event=dynamic&head_sha=${HEAD_SHA}&per_page=20" \
+                --jq '.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment") | .id' \
+                | head -n 1
+            )"
+            if [[ -n "${legacy_run}" ]]; then
+              break
+            fi
+            sleep 5
+          done
+
+          if [[ -z "${legacy_run}" ]]; then
+            echo "No legacy Jekyll Pages run found for ${HEAD_SHA}; deploying MkDocs directly."
+            exit 0
+          fi
+
+          echo "Legacy Pages run ${legacy_run} detected. Waiting for it to finish before publishing MkDocs."
+          for attempt in {1..120}; do
+            status="$(gh api "repos/${REPOSITORY}/actions/runs/${legacy_run}" --jq '.status')"
+            if [[ "${status}" == "completed" ]]; then
+              conclusion="$(gh api "repos/${REPOSITORY}/actions/runs/${legacy_run}" --jq '.conclusion')"
+              echo "Legacy Pages run completed with conclusion=${conclusion}. MkDocs will publish last."
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Legacy Pages run did not complete within the safety window." >&2
+          exit 1
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
