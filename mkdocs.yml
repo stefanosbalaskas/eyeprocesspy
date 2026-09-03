@@ -3,7 +3,7 @@ site_description: Reproducible Python infrastructure for eye-tracking, pupillome
 site_url: https://stefanosbalaskas.github.io/eyeprocesspy/
 repo_url: https://github.com/stefanosbalaskas/eyeprocesspy
 repo_name: stefanosbalaskas/eyeprocesspy
-edit_uri: edit/release/0.1.0-deep-parity/docs/
+edit_uri: edit/main/docs/
 
 # The complete 88-article corpus remains built and searchable, but only its
 # curated entry points are exposed in the primary navigation.
@@ -31,9 +31,9 @@ nav:
       - Quality & uncertainty: guides/process-quality-uncertainty.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
-  - Visual gallery: gallery.md
-  - Workflow library:
-      - 88-article library: articles/index.md
+  - Gallery: gallery.md
+  - Workflows:
+      - 88-workflow library: articles/index.md
       - Featured workflows: articles/featured-workflows.md
   - Reference:
       - Reference map: reference/index.md
@@ -45,11 +45,14 @@ nav:
 
 theme:
   name: material
+  language: en
   icon:
     repo: fontawesome/brands/github
   features:
     - navigation.instant
     - navigation.instant.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.indexes
     - navigation.top
@@ -65,11 +68,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: indigo
+      accent: cyan
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: indigo
+      accent: light-blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -105,5 +112,11 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/stefanosbalaskas/eyeprocesspy
       name: eyeprocesspy on GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/eyeprocesspy/
+      name: eyeprocesspy on PyPI
+    - icon: fontawesome/solid/fingerprint
+      link: https://doi.org/10.5281/zenodo.22285167
+      name: eyeprocesspy DOI on Zenodo
 
-copyright: Copyright &copy; Stefanos Balaskas
+copyright: Copyright &copy; Stefanos Balaskas · eyeprocesspy 0.1.0
