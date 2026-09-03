@@ -1,9 +1,11 @@
 site_name: eyeprocesspy
 site_description: Reproducible Python infrastructure for eye-tracking, pupillometry, AOIs, process data, psychometrics, validation, and multimodal behavioral measurement.
 site_url: https://stefanosbalaskas.github.io/eyeprocesspy/
+site_author: Stefanos Balaskas
 repo_url: https://github.com/stefanosbalaskas/eyeprocesspy
 repo_name: stefanosbalaskas/eyeprocesspy
 edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Stefanos Balaskas · MIT License
 
 # The complete 88-article corpus remains built and searchable, but only its
 # curated entry points are exposed in the primary navigation.
@@ -12,51 +14,67 @@ not_in_nav: |
 
 nav:
   - Home: index.md
-  - Start:
+  - Start here:
       - Getting started: getting-started.md
       - Manual installation: manual-install.md
       - Cookbook: cookbook.md
       - FAQ: faq.md
-  - Examples:
-      - Overview: examples/index.md
-      - Core gaze, AOI & provenance: examples/core-workflow.md
-      - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
-      - Process reliability: examples/process-reliability.md
-      - IRT diagnostics: examples/irt-diagnostics.md
-  - Scientific guides:
-      - Guide map: guides/index.md
+  - Workflows:
+      - Scientific guide map: guides/index.md
       - Eye-tracking end to end: guides/end-to-end-eye-tracking.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
-  - Gallery: gallery.md
-  - Workflows:
+      - Worked examples:
+          - Overview: examples/index.md
+          - Core gaze, AOI & provenance: examples/core-workflow.md
+          - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
+          - Process reliability: examples/process-reliability.md
+          - IRT diagnostics: examples/irt-diagnostics.md
+  - Plot gallery: gallery.md
+  - Articles:
       - 88-workflow library: articles/index.md
       - Featured workflows: articles/featured-workflows.md
-  - Reference:
+  - API:
       - Reference map: reference/index.md
-      - API reference: reference/api.md
+      - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
-  - Validation:
+  - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
 
 theme:
   name: material
   language: en
+  logo: https://raw.githubusercontent.com/stefanosbalaskas/gpbiometricspy/main/docs/assets/python-suite-logo.png
   icon:
     repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
   features:
     - navigation.instant
     - navigation.instant.progress
+    - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.indexes
     - navigation.top
-    - navigation.tracking
     - navigation.footer
     - content.action.edit
     - content.code.copy
@@ -65,21 +83,6 @@ theme:
     - search.suggest
     - search.highlight
     - search.share
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: light-blue
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
 
 plugins:
   - search
@@ -95,6 +98,9 @@ markdown_extensions:
   - admonition
   - attr_list
   - md_in_html
+  - tables
+  - toc:
+      permalink: true
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight:
@@ -102,7 +108,6 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.tabbed:
       alternate_style: true
-  - tables
 
 extra_css:
   - stylesheets/extra.css
@@ -115,8 +120,6 @@ extra:
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/eyeprocesspy/
       name: eyeprocesspy on PyPI
-    - icon: fontawesome/solid/fingerprint
+    - icon: material/archive-outline
       link: https://doi.org/10.5281/zenodo.22285167
-      name: eyeprocesspy DOI on Zenodo
-
-copyright: Copyright &copy; Stefanos Balaskas · eyeprocesspy 0.1.0
+      name: eyeprocesspy on Zenodo
