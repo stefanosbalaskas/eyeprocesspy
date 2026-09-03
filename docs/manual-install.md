@@ -1,132 +1,151 @@
 # Manual installation
 
-The `0.1.0` release candidate is intentionally installable **before PyPI publication**. CI builds a wheel and source distribution, installs the wheel in a clean environment, verifies the package import, and only then publishes the distributions as a workflow artifact.
+The `0.1.0` release candidate can be installed directly from the project-built wheel before any public PyPI release. The manual-install route is intended to make the exact CI-built package easy to validate on a real workstation while the deep-parity branch remains under release gating.
 
-## Recommended Windows route
+## Windows: recommended route
 
-Download and extract the manual-install bundle, open PowerShell inside the extracted directory, and run:
+Download and extract the Windows manual-install bundle. The extracted directory should contain the canonical wheel, the PowerShell installer, the verifier, and the one-click launcher.
 
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\install_eyeprocesspy.ps1
-```
-
-The installer automatically finds a supported Python **3.11–3.14**, upgrades `pip`, installs the canonical wheel, and verifies both package versions. It prefers the Windows `py` launcher when available and safely falls back to a supported `python` executable when the launcher is absent.
-
-Successful verification reports:
+The easiest route is to double-click:
 
 ```text
-eyeprocesspy 0.1.0 | R reference 0.11.1
-eyeprocesspy installation completed successfully.
+RUN_INSTALL_RECOMMENDED.cmd
 ```
 
-The repository copy of the installer is [`scripts/install_eyeprocesspy.ps1`](https://github.com/stefanosbalaskas/eyeprocesspy/blob/release/0.1.0-deep-parity/scripts/install_eyeprocesspy.ps1), and a second smoke check is available as [`scripts/verify_manual_install.py`](https://github.com/stefanosbalaskas/eyeprocesspy/blob/release/0.1.0-deep-parity/scripts/verify_manual_install.py).
-
-## Install recommended scientific extras
-
-To install the wheel plus plotting, psychometrics, machine-learning and Arrow support in one command:
+It launches PowerShell with a process-local execution-policy bypass and runs:
 
 ```powershell
 .\install_eyeprocesspy.ps1 -WithAllRecommended
 ```
 
-Or request only the extras you need:
+The installer installs the bundled wheel, installs the recommended scientific extras, and verifies the package import.
+
+## Windows: PowerShell route
+
+Open PowerShell in the extracted directory and run:
 
 ```powershell
-.\install_eyeprocesspy.ps1 -WithPlots
-.\install_eyeprocesspy.ps1 -WithPsychometrics
-.\install_eyeprocesspy.ps1 -WithML
-.\install_eyeprocesspy.ps1 -WithArrow
+Set-ExecutionPolicy -Scope Process Bypass
+.\install_eyeprocesspy.ps1 -WithAllRecommended
 ```
 
-Flags can be combined:
+The installer **does not require the Windows `py` launcher**. It searches for a supported Python 3.11–3.14 using, in order, the Windows launcher when available, `python`, `python3`, the active virtual or Conda environment, common Miniconda/Anaconda locations, and standard per-user python.org installation directories.
+
+Successful verification reports the installed package version and the frozen R reference used by this build.
+
+## If Python is installed but is not detected
+
+Pass the interpreter explicitly:
 
 ```powershell
-.\install_eyeprocesspy.ps1 -WithPlots -WithPsychometrics
+.\install_eyeprocesspy.ps1 `
+  -PythonCommand "C:\Path\To\python.exe" `
+  -WithAllRecommended
 ```
 
-To force a specific supported Python interpreter through the Windows launcher:
+You may also request a specific validated Python minor version:
 
 ```powershell
-.\install_eyeprocesspy.ps1 -PythonVersion 3.12 -WithAllRecommended
+.\install_eyeprocesspy.ps1 -PythonVersion 3.13 -WithAllRecommended
 ```
 
-The optional installer groups correspond to commonly used backends:
+The currently validated manual-install range is Python 3.11–3.14.
 
-| Flag | Packages installed |
+## If Python is not installed
+
+Install a supported Python version, reopen PowerShell, and rerun the installer. On Windows systems with `winget`, for example:
+
+```powershell
+winget install -e --id Python.Python.3.13
+```
+
+The corrected installer also searches standard python.org install locations, so the Windows `py` launcher is optional. Adding `python.exe` to `PATH` is convenient but is no longer required for the common per-user python.org layout.
+
+## Installer options
+
+`-WithAllRecommended` installs the common scientific stack needed for most package examples and documentation workflows:
+
+| Flag | Package extra |
 | --- | --- |
-| `-WithPlots` | `matplotlib>=3.9` |
-| `-WithPsychometrics` | `patsy`, `statsmodels`, `girth`, `catsim` |
-| `-WithML` | `scikit-learn>=1.5` |
-| `-WithArrow` | `pyarrow>=20` |
-| `-WithAllRecommended` | all of the above |
+| `-WithPlots` | `plots` |
+| `-WithPsychometrics` | `psychometrics` |
+| `-WithML` | `ml` |
+| `-WithArrow` | `arrow` |
+| `-WithPhysio` | `physio` |
+| `-WithDocs` | `docs` |
+| `-WithAllRecommended` | all six groups above |
 
-Stan, Bayesian, streaming and specialist interoperability backends remain opt-in and should be installed only for workflows that require them.
+Specialized backends remain explicit rather than being silently installed:
 
-## Install the wheel directly
-
-The canonical wheel name is:
-
-```text
-eyeprocesspy-0.1.0-py3-none-any.whl
+```powershell
+.\install_eyeprocesspy.ps1 -WithStan
+.\install_eyeprocesspy.ps1 -WithBayes
+.\install_eyeprocesspy.ps1 -WithGaze
+.\install_eyeprocesspy.ps1 -WithStreaming
 ```
 
-Install it with:
+Development tooling can be installed with:
+
+```powershell
+.\install_eyeprocesspy.ps1 -WithDev
+```
+
+If the selected Python installation does not permit system-wide package writes, add:
+
+```powershell
+-UserInstall
+```
+
+Other useful switches include `-ForceReinstall` and `-SkipPipUpgrade`.
+
+## Direct wheel fallback
+
+Once a supported `python` command works, the core package can always be installed without the helper script:
 
 ```powershell
 python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
-```
-
-Then verify:
-
-```powershell
-python -c "import eyeprocesspy as ep; print('eyeprocesspy:', ep.__version__); print('R reference:', ep.__r_reference_version__)"
-```
-
-For a deeper smoke test:
-
-```powershell
 python .\verify_eyeprocesspy.py
 ```
 
-or, from a repository checkout:
+If `python` is not the command name for the interpreter you intend to use, substitute its full path.
+
+## Verification
+
+A basic verification is:
+
+```powershell
+python -c "import eyeprocesspy as ep; print('eyeprocesspy', ep.__version__); print('R reference', ep.__r_reference_version__)"
+```
+
+The bundled `verify_eyeprocesspy.py` performs the deeper manual-install smoke check. From a repository checkout, the equivalent repository verifier is:
 
 ```powershell
 python .\scripts\verify_manual_install.py
 ```
 
-The verifier imports the package and runs the bundled deterministic benchmark audit.
+## Troubleshooting
 
-## Important Windows/browser filename issue
+### PowerShell parser error around an exit code
 
-Browsers sometimes rename a duplicate download to a filename such as:
+An early Windows bundle contained a PowerShell interpolation form equivalent to `$LASTEXITCODE:`. PowerShell parses the colon as part of the variable reference and fails before installation begins. The canonical installer now stores the exit code separately and interpolates it as `$($exitCode)`, eliminating that parser failure.
 
-```text
-eyeprocesspy-0.1.0-py3-none-any (1).whl
-```
+Use the current `scripts/install_eyeprocesspy.ps1` or a manual-install bundle produced after this fix rather than reusing an older extracted installer.
 
-That is **not a valid wheel filename**. `pip` can report that it is unsupported even when the wheel contents are fine. Rename it back before installation:
+### `py` is not recognized
 
-```powershell
-Rename-Item ".\eyeprocesspy-0.1.0-py3-none-any (1).whl" "eyeprocesspy-0.1.0-py3-none-any.whl"
-python -m pip install --upgrade .\eyeprocesspy-0.1.0-py3-none-any.whl
-```
+That is no longer a blocker. The current installer automatically tries other supported interpreter locations. Do not install the Windows launcher solely for eyeprocesspy if a supported Python interpreter is already present.
 
-The packaged manual-install ZIP preserves the canonical filename and avoids this problem.
+### An optional backend fails to install
 
-## CI-built distributions
+The installer handles recommended extras independently. A failure in one optional group is reported without hiding the status of the core package. Retry only the failed group after resolving its platform-specific dependency.
 
-The release-branch CI publishes a fresh artifact named:
+## Repository sources
 
-```text
-eyeprocesspy-manual-install-<commit>
-```
+The canonical Windows installer is [`scripts/install_eyeprocesspy.ps1`](https://github.com/stefanosbalaskas/eyeprocesspy/blob/release/0.1.0-deep-parity/scripts/install_eyeprocesspy.ps1). The one-click launcher is [`scripts/RUN_INSTALL_RECOMMENDED.cmd`](https://github.com/stefanosbalaskas/eyeprocesspy/blob/release/0.1.0-deep-parity/scripts/RUN_INSTALL_RECOMMENDED.cmd), and the repository smoke verifier is [`scripts/verify_manual_install.py`](https://github.com/stefanosbalaskas/eyeprocesspy/blob/release/0.1.0-deep-parity/scripts/verify_manual_install.py).
 
-It contains the wheel and source distribution **after** clean wheel installation/import verification. This makes the downloadable distribution part of the release evidence rather than an ad hoc binary.
+## After installation
 
-## After installation: run the examples
-
-With plotting support installed:
+With the recommended extras installed, start with the runnable workflows:
 
 ```powershell
 python .\examples\complete_workflow.py
@@ -135,11 +154,8 @@ python .\examples\process_reliability.py
 python .\examples\irt_diagnostics.py
 ```
 
-See [Runnable examples](examples/index.md), the [Cookbook](cookbook.md), and the [visual gallery](gallery.md) for the corresponding workflows and package-generated figures.
+The documentation site also provides the runnable-example index, cookbook, visual gallery, eye-tracking and pupillometry guides, psychometrics/IRT guide, and the full article library.
 
 ## Why the manual bundle exists
 
-The manual path separates **distribution testing** from **public release publication**. It lets Windows, macOS and Linux users install the exact built package while the deep-parity branch still enforces the final scientific release gates.
-
-!!! success "Verified installation path"
-    The canonical wheel has passed CI clean-install/import verification and the manual workflow has been tested with the package reporting `eyeprocesspy 0.1.0` and frozen R reference `0.11.1`.
+The manual path separates distribution testing from public release publication. It allows the exact built package to be installed and verified on Windows while release governance, deep parity, coverage, and publication gates remain independent.
