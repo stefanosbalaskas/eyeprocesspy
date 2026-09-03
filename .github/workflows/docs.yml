@@ -3,7 +3,6 @@ name: Documentation
 on:
   push:
     branches:
-      - main
       - release/0.1.0-deep-parity
     paths:
       - "docs/**"
@@ -22,11 +21,10 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  actions: write
 
 concurrency:
-  group: "pages-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}"
+  group: "docs-validation-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}"
   cancel-in-progress: true
 
 jobs:
@@ -35,38 +33,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - name: Configure GitHub Pages
-        if: >-
-          github.event_name == 'push' &&
-          (github.ref == 'refs/heads/main' ||
-           github.ref == 'refs/heads/release/0.1.0-deep-parity')
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Install package and documentation dependencies
         run: uv sync --extra docs
       - name: Build documentation strictly
         run: uv run mkdocs build --strict
-      - name: Upload Pages artifact
-        if: >-
-          github.event_name == 'push' &&
-          (github.ref == 'refs/heads/main' ||
-           github.ref == 'refs/heads/release/0.1.0-deep-parity')
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-  deploy:
-    if: >-
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' ||
-       github.ref == 'refs/heads/release/0.1.0-deep-parity')
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Request protected Pages deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release/0.1.0-deep-parity'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docs.yml --ref main
