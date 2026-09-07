@@ -8,6 +8,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+      - run: uv sync --extra dev
+      - name: Ruff regression gate
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: uv run --no-sync python scripts/ruff_delta.py --base "$BASE_SHA"
+
   test:
     strategy:
       matrix:
@@ -21,7 +36,6 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: uv sync --extra dev
       - run: uv run pytest
-      - run: uv run --no-sync ruff check src tests
 
   build-wheel:
     runs-on: ubuntu-latest
