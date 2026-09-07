@@ -5,9 +5,9 @@ timebase, multimodal, and grouped-validation APIs.
 """
 from __future__ import annotations
 
-from typing import Iterable, Mapping, Sequence
 import math
 import random
+from collections.abc import Iterable, Mapping, Sequence
 
 
 def _finite(values: Iterable[float]) -> list[float]:

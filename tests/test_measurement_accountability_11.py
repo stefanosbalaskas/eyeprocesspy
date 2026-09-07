@@ -1,5 +1,7 @@
 import math
 
+import pytest
+
 from eyeprocesspy.measurement_accountability_11 import (
     event_marker_qc,
     pupil_latency_sensitivity,
@@ -40,5 +42,3 @@ def test_generalization_requires_held_out_person_evidence():
     assert out["claim_status"] == "not_supported"
     assert out["held_out_person_generalization"] is False
 
-
-import pytest
