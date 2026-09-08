@@ -62,6 +62,15 @@ hide:
   </div>
 </div>
 
+<div class="ep-method-cta">
+  <div>
+    <span>September 2026 methods update · current development branch</span>
+    <strong>Measurement accountability is now explicit.</strong>
+    <p>Compare three pupil-latency estimators with resolvability diagnostics, audit event-marker plausibility without altering timestamps, and separate acquisition, analytical, construct, within-person, and held-out-person evidence before making generalization claims.</p>
+  </div>
+  <a class="md-button" href="articles/measurement-accountability-0-11/">Open measurement accountability</a>
+</div>
+
 <section class="ep-section-intro">
   <span class="ep-section-number">01</span>
   <div>
