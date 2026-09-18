@@ -375,11 +375,16 @@ def validate_multilevel_mediation_data(
         issues.append("trial identifiers contain missing values")
     if frame.duplicated([participant_col, trial_col]).any():
         issues.append("participant/trial identifiers are not unique")
-    _numeric_series(frame, mediator_col)
+    level_frame = frame.copy(deep=True)
+    mediator_numeric = pd.to_numeric(frame[mediator_col], errors="coerce")
+    if bool((frame[mediator_col].notna() & mediator_numeric.isna()).any()):
+        issues.append("mediator must be numeric or explicitly coded before decomposition")
+    level_frame[mediator_col] = mediator_numeric
     x_numeric = pd.to_numeric(frame[x_col], errors="coerce")
     if bool((frame[x_col].notna() & x_numeric.isna()).any()):
         issues.append("X must be numeric or explicitly coded before decomposition")
-    levels = identify_mediation_levels(frame, [x_col, mediator_col], participant_col)
+    level_frame[x_col] = x_numeric
+    levels = identify_mediation_levels(level_frame, [x_col, mediator_col], participant_col)
     lookup = levels.set_index("variable")
     if require_within_x and not bool(lookup.loc[x_col, "has_within_variation"]):
         issues.append("X has no within-participant variation")
