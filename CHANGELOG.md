@@ -2,6 +2,14 @@
 
 All notable changes to `eyeprocesspy` are documented here.
 
+## Unreleased
+
+### Standardized spatial data quality
+
+- Added vendor-neutral accuracy, RMS-S2S, population-SD precision, BCEA, effective-sampling, jitter, validity, and missingness metrics.
+- Added a canonical review-oriented gaze-quality report with explicit units, provenance, study-defined thresholds, and no automatic exclusion.
+- Added a six-profile synthetic 9-point validation fixture, R/Python numerical parity fixture, runnable example, dedicated Data Quality site section, and manuscript-reporting guidance.
+
 ## 0.1.0 — 2026-09-03
 
 First public Python release aligned to the frozen R `eyeprocess` 0.11.1 reference.
