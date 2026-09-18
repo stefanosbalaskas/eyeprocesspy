@@ -71,6 +71,10 @@ def test_mixed_units_fail_and_mixed_targets_flag_review_only():
 def test_user_thresholds_flag_but_never_exclude():
     d=pd.DataFrame({"grp":["a"]*4,"timestamp_ms":[0,10,20,30],"gaze_x":[1,1,1,1],"gaze_y":[0,0,0,0],"target_x":[0]*4,"target_y":[0]*4})
     r=ep.create_gaze_quality_report(d,by="grp",thresholds={"accuracy_mean":{"max":.5}})
+    assert r.accuracy_unit.iloc[0]=="deg"
+    assert r.precision_rms_s2s_unit.iloc[0]=="deg"
+    assert r.precision_sd_unit.iloc[0]=="deg"
+    assert r.bcea_unit.iloc[0]=="deg^2"
     assert len(r)==1 and bool(r.review_required.iloc[0]) and "accuracy_mean>max" in r.quality_flags.iloc[0]
     assert r.attrs["gaze_quality_provenance"]["automatic_exclusion"] is False
 
