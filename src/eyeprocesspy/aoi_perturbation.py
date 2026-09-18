@@ -173,7 +173,7 @@ def run_aoi_sensitivity_analysis(
 def assess_aoi_inference_stability(x: Any, *, term: str | None = None) -> pd.DataFrame:
     models = x["models"].copy()
     if models.empty:
-        return pd.DataFrame(columns=["term", "n_models", "n_converged", "same_sign_proportion", "median_estimate", "min_estimate", "max_estimate", "median_CI_width"])
+        return pd.DataFrame(columns=["term", "n_models", "n_converged", "convergence_proportion", "same_sign_proportion", "median_estimate", "min_estimate", "max_estimate", "median_CI_width", "median_N", "min_N", "max_N"])
     if term is not None:
         models = models.loc[models["term"].astype(str).eq(str(term))].copy()
         if models.empty:
@@ -190,6 +190,7 @@ def assess_aoi_inference_stability(x: Any, *, term: str | None = None) -> pd.Dat
             baseline_sign = np.sign(baseline_est)
         estimates = pd.to_numeric(usable["estimate"], errors="coerce")
         ci_width = pd.to_numeric(usable["CI_high"], errors="coerce") - pd.to_numeric(usable["CI_low"], errors="coerce")
+        sample_sizes = pd.to_numeric(usable["N"], errors="coerce")
         signs = np.sign(estimates)
         same = np.nan if not np.isfinite(baseline_sign) or not len(signs) else float(np.mean(signs == baseline_sign))
         rows.append({
@@ -202,6 +203,9 @@ def assess_aoi_inference_stability(x: Any, *, term: str | None = None) -> pd.Dat
             "min_estimate": float(estimates.min()) if estimates.notna().any() else np.nan,
             "max_estimate": float(estimates.max()) if estimates.notna().any() else np.nan,
             "median_CI_width": float(ci_width.median()) if ci_width.notna().any() else np.nan,
+            "median_N": float(sample_sizes.median()) if sample_sizes.notna().any() else np.nan,
+            "min_N": float(sample_sizes.min()) if sample_sizes.notna().any() else np.nan,
+            "max_N": float(sample_sizes.max()) if sample_sizes.notna().any() else np.nan,
         })
     out = pd.DataFrame(rows)
     out.attrs["caveat"] = "Same-sign and convergence proportions are descriptive sensitivity summaries, not probabilities that an effect is true."
@@ -244,7 +248,7 @@ def report_aoi_sensitivity(x: Any) -> str:
         lines.append("Model-level sensitivity was summarized using coefficient direction, magnitude, interval width, and convergence rather than significance alone.")
         for row in inference.itertuples(index=False):
             lines.append(
-                f"- `{row.term}`: {row.n_converged}/{row.n_models} converged; same-sign frequency={row.same_sign_proportion:.3f}; median estimate={row.median_estimate:.4g}; range=[{row.min_estimate:.4g}, {row.max_estimate:.4g}]."
+                f"- `{row.term}`: {row.n_converged}/{row.n_models} converged; same-sign frequency={row.same_sign_proportion:.3f}; median estimate={row.median_estimate:.4g}; range=[{row.min_estimate:.4g}, {row.max_estimate:.4g}]; N range=[{row.min_N:.0f}, {row.max_N:.0f}]."
             )
         lines.append("")
     lines.append("Interpretation: these quantities describe robustness to the declared AOI perturbations. They are not probabilities that the scientific conclusion is true.")
