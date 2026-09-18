@@ -658,7 +658,7 @@ def import_external_detector_events(
         data["derived_by"] = "external"
     if "trial_id" not in data:
         data["trial_id"] = pd.NA
-    if dataset is not None && data["trial_id"].isna().any() && !dataset["intervals"].empty:
+    if dataset is not None and data["trial_id"].isna().any() and not dataset["intervals"].empty:
         intervals = dataset["intervals"].loc[dataset["intervals"]["interval_type"].eq("trial")]
         for idx in data.index[data["trial_id"].isna()]:
             rec = data.at[idx, "recording_id"]
@@ -789,3 +789,393 @@ def run_detector_multiverse(
 ) -> DetectorMultiverseResult:
     """Run all detector branches independently in deterministic detector-id order."""
     if not is_eye_dataset(x):
+        raise EyeProcessValidationError("`x` must be an EyeDataset.")
+    if not isinstance(multiverse, DetectorMultiverse):
+        multiverse = create_detector_multiverse(multiverse)
+    branches: dict[str, EyeDataset] = {}
+    event_frames = []
+    statuses = []
+    failures = []
+    warning_rows = []
+    for spec in multiverse.specs:
+        captured: list[str] = []
+        try:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                branch = detect_events_with_spec(x, spec)
+            captured = [str(item.message) for item in caught]
+            branches[spec.detector_id] = branch
+            events = branch["episodes"].copy()
+            if "detector_id" in events:
+                events = events[events["detector_id"].eq(spec.detector_id)]
+            else:
+                events = events.iloc[0:0]
+            event_frames.append(events)
+            statuses.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "detector_spec_hash": spec.fingerprint,
+                    "status": "ok",
+                    "n_events": len(events),
+                    "n_fixations": int(events["episode_type"].eq("fixation").sum()) if not events.empty else 0,
+                }
+            )
+            for message in captured:
+                warning_rows.append({"detector_id": spec.detector_id, "stage": "detection", "warning": message})
+        except Exception as exc:  # branch failure is recorded, never treated as a valid result
+            failures.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "detector_spec_hash": spec.fingerprint,
+                    "stage": "detection",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            statuses.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "detector_spec_hash": spec.fingerprint,
+                    "status": "failed",
+                    "n_events": np.nan,
+                    "n_fixations": np.nan,
+                }
+            )
+            if not continue_on_error:
+                raise
+    events = pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    return DetectorMultiverseResult(
+        multiverse=multiverse,
+        branches=branches,
+        events=events,
+        status=pd.DataFrame(statuses),
+        failures=pd.DataFrame(failures),
+        warnings=pd.DataFrame(warning_rows),
+        source_fingerprint=_dataset_fingerprint(x),
+    )
+
+
+def _event_iou(a_start: float, a_end: float, b_start: float, b_end: float) -> float:
+    intersection = max(0.0, min(a_end, b_end) - max(a_start, b_start))
+    union = max(a_end, b_end) - min(a_start, b_start)
+    return intersection / union if union > 0 else float(a_start == b_start and a_end == b_end)
+
+
+def match_detected_events(
+    reference: pd.DataFrame,
+    candidate: pd.DataFrame,
+    *,
+    event_type: str = "fixation",
+    onset_tolerance_ms: float = 75.0,
+    minimum_overlap: float = 0.10,
+) -> pd.DataFrame:
+    """One-to-one temporal matching robust to different event catalogue lengths."""
+    if onset_tolerance_ms < 0 or minimum_overlap < 0 or minimum_overlap > 1:
+        raise EyeProcessValidationError("Invalid event-matching tolerance.")
+    required = {"recording_id", "episode_type", "start_time", "end_time"}
+    for name, frame in {"reference": reference, "candidate": candidate}.items():
+        if not isinstance(frame, pd.DataFrame):
+            raise EyeProcessValidationError(f"`{name}` must be a DataFrame.")
+        missing = required - set(frame.columns)
+        if missing:
+            raise EyeProcessValidationError(f"`{name}` is missing: {', '.join(sorted(missing))}.")
+    ref = reference[reference["episode_type"].eq(event_type)].copy().reset_index(drop=True)
+    cand = candidate[candidate["episode_type"].eq(event_type)].copy().reset_index(drop=True)
+    if ref.empty or cand.empty:
+        return pd.DataFrame(
+            columns=[
+                "reference_index", "candidate_index", "recording_id", "trial_id",
+                "event_type", "overlap_iou", "onset_difference_ms", "offset_difference_ms",
+                "duration_difference_ms",
+            ]
+        )
+    candidates = []
+    for i, a in ref.iterrows():
+        for j, b in cand.iterrows():
+            if str(a["recording_id"]) != str(b["recording_id"]):
+                continue
+            if "trial_id" in ref and "trial_id" in cand and pd.notna(a.get("trial_id")) and pd.notna(b.get("trial_id")):
+                if str(a.get("trial_id")) != str(b.get("trial_id")):
+                    continue
+            a_start, a_end = float(a["start_time"]), float(a["end_time"])
+            b_start, b_end = float(b["start_time"]), float(b["end_time"])
+            onset_diff = abs(a_start - b_start) * 1000.0
+            iou = _event_iou(a_start, a_end, b_start, b_end)
+            if iou < minimum_overlap and onset_diff > onset_tolerance_ms:
+                continue
+            candidates.append((iou, -onset_diff, i, j))
+    candidates.sort(reverse=True)
+    used_ref: set[int] = set()
+    used_cand: set[int] = set()
+    rows = []
+    for iou, neg_onset, i, j in candidates:
+        if i in used_ref or j in used_cand:
+            continue
+        used_ref.add(i)
+        used_cand.add(j)
+        a = ref.iloc[i]
+        b = cand.iloc[j]
+        rows.append(
+            {
+                "reference_index": i,
+                "candidate_index": j,
+                "recording_id": a["recording_id"],
+                "trial_id": a.get("trial_id", pd.NA),
+                "event_type": event_type,
+                "overlap_iou": float(iou),
+                "onset_difference_ms": float(-neg_onset),
+                "offset_difference_ms": abs(float(a["end_time"]) - float(b["end_time"])) * 1000.0,
+                "duration_difference_ms": float(b["end_time"] - b["start_time"] - (a["end_time"] - a["start_time"])) * 1000.0,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def compare_event_catalogues(
+    reference: pd.DataFrame,
+    candidate: pd.DataFrame,
+    *,
+    event_type: str = "fixation",
+    onset_tolerance_ms: float = 75.0,
+    minimum_overlap: float = 0.10,
+) -> pd.DataFrame:
+    """Compare two event catalogues using one-to-one temporal matching."""
+    matches = match_detected_events(
+        reference,
+        candidate,
+        event_type=event_type,
+        onset_tolerance_ms=onset_tolerance_ms,
+        minimum_overlap=minimum_overlap,
+    )
+    n_ref = int(reference["episode_type"].eq(event_type).sum())
+    n_cand = int(candidate["episode_type"].eq(event_type).sum())
+    n_match = len(matches)
+    precision = n_match / n_cand if n_cand else np.nan
+    recall = n_match / n_ref if n_ref else np.nan
+    f1 = 2 * precision * recall / (precision + recall) if np.isfinite(precision) and np.isfinite(recall) and precision + recall else np.nan
+    return pd.DataFrame(
+        [{
+            "event_type": event_type,
+            "reference_events": n_ref,
+            "candidate_events": n_cand,
+            "matched_events": n_match,
+            "matched_event_precision": precision,
+            "matched_event_recall": recall,
+            "f1": f1,
+            "mean_event_overlap": matches["overlap_iou"].mean() if n_match else np.nan,
+            "median_event_overlap": matches["overlap_iou"].median() if n_match else np.nan,
+            "mean_onset_difference_ms": matches["onset_difference_ms"].mean() if n_match else np.nan,
+            "mean_offset_difference_ms": matches["offset_difference_ms"].mean() if n_match else np.nan,
+            "mean_duration_difference_ms": matches["duration_difference_ms"].mean() if n_match else np.nan,
+        }]
+    )
+
+
+def estimate_detector_agreement(
+    x: DetectorMultiverseResult | pd.DataFrame,
+    *,
+    event_type: str = "fixation",
+    onset_tolerance_ms: float = 75.0,
+    minimum_overlap: float = 0.10,
+) -> pd.DataFrame:
+    """Pairwise detector agreement across all successful detector branches."""
+    events = x.events if isinstance(x, DetectorMultiverseResult) else x
+    if not isinstance(events, pd.DataFrame) or "detector_id" not in events:
+        raise EyeProcessValidationError("Detector-labelled event data are required.")
+    ids = sorted(events["detector_id"].dropna().astype(str).unique())
+    rows = []
+    for left, right in itertools.combinations(ids, 2):
+        a = events[events["detector_id"].astype(str).eq(left)]
+        b = events[events["detector_id"].astype(str).eq(right)]
+        comp = compare_event_catalogues(
+            a, b, event_type=event_type, onset_tolerance_ms=onset_tolerance_ms, minimum_overlap=minimum_overlap
+        )
+        row = comp.iloc[0].to_dict()
+        row.update({"detector_a": left, "detector_b": right})
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def summarise_detector_events(x: DetectorMultiverseResult | pd.DataFrame) -> pd.DataFrame:
+    """Detector-level event counts and fixation-duration summaries."""
+    events = x.events if isinstance(x, DetectorMultiverseResult) else x
+    if events.empty:
+        return pd.DataFrame()
+    if "detector_id" not in events:
+        raise EyeProcessValidationError("`events` must include detector_id.")
+    rows = []
+    for detector_id, group in events.groupby("detector_id", sort=True, dropna=False):
+        fix = group[group["episode_type"].eq("fixation")]
+        duration = pd.to_numeric(fix["duration_ms"], errors="coerce")
+        rows.append(
+            {
+                "detector_id": detector_id,
+                "number_of_events": len(group),
+                "number_of_fixations": len(fix),
+                "number_of_saccades": int(group["episode_type"].eq("saccade").sum()),
+                "mean_fixation_duration_ms": duration.mean() if len(fix) else np.nan,
+                "median_fixation_duration_ms": duration.median() if len(fix) else np.nan,
+                "total_fixation_duration_ms": duration.sum(min_count=1) if len(fix) else 0.0,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def summarise_detector_disagreement(x: DetectorMultiverseResult, *, event_type: str = "fixation") -> pd.DataFrame:
+    """Pairwise detector disagreement expressed without assuming a gold standard."""
+    agreement = estimate_detector_agreement(x, event_type=event_type)
+    if agreement.empty:
+        return agreement
+    out = agreement.copy()
+    out["unmatched_reference"] = out["reference_events"] - out["matched_events"]
+    out["unmatched_candidate"] = out["candidate_events"] - out["matched_events"]
+    out["event_count_difference"] = out["candidate_events"] - out["reference_events"]
+    return out
+
+
+def _assign_episode_aois_explicit(branch: EyeDataset, overlap: str) -> EyeDataset:
+    if overlap not in {"error", "first", "smallest", "all"}:
+        raise EyeProcessValidationError("`overlap` must be error, first, smallest, or all.")
+    if branch["aoi_definitions"].empty or branch["aoi_geometry"].empty:
+        raise EyeProcessValidationError("No AOIs are registered; detector-to-AOI propagation cannot continue.")
+    out = branch.copy()
+    episodes = out["episodes"].copy()
+    if episodes.empty:
+        return out
+    definitions = out["aoi_definitions"].reset_index(drop=True)
+    geometries = out["aoi_geometry"]
+    assignments: list[Any] = []
+    for _, event in episodes.iterrows():
+        if event["episode_type"] not in {"fixation", "pursuit"} or not np.isfinite(pd.to_numeric(pd.Series([event["centroid_x"]]), errors="coerce").iloc[0]):
+            assignments.append(event.get("aoi_id", pd.NA))
+            continue
+        hits: list[tuple[str, float, int]] = []
+        for order, definition in definitions.iterrows():
+            if pd.notna(definition["stimulus_id"]) and str(definition["stimulus_id"]).strip():
+                if str(event.get("stimulus_id")) != str(definition["stimulus_id"]):
+                    continue
+            selected = geometries[geometries["aoi_id"].astype(str).eq(str(definition["aoi_id"]))]
+            for _, geometry in selected.iterrows():
+                if str(event.get("coordinate_space_id")) != str(geometry["coordinate_space_id"]):
+                    continue
+                hit = _aoi_contains(
+                    [event["centroid_x"]], [event["centroid_y"]], [event["start_time"]], definition, geometry
+                )[0]
+                if hit:
+                    width = pd.to_numeric(pd.Series([geometry["width"]]), errors="coerce").iloc[0]
+                    height = pd.to_numeric(pd.Series([geometry["height"]]), errors="coerce").iloc[0]
+                    area = float(width * height) if np.isfinite(width) and np.isfinite(height) else np.inf
+                    hits.append((str(definition["aoi_id"]), area, order))
+        unique = []
+        seen = set()
+        for hit in hits:
+            if hit[0] not in seen:
+                unique.append(hit)
+                seen.add(hit[0])
+        if len(unique) > 1 and overlap == "error":
+            raise EyeProcessValidationError(
+                f"Ambiguous AOI assignment for episode {event.get('episode_id')}: "
+                + ", ".join(item[0] for item in unique)
+                + ". Choose an overlap rule explicitly."
+            )
+        if not unique:
+            assignments.append(pd.NA)
+        elif overlap == "all":
+            assignments.append("|".join(item[0] for item in unique))
+        elif overlap == "smallest":
+            assignments.append(min(unique, key=lambda item: (item[1], item[2]))[0])
+        else:
+            assignments.append(unique[0][0])
+    episodes["aoi_id"] = assignments
+    out["episodes"] = episodes
+    return add_provenance(out, "propagate_detector_to_aoi", "episodes", f"overlap={overlap}")
+
+
+def propagate_detector_to_aoi(
+    x: DetectorMultiverseResult,
+    *,
+    overlap: str = "error",
+    continue_on_error: bool = True,
+) -> DetectorMultiverseResult:
+    """Assign AOIs independently within every detector branch."""
+    if not isinstance(x, DetectorMultiverseResult):
+        raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
+    branches: dict[str, EyeDataset] = {}
+    failures = [] if x.failures.empty else x.failures.to_dict("records")
+    warnings_rows = [] if x.warnings.empty else x.warnings.to_dict("records")
+    event_frames = []
+    for spec in x.multiverse.specs:
+        if spec.detector_id not in x.branches:
+            continue
+        try:
+            branch = _assign_episode_aois_explicit(x.branches[spec.detector_id], overlap)
+            branches[spec.detector_id] = branch
+            events = branch["episodes"].copy()
+            if "detector_id" in events:
+                events = events[events["detector_id"].eq(spec.detector_id)]
+            event_frames.append(events)
+        except Exception as exc:
+            failures.append({
+                "detector_id": spec.detector_id,
+                "detector_spec_hash": spec.fingerprint,
+                "stage": "aoi_assignment",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            })
+            if not continue_on_error:
+                raise
+    events = pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    status = x.status.copy()
+    failed_ids = {row["detector_id"] for row in failures if row.get("stage") == "aoi_assignment"}
+    if not status.empty and failed_ids:
+        status.loc[status["detector_id"].isin(failed_ids), "status"] = "failed_aoi"
+    return replace(
+        x,
+        branches=branches,
+        events=events,
+        status=status,
+        failures=pd.DataFrame(failures),
+        warnings=pd.DataFrame(warnings_rows),
+    )
+
+
+def _trial_rows(branch: EyeDataset) -> pd.DataFrame:
+    intervals = branch["intervals"].copy()
+    trials = intervals[intervals["interval_type"].eq("trial")].copy()
+    if trials.empty:
+        raise EyeProcessValidationError("Explicit trial intervals are required for detector-to-feature propagation.")
+    if trials["trial_id"].isna().any():
+        raise EyeProcessValidationError("Trial intervals must have non-missing trial_id values.")
+    if trials.duplicated(["recording_id", "trial_id"]).any():
+        raise EyeProcessValidationError("Trial intervals must be unique by recording_id and trial_id.")
+    return trials
+
+
+def _trial_valid_fraction(branch: EyeDataset, recording_id: Any, trial_id: Any) -> tuple[int, float]:
+    gaze = branch["gaze_samples"]
+    subset = gaze[gaze["recording_id"].eq(recording_id) & gaze["trial_id"].eq(trial_id)]
+    if subset.empty:
+        return 0, np.nan
+    valid = subset["valid"].astype("boolean").fillna(False).to_numpy(bool)
+    finite = np.isfinite(pd.to_numeric(subset["gaze_x"], errors="coerce")) & np.isfinite(pd.to_numeric(subset["gaze_y"], errors="coerce"))
+    observed = valid & finite
+    return len(subset), float(observed.mean())
+
+
+def _pupil_within_fixations(branch: EyeDataset, fixations: pd.DataFrame, recording_id: Any, trial_id: Any) -> float:
+    eye = branch["eye_samples"]
+    if eye.empty or fixations.empty:
+        return np.nan
+    data = eye[eye["recording_id"].eq(recording_id) & eye["trial_id"].eq(trial_id)].copy()
+    if data.empty:
+        return np.nan
+    times = pd.to_numeric(data["timestamp_seconds"], errors="coerce").to_numpy(float)
+    pupil = pd.to_numeric(data["pupil_diameter"], errors="coerce").to_numpy(float)
+    valid = data["pupil_valid"].astype("boolean").fillna(False).to_numpy(bool)
+    mask = np.zeros(len(data), dtype=bool)
+    for _, fix in fixations.iterrows():
+        mask |= (times >= float(fix["start_time"])) & (times <= float(fix["end_time"]))
+    values = pupil[mask & valid & np.isfinite(pupil)]
+    return float(np.mean(values)) if values.size else np.nan
+
+
