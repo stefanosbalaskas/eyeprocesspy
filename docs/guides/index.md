@@ -45,6 +45,14 @@ Reliability, Bland–Altman evidence, sampling irregularity, calibration error, 
 </div>
 <div class="ep-card" markdown>
 
+### Censored gaze latency
+Retain valid never-inspected trials as right-censored observations, choose Cox/AFT estimands explicitly, diagnose assumptions, and report sensitivity transparently.
+
+[Open guide](gaze-survival-analysis.md) · [Decision guide](../methods/gaze-survival/decision-guide.md)
+
+</div>
+<div class="ep-card" markdown>
+
 ### AOI perturbation & uncertainty
 Stress-test AOI geometry, assignment stability, feature recomputation, and model coefficients under defensible boundary changes.
 
