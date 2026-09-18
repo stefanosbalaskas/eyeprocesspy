@@ -6,6 +6,7 @@ inference. It is deliberately vendor-neutral. Vendor-specific adapters belong in
 adapter packages; mature external detectors such as REMoDNaV are bridged rather
 than reimplemented.
 """
+
 from __future__ import annotations
 
 import importlib.metadata
