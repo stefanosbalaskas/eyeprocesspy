@@ -326,33 +326,59 @@ def test_assignment_frequency_is_descriptive():
     assert "not a posterior probability" in out.attrs["caveat"]
 
 
-def test_recompute_features_does_not_infer_dwell_or_zero_missing():
+def test_recompute_features_preserves_zero_cells_and_missing_denominators():
     d = pd.DataFrame(
         {
-            "participant": [1, 1, 1],
-            "trial": [1, 1, 1],
-            "time": [0.1, 0.2, 0.3],
-            "duration": [0.1, np.nan, 0.1],
+            "participant": [1, 1, 1, 2, 2],
+            "trial": [1, 1, 1, 1, 1],
+            "time": [0.1, 0.2, 0.3, np.nan, np.nan],
+            "duration": [0.1, np.nan, 0.1, np.nan, np.nan],
         }
     )
-    with pytest.warns(RuntimeWarning, match="dwell is returned as NA"):
-        f = recompute_aoi_features(
+    assignments = ["a", "a", OUTSIDE, None, None]
+
+    with pytest.warns(RuntimeWarning) as warning_record:
+        sparse = recompute_aoi_features(
             d,
-            ["a", "a", OUTSIDE],
+            assignments,
             participant_col="participant",
             trial_col="trial",
-            time_col="time",
+            aoi_levels=["a", "b"],
         )
-    assert np.isnan(f.iloc[0]["dwell"])
-    f2 = recompute_aoi_features(
+    messages = " ".join(str(w.message) for w in warning_record)
+    assert "dwell is returned as NA" in messages
+    assert "first_fixation is returned as NA" in messages
+
+    p1a = sparse[(sparse.participant == 1) & sparse.aoi.eq("a")].iloc[0]
+    p1b = sparse[(sparse.participant == 1) & sparse.aoi.eq("b")].iloc[0]
+    p2a = sparse[(sparse.participant == 2) & sparse.aoi.eq("a")].iloc[0]
+    assert p1a.fixation_count == 2
+    assert bool(p1a.inspected)
+    assert p1b.fixation_count == 0
+    assert not bool(p1b.inspected)
+    assert np.isnan(p1b.dwell)
+    assert pd.isna(p2a.fixation_count)
+    assert pd.isna(p2a.inspected)
+    assert p2a.n_valid_observations == 0
+    assert p2a.n_missing_observations == 2
+
+    complete = recompute_aoi_features(
         d,
-        ["a", "a", OUTSIDE],
+        assignments,
         participant_col="participant",
         trial_col="trial",
         time_col="time",
         duration_col="duration",
+        aoi_levels=["a", "b"],
     )
-    assert math.isclose(f2.iloc[0]["dwell"], 0.1)
+    p1a = complete[(complete.participant == 1) & complete.aoi.eq("a")].iloc[0]
+    p1b = complete[(complete.participant == 1) & complete.aoi.eq("b")].iloc[0]
+    assert np.isnan(p1a.dwell)
+    assert not bool(p1a.duration_complete)
+    assert math.isclose(p1b.dwell, 0.0)
+    assert bool(p1b.duration_complete)
+    assert np.isnan(p1b.first_fixation)
+    assert bool(p1b.time_complete)
 
 
 def synthetic_data():
@@ -482,6 +508,15 @@ def sensitivity_result():
         quality_rules={"missing": "preserve"},
         model_specification={"family": "OLS", "outcome": "disclosure_dwell"},
     )
+
+
+def test_sensitivity_features_keep_all_trial_by_aoi_cells():
+    result = sensitivity_result()
+    baseline = result["features"]["baseline"]
+    expected_rows = 8 * 3 * 5
+    assert len(baseline) == expected_rows
+    assert set(baseline["aoi"]) == {"headline", "image", "claim", "disclosure", "cta"}
+    assert baseline["n_valid_observations"].gt(0).all()
 
 
 def test_full_sensitivity_pipeline_and_model_provenance():
