@@ -181,7 +181,7 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 _survival_module = __import__(f"{__name__}.survival", fromlist=["survival"])
 _survival_exports = (
     "CANONICAL_GAZE_SURVIVAL_COLUMNS",
-    "GazeSurvivalModel",
+    "GazeSurvivalFit",
     "prepare_gaze_survival_data",
     "validate_gaze_survival_data",
     "summarise_gaze_censoring",
