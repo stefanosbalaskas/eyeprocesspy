@@ -61,6 +61,16 @@ Do not use this workflow when event status cannot be determined, the observation
 
 Cox and AFT estimates answer different questions. The package therefore summarizes them side by side but does not declare a winner. Cox partial-likelihood and AFT full-likelihood AIC/BIC are marked as non-comparable across families.
 
+## Backend map
+
+| Scientific task | Python backend | R backend | Contract note |
+| --- | --- | --- | --- |
+| Cox PH | `statsmodels.PHReg` | `survival::coxph` | Semantic parity; backend diagnostics can differ numerically |
+| Repeated-trial marginal Cox | `PHReg.fit(groups=...)` | `coxph(..., cluster=...)` | Participant dependence is handled without pretending to be frailty |
+| Participant frailty Cox | Not currently exposed; request fails | `coxme::coxme` | No silent substitution in Python |
+| Weibull AFT | `lifelines.WeibullAFTFitter` | `survival::survreg(dist = "weibull")` | Time-ratio estimand aligned; parameterization may differ |
+| Log-normal AFT | `lifelines.LogNormalAFTFitter` | `survival::survreg(dist = "lognormal")` | Time-ratio estimand aligned; parameterization may differ |
+
 ## Start here
 
 - [Methodological guide](../../guides/gaze-survival-analysis.md)
