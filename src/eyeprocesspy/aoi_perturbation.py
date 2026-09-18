@@ -74,6 +74,9 @@ def run_aoi_sensitivity_analysis(
 ) -> EyeResult:
     """Run geometry perturbation, remapping, feature recomputation, and optional models."""
     frame = _frame(data, "data")
+    observation_level = str(observation_level).lower()
+    if observation_level not in {"fixation", "sample"}:
+        raise EyeProcessValidationError("`observation_level` must be 'fixation' or 'sample'.")
     geometry = validate_aoi_geometry(aois)["geometry"]
     if observation_id_col is not None:
         if observation_id_col not in frame.columns:
