@@ -1185,8 +1185,10 @@ def estimate_gaze_latency_quantiles(
 ) -> pd.DataFrame:
     """Estimate event-time quantiles from KM or fitted models."""
     probabilities = np.asarray(probs, float)
-    if ((probabilities <= 0) | (probabilities >= 1)).any():
-        raise ValueError("probs must lie strictly between 0 and 1.")
+    if probabilities.ndim != 1 or probabilities.size == 0:
+        raise ValueError("probs must be a non-empty one-dimensional sequence.")
+    if not np.isfinite(probabilities).all() or ((probabilities <= 0) | (probabilities >= 1)).any():
+        raise ValueError("probs must be finite and lie strictly between 0 and 1.")
     if isinstance(obj, pd.DataFrame):
         km = estimate_gaze_survival(obj, group=group)
         rows = []
@@ -1196,56 +1198,59 @@ def estimate_gaze_latency_quantiles(
                 rows.append(
                     {
                         "group": label,
-                        "prob": probability,
+                        "prob": float(probability),
                         "quantile": np.nan if q.empty else float(q.iloc[0]["time"]),
                     }
                 )
         return pd.DataFrame(rows)
 
     fit = obj
+    if not isinstance(fit, GazeSurvivalFit):
+        raise TypeError("obj must be a survival-ready DataFrame or GazeSurvivalFit.")
     if newdata is None:
         newdata = fit.data.iloc[[0]].copy()
-    _require_optional("patsy", "to build survival-model design matrices")
-    import patsy
-
-    design = patsy.build_design_matrices(
-        [fit.design_info], newdata, return_type="dataframe"
-    )[0]
-    if fit.model_family.startswith("cox") and "Intercept" in design:
-        design = design.drop(columns="Intercept")
+    new = _as_dataframe(newdata, "newdata")
     rows = []
     if fit.model_family.startswith("cox"):
+        _require_optional("patsy", "to build survival-model design matrices")
+        import patsy
+
+        design = patsy.build_design_matrices(
+            [fit.design_info], new, return_type="dataframe"
+        )[0]
+        if "Intercept" in design:
+            design = design.drop(columns="Intercept")
         baseline = _cox_baseline(fit)
         lp = design.to_numpy(float) @ np.asarray(fit.result.params)
         for row, value in enumerate(lp):
             for probability in probabilities:
-                target = -math.log(1 - probability) / math.exp(float(value))
+                target = -math.log(1 - float(probability)) / math.exp(float(value))
                 q = baseline[baseline["cum_hazard"] >= target]
                 rows.append(
                     {
                         "row": row,
-                        "prob": probability,
+                        "prob": float(probability),
                         "quantile": np.nan if q.empty else float(q.iloc[0]["time"]),
                     }
                 )
-    else:
-        beta = np.asarray(fit.result["params"][:-1])
-        sigma = math.exp(float(fit.result["params"][-1]))
-        mu = design.to_numpy(float) @ beta
-        for row, location in enumerate(mu):
-            for probability in probabilities:
-                if fit.model_family == "aft_weibull":
-                    rho = 1 / sigma
-                    quantile = math.exp(float(location)) * (
-                        -math.log(1 - probability)
-                    ) ** (1 / rho)
-                else:
-                    quantile = math.exp(
-                        float(location) + sigma * stats.norm.ppf(probability)
-                    )
+    elif fit.model_family.startswith("aft"):
+        for probability in probabilities:
+            predicted = fit.result.predict_percentile(
+                new, p=1 - float(probability)
+            )
+            values = np.asarray(predicted, dtype=float).reshape(-1)
+            if len(values) != len(new):
+                raise RuntimeError("Unexpected lifelines AFT quantile contract.")
+            for row, value in enumerate(values):
                 rows.append(
-                    {"row": row, "prob": probability, "quantile": quantile}
+                    {
+                        "row": row,
+                        "prob": float(probability),
+                        "quantile": float(value),
+                    }
                 )
+    else:
+        raise TypeError("Unsupported fitted object.")
     return pd.DataFrame(rows)
 
 
