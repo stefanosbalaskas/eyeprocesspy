@@ -149,7 +149,7 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .compositional_aoi_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-from .aoi_perturbation import (  # noqa: E402
+from .aoi_perturbation import (  # noqa: E402, F401, I001
     AMBIGUOUS,
     OUTSIDE,
     aoi_perturbation_spec,
