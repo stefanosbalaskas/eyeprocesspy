@@ -1163,12 +1163,12 @@ def predict_gaze_survival(
         if prediction.shape[1] != len(new):
             raise RuntimeError("Unexpected lifelines AFT prediction contract.")
         for row in range(len(new)):
-            for point in requested:
+            for position, point in enumerate(requested):
                 rows.append(
                     {
                         "row": row,
                         "time": float(point),
-                        "survival": float(prediction.loc[point].iloc[row]),
+                        "survival": float(prediction.iloc[position, row]),
                     }
                 )
     else:
