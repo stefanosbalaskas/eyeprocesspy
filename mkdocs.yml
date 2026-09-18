@@ -33,6 +33,7 @@ nav:
           - Assignment stability: guides/aoi-uncertainty/assignment-stability.md
           - Model propagation: guides/aoi-uncertainty/model-propagation.md
           - Reporting robustness: guides/aoi-uncertainty/reporting.md
+          - R/Python parity: guides/aoi-uncertainty/r-python-parity.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
