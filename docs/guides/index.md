@@ -51,6 +51,15 @@ Benchmarks, provenance, manifests, validation evidence, frozen-R checks, and dis
 [Open guide](reproducibility-release-evidence.md)
 
 </div>
+<div class="ep-card" markdown>
+
+### Event detector multiverse
+Propagate detector uncertainty from events through AOI features to the same statistical model, with explicit failures, provenance, and robustness diagnostics.
+
+[Open guide](event-detector-multiverse.md)
+
+</div>
+
 </div>
 
 For compact copy-paste workflows, use [Runnable examples](../examples/index.md). For exact source-port context, use the [88-article library](../articles/index.md). For visual discovery, use the [plot gallery](../gallery.md).
