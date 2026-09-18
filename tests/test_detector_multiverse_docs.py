@@ -59,3 +59,23 @@ def test_worked_example_is_runnable_and_records_optional_backend_failure():
     assert not summaries["feature_sensitivity"].empty
     assert "remodnav" in set(result.status.detector_id)
     assert not inference.coefficients.empty
+
+def test_method_landing_page_keeps_interpretation_limitations_and_reporting_handoff():
+    text = (DOCS / "guides/event-detector-multiverse.md").read_text(encoding="utf-8")
+    assert "## Interpretation" in text
+    assert "## Limitations" in text
+    assert "## Reporting and API links" in text
+    assert "reporting-detector-sensitivity.md" in text
+    assert "../reference/detector-multiverse.md" in text
+
+
+def test_generated_report_uses_planned_detector_denominator():
+    text = (
+        DOCS
+        / "assets"
+        / "detector-multiverse"
+        / "detector-multiverse-report.md"
+    ).read_text(encoding="utf-8")
+    assert "six detector specifications were planned" in text
+    assert "planned-specification convergence rate is 5/6 (0.833)" in text
+
