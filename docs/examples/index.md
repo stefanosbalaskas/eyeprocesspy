@@ -28,6 +28,12 @@
 
     [Open worked workflow](process-reliability.md)
 
+-   :material-timer-sand: **Censored gaze latency**
+
+    Build event/censor rows from trial windows and fixation/AOI events, retain never-inspected valid trials, fit clustered Cox/AFT models, inspect diagnostics, and produce manuscript-ready reporting.
+
+    [Open worked workflow](gaze-survival-analysis.md)
+
 -   :material-vector-polygon: **AOI perturbation sensitivity**
 
     Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
@@ -183,6 +189,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
+| `examples/worked_gaze_survival_analysis.py` | Raw trial/event inputs → censoring → Kaplan–Meier → clustered Cox/AFT → diagnostics/reporting | console summaries + survival plots |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
 
 | `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
