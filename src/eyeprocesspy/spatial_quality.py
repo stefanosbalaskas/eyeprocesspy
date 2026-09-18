@@ -408,16 +408,27 @@ def estimate_effective_sampling_rate(
         else:
             effective_count=int(finite.size); count_rule="finite timestamps"
         hz=float(effective_count/duration) if math.isfinite(duration) and duration>0 else math.nan
+        long_count=math.nan
         dropped=math.nan
         if nominal_sampling_hz is not None and pos.size:
-            expected=1/float(nominal_sampling_hz); dropped=int(np.sum(pos>float(dropped_interval_factor)*expected))
+            expected=1/float(nominal_sampling_hz)
+            long_mask=pos>float(dropped_interval_factor)*expected
+            long_count=int(np.sum(long_mask))
+            if long_count:
+                nominal_steps=np.floor((pos[long_mask]/expected)+0.5).astype(int)
+                dropped=int(np.sum(np.maximum(nominal_steps-1,0)))
+            else:
+                dropped=0
         rows.append({**_header(keys,g),"observed_sample_count":int(finite.size),"effective_sample_count":effective_count,
                      "timestamp_span_s":span,"trial_duration_s":duration,"effective_sampling_hz":hz,
                      "median_interval_ms":med*1000 if math.isfinite(med) else math.nan,
-                     "dropped_interval_count":dropped,"nominal_sampling_hz":nominal_sampling_hz,"effective_count_rule":count_rule})
+                     "long_interval_count":long_count,"dropped_interval_count":dropped,
+                     "nominal_sampling_hz":nominal_sampling_hz,"effective_count_rule":count_rule})
     return _attach_provenance(pd.DataFrame(rows),{"function":"estimate_effective_sampling_rate",
         "definition":"effective sample count / estimated recording duration",
         "duration_estimator":"timestamp span plus one median positive inter-sample interval",
+        "long_interval_definition":"positive interval exceeding dropped_interval_factor times the nominal interval",
+        "dropped_interval_definition":"sum of estimated missing nominal samples within long intervals",
         "dropped_interval_factor":dropped_interval_factor})
 
 
@@ -633,7 +644,9 @@ def plot_bcea(report: Any,ax: Any=None):
 
 
 def plot_sampling_intervals(data: Any,time: str="timestamp_ms",time_unit: str="ms",ax: Any=None):
-    d=_df(data); _require(d,[time]); t=_numeric(d[time])*_TIME_SCALES[time_unit]; dt=np.diff(t)*1000; ax=_ax(ax); ax.plot(np.arange(1,len(dt)+1),dt,marker="."); ax.set(ylabel="interval (ms)",xlabel="interval",title="Sampling intervals"); ax.eyeprocess_plot_data=pd.DataFrame({"interval_ms":dt}); return ax
+    d=_df(data); _require(d,[time])
+    if time_unit not in _TIME_SCALES: raise ValueError("time_unit must be one of s, ms, us, ns")
+    t=_numeric(d[time])*_TIME_SCALES[time_unit]; dt=np.diff(t)*1000; ax=_ax(ax); ax.plot(np.arange(1,len(dt)+1),dt,marker="."); ax.set(ylabel="interval (ms)",xlabel="interval",title="Sampling intervals"); ax.eyeprocess_plot_data=pd.DataFrame({"interval_ms":dt}); return ax
 
 
 def plot_gaze_quality_dashboard(report: Any):
@@ -646,6 +659,9 @@ def plot_gaze_quality_dashboard(report: Any):
 
 
 def report_gaze_quality(report: Any,digits: int=3) -> str:
+    if isinstance(digits,bool) or not isinstance(digits,(int,np.integer)) or int(digits)<0:
+        raise ValueError("digits must be a non-negative integer")
+    digits=int(digits)
     d=_df(report)
     if d.empty: return "No gaze-quality rows were available."
     cols=[c for c in ["accuracy_mean","precision_rms_s2s","precision_sd","bcea","effective_sampling_hz","valid_sample_fraction","data_loss_fraction"] if c in d]
@@ -659,7 +675,17 @@ def report_gaze_quality(report: Any,digits: int=3) -> str:
 
 def simulate_gaze_quality_calibration(seed: int=20260918,samples_per_target: int=18,nominal_sampling_hz: float=60.0) -> pd.DataFrame:
     """Generate a reproducible 9-point validation set with six quality profiles."""
-    if samples_per_target<4: raise ValueError("samples_per_target must be at least 4")
+    try:
+        samples_float=float(samples_per_target)
+        sampling_hz=float(nominal_sampling_hz)
+    except (TypeError,ValueError) as exc:
+        raise ValueError("samples_per_target and nominal_sampling_hz must be numeric") from exc
+    if not math.isfinite(samples_float) or samples_float<4 or not samples_float.is_integer():
+        raise ValueError("samples_per_target must be an integer of at least 4")
+    if not math.isfinite(sampling_hz) or sampling_hz<=0:
+        raise ValueError("nominal_sampling_hz must be a finite positive value")
+    samples_per_target=int(samples_float)
+    nominal_sampling_hz=sampling_hz
     rng=np.random.default_rng(int(seed)); targets=[(-5,-5),(0,-5),(5,-5),(-5,0),(0,0),(5,0),(-5,5),(0,5),(5,5)]
     specs={"good_accuracy_good_precision":(0.0,0.0,.12),"poor_accuracy_good_precision":(.9,-.7,.12),"good_accuracy_poor_precision":(0.0,0.0,.75),"poor_accuracy_poor_precision":(.9,-.7,.75),"irregular_sampling":(.1,-.1,.20),"missingness":(.1,-.1,.20)}
     rows=[]
