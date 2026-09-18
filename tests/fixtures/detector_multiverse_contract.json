@@ -1,0 +1,52 @@
+{
+  "specs": [
+    {
+      "detector_id": "ivt30",
+      "algorithm": "ivt",
+      "velocity_threshold": 30,
+      "dispersion_threshold": null,
+      "minimum_duration_ms": 60,
+      "maximum_gap_ms": 75,
+      "merge_rule": "none",
+      "sampling_rate": 60,
+      "smoothing": null,
+      "filter": null,
+      "coordinate_unit": "degrees",
+      "implementation": "eyeprocesspy",
+      "implementation_version": "contract-fixture",
+      "parameters": {}
+    },
+    {
+      "detector_id": "idtA",
+      "algorithm": "idt",
+      "velocity_threshold": null,
+      "dispersion_threshold": 1.2,
+      "minimum_duration_ms": 80,
+      "maximum_gap_ms": null,
+      "merge_rule": "none",
+      "sampling_rate": 60,
+      "smoothing": null,
+      "filter": null,
+      "coordinate_unit": "degrees",
+      "implementation": "eyeprocesspy",
+      "implementation_version": "contract-fixture",
+      "parameters": {}
+    }
+  ],
+  "event_matching_fixture": {
+    "reference": [
+      {"recording_id":"R1","trial_id":"T1","episode_type":"fixation","start_time":0.10,"end_time":0.30},
+      {"recording_id":"R1","trial_id":"T1","episode_type":"fixation","start_time":0.50,"end_time":0.70}
+    ],
+    "candidate": [
+      {"recording_id":"R1","trial_id":"T1","episode_type":"fixation","start_time":0.11,"end_time":0.29},
+      {"recording_id":"R1","trial_id":"T1","episode_type":"fixation","start_time":0.52,"end_time":0.72},
+      {"recording_id":"R1","trial_id":"T1","episode_type":"fixation","start_time":0.90,"end_time":1.02}
+    ],
+    "expected": {
+      "reference_events": 2,
+      "candidate_events": 3,
+      "matched_events": 2
+    }
+  }
+}
