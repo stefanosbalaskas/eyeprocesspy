@@ -530,13 +530,16 @@ def create_gaze_quality_report(
     valid: str|None=None,missing_reason: str|None=None,by: str|Sequence[str]|None=None,unit: str="degrees",output_unit: str|None=None,
     geometry: Mapping[str,Any]|None=None,time_unit: str="ms",nominal_sampling_hz: float|None=None,bcea_probability: float=.68,
     max_gap_ms: float|None=None,thresholds: Mapping[str,Any]|None=None,preprocessing_spec: Any=None,event_detector: Any=None,aoi_specification: Any=None,
-    quality_rules: Any=None,model_specification: Any=None,software_version: str|None=None,
+    quality_rules: Any=None,model_specification: Any=None,software_version: str|None=None,unit_column: str|None=None,
 ) -> pd.DataFrame:
     """Create a manuscript-ready report; thresholds only flag rows for review."""
     d=_df(data); keys=_by_list(by)
-    _require(d,[x,y,time,valid,missing_reason,*keys])
+    resolved_unit_column=unit_column
+    if resolved_unit_column is None and "coordinate_unit" in d.columns:
+        resolved_unit_column="coordinate_unit"
+    _require(d,[x,y,time,valid,missing_reason,resolved_unit_column,*keys])
     has_targets=target_x is not None and target_y is not None and target_x in d.columns and target_y in d.columns
-    validation=validate_gaze_quality_inputs(d,x=x,y=y,time=time,target_x=target_x if has_targets else None,target_y=target_y if has_targets else None,by=keys,unit=unit,time_unit=time_unit)
+    validation=validate_gaze_quality_inputs(d,x=x,y=y,time=time,target_x=target_x if has_targets else None,target_y=target_y if has_targets else None,by=keys,unit=unit,time_unit=time_unit,unit_column=resolved_unit_column)
     if has_targets:
         spatial=summarise_spatial_quality(d,x=x,y=y,time=time,target_x=target_x,target_y=target_y,by=keys,unit=unit,output_unit=output_unit,geometry=geometry,time_unit=time_unit,max_gap_ms=max_gap_ms,probability=bcea_probability)
     else:
@@ -556,13 +559,16 @@ def create_gaze_quality_report(
         rf=[]; key=tuple(row.get(k) for k in keys)
         rf.extend(issue_map.get(key,[]))
         if "n_accuracy_targets" in row and pd.notna(row.get("n_accuracy_targets")) and float(row["n_accuracy_targets"])>1: rf.append("mixed_accuracy_targets")
+        if "n_bcea_samples" in row and pd.notna(row.get("n_bcea_samples")) and float(row["n_bcea_samples"])<2: rf.append("insufficient_bcea_samples")
+        if "n_steps" in row and pd.notna(row.get("n_steps")) and float(row["n_steps"])<1: rf.append("insufficient_rms_pairs")
+        if "valid_sample_fraction" in row and pd.notna(row.get("valid_sample_fraction")) and float(row["valid_sample_fraction"])<=0: rf.append("no_valid_gaze_samples")
         rf.extend(_threshold_flags(row,thresholds)); flags.append(sorted(set(rf)))
     report["quality_flags"]=[";".join(x) for x in flags]
     report["review_required"]=[bool(x) for x in flags]
-    provenance={"source_fingerprint":_source_fingerprint(d,[x,y,time,*([target_x,target_y] if has_targets else []),*keys]),
+    provenance={"source_fingerprint":_source_fingerprint(d,[x,y,time,valid,missing_reason,resolved_unit_column,*([target_x,target_y] if has_targets else []),*keys]),
                 "preprocessing_spec":preprocessing_spec,"event_detector":event_detector,"aoi_specification":aoi_specification,
                 "quality_rules":quality_rules if quality_rules is not None else thresholds,"model_specification":model_specification,
-                "software_version":software_version,"input_unit":unit,"output_unit":output_unit or unit,"time_unit":time_unit,
+                "software_version":software_version,"input_unit":unit,"output_unit":output_unit or unit,"unit_column":resolved_unit_column,"time_unit":time_unit,
                 "nominal_sampling_hz":nominal_sampling_hz,"bcea_probability":bcea_probability,"max_gap_ms":max_gap_ms,
                 "automatic_exclusion":False}
     return _attach_provenance(report,provenance)
