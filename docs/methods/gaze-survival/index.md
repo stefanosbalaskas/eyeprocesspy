@@ -84,6 +84,8 @@ The extra installs the tested `statsmodels`, `lifelines`, Patsy, and plotting de
 - [Methodological guide](../../guides/gaze-survival-analysis.md)
 - [Decision guide](decision-guide.md)
 - [Runnable disclosure-inspection example](../../examples/gaze-survival-analysis.md)
+- [Runnable evidence-verification example](../../examples/gaze-verification-survival.md)
 - [Reporting and limitations](reporting.md)
 - [Copyable reporting template](reporting-template.md)
+- [Troubleshooting clinic](troubleshooting.md)
 - [API reference](../../reference/gaze-survival.md)
