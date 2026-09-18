@@ -27,3 +27,7 @@ Use the [AOI robustness decision clinic](../guides/aoi-uncertainty/decision-clin
 ## Failure handling
 
 Use [AOI perturbation troubleshooting](../guides/aoi-uncertainty/troubleshooting.md) for geometry failures, overlap ambiguity, zero-versus-missing denominators, callback exceptions, non-convergence, and model-N changes. The [worked failure clinic](../examples/aoi-perturbation-failure-clinic.md) executes these states on synthetic data.
+
+## Planning
+
+Use the [AOI sensitivity analysis plan](../guides/aoi-uncertainty/analysis-plan.md) before running branch-specific models. The [worked filled plan](../examples/aoi-analysis-plan-worked.md) maps each planning decision to the public API.
