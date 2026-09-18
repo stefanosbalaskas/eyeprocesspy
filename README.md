@@ -75,6 +75,7 @@ See [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md), [`TEST_SUMMARY.md`](TEST_S
 | --- | --- |
 | **Import & canonicalization** | Vendor/generic readers, Gazepoint workflows, schema validation, coordinates, events, timebase, file pairing |
 | **Gaze & AOIs** | Fixations, saccades, dwell, scanpaths, transitions, entropy, recurrence, hard/probabilistic/compositional AOIs |
+| **Censored latency** | survival-ready event/censor tables, Kaplan–Meier, repeated-trial Cox, Weibull/log-normal AFT, PH diagnostics, sensitivity |
 | **Pupil & multimodal** | Baselines, pupil features, missingness, functional pupil, synchronized streams, staged multimodal models |
 | **Psychometrics & IRT** | Information, fit, DIF/DTF, process-informed and dynamic IRT, reliability, linking, norms, diagnostics |
 | **Measurement intelligence** | Calibration uncertainty, reliability, process guardrails, fairness, item-bank optimization |
@@ -120,6 +121,7 @@ issues = ep.validate_eye_dataset(eye)
 
 - **New to the package:** [Getting started](https://stefanosbalaskas.github.io/eyeprocesspy/getting-started/) → [Worked examples](https://stefanosbalaskas.github.io/eyeprocesspy/examples/) → [Cookbook](https://stefanosbalaskas.github.io/eyeprocesspy/cookbook/)
 - **Eye-tracking / AOI work:** [End-to-end eye-tracking](https://stefanosbalaskas.github.io/eyeprocesspy/guides/end-to-end-eye-tracking/) · [Gazepoint import & QC](https://stefanosbalaskas.github.io/eyeprocesspy/guides/gazepoint-import-qc/)
+- **Gaze latency / TTFF:** [Censored gaze-latency method](https://stefanosbalaskas.github.io/eyeprocesspy/methods/gaze-survival/) · [Worked survival example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/gaze-survival-analysis/)
 - **Pupillometry / multimodal:** [Pupillometry guide](https://stefanosbalaskas.github.io/eyeprocesspy/guides/pupillometry/) · [Quality & uncertainty](https://stefanosbalaskas.github.io/eyeprocesspy/guides/process-quality-uncertainty/)
 - **Psychometrics / IRT:** [Psychometrics & IRT](https://stefanosbalaskas.github.io/eyeprocesspy/guides/psychometrics-irt/) · [IRT example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/irt-diagnostics/)
 - **Full workflows:** [Featured workflows](https://stefanosbalaskas.github.io/eyeprocesspy/articles/featured-workflows/) · [88-article library](https://stefanosbalaskas.github.io/eyeprocesspy/articles/)
