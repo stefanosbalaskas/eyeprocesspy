@@ -320,6 +320,40 @@ def test_cox_matches_direct_statsmodels_backend_call():
     np.testing.assert_allclose(np.asarray(ours.result.params), np.asarray(direct.params), rtol=1e-10, atol=1e-10)
 
 
+def test_aft_matches_direct_lifelines_backend_call():
+    from lifelines import LogNormalAFTFitter, WeibullAFTFitter
+
+    d = simulate_gaze_survival_example(
+        seed=19, n_participants=50, trials_per_participant=3
+    )
+    for distribution, backend_class in (
+        ("weibull", WeibullAFTFitter),
+        ("lognormal", LogNormalAFTFitter),
+    ):
+        ours = fit_gaze_aft_model(
+            d, "C(condition)", distribution=distribution, maxiter=2000
+        )
+        direct = backend_class().fit(
+            d,
+            duration_col="analysis_time",
+            event_col="event_observed",
+            formula="C(condition)",
+            ancillary=False,
+            fit_options={"maxiter": 2000},
+        )
+        assert ours.backend == f"lifelines.{backend_class.__name__}"
+        pd.testing.assert_series_equal(
+            ours.result.params_.sort_index(),
+            direct.params_.sort_index(),
+            check_names=False,
+            rtol=1e-9,
+            atol=1e-9,
+        )
+        assert ours.result.log_likelihood_ == pytest.approx(
+            direct.log_likelihood_, rel=1e-10, abs=1e-10
+        )
+
+
 def test_sensitivity_grid_is_explicit_and_preserves_branch_metadata():
     d = simulate_gaze_survival_example(seed=7, n_participants=30, trials_per_participant=3)
     alt = d.copy()
