@@ -78,8 +78,11 @@ def run_aoi_sensitivity_analysis(
         if observation_id_col not in frame.columns:
             raise EyeProcessValidationError(f"Observation id column `{observation_id_col}` is absent.")
         ids = frame[observation_id_col].tolist()
-        if pd.Series(ids).duplicated().any():
-            raise EyeProcessValidationError("Observation IDs must be unique for perturbation tracking.")
+        id_series = pd.Series(ids)
+        if id_series.isna().any() or id_series.duplicated().any():
+            raise EyeProcessValidationError(
+                "Observation IDs must be unique and non-missing for perturbation tracking."
+            )
     else:
         ids = list(range(1, len(frame) + 1))
     grid_result = apply_aoi_perturbation_grid(geometry, grid)
