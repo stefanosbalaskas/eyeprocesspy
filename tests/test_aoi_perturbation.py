@@ -168,6 +168,41 @@ def test_overlap_is_audited_not_resolved():
     assert result["overlap_present"]
 
 
+def test_polygon_overlap_and_boundary_membership_are_deterministic():
+    polygons = pd.DataFrame(
+        {
+            "aoi_id": ["left", "right"],
+            "shape_type": ["polygon", "polygon"],
+            "polygon": [
+                np.array([[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0]]),
+                np.array([[9.5, -2.0], [12.0, 5.0], [9.5, 12.0]]),
+            ],
+        }
+    )
+    validation = validate_aoi_geometry(polygons)
+    assert validation["overlap_present"]
+    with pytest.raises(EyeProcessValidationError, match="overlap"):
+        validate_aoi_geometry(polygons, allow_overlap=False)
+
+    single = polygons.iloc[[0]].copy()
+    data = pd.DataFrame(
+        {
+            "x": [0.0, 10.0, 5.0],
+            "y": [5.0, 5.0, 0.0],
+            "duration": [1.0, 1.0, 1.0],
+        }
+    )
+    result = run_aoi_sensitivity_analysis(
+        data,
+        single,
+        create_aoi_perturbation_grid(include_baseline=True),
+        x_col="x",
+        y_col="y",
+        duration_col="duration",
+    )
+    assert result["assignments"]["baseline"] == ["left", "left", "left"]
+
+
 def test_zero_area_and_invalid_polygon_fail():
     zero = pd.DataFrame(
         {"aoi_id": ["a"], "xmin": [0], "xmax": [0], "ymin": [0], "ymax": [1]}
