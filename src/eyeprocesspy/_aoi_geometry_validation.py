@@ -12,7 +12,6 @@ from ._aoi_geometry_primitives import (
     _on_segment,
     _polygon_array,
     _polygon_self_intersects,
-    _segments_intersect,
     _signed_polygon_area,
     _software_provenance,
     _stable_frame_hash,
