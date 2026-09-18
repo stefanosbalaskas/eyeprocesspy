@@ -396,3 +396,27 @@ def test_worked_example_runs_end_to_end(tmp_path):
     ):
         assert (tmp_path / filename).exists()
     assert result["report"]["N_participants"] == 36
+
+def test_survival_public_api_is_available_from_package_root():
+    import eyeprocesspy as ep
+
+    required = [
+        "GazeSurvivalFit",
+        "prepare_gaze_survival_data",
+        "validate_gaze_survival_data",
+        "summarise_gaze_censoring",
+        "estimate_gaze_survival",
+        "fit_gaze_cox_model",
+        "fit_gaze_mixed_cox_model",
+        "fit_gaze_aft_model",
+        "check_gaze_proportional_hazards",
+        "compare_gaze_survival_models",
+        "predict_gaze_survival",
+        "estimate_gaze_latency_quantiles",
+        "plot_gaze_survival_curve",
+        "plot_gaze_cumulative_incidence",
+        "plot_gaze_hazard",
+        "plot_gaze_cox_diagnostics",
+        "report_gaze_survival_model",
+    ]
+    assert all(hasattr(ep, name) for name in required)
