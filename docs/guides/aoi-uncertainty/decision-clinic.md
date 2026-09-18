@@ -39,3 +39,7 @@ Report the nominal AOI source, observation level, perturbation operations and un
 - [`estimate_aoi_assignment_stability()`](../../reference/aoi-perturbation.md) — inspect assignment robustness.
 - [`assess_aoi_inference_stability()`](../../reference/aoi-perturbation.md) — summarize coefficient, convergence, and model-N stability.
 - [`report_aoi_sensitivity()`](../../reference/aoi-perturbation.md) — generate a compact reporting draft.
+
+## When a branch is non-evaluable
+
+Use the [troubleshooting guide](troubleshooting.md) before interpreting an unstable or failed branch. Diagnose geometry, assignment, feature denominators, and model callback in that order; do not repair a downstream symptom by silently changing the upstream scientific contract.

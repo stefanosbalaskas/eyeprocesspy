@@ -23,3 +23,7 @@ See [AOI perturbation and uncertainty analysis](../guides/aoi-uncertainty/) for 
 ## Practical guidance
 
 Use the [AOI robustness decision clinic](../guides/aoi-uncertainty/decision-clinic.md) to interpret assignment/model stability patterns, the [fixation-level worked example](../examples/aoi-perturbation-sensitivity.md) for end-to-end model propagation, and the [sample-level worked example](../examples/sample-level-aoi-sensitivity.md) when geometry sensitivity is evaluated directly on gaze samples.
+
+## Failure handling
+
+Use [AOI perturbation troubleshooting](../guides/aoi-uncertainty/troubleshooting.md) for geometry failures, overlap ambiguity, zero-versus-missing denominators, callback exceptions, non-convergence, and model-N changes. The [worked failure clinic](../examples/aoi-perturbation-failure-clinic.md) executes these states on synthetic data.
