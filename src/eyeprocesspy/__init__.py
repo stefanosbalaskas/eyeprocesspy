@@ -209,3 +209,35 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .multilevel_mediation import *
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .detector_multiverse import (
+    DetectorInferenceResult as DetectorInferenceResult,
+    DetectorMultiverse as DetectorMultiverse,
+    DetectorMultiverseResult as DetectorMultiverseResult,
+    EventDetectorSpec as EventDetectorSpec,
+    assess_detector_inference_stability as assess_detector_inference_stability,
+    compare_event_catalogues as compare_event_catalogues,
+    create_detector_multiverse as create_detector_multiverse,
+    define_event_detector_spec as define_event_detector_spec,
+    detect_events_with_spec as detect_events_with_spec,
+    estimate_detector_agreement as estimate_detector_agreement,
+    import_external_detector_events as import_external_detector_events,
+    match_detected_events as match_detected_events,
+    plot_detector_agreement as plot_detector_agreement,
+    plot_detector_coefficient_stability as plot_detector_coefficient_stability,
+    plot_detector_event_timeline as plot_detector_event_timeline,
+    plot_detector_feature_distributions as plot_detector_feature_distributions,
+    plot_detector_multiverse as plot_detector_multiverse,
+    propagate_detector_to_aoi as propagate_detector_to_aoi,
+    propagate_detector_to_features as propagate_detector_to_features,
+    report_detector_multiverse as report_detector_multiverse,
+    run_detector_inference_multiverse as run_detector_inference_multiverse,
+    run_detector_multiverse as run_detector_multiverse,
+    simulate_detector_multiverse_data as simulate_detector_multiverse_data,
+    summarise_detector_disagreement as summarise_detector_disagreement,
+    summarise_detector_events as summarise_detector_events,
+    summarise_detector_robustness as summarise_detector_robustness,
+    validate_event_detector_spec as validate_event_detector_spec,
+)
+__all__ = [n for n in globals() if not n.startswith("_")]
+
