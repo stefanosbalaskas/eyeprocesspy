@@ -38,6 +38,19 @@ The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example o
 
 </div>
 
+## Time-to-event gaze workflows
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/gaze-survival/km-disclosure.svg" alt="Kaplan–Meier gaze-latency curves">
+  <figcaption><strong>Censored gaze latency.</strong> Kaplan–Meier curves retain valid trials that end before the target AOI is inspected.</figcaption>
+</figure>
+
+</div>
+
+[Open the survival-analysis method →](methods/gaze-survival/index.md)
+
 ## Pupil and data-quality workflows
 
 <div class="ep-gallery" markdown>
