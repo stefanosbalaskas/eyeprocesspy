@@ -149,7 +149,33 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .compositional_aoi_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-from .aoi_perturbation import *
+from .aoi_perturbation import (  # noqa: E402
+    AMBIGUOUS,
+    OUTSIDE,
+    aoi_perturbation_spec,
+    apply_aoi_perturbation_grid,
+    assess_aoi_inference_stability,
+    compare_aoi_assignments,
+    convert_aoi_margin_to_degrees,
+    convert_aoi_margin_to_pixels,
+    create_aoi_perturbation_grid,
+    dilate_aoi,
+    erode_aoi,
+    estimate_aoi_assignment_stability,
+    estimate_fixation_assignment_probability,
+    jitter_aoi,
+    perturb_aoi_geometry,
+    plot_aoi_assignment_stability,
+    plot_aoi_coefficient_stability,
+    plot_aoi_perturbations,
+    plot_aoi_robustness_surface,
+    recompute_aoi_features,
+    report_aoi_sensitivity,
+    run_aoi_sensitivity_analysis,
+    summarise_aoi_sensitivity,
+    translate_aoi,
+    validate_aoi_geometry,
+)
 __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .plots_completion_08 import *
