@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="620" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+  <title id="title">Conceptual accuracy and precision profiles</title>
+  <desc id="desc">Four panels distinguish good accuracy and good precision, poor accuracy and good precision, good accuracy and poor precision, and poor accuracy and poor precision. Crosshairs mark the target and dots represent gaze samples. This is a conceptual illustration, not empirical data.</desc>
+  <rect width="1080" height="620" fill="#ffffff"/>
+  <style>
+    .h{font:700 26px system-ui,sans-serif;fill:#111}
+    .t{font:600 18px system-ui,sans-serif;fill:#111}
+    .s{font:400 14px system-ui,sans-serif;fill:#333}
+    .axis{stroke:#c7c7c7;stroke-width:1}
+    .target{stroke:#111;stroke-width:2}
+    .dot{fill:#4b5563;opacity:.82}
+    .box{fill:#fafafa;stroke:#d1d5db;stroke-width:1.5}
+  </style>
+  <text x="40" y="42" class="h">Accuracy and precision answer different questions</text>
+  <text x="40" y="70" class="s">Crosshair = intended target; dots = recorded samples. Conceptual illustration only.</text>
+
+  <g transform="translate(40,100)">
+    <rect width="485" height="220" rx="12" class="box"/>
+    <text x="18" y="30" class="t">Good accuracy · good precision</text>
+    <line x1="242" y1="55" x2="242" y2="205" class="axis"/><line x1="35" y1="132" x2="450" y2="132" class="axis"/>
+    <line x1="232" y1="132" x2="252" y2="132" class="target"/><line x1="242" y1="122" x2="242" y2="142" class="target"/>
+    <circle cx="236" cy="127" r="5" class="dot"/><circle cx="246" cy="133" r="5" class="dot"/><circle cx="241" cy="138" r="5" class="dot"/><circle cx="249" cy="124" r="5" class="dot"/><circle cx="233" cy="136" r="5" class="dot"/>
+    <text x="18" y="202" class="s">Centered and tightly clustered.</text>
+  </g>
+
+  <g transform="translate(555,100)">
+    <rect width="485" height="220" rx="12" class="box"/>
+    <text x="18" y="30" class="t">Poor accuracy · good precision</text>
+    <line x1="242" y1="55" x2="242" y2="205" class="axis"/><line x1="35" y1="132" x2="450" y2="132" class="axis"/>
+    <line x1="232" y1="132" x2="252" y2="132" class="target"/><line x1="242" y1="122" x2="242" y2="142" class="target"/>
+    <circle cx="326" cy="92" r="5" class="dot"/><circle cx="336" cy="96" r="5" class="dot"/><circle cx="330" cy="103" r="5" class="dot"/><circle cx="340" cy="88" r="5" class="dot"/><circle cx="323" cy="101" r="5" class="dot"/>
+    <text x="18" y="202" class="s">Stable samples with systematic offset.</text>
+  </g>
+
+  <g transform="translate(40,350)">
+    <rect width="485" height="220" rx="12" class="box"/>
+    <text x="18" y="30" class="t">Good accuracy · poor precision</text>
+    <line x1="242" y1="55" x2="242" y2="205" class="axis"/><line x1="35" y1="132" x2="450" y2="132" class="axis"/>
+    <line x1="232" y1="132" x2="252" y2="132" class="target"/><line x1="242" y1="122" x2="242" y2="142" class="target"/>
+    <circle cx="190" cy="90" r="5" class="dot"/><circle cx="286" cy="100" r="5" class="dot"/><circle cx="207" cy="166" r="5" class="dot"/><circle cx="300" cy="154" r="5" class="dot"/><circle cx="236" cy="121" r="5" class="dot"/><circle cx="258" cy="145" r="5" class="dot"/>
+    <text x="18" y="202" class="s">Centered on average but spatially dispersed.</text>
+  </g>
+
+  <g transform="translate(555,350)">
+    <rect width="485" height="220" rx="12" class="box"/>
+    <text x="18" y="30" class="t">Poor accuracy · poor precision</text>
+    <line x1="242" y1="55" x2="242" y2="205" class="axis"/><line x1="35" y1="132" x2="450" y2="132" class="axis"/>
+    <line x1="232" y1="132" x2="252" y2="132" class="target"/><line x1="242" y1="122" x2="242" y2="142" class="target"/>
+    <circle cx="302" cy="72" r="5" class="dot"/><circle cx="378" cy="98" r="5" class="dot"/><circle cx="310" cy="144" r="5" class="dot"/><circle cx="401" cy="150" r="5" class="dot"/><circle cx="350" cy="118" r="5" class="dot"/><circle cx="420" cy="83" r="5" class="dot"/>
+    <text x="18" y="202" class="s">Offset and dispersed.</text>
+  </g>
+</svg>
