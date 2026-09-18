@@ -230,6 +230,7 @@ def test_plot_passed_axis_dashboard_missing_metrics_and_empty_report():
 
 def test_simulator_small_sample_guard_and_reason_branches():
     with pytest.raises(ValueError,match="at least 4"): ep.simulate_gaze_quality_calibration(samples_per_target=3)
+    with pytest.raises(ValueError,match="seed"): ep.simulate_gaze_quality_calibration(seed=1.5)
     with pytest.raises(ValueError,match="integer"): ep.simulate_gaze_quality_calibration(samples_per_target=4.5)
     with pytest.raises(ValueError,match="finite positive"): ep.simulate_gaze_quality_calibration(nominal_sampling_hz=0)
     d=ep.simulate_gaze_quality_calibration(samples_per_target=15)
