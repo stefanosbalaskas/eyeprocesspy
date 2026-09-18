@@ -536,6 +536,42 @@ def sensitivity_result():
     )
 
 
+def test_sample_level_features_are_not_mislabeled_as_fixations():
+    data = pd.DataFrame(
+        {
+            "participant": ["p1", "p1", "p1"],
+            "trial": [1, 1, 1],
+            "x": [1.0, 2.0, 20.0],
+            "y": [1.0, 2.0, 20.0],
+            "duration": [0.01, 0.01, 0.01],
+            "time": [0.00, 0.01, 0.02],
+        }
+    )
+    aois = pd.DataFrame(
+        {"aoi_id": ["a"], "xmin": [0.0], "xmax": [10.0], "ymin": [0.0], "ymax": [10.0]}
+    )
+    result = run_aoi_sensitivity_analysis(
+        data,
+        aois,
+        create_aoi_perturbation_grid(include_baseline=True),
+        x_col="x",
+        y_col="y",
+        participant_col="participant",
+        trial_col="trial",
+        duration_col="duration",
+        time_col="time",
+        observation_level="sample",
+    )
+    row = result["features"]["baseline"].iloc[0]
+    assert row.observation_level == "sample"
+    assert row.observation_count == 2
+    assert row.sample_count == 2
+    assert pd.isna(row.fixation_count)
+    assert math.isclose(row.first_observation, 0.0)
+    assert np.isnan(row.first_fixation)
+    assert result["provenance"]["observation_level"] == "sample"
+
+
 def test_sensitivity_features_keep_all_trial_by_aoi_cells():
     result = sensitivity_result()
     baseline = result["features"]["baseline"]
