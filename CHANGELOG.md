@@ -6,9 +6,17 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ### Standardized spatial data quality
 
-- Added vendor-neutral accuracy, RMS-S2S, population-SD precision, BCEA, effective-sampling, jitter, validity, and missingness metrics.
-- Added a canonical review-oriented gaze-quality report with explicit units, provenance, study-defined thresholds, and no automatic exclusion.
-- Added a six-profile synthetic 9-point validation fixture, R/Python numerical parity fixture, runnable example, dedicated Data Quality site section, and manuscript-reporting guidance.
+- Added vendor-neutral target-referenced accuracy, RMS-S2S and population-SD precision, BCEA with explicit probability, empirical sampling intervals/jitter/effective frequency, valid-data fractions, and reason-aware data-loss metrics.
+- Added a canonical review-oriented gaze-quality report with explicit units, provenance, study-defined thresholds, insufficiency flags, and no automatic exclusion.
+- Added a deterministic six-profile 9-point validation generator, frozen R/Python numerical fixture, quality-decision sensitivity workflow, reporting guidance, and dedicated site navigation.
+- Long observed timing gaps are reported separately from the estimated number of nominal samples represented by those gaps.
+
+### Censored gaze-latency survival analysis
+
+- Added a vendor-neutral survival-ready trial contract that retains valid never-inspected trials as right-censored observations while keeping incomplete/unusable gaze in explicit review states.
+- Added Kaplan–Meier, Cox PH, participant-clustered Cox, Weibull/log-normal AFT, prediction, latency quantiles, PH diagnostics, sensitivity comparisons, plotting, reporting, provenance, and deterministic synthetic examples. Cox estimation delegates to `statsmodels`; parametric AFT estimation delegates to `lifelines>=0.30.3,<0.31` rather than duplicating the survival likelihood in eyeprocesspy.
+- Added a first-class documentation pathway with method overview, when-to-use/not-use guidance, worked examples, visual output, reporting/limitations guidance, and dedicated API reference.
+- Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
 
 ## 0.1.0 — 2026-09-03
 
