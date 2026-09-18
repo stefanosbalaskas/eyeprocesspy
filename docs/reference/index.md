@@ -1,6 +1,6 @@
 # API and plotting reference
 
-The `eyeprocesspy` public surface follows the frozen eyeprocess 0.11.1 API ledger and exposes a broad Python namespace for reproducible behavioral-process research.
+The `eyeprocesspy` public surface preserves the frozen eyeprocess 0.11.1 API ledger and also supports explicitly documented post-parity extensions. Trial-level multilevel mediation preparation is one such additive extension; it does not alter the frozen parity record.
 
 [Browse the generated API](api.md){ .md-button .md-button--primary }
 [Plotting reference](plotting.md){ .md-button }
@@ -15,6 +15,7 @@ The `eyeprocesspy` public surface follows the frozen eyeprocess 0.11.1 API ledge
 | **Gazepoint** | gaze/fixation/event/biometric readers, pairing, real-export validation, workflow helpers |
 | **Preprocessing and features** | fixations, saccades, AOIs, dwell, scanpaths, transitions, entropy, wide/trial feature tables |
 | **Pupil and multimodal** | pupil preprocessing, functional pupil, missingness, synchronized/staged multimodal workflows |
+| **Trial-level mediation preparation** | within/between decomposition, mediation-level audits, explicit missing/zero states, trial-count support, provenance, serial/moderator preparation |
 | **Process quality** | reliability, Bland–Altman, sampling irregularity, calibration error, gaze precision, quality profiles |
 | **AOI uncertainty** | calibration propagation, probabilistic AOIs, compositional AOIs, sensitivity/boundary uncertainty |
 | **Psychometrics and IRT** | information, scoring, fit, Q3, DIF/DTF, dynamic/process-informed/advanced IRT |
@@ -39,6 +40,6 @@ The plotting reference documents the major Matplotlib families and how to save, 
 
 ## Reference breadth
 
-The frozen parity surface contains **1,182 resolved APIs** spanning import, data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, interoperability, governance, storage, scientific plots, and reporting.
+The frozen parity surface contains **1,182 resolved APIs** spanning import, data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, interoperability, governance, storage, scientific plots, and reporting. The mediation preparation module adds **10 public functions and 1 public data-contract class** beyond that frozen ledger.
 
 The generated API page is intentionally comprehensive; the curated guides and plotting reference provide the higher-level navigation layer.
