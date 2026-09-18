@@ -1,5 +1,4 @@
 import math
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -7,7 +6,6 @@ import pandas as pd
 import pytest
 
 from eyeprocesspy.aoi_perturbation import (
-    AMBIGUOUS,
     OUTSIDE,
     aoi_perturbation_spec,
     apply_aoi_perturbation_grid,
