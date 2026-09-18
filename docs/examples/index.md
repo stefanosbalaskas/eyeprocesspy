@@ -171,7 +171,8 @@ For release-level verification, use the deterministic benchmark, validation evid
 
 | Script | Purpose | Output |
 | --- | --- | --- |
-| `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |\n| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |
+| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
 | `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
