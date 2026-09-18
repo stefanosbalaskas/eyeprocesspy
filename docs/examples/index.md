@@ -64,6 +64,12 @@
 
     [Open worked workflow](irt-diagnostics.md)
 
+-   :material-tune-variant: **Detector choice → inference**
+
+    Compare defensible event detectors, propagate differences into AOI features, fit the same model across branches, and report coefficient stability rather than significance counts.
+
+    [Open worked workflow](detector-multiverse-disclosure.md)
+
 </div>
 
 For short task-oriented snippets, use the [Cookbook](../cookbook.md). For visual output, browse the [15-figure gallery](../gallery.md).
@@ -202,6 +208,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | Script | Purpose | Output |
 | --- | --- | --- |
 | `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/detector_multiverse_worked.py` | Detector specs → events → AOIs/features → identical model → robustness report | `detector-multiverse-output/*.svg` + Markdown |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
 | `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
