@@ -21,6 +21,14 @@ Import, validate, audit, derive process structure, visualize, and preserve prove
 </div>
 <div class="ep-card" markdown>
 
+### Event detector multiverse
+Propagate detector uncertainty from events through AOI features to the same statistical model, with explicit failures, provenance, and robustness diagnostics.
+
+[Open guide](event-detector-multiverse.md)
+
+</div>
+<div class="ep-card" markdown>
+
 ### Gazepoint import & QC
 Vendor detection, gaze/fixation/event/biometric files, pairing, combined imports, and QC.
 
