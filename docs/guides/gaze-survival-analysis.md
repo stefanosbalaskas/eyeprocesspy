@@ -96,6 +96,10 @@ lognormal = fit_gaze_aft_model(data, "C(condition)", distribution="lognormal")
 
 Cox coefficients are reported as hazard ratios. A hazard ratio above one means a higher instantaneous target-event rate among trials still at risk; it is not a ratio of mean latency. AFT coefficients are reported as time ratios and describe multiplicative changes in event time under the fitted distribution.
 
+### Backend and parity contract
+
+Python Cox models delegate estimation to `statsmodels.PHReg`. Python Weibull and log-normal AFT models delegate to `lifelines` (`WeibullAFTFitter` and `LogNormalAFTFitter`). R `eyeprocess` uses `survival::coxph`, `coxme::coxme` for true participant frailty, and `survival::survreg` for AFT. The public scientific contract—censoring semantics, explicit estimator choice, effect-measure meaning, provenance, diagnostics, and output fields—is aligned across languages. Exact coefficient identity is not promised when the statistical backends use different parameterizations or numerical optimizers.
+
 Model family is always explicit. `compare_gaze_survival_models()` reports fit summaries but marks Cox partial-likelihood and AFT full-likelihood information criteria as non-comparable across families rather than ranking models automatically.
 
 ## Repeated observations and participant effects
