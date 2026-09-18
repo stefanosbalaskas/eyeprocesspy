@@ -219,8 +219,16 @@ def recompute_aoi_features(
     duration_col: str | None = None,
     time_col: str | None = None,
     perturbation_id: str | None = None,
+    aoi_levels: Sequence[str] | None = None,
 ) -> pd.DataFrame:
-    """Recompute AOI dwell, counts, first-fixation timing, and inspection flags."""
+    """Recompute AOI features without dropping observed zero-assignment cells.
+
+    A participant/trial × AOI cell receives a structural zero count only when
+    the group contains at least one non-missing AOI assignment opportunity.
+    Groups whose assignments are all missing retain NA counts/inspection.
+    Dwell is NA when an assigned observation has missing duration, and
+    first-fixation timing is never inferred from row order.
+    """
     frame = _frame(data, "data")
     if len(assignments) != len(frame):
         raise EyeProcessValidationError("`assignments` must contain one value per data row.")
@@ -235,33 +243,122 @@ def recompute_aoi_features(
     if time_col is not None and time_col not in frame.columns:
         raise EyeProcessValidationError(f"`time_col` `{time_col}` is absent.")
     if duration_col is None:
-        warnings.warn("No `duration_col` supplied; dwell is returned as NA rather than inferred from sampling intervals.", RuntimeWarning, stacklevel=2)
-    valid = frame["aoi_assignment"].notna() & ~frame["aoi_assignment"].isin([OUTSIDE, AMBIGUOUS])
-    work = frame.loc[valid].copy()
-    if work.empty:
-        columns = group_cols + ["aoi", "fixation_count", "dwell", "first_fixation", "inspected", "perturbation_id"]
+        warnings.warn(
+            "No `duration_col` supplied; dwell is returned as NA rather than inferred.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+    if time_col is None:
+        warnings.warn(
+            "No `time_col` supplied; first_fixation is returned as NA rather than inferred from row order.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+    if aoi_levels is None:
+        inferred = (
+            frame.loc[
+                frame["aoi_assignment"].notna()
+                & ~frame["aoi_assignment"].isin([OUTSIDE, AMBIGUOUS]),
+                "aoi_assignment",
+            ]
+            .astype(str)
+            .drop_duplicates()
+            .tolist()
+        )
+        levels = inferred
+    else:
+        levels = [str(v) for v in aoi_levels]
+        if any(not v for v in levels) or len(set(levels)) != len(levels):
+            raise EyeProcessValidationError("`aoi_levels` must contain unique non-empty AOI identifiers.")
+
+    columns = group_cols + [
+        "aoi",
+        "fixation_count",
+        "dwell",
+        "first_fixation",
+        "inspected",
+        "n_valid_observations",
+        "n_missing_observations",
+        "duration_complete",
+        "time_complete",
+        "perturbation_id",
+    ]
+    if not levels:
         return pd.DataFrame(columns=columns)
-    keys = group_cols + ["aoi_assignment"]
-    rows = []
-    for key, z in work.groupby(keys, dropna=False, sort=True):
-        key = (key,) if not isinstance(key, tuple) else key
-        row = {k: v for k, v in zip(keys, key)}
-        row["aoi"] = row.pop("aoi_assignment")
-        row["fixation_count"] = int(len(z))
-        if duration_col is None:
-            row["dwell"] = np.nan
-        else:
-            durations = pd.to_numeric(z[duration_col], errors="coerce")
-            row["dwell"] = float(durations.sum(min_count=1)) if durations.notna().any() else np.nan
-        if time_col is None:
-            row["first_fixation"] = float(z.index.min())
-        else:
-            times = pd.to_numeric(z[time_col], errors="coerce")
-            row["first_fixation"] = float(times.min()) if times.notna().any() else np.nan
-        row["inspected"] = True
-        row["perturbation_id"] = perturbation_id
-        rows.append(row)
-    return pd.DataFrame(rows)
+
+    grouped: Any
+    if group_cols:
+        grouped = frame.groupby(group_cols, dropna=False, sort=True)
+    else:
+        grouped = [((), frame)]
+
+    rows: list[dict[str, Any]] = []
+    for key, group in grouped:
+        if group_cols and not isinstance(key, tuple):
+            key = (key,)
+        elif not group_cols:
+            key = ()
+        group_values = {k: v for k, v in zip(group_cols, key)}
+        valid_assignment = group["aoi_assignment"].notna()
+        n_valid = int(valid_assignment.sum())
+        n_missing = int((~valid_assignment).sum())
+
+        for aoi in levels:
+            row: dict[str, Any] = dict(group_values)
+            row["aoi"] = aoi
+            selected = group.loc[group["aoi_assignment"].astype("string").eq(aoi).fillna(False)]
+            count = int(len(selected))
+
+            if n_valid == 0:
+                row["fixation_count"] = pd.NA
+                row["dwell"] = np.nan
+                row["first_fixation"] = np.nan
+                row["inspected"] = pd.NA
+                row["duration_complete"] = pd.NA
+                row["time_complete"] = pd.NA
+            else:
+                row["fixation_count"] = count
+                row["inspected"] = bool(count > 0)
+                if duration_col is None:
+                    row["dwell"] = np.nan
+                    row["duration_complete"] = pd.NA
+                elif count == 0:
+                    row["dwell"] = 0.0
+                    row["duration_complete"] = True
+                else:
+                    durations = pd.to_numeric(selected[duration_col], errors="coerce")
+                    duration_complete = bool(durations.notna().all())
+                    row["duration_complete"] = duration_complete
+                    row["dwell"] = float(durations.sum()) if duration_complete else np.nan
+
+                if time_col is None:
+                    row["first_fixation"] = np.nan
+                    row["time_complete"] = pd.NA
+                elif count == 0:
+                    row["first_fixation"] = np.nan
+                    row["time_complete"] = True
+                else:
+                    times = pd.to_numeric(selected[time_col], errors="coerce")
+                    time_complete = bool(times.notna().all())
+                    row["time_complete"] = time_complete
+                    row["first_fixation"] = float(times.min()) if times.notna().any() else np.nan
+
+            row["n_valid_observations"] = n_valid
+            row["n_missing_observations"] = n_missing
+            row["perturbation_id"] = perturbation_id
+            rows.append(row)
+
+    out = pd.DataFrame(rows, columns=columns)
+    if "fixation_count" in out:
+        out["fixation_count"] = out["fixation_count"].astype("Int64")
+    if "inspected" in out:
+        out["inspected"] = out["inspected"].astype("boolean")
+    if "duration_complete" in out:
+        out["duration_complete"] = out["duration_complete"].astype("boolean")
+    if "time_complete" in out:
+        out["time_complete"] = out["time_complete"].astype("boolean")
+    return out
 
 
 def _validate_model_table(table: Any, perturbation_id: str) -> pd.DataFrame:
