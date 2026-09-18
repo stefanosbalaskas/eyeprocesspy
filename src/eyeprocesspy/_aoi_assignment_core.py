@@ -228,6 +228,7 @@ def recompute_aoi_features(
     time_col: str | None = None,
     perturbation_id: str | None = None,
     aoi_levels: Sequence[str] | None = None,
+    observation_level: str = "fixation",
 ) -> pd.DataFrame:
     """Recompute AOI features without dropping observed zero-assignment cells.
 
@@ -238,6 +239,9 @@ def recompute_aoi_features(
     first-fixation timing is never inferred from row order.
     """
     frame = _frame(data, "data")
+    observation_level = str(observation_level).lower()
+    if observation_level not in {"fixation", "sample"}:
+        raise EyeProcessValidationError("`observation_level` must be 'fixation' or 'sample'.")
     if len(assignments) != len(frame):
         raise EyeProcessValidationError("`assignments` must contain one value per data row.")
     frame = frame.copy()
@@ -282,8 +286,12 @@ def recompute_aoi_features(
 
     columns = group_cols + [
         "aoi",
+        "observation_level",
+        "observation_count",
         "fixation_count",
+        "sample_count",
         "dwell",
+        "first_observation",
         "first_fixation",
         "inspected",
         "n_valid_observations",
@@ -318,15 +326,21 @@ def recompute_aoi_features(
             selected = group.loc[group["aoi_assignment"].astype("string").eq(aoi).fillna(False)]
             count = int(len(selected))
 
+            row["observation_level"] = observation_level
             if n_valid == 0:
+                row["observation_count"] = pd.NA
                 row["fixation_count"] = pd.NA
+                row["sample_count"] = pd.NA
                 row["dwell"] = np.nan
+                row["first_observation"] = np.nan
                 row["first_fixation"] = np.nan
                 row["inspected"] = pd.NA
                 row["duration_complete"] = pd.NA
                 row["time_complete"] = pd.NA
             else:
-                row["fixation_count"] = count
+                row["observation_count"] = count
+                row["fixation_count"] = count if observation_level == "fixation" else pd.NA
+                row["sample_count"] = count if observation_level == "sample" else pd.NA
                 row["inspected"] = bool(count > 0)
                 if duration_col is None:
                     row["dwell"] = np.nan
@@ -341,16 +355,22 @@ def recompute_aoi_features(
                     row["dwell"] = float(durations.sum()) if duration_complete else np.nan
 
                 if time_col is None:
+                    row["first_observation"] = np.nan
                     row["first_fixation"] = np.nan
                     row["time_complete"] = pd.NA
                 elif count == 0:
+                    row["first_observation"] = np.nan
                     row["first_fixation"] = np.nan
                     row["time_complete"] = True
                 else:
                     times = pd.to_numeric(selected[time_col], errors="coerce")
                     time_complete = bool(times.notna().all())
+                    first_observation = float(times.min()) if times.notna().any() else np.nan
                     row["time_complete"] = time_complete
-                    row["first_fixation"] = float(times.min()) if times.notna().any() else np.nan
+                    row["first_observation"] = first_observation
+                    row["first_fixation"] = (
+                        first_observation if observation_level == "fixation" else np.nan
+                    )
 
             row["n_valid_observations"] = n_valid
             row["n_missing_observations"] = n_missing
@@ -358,8 +378,9 @@ def recompute_aoi_features(
             rows.append(row)
 
     out = pd.DataFrame(rows, columns=columns)
-    if "fixation_count" in out:
-        out["fixation_count"] = out["fixation_count"].astype("Int64")
+    for count_col in ("observation_count", "fixation_count", "sample_count"):
+        if count_col in out:
+            out[count_col] = out[count_col].astype("Int64")
     if "inspected" in out:
         out["inspected"] = out["inspected"].astype("boolean")
     if "duration_complete" in out:
