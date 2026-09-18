@@ -4,6 +4,23 @@ title: Survival analysis for gaze latency
 
 # Survival analysis for gaze latency
 
+## Installation
+
+Install the survival extra so the specialist Cox/AFT and plotting backends used by this workflow are available:
+
+```bash
+pip install "eyeprocesspy[survival]"
+```
+
+For a source checkout managed with `uv`:
+
+```bash
+uv sync --extra survival
+```
+
+The base package remains usable without these optional model backends; attempting to fit a model whose backend is absent fails with an explicit installation message.
+
+
 ## Why TTFF is a censored-data problem
 
 Time to first fixation (TTFF), first AOI entry, evidence inspection, revisit, transition latency, and substantively defined disengagement are time-to-event outcomes. A valid trial that ends before the target event contributes information up to its observation limit and should remain as a right-censored observation. Dropping those trials conditions the latency distribution on eventual target inspection.
