@@ -109,6 +109,7 @@ The figure uses synthetic data and illustrates the preparation estimand: both ax
 - [Why participant aggregation can mislead](why-aggregation-can-mislead.md)
 - [Preparing trial-level gaze mediators](preparing-gaze-mediators.md)
 - [Missingness, quality, and trial retention](missingness-and-quality.md)
+- [Pre-fit analysis readiness checklist](analysis-readiness-checklist.md)
 
 ## Next step
 
