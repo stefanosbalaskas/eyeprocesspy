@@ -29,6 +29,7 @@ nav:
           - Readiness checklist: guides/multilevel-mediation/analysis-readiness-checklist.md
           - Why aggregation can mislead: guides/multilevel-mediation/why-aggregation-can-mislead.md
       - Eye-tracking end to end: guides/end-to-end-eye-tracking.md
+      - Event detector multiverse: guides/event-detector-multiverse.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
@@ -55,6 +56,7 @@ nav:
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
           - Overview: examples/index.md
+          - Detector choice → inference: examples/detector-multiverse-disclosure.md
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
@@ -73,6 +75,7 @@ nav:
   - Reference:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
+      - Detector multiverse API: reference/detector-multiverse.md
       - Plotting reference: reference/plotting.md
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md
