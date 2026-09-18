@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="470" viewBox="0 0 620 470">
+<style>text{font-family:system-ui,sans-serif;font-size:14px}.title{font-size:20px;font-weight:600}.small{font-size:12px}</style>
+<text x="310" y="28" text-anchor="middle" class="title">Pairwise fixation-event agreement</text>
+<text x="140" y="116" text-anchor="end">adaptive</text><text x="180" y="68" text-anchor="middle" transform="rotate(-35 180 68)">adaptive</text>
+<text x="140" y="176" text-anchor="end">idt_A</text><text x="240" y="68" text-anchor="middle" transform="rotate(-35 240 68)">idt_A</text>
+<text x="140" y="236" text-anchor="end">ivt25</text><text x="300" y="68" text-anchor="middle" transform="rotate(-35 300 68)">ivt25</text>
+<text x="140" y="296" text-anchor="end">ivt30</text><text x="360" y="68" text-anchor="middle" transform="rotate(-35 360 68)">ivt30</text>
+<text x="140" y="356" text-anchor="end">ivt35</text><text x="420" y="68" text-anchor="middle" transform="rotate(-35 420 68)">ivt35</text>
+<rect x="150" y="80" width="58" height="58" fill="currentColor" fill-opacity=".630"/><text x="179" y="115" text-anchor="middle">1.00</text>
+<rect x="210" y="80" width="58" height="58" fill="currentColor" fill-opacity=".510"/><text x="239" y="115" text-anchor="middle">0.78</text>
+<rect x="270" y="80" width="58" height="58" fill="currentColor" fill-opacity=".597"/><text x="299" y="115" text-anchor="middle">0.94</text>
+<rect x="330" y="80" width="58" height="58" fill="currentColor" fill-opacity=".623"/><text x="359" y="115" text-anchor="middle">0.99</text>
+<rect x="390" y="80" width="58" height="58" fill="currentColor" fill-opacity=".627"/><text x="419" y="115" text-anchor="middle">0.99</text>
+<rect x="150" y="140" width="58" height="58" fill="currentColor" fill-opacity=".510"/><text x="179" y="175" text-anchor="middle">0.78</text>
+<rect x="210" y="140" width="58" height="58" fill="currentColor" fill-opacity=".630"/><text x="239" y="175" text-anchor="middle">1.00</text>
+<rect x="270" y="140" width="58" height="58" fill="currentColor" fill-opacity=".479"/><text x="299" y="175" text-anchor="middle">0.72</text>
+<rect x="330" y="140" width="58" height="58" fill="currentColor" fill-opacity=".506"/><text x="359" y="175" text-anchor="middle">0.78</text>
+<rect x="390" y="140" width="58" height="58" fill="currentColor" fill-opacity=".513"/><text x="419" y="175" text-anchor="middle">0.79</text>
+<rect x="150" y="200" width="58" height="58" fill="currentColor" fill-opacity=".597"/><text x="179" y="235" text-anchor="middle">0.94</text>
+<rect x="210" y="200" width="58" height="58" fill="currentColor" fill-opacity=".479"/><text x="239" y="235" text-anchor="middle">0.72</text>
+<rect x="270" y="200" width="58" height="58" fill="currentColor" fill-opacity=".630"/><text x="299" y="235" text-anchor="middle">1.00</text>
+<rect x="330" y="200" width="58" height="58" fill="currentColor" fill-opacity=".604"/><text x="359" y="235" text-anchor="middle">0.95</text>
+<rect x="390" y="200" width="58" height="58" fill="currentColor" fill-opacity=".594"/><text x="419" y="235" text-anchor="middle">0.93</text>
+<rect x="150" y="260" width="58" height="58" fill="currentColor" fill-opacity=".623"/><text x="179" y="295" text-anchor="middle">0.99</text>
+<rect x="210" y="260" width="58" height="58" fill="currentColor" fill-opacity=".506"/><text x="239" y="295" text-anchor="middle">0.78</text>
+<rect x="270" y="260" width="58" height="58" fill="currentColor" fill-opacity=".604"/><text x="299" y="295" text-anchor="middle">0.95</text>
+<rect x="330" y="260" width="58" height="58" fill="currentColor" fill-opacity=".630"/><text x="359" y="295" text-anchor="middle">1.00</text>
+<rect x="390" y="260" width="58" height="58" fill="currentColor" fill-opacity=".620"/><text x="419" y="295" text-anchor="middle">0.98</text>
+<rect x="150" y="320" width="58" height="58" fill="currentColor" fill-opacity=".627"/><text x="179" y="355" text-anchor="middle">0.99</text>
+<rect x="210" y="320" width="58" height="58" fill="currentColor" fill-opacity=".513"/><text x="239" y="355" text-anchor="middle">0.79</text>
+<rect x="270" y="320" width="58" height="58" fill="currentColor" fill-opacity=".594"/><text x="299" y="355" text-anchor="middle">0.93</text>
+<rect x="330" y="320" width="58" height="58" fill="currentColor" fill-opacity=".620"/><text x="359" y="355" text-anchor="middle">0.98</text>
+<rect x="390" y="320" width="58" height="58" fill="currentColor" fill-opacity=".630"/><text x="419" y="355" text-anchor="middle">1.00</text>
+<text x="310" y="445" text-anchor="middle" class="small">Temporal IoU agreement; descriptive agreement, not ground-truth accuracy.</text>
+</svg>
