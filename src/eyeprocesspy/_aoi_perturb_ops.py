@@ -220,6 +220,30 @@ def create_aoi_perturbation_grid(
     def values_or_empty(values: Iterable[Any] | None) -> Iterable[Any]:
         return () if values is None else values
 
+    def pairs_or_empty(values: Any, name: str) -> Iterable[Sequence[float]]:
+        if values is None:
+            return ()
+        if isinstance(values, pd.DataFrame):
+            array = values.to_numpy()
+            if array.ndim != 2 or array.shape[1] != 2:
+                raise EyeProcessValidationError(f"`{name}` data frames must have exactly two columns.")
+            return [row.tolist() for row in array]
+        if isinstance(values, np.ndarray):
+            array = np.asarray(values)
+            if array.ndim == 1:
+                if array.shape[0] != 2:
+                    raise EyeProcessValidationError(f"`{name}` one-dimensional arrays must have length two.")
+                return [array.tolist()]
+            if array.ndim == 2 and array.shape[1] == 2:
+                return [row.tolist() for row in array]
+            raise EyeProcessValidationError(f"`{name}` arrays must be length two or have exactly two columns.")
+        if isinstance(values, Sequence) and not isinstance(values, (str, bytes)):
+            seq = list(values)
+            if len(seq) == 2 and all(np.isscalar(v) for v in seq):
+                return [seq]
+            return seq
+        return values
+
     for value in values_or_empty(dilations):
         specs.append(aoi_perturbation_spec(f"dilate_{float(value):g}_{unit}", "dilation", margin_x=value, unit=unit, **geometry_kwargs))
     for value in values_or_empty(erosions):
@@ -228,7 +252,7 @@ def create_aoi_perturbation_grid(
         specs.append(aoi_perturbation_spec(f"shift_x_{float(value):g}_{unit}", "translate", translation_x=value, unit=unit, **geometry_kwargs))
     for value in values_or_empty(translations_y):
         specs.append(aoi_perturbation_spec(f"shift_y_{float(value):g}_{unit}", "translate", translation_y=value, unit=unit, **geometry_kwargs))
-    for values in values_or_empty(translations_xy):
+    for values in pairs_or_empty(translations_xy, "translations_xy"):
         tx, ty = _normalise_pair(values, "translations_xy")
         specs.append(
             aoi_perturbation_spec(
@@ -242,7 +266,7 @@ def create_aoi_perturbation_grid(
         )
     for idx, value in enumerate(values_or_empty(jitters)):
         specs.append(aoi_perturbation_spec(f"jitter_{float(value):g}_{unit}_{idx+1}", "jitter", translation_x=value, translation_y=value, unit=unit, seed=seed + idx, **geometry_kwargs))
-    for values in values_or_empty(anisotropic):
+    for values in pairs_or_empty(anisotropic, "anisotropic"):
         mx, my = _normalise_pair(values, "anisotropic")
         specs.append(aoi_perturbation_spec(f"anisotropic_{mx:g}_{my:g}_{unit}", "anisotropic_expansion", margin_x=mx, margin_y=my, unit=unit, **geometry_kwargs))
     if not specs:
