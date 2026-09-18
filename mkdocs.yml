@@ -22,6 +22,7 @@ nav:
   - Workflows:
       - Scientific guide map: guides/index.md
       - Eye-tracking end to end: guides/end-to-end-eye-tracking.md
+      - Event detector multiverse: guides/event-detector-multiverse.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
@@ -29,6 +30,7 @@ nav:
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
           - Overview: examples/index.md
+          - Detector choice → inference: examples/detector-multiverse-disclosure.md
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
@@ -41,6 +43,7 @@ nav:
   - Reference:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
+      - Detector multiverse API: reference/detector-multiverse.md
       - Plotting reference: reference/plotting.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
