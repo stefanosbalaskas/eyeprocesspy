@@ -16,6 +16,12 @@
 
     [Open worked workflow](data-quality-validation.md)
 
+-   :material-filter-cog: **Quality-decision sensitivity**
+
+    Keep the complete quality report intact, define review rules explicitly, and compare downstream inclusion/stratification decisions without silent deletion.
+
+    [Open sensitivity workflow](data-quality-sensitivity.md)
+
 -   :material-target: **Calibration uncertainty → probabilistic AOIs**
 
     Fit an empirical calibration-error model, propagate coordinate uncertainty and diagnose boundary-sensitive AOI assignments.
