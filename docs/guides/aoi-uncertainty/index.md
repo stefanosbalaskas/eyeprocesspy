@@ -10,6 +10,12 @@ Use AOI perturbation analysis when gaze or fixation coordinates cluster near AOI
 
 Do **not** use it to search for a favorable AOI, replace calibration/coordinate-quality checks, or rescue an implausible layout. Define the perturbation envelope from measurement and design knowledge rather than from whichever branch produces the preferred result.
 
+## Visual orientation
+
+![AOI perturbation geometry and reassigned fixations](../../assets/aoi-uncertainty/geometry-perturbation.svg)
+
+The full [worked example](../../examples/aoi-perturbation-sensitivity.md) also shows assignment stability, coefficient trajectories, and the two-dimensional robustness surface.
+
 ## Method guides
 
 - [AOI Geometry Is an Analytical Assumption](geometry-assumption.md)
