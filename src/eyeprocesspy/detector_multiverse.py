@@ -8,28 +8,29 @@ than reimplemented.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
-from hashlib import sha256
 import importlib.metadata
 import inspect
 import itertools
 import json
-import math
 import warnings
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field, replace
+from hashlib import sha256
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from .dataset import EyeDataset, add_provenance, is_eye_dataset
+from .dataset import EyeDataset, add_provenance, is_eye_dataset, new_eye_dataset
 from .exceptions import EyeProcessBackendError, EyeProcessValidationError
-from .foundation_09 import _aoi_contains
+from .foundation_09 import _aoi_contains, new_aoi, register_aois
 from .preprocess_features_09 import (
     detect_fixations_idt,
     detect_fixations_ivt,
     detect_saccades,
 )
-from .schema import empty_eye_table, standardize_eye_table
+from .schema import empty_eye_table, new_coordinate_space, standardize_eye_table
 
 
 _RAW_ALGORITHMS = {"ivt", "idt", "adaptive_velocity", "remodnav"}
@@ -1745,7 +1746,6 @@ def report_detector_multiverse(
     ])
     text = "\n".join(lines)
     if path is not None:
-        from pathlib import Path
         Path(path).write_text(text, encoding="utf-8")
     return text
 
@@ -1758,10 +1758,6 @@ def simulate_detector_multiverse_data(
     seed: int = 20260918,
 ) -> EyeDataset:
     """Create a small synthetic 60-Hz dataset with a known disclosure-dwell effect."""
-    from .dataset import new_eye_dataset
-    from .schema import new_coordinate_space
-    from .foundation_09 import new_aoi, register_aois
-
     if int(n_participants) < 4:
         raise EyeProcessValidationError("Use at least four participants for the worked multiverse example.")
     _finite_positive(sampling_rate, "sampling_rate", allow_none=False)
