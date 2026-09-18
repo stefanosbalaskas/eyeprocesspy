@@ -40,11 +40,11 @@
 
     [Open worked workflow](process-reliability.md)
 
--   :material-timer-sand: **Censored gaze latency**
+-   :material-vector-polygon: **AOI perturbation sensitivity**
 
-    Construct right censoring from synthetic trial windows and fixation events, fit clustered Cox and AFT models, run diagnostics, and produce manuscript-ready outputs.
+    Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
 
-    [Open worked workflow](gaze-survival-analysis.md)
+    [Open worked workflow](aoi-perturbation-sensitivity.md)
 
 -   :material-chart-bell-curve-cumulative: **IRT diagnostics**
 
@@ -196,6 +196,13 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
+| `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
+
 | `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
 
-All examples are deterministic and use no private participant data. The quality and mediation examples are CI-small and deliberately include missingness/quality edge cases rather than only idealized inputs.
+All listed examples are deterministic and use no private participant data.
+
+## AOI uncertainty
+
+- [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
+- [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
