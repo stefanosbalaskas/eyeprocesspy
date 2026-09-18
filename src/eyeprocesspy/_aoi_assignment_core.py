@@ -378,6 +378,10 @@ def _validate_model_table(table: Any, perturbation_id: str) -> pd.DataFrame:
             "Model callback result is missing required column(s): " + ", ".join(missing)
         )
     out = frame.copy()
+    terms = out["term"].astype("string")
+    if terms.isna().any() or (terms.str.len() == 0).any():
+        raise EyeProcessValidationError("Model callback term values must be non-missing and non-empty.")
+    out["term"] = terms.astype(str)
 
     raw_convergence = out["model_converged"]
     valid_boolean = raw_convergence.map(
@@ -389,10 +393,20 @@ def _validate_model_table(table: Any, perturbation_id: str) -> pd.DataFrame:
         )
     out["model_converged"] = raw_convergence.astype("boolean")
 
-    for column in ("estimate", "SE", "CI_low", "CI_high", "N"):
-        out[column] = pd.to_numeric(out[column], errors="coerce")
+    for column in ("estimate", "SE", "CI_low", "CI_high", "p_value", "N"):
+        original = out[column]
+        converted = pd.to_numeric(original, errors="coerce")
+        bad_conversion = original.notna() & converted.isna()
+        if bad_conversion.any():
+            raise EyeProcessValidationError(
+                f"Model callback `{column}` must be numeric or missing."
+            )
+        out[column] = converted
     if (out["N"].dropna() < 0).any():
         raise EyeProcessValidationError("Model callback `N` must be non-negative when supplied.")
+    n_values = out["N"].dropna().to_numpy(dtype=float)
+    if len(n_values) and not np.allclose(n_values, np.round(n_values), atol=1e-9, rtol=0.0):
+        raise EyeProcessValidationError("Model callback `N` must be integer-valued when supplied.")
 
     converged = out["model_converged"].fillna(False).astype(bool)
     if converged.any():
