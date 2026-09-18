@@ -167,6 +167,16 @@ def test_quantiles():
     assert np.isfinite(q2["quantile"].iloc[0])
 
 
+def test_verification_example_uses_source_evidence_entry_contract():
+    d = simulate_gaze_survival_example(
+        "verification", seed=20260918, n_participants=12, trials_per_participant=3
+    )
+    assert set(d["target_aoi"]) == {"source_evidence"}
+    assert set(d["event_type"]) == {"first_aoi_entry"}
+    assert set(d["condition"]) == {"standard", "evidence_prompt"}
+    assert any(d["event_observed"].eq(0))
+
+
 def test_recording_trial_join_matches_canonical_episode_contract():
     inputs = simulate_gaze_survival_inputs(
         "disclosure", seed=99, n_participants=4, trials_per_participant=2
