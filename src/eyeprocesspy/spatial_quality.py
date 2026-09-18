@@ -6,9 +6,11 @@ function silently excludes samples, trials, sessions, or participants.
 """
 from __future__ import annotations
 
-from hashlib import sha256
+# ruff: noqa: E701, E702
 import math
-from typing import Any, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from hashlib import sha256
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -468,14 +470,32 @@ def compute_gaze_data_loss(
     return _attach_provenance(pd.DataFrame(rows),{"function":"compute_gaze_data_loss","loss_rule":"missing coordinates or explicit invalidity"})
 
 
+def _merge_quality_parts(parts: Sequence[pd.DataFrame], keys: Sequence[str]) -> pd.DataFrame:
+    """Merge quality tables without manufacturing duplicate metric columns."""
+    if not parts:
+        return pd.DataFrame()
+    out = parts[0].reset_index(drop=True)
+    for part in parts[1:]:
+        right = part.reset_index(drop=True)
+        if keys:
+            duplicate_nonkeys = [c for c in right.columns if c in out.columns and c not in keys]
+            if duplicate_nonkeys:
+                right = right.drop(columns=duplicate_nonkeys)
+            out = out.merge(right, on=list(keys), how="outer")
+        else:
+            duplicate_nonkeys = [c for c in right.columns if c in out.columns]
+            if duplicate_nonkeys:
+                right = right.drop(columns=duplicate_nonkeys)
+            out = pd.concat([out, right], axis=1)
+    return out
+
+
 def summarise_spatial_quality(data: Any, **kwargs: Any) -> pd.DataFrame:
     keys=_by_list(kwargs.get("by")); acc=compute_gaze_accuracy(data,**{k:v for k,v in kwargs.items() if k in {"x","y","target_x","target_y","by","unit","output_unit","geometry"}})
     rms=compute_rms_s2s(data,**{k:v for k,v in kwargs.items() if k in {"x","y","time","by","unit","output_unit","geometry","dimension","time_unit","max_gap_ms"}})
     sd=compute_gaze_sd_precision(data,**{k:v for k,v in kwargs.items() if k in {"x","y","by","unit","output_unit","geometry"}})
     bcea=compute_bcea(data,probability=kwargs.get("probability",.68),**{k:v for k,v in kwargs.items() if k in {"x","y","by","unit","output_unit","geometry"}})
-    out=acc
-    for t in (rms,sd,bcea): out=out.merge(t,on=keys,how="outer",suffixes=("","_dup")) if keys else pd.concat([out.reset_index(drop=True),t.reset_index(drop=True)],axis=1)
-    out=out.loc[:,~out.columns.duplicated()]
+    out=_merge_quality_parts([acc,rms,sd,bcea],keys)
     return _attach_provenance(out,{"function":"summarise_spatial_quality"})
 
 
@@ -483,9 +503,7 @@ def summarise_sampling_quality(data: Any,**kwargs: Any) -> pd.DataFrame:
     keys=_by_list(kwargs.get("by")); inter=estimate_sampling_interval(data,**{k:v for k,v in kwargs.items() if k in {"time","by","time_unit"}})
     jit=estimate_sampling_jitter(data,**{k:v for k,v in kwargs.items() if k in {"time","by","time_unit"}})
     eff=estimate_effective_sampling_rate(data,**{k:v for k,v in kwargs.items() if k in {"time","by","time_unit","nominal_sampling_hz","dropped_interval_factor","x","y","valid"}})
-    out=inter
-    for t in (jit,eff): out=out.merge(t,on=keys,how="outer",suffixes=("","_dup")) if keys else pd.concat([out.reset_index(drop=True),t.reset_index(drop=True)],axis=1)
-    out=out.loc[:,~out.columns.duplicated()]
+    out=_merge_quality_parts([inter,jit,eff],keys)
     return _attach_provenance(out,{"function":"summarise_sampling_quality"})
 
 
@@ -521,14 +539,10 @@ def create_gaze_quality_report(
         rms=compute_rms_s2s(d,x=x,y=y,time=time,by=keys,unit=unit,output_unit=output_unit,geometry=geometry,time_unit=time_unit,max_gap_ms=max_gap_ms)
         sd=compute_gaze_sd_precision(d,x=x,y=y,by=keys,unit=unit,output_unit=output_unit,geometry=geometry)
         bc=compute_bcea(d,x=x,y=y,by=keys,probability=bcea_probability,unit=unit,output_unit=output_unit,geometry=geometry)
-        spatial=rms
-        for t in (sd,bc): spatial=spatial.merge(t,on=keys,how="outer",suffixes=("","_dup")) if keys else pd.concat([spatial.reset_index(drop=True),t.reset_index(drop=True)],axis=1)
-        spatial=spatial.loc[:,~spatial.columns.duplicated()]
+        spatial=_merge_quality_parts([rms,sd,bc],keys)
     sampling=summarise_sampling_quality(d,time=time,by=keys,time_unit=time_unit,nominal_sampling_hz=nominal_sampling_hz,x=x,y=y,valid=valid)
     loss=compute_gaze_data_loss(d,x=x,y=y,time=time,valid=valid,missing_reason=missing_reason,by=keys,time_unit=time_unit)
-    report=spatial
-    for t in (sampling,loss): report=report.merge(t,on=keys,how="outer",suffixes=("","_dup")) if keys else pd.concat([report.reset_index(drop=True),t.reset_index(drop=True)],axis=1)
-    report=report.loc[:,~report.columns.duplicated()]
+    report=_merge_quality_parts([spatial,sampling,loss],keys)
     issue_map={tuple(item.get(k) for k in keys):item["issues"] for item in validation["group_issues"]}
     flags=[]
     for _,row in report.iterrows():
