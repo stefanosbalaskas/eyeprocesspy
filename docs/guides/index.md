@@ -45,8 +45,6 @@ Accuracy, RMS-S2S, population-SD precision, BCEA, effective sampling, jitter, da
 </div>
 <div class="ep-card" markdown>
 
-<div class="ep-card" markdown>
-
 ### Psychometrics & IRT
 Information, fit, DIF, process-informed measurement, score uncertainty, and validation evidence.
 
