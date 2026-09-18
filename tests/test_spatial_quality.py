@@ -78,6 +78,10 @@ def test_user_thresholds_flag_but_never_exclude():
     assert r.bcea_unit.iloc[0]=="deg^2"
     assert len(r)==1 and bool(r.review_required.iloc[0]) and "accuracy_mean>max" in r.quality_flags.iloc[0]
     assert r.attrs["gaze_quality_provenance"]["automatic_exclusion"] is False
+    with pytest.raises(ValueError,match="must contain only"):
+        ep.create_gaze_quality_report(d,by="grp",thresholds={"accuracy_mean":{"upper":.5}})
+    with pytest.raises(ValueError,match="finite numeric"):
+        ep.create_gaze_quality_report(d,by="grp",thresholds={"accuracy_mean":np.inf})
 
 
 def test_synthetic_six_profiles_show_accuracy_precision_noninterchangeability():
@@ -199,7 +203,9 @@ def test_summaries_threshold_variants_no_targets_comparisons_and_provenance():
     d=pd.DataFrame({"session_id":[1,1,2,2],"condition":["a","a","b","b"],"timestamp_ms":[0,10,0,10],"gaze_x":[0,0,1,1],"gaze_y":[0,0,1,1],"target_x":[0,0,0,0],"target_y":[0,0,0,0]})
     assert len(ep.summarise_spatial_quality(d,by="session_id",time="timestamp_ms"))==2
     assert len(ep.summarise_sampling_quality(d,by="session_id",time="timestamp_ms"))==2
-    r=ep.create_gaze_quality_report(d,by="session_id",thresholds={"accuracy_mean":0.5,"valid_sample_fraction":{"min":1.1},"missing":1})
+    with pytest.raises(ValueError,match="threshold metrics"):
+        ep.create_gaze_quality_report(d,by="session_id",thresholds={"missing":1})
+    r=ep.create_gaze_quality_report(d,by="session_id",thresholds={"accuracy_mean":0.5,"valid_sample_fraction":{"min":1.1}})
     assert r.review_required.all()
     no_targets=d.drop(columns=["target_x","target_y"])
     r2=ep.create_gaze_quality_report(no_targets,by="session_id",target_x=None,target_y=None,quality_rules={"named":"rule"})
