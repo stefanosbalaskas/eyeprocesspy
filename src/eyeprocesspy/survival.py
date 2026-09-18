@@ -979,11 +979,16 @@ def tidy_gaze_survival_model(
         names = fit.covariate_names
         measure = "hazard_ratio"
     elif fit.model_family.startswith("aft"):
-        beta = np.asarray(fit.result["params"][:-1])
-        se = np.asarray(fit.result["standard_errors"][:-1])
-        statistic = beta / se
-        p_value = 2 * stats.norm.sf(np.abs(statistic))
-        names = fit.covariate_names
+        location_param = "lambda_" if fit.model_family == "aft_weibull" else "mu_"
+        summary = fit.result.summary
+        if not isinstance(summary.index, pd.MultiIndex):
+            raise RuntimeError("Unexpected lifelines AFT summary contract.")
+        location = summary.xs(location_param, level=0)
+        beta = location["coef"].to_numpy(float)
+        se = location["se(coef)"].to_numpy(float)
+        statistic = location["z"].to_numpy(float)
+        p_value = location["p"].to_numpy(float)
+        names = location.index.astype(str).tolist()
         measure = "time_ratio"
     else:
         raise TypeError("Unsupported fitted object.")
@@ -1065,9 +1070,9 @@ def compare_gaze_survival_models(*fits: GazeSurvivalFit) -> pd.DataFrame:
             n = len(fit.data)
             basis = "cox_partial_likelihood"
         else:
-            loglik = float(fit.result["loglik"])
-            n_parameters = len(fit.result["params"])
-            n = int(fit.result["nobs"])
+            loglik = float(fit.result.log_likelihood_)
+            n_parameters = len(fit.result.params_)
+            n = len(fit.data)
             basis = "full_likelihood"
         likelihood_bases.add(basis)
         sample_sizes.add(n)
@@ -1124,17 +1129,17 @@ def predict_gaze_survival(
     fit: GazeSurvivalFit, newdata: pd.DataFrame, times: Sequence[float]
 ) -> pd.DataFrame:
     """Predict survival probabilities at requested times."""
-    _require_optional("patsy", "to build survival-model design matrices")
-    import patsy
-
     new = _as_dataframe(newdata, "newdata")
     requested = np.asarray(times, float)
     if requested.ndim != 1 or requested.size == 0:
         raise ValueError("times must be a non-empty one-dimensional sequence.")
-    if (requested < 0).any():
-        raise ValueError("Prediction times cannot be negative.")
+    if not np.isfinite(requested).all() or (requested < 0).any():
+        raise ValueError("Prediction times must be finite and non-negative.")
     rows = []
     if fit.model_family.startswith("cox"):
+        _require_optional("patsy", "to build survival-model design matrices")
+        import patsy
+
         design = patsy.build_design_matrices(
             [fit.design_info], new, return_type="dataframe"
         )[0]
@@ -1149,33 +1154,25 @@ def predict_gaze_survival(
                 rows.append(
                     {
                         "row": row,
-                        "time": point,
+                        "time": float(point),
                         "survival": math.exp(-h0 * math.exp(float(lp))),
                     }
                 )
-    else:
-        design = patsy.build_design_matrices(
-            [fit.design_info], new, return_type="dataframe"
-        )[0]
-        beta = np.asarray(fit.result["params"][:-1])
-        sigma = math.exp(float(fit.result["params"][-1]))
-        mu = design.to_numpy(float) @ beta
-        for row, location in enumerate(mu):
+    elif fit.model_family.startswith("aft"):
+        prediction = fit.result.predict_survival_function(new, times=requested)
+        if prediction.shape[1] != len(new):
+            raise RuntimeError("Unexpected lifelines AFT prediction contract.")
+        for row in range(len(new)):
             for point in requested:
-                if point <= 0:
-                    survival = 1.0
-                elif fit.model_family == "aft_weibull":
-                    rho = 1 / sigma
-                    survival = math.exp(
-                        -math.exp(
-                            np.clip(rho * (math.log(point) - location), -700, 700)
-                        )
-                    )
-                else:
-                    survival = float(
-                        stats.norm.sf((math.log(point) - location) / sigma)
-                    )
-                rows.append({"row": row, "time": point, "survival": survival})
+                rows.append(
+                    {
+                        "row": row,
+                        "time": float(point),
+                        "survival": float(prediction.loc[point].iloc[row]),
+                    }
+                )
+    else:
+        raise TypeError("Unsupported fitted object.")
     return pd.DataFrame(rows)
 
 
