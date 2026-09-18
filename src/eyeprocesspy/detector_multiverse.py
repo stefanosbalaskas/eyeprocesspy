@@ -1383,6 +1383,10 @@ def run_detector_inference_multiverse(
                 missing = required - set(tidy.columns)
                 if missing:
                     raise EyeProcessValidationError("Model callback output is missing: " + ", ".join(sorted(missing)))
+                if tidy["term"].astype(str).duplicated().any():
+                    raise EyeProcessValidationError(
+                        "Model callback output must contain at most one row per coefficient term."
+                    )
                 model_warnings: list[str] = []
             else:
                 fit, model_warnings = _fit_statsmodels(data, model_spec)
@@ -1425,38 +1429,80 @@ def assess_detector_inference_stability(
     substantive_threshold: float | None = None,
     direction: str = "above",
 ) -> pd.DataFrame:
-    """Summarize coefficient stability across converged detector specifications."""
+    """Summarize coefficient stability across all planned detector specifications.
+
+    The denominator is the declared detector multiverse, not only branches that
+    emitted the requested term. Model failures and missing-term branches therefore
+    reduce the reported convergence rate rather than disappearing from it.
+    """
     if not isinstance(x, DetectorInferenceResult):
         raise EyeProcessValidationError("`x` must be a DetectorInferenceResult.")
     if direction not in {"above", "below", "absolute"}:
         raise EyeProcessValidationError("`direction` must be above, below, or absolute.")
+
+    planned_ids = [spec.detector_id for spec in x.multiverse.specs]
+    planned_n = len(planned_ids)
     data = x.coefficients[x.coefficients["term"].astype(str).eq(str(term))].copy()
-    all_n = len(data)
+    term_ids = set(data["detector_id"].dropna().astype(str)) if "detector_id" in data else set()
+    failure_ids = (
+        set(x.failures["detector_id"].dropna().astype(str))
+        if not x.failures.empty and "detector_id" in x.failures
+        else set()
+    )
+
+    base = {
+        "term": term,
+        "specifications": planned_n,
+        "term_available_specifications": len(term_ids),
+        "model_failure_specifications": len(failure_ids),
+    }
     if data.empty:
         return pd.DataFrame([{
-            "term": term, "specifications": 0, "converged_specifications": 0, "convergence_rate": np.nan,
-            "median_estimate": np.nan, "estimate_min": np.nan, "estimate_max": np.nan, "estimate_range": np.nan,
-            "same_sign_proportion": np.nan, "ci_overlap": pd.NA, "ci_overlap_lower": np.nan, "ci_overlap_upper": np.nan,
+            **base,
+            "converged_specifications": 0,
+            "convergence_rate": 0.0 if planned_n else np.nan,
+            "median_estimate": np.nan,
+            "estimate_min": np.nan,
+            "estimate_max": np.nan,
+            "estimate_range": np.nan,
+            "same_sign_proportion": np.nan,
+            "ci_overlap": pd.NA,
+            "ci_overlap_lower": np.nan,
+            "ci_overlap_upper": np.nan,
             "substantive_conclusion_stability": np.nan,
         }])
+
     converged_mask = data["converged"].astype("boolean").fillna(False)
     valid = data[converged_mask].copy()
     estimates = pd.to_numeric(valid["estimate"], errors="coerce")
     valid = valid[np.isfinite(estimates)]
     estimates = pd.to_numeric(valid["estimate"], errors="coerce")
+    converged_ids = set(valid["detector_id"].dropna().astype(str)) if "detector_id" in valid else set()
+    converged_n = len(converged_ids)
+
     if valid.empty:
         return pd.DataFrame([{
-            "term": term, "specifications": all_n, "converged_specifications": 0, "convergence_rate": 0.0,
-            "median_estimate": np.nan, "estimate_min": np.nan, "estimate_max": np.nan, "estimate_range": np.nan,
-            "same_sign_proportion": np.nan, "ci_overlap": pd.NA, "ci_overlap_lower": np.nan, "ci_overlap_upper": np.nan,
+            **base,
+            "converged_specifications": 0,
+            "convergence_rate": 0.0 if planned_n else np.nan,
+            "median_estimate": np.nan,
+            "estimate_min": np.nan,
+            "estimate_max": np.nan,
+            "estimate_range": np.nan,
+            "same_sign_proportion": np.nan,
+            "ci_overlap": pd.NA,
+            "ci_overlap_lower": np.nan,
+            "ci_overlap_upper": np.nan,
             "substantive_conclusion_stability": np.nan,
         }])
+
     nonzero = estimates[estimates != 0]
     if len(nonzero):
         majority_positive = float((nonzero > 0).mean()) >= 0.5
         same_sign = float((nonzero > 0).mean() if majority_positive else (nonzero < 0).mean())
     else:
         same_sign = np.nan
+
     lowers = pd.to_numeric(valid["CI_lower"], errors="coerce")
     uppers = pd.to_numeric(valid["CI_upper"], errors="coerce")
     finite_ci = np.isfinite(lowers) & np.isfinite(uppers)
@@ -1467,6 +1513,7 @@ def assess_detector_inference_stability(
     else:
         overlap_lower = overlap_upper = np.nan
         ci_overlap = pd.NA
+
     threshold_stability = np.nan
     if substantive_threshold is not None:
         threshold = float(substantive_threshold)
@@ -1477,11 +1524,11 @@ def assess_detector_inference_stability(
         else:
             decisions = estimates.abs() >= abs(threshold)
         threshold_stability = float(max(decisions.mean(), (~decisions).mean()))
+
     return pd.DataFrame([{
-        "term": term,
-        "specifications": all_n,
-        "converged_specifications": len(valid),
-        "convergence_rate": len(valid) / all_n if all_n else np.nan,
+        **base,
+        "converged_specifications": converged_n,
+        "convergence_rate": converged_n / planned_n if planned_n else np.nan,
         "median_estimate": float(estimates.median()),
         "estimate_min": float(estimates.min()),
         "estimate_max": float(estimates.max()),
@@ -1492,7 +1539,6 @@ def assess_detector_inference_stability(
         "ci_overlap_upper": overlap_upper,
         "substantive_conclusion_stability": threshold_stability,
     }])
-
 
 def _feature_sensitivity(features: pd.DataFrame) -> pd.DataFrame:
     if features.empty:
@@ -1731,7 +1777,7 @@ def report_detector_multiverse(
             "",
             _markdown_table(summary["inference_stability"]),
             "",
-            "Non-converged model branches are retained as diagnostic failures and are excluded from coefficient-stability calculations.",
+            "The convergence-rate denominator is every planned detector specification. Model failures, missing requested terms, and non-converged branches therefore remain visible rather than disappearing from robustness accounting.",
             "",
         ])
     if not x.failures.empty:
