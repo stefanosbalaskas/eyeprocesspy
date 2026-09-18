@@ -34,6 +34,12 @@
 
     [Open worked workflow](gaze-survival-analysis.md)
 
+-   :material-source-branch: **Evidence-verification survival**
+
+    Model time to first source/evidence AOI entry under repeated conditions, retain valid never-inspected trials as censored observations, and compare clustered Cox with explicit AFT sensitivity models.
+
+    [Open verification workflow](gaze-verification-survival.md)
+
 -   :material-vector-polygon: **AOI perturbation sensitivity**
 
     Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
@@ -196,6 +202,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
 | `examples/worked_gaze_survival_analysis.py` | Raw trial/event inputs → censoring → Kaplan–Meier → clustered Cox/AFT → diagnostics/reporting | console summaries + survival plots |
+| `examples/worked_gaze_verification_survival.py` | Source/evidence AOI entry → censoring → clustered Cox/AFT → diagnostics/reporting | CSV/JSON summaries + Kaplan–Meier SVG |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
 | `examples/aoi_perturbation_failure_clinic.py` | Deliberate AOI geometry/model failures → retained audits → troubleshooting report | `workflow-output/aoi-failure-clinic/*` |
 
