@@ -37,6 +37,14 @@ Reliability, Bland–Altman evidence, sampling irregularity, calibration error, 
 </div>
 <div class="ep-card" markdown>
 
+### AOI perturbation & uncertainty
+Stress-test AOI geometry, assignment stability, feature recomputation, and model coefficients under defensible boundary changes.
+
+[Open guide](aoi-uncertainty/)
+
+</div>
+<div class="ep-card" markdown>
+
 ### Psychometrics & IRT
 Information, fit, DIF, process-informed measurement, score uncertainty, and validation evidence.
 
