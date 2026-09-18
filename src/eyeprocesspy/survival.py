@@ -842,7 +842,7 @@ def fit_gaze_mixed_cox_model(
     formula: str,
     *,
     participant_col: str = "participant_id",
-    structure: str = "cluster_robust",
+    structure: str | None = None,
     ties: str = "breslow",
 ) -> GazeSurvivalFit:
     """Fit a repeated-participant Cox model.
@@ -851,6 +851,10 @@ def fit_gaze_mixed_cox_model(
     does not mislabel this estimator as latent frailty. ``structure='frailty'``
     fails explicitly; R eyeprocess provides the frailty implementation.
     """
+    if structure is None:
+        raise ValueError(
+            "structure must be specified explicitly as 'cluster_robust' or 'frailty'."
+        )
     if structure == "frailty":
         raise NotImplementedError(
             "A participant-level latent frailty Cox estimator is not available "
@@ -901,12 +905,16 @@ def fit_gaze_aft_model(
     data: pd.DataFrame,
     formula: str,
     *,
-    distribution: str = "weibull",
+    distribution: str | None = None,
     maxiter: int = 2000,
 ) -> GazeSurvivalFit:
     """Fit Weibull or log-normal accelerated failure-time model by MLE."""
     d = _analysis_rows(data)
     _require_optional("patsy", "to build survival-model design matrices")
+    if distribution is None:
+        raise ValueError(
+            "distribution must be specified explicitly as 'weibull' or 'lognormal'."
+        )
     distribution = distribution.lower().replace("-", "")
     if distribution not in {"weibull", "lognormal"}:
         raise ValueError("distribution must be 'weibull' or 'lognormal'.")

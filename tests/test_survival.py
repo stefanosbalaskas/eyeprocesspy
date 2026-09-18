@@ -124,7 +124,7 @@ def tiny_survival_fixture():
 def test_models_fit_and_report():
     d = simulate_gaze_survival_example(n_participants=40, trials_per_participant=3)
     cox = fit_gaze_cox_model(d, "C(condition)")
-    mixed = fit_gaze_mixed_cox_model(d, "C(condition)")
+    mixed = fit_gaze_mixed_cox_model(d, "C(condition)", structure="cluster_robust")
     weib = fit_gaze_aft_model(d, "C(condition)", distribution="weibull")
     logn = fit_gaze_aft_model(d, "C(condition)", distribution="lognormal")
     assert not tidy_gaze_survival_model(cox).empty
@@ -141,6 +141,14 @@ def test_aft_rejects_zero_time():
     d = simulate_gaze_survival_example(n_participants=6)
     d.loc[0, ["event_time", "analysis_time", "event_observed"]] = [0.0, 0.0, 1]
     with pytest.raises(ValueError, match="strictly positive"):
+        fit_gaze_aft_model(d, "C(condition)", distribution="weibull")
+
+
+def test_estimators_must_be_selected_explicitly():
+    d = simulate_gaze_survival_example(n_participants=6)
+    with pytest.raises(ValueError, match="structure must be specified explicitly"):
+        fit_gaze_mixed_cox_model(d, "C(condition)")
+    with pytest.raises(ValueError, match="distribution must be specified explicitly"):
         fit_gaze_aft_model(d, "C(condition)")
 
 
@@ -154,7 +162,7 @@ def test_quantiles():
     d = simulate_gaze_survival_example(n_participants=20)
     q = estimate_gaze_latency_quantiles(d, probs=[0.5], group="condition")
     assert len(q) == 3
-    aft = fit_gaze_aft_model(d, "C(condition)")
+    aft = fit_gaze_aft_model(d, "C(condition)", distribution="weibull")
     q2 = estimate_gaze_latency_quantiles(aft, probs=[0.5], newdata=d.iloc[[0]])
     assert np.isfinite(q2["quantile"].iloc[0])
 
