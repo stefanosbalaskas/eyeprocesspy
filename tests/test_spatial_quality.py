@@ -251,3 +251,19 @@ def test_cross_language_fixture_matches_frozen_expected_values():
             assert actual[col].tolist()==expected[col].tolist()
         else:
             np.testing.assert_allclose(pd.to_numeric(actual[col]),pd.to_numeric(expected[col]),rtol=1e-12,atol=1e-12,equal_nan=True)
+
+
+def test_missing_group_ids_are_preserved_and_flagged():
+    d=pd.DataFrame({
+        "trial_id":["T1","T1",np.nan,np.nan],
+        "timestamp_ms":[0,10,0,0],
+        "gaze_x":[0,0,1,1],
+        "gaze_y":[0,0,1,1],
+        "target_x":[0,0,1,1],
+        "target_y":[0,0,1,1],
+    })
+    q=ep.create_gaze_quality_report(d,by="trial_id")
+    assert len(q)==2
+    missing=q[q.trial_id.isna()]
+    assert len(missing)==1
+    assert "duplicate_timestamps" in missing.quality_flags.iloc[0]
