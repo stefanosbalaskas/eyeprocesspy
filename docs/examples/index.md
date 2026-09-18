@@ -40,6 +40,12 @@
 
     [Open worked workflow](process-reliability.md)
 
+-   :material-timer-sand: **Censored gaze latency**
+
+    Construct right censoring from synthetic trial windows and fixation events, fit clustered Cox and AFT models, run diagnostics, and produce manuscript-ready outputs.
+
+    [Open worked workflow](gaze-survival-analysis.md)
+
 -   :material-chart-bell-curve-cumulative: **IRT diagnostics**
 
     Inspect conditional information, item fit and DIF with publication-ready Matplotlib diagnostics.
