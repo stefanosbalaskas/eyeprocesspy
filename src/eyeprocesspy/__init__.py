@@ -178,5 +178,32 @@ from .validation_atlas_09 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-from .survival import *
+_survival_module = __import__(f"{__name__}.survival", fromlist=["survival"])
+_survival_exports = (
+    "CANONICAL_GAZE_SURVIVAL_COLUMNS",
+    "GazeSurvivalModel",
+    "prepare_gaze_survival_data",
+    "validate_gaze_survival_data",
+    "summarise_gaze_censoring",
+    "estimate_gaze_survival",
+    "fit_gaze_cox_model",
+    "fit_gaze_mixed_cox_model",
+    "fit_gaze_aft_model",
+    "tidy_gaze_survival_model",
+    "check_gaze_proportional_hazards",
+    "compare_gaze_survival_models",
+    "predict_gaze_survival",
+    "estimate_gaze_latency_quantiles",
+    "plot_gaze_survival_curve",
+    "plot_gaze_cumulative_incidence",
+    "plot_gaze_hazard",
+    "plot_gaze_cox_diagnostics",
+    "compare_gaze_survival_specifications",
+    "report_gaze_survival_model",
+    "simulate_gaze_survival_inputs",
+    "simulate_gaze_survival_example",
+)
+for _survival_name in _survival_exports:
+    globals()[_survival_name] = getattr(_survival_module, _survival_name)
+del _survival_module, _survival_exports, _survival_name
 __all__ = [n for n in globals() if not n.startswith("_")]

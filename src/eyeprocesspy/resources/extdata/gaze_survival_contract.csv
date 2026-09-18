@@ -1,7 +1,7 @@
-index,participant_id,trial_id,stimulus_id,condition,target_aoi,time_origin,event_time,censor_time,analysis_time,event_observed,event_type,n_valid_samples,valid_data_fraction,trial_duration
-0,P1,T1,S1,A,disclosure,trial_start,1.0,5.0,1.0,1,first_fixation,300,0.98,5.0
-1,P1,T2,S2,B,disclosure,trial_start,,5.0,5.0,0,first_fixation,298,0.97,5.0
-2,P2,T1,S1,A,disclosure,trial_start,2.0,5.0,2.0,1,first_fixation,301,0.99,5.0
-3,P2,T2,S2,B,disclosure,trial_start,2.5,5.0,2.5,1,first_fixation,297,0.96,5.0
-4,P3,T1,S1,A,disclosure,trial_start,,5.0,5.0,0,first_fixation,295,0.95,5.0
-5,P3,T2,S2,B,disclosure,trial_start,4.0,5.0,4.0,1,first_fixation,296,0.96,5.0
+participant_id,trial_id,stimulus_id,condition,target_aoi,time_origin,event_time,censor_time,analysis_time,event_observed,event_type,n_valid_samples,valid_data_fraction,trial_duration
+P1,T1,S1,A,disclosure,trial_start,1.0,5.0,1.0,1,first_fixation,300,0.98,5.0
+P1,T2,S2,B,disclosure,trial_start,,5.0,5.0,0,first_fixation,298,0.97,5.0
+P2,T1,S1,A,disclosure,trial_start,2.0,5.0,2.0,1,first_fixation,301,0.99,5.0
+P2,T2,S2,B,disclosure,trial_start,2.5,5.0,2.5,1,first_fixation,297,0.96,5.0
+P3,T1,S1,A,disclosure,trial_start,,5.0,5.0,0,first_fixation,295,0.95,5.0
+P3,T2,S2,B,disclosure,trial_start,4.0,5.0,4.0,1,first_fixation,296,0.96,5.0

@@ -79,7 +79,8 @@ def test_zero_event_warns_but_is_not_rewritten():
 
 
 def test_unusable_data_is_review_not_censor():
-    tr = tiny_trials(); tr.loc[1, "valid_data_fraction"] = 0.2
+    tr = tiny_trials()
+    tr.loc[1, "valid_data_fraction"] = 0.2
     with pytest.warns(RuntimeWarning):
         d = prepare_gaze_survival_data(tr, tiny_events(), target_aoi="disclosure", min_valid_fraction=0.8)
     row = d.iloc[1]
