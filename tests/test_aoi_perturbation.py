@@ -317,6 +317,32 @@ def test_group_level_assignment_stability():
     assert len(out["aoi_level"]) > 0
 
 
+def test_assignment_stability_requires_exact_metadata_ids():
+    comparison = compare_aoi_assignments(
+        ["a", "b"],
+        ["a", "b"],
+        ids=["obs-1", "obs-2"],
+    )
+    inherited = estimate_aoi_assignment_stability(
+        {"baseline": comparison},
+        metadata=pd.DataFrame({"participant": ["p1", "p2"]}),
+        group_cols=["participant"],
+    )
+    assert inherited["detail"]["observation_id"].tolist() == ["obs-1", "obs-2"]
+
+    with pytest.raises(EyeProcessValidationError, match="match .* exactly"):
+        estimate_aoi_assignment_stability(
+            {"baseline": comparison},
+            metadata=pd.DataFrame(
+                {
+                    "observation_id": ["obs-1", "wrong"],
+                    "participant": ["p1", "p2"],
+                }
+            ),
+            group_cols=["participant"],
+        )
+
+
 def test_assignment_frequency_is_descriptive():
     out = estimate_fixation_assignment_probability(
         {"baseline": ["a", "b"], "p1": ["a", "a"], "p2": ["b", "b"]}
@@ -609,6 +635,67 @@ def test_model_callback_failures_and_partial_nonconvergence_are_preserved():
     assert not bool(row.model_converged)
     inf = assess_aoi_inference_stability(result, term="x")
     assert inf.iloc[0].n_converged == 1
+    assert inf.iloc[0].min_N == 10
+    assert inf.iloc[0].max_N == 10
+
+
+def test_invalid_model_callback_rows_are_recorded_as_failures():
+    data = synthetic_data().head(40).copy()
+    grid = create_aoi_perturbation_grid(include_baseline=True)
+
+    def bad_flag(features, assigned, spec):
+        return pd.DataFrame(
+            [{
+                "term": "x",
+                "estimate": 1.0,
+                "SE": 0.2,
+                "CI_low": 0.6,
+                "CI_high": 1.4,
+                "p_value": 0.03,
+                "model_converged": "yes",
+                "N": 10,
+            }]
+        )
+
+    result = run_aoi_sensitivity_analysis(
+        data,
+        synthetic_aois(),
+        grid,
+        x_col="x",
+        y_col="y",
+        duration_col="duration",
+        time_col="time",
+        model_callback=bad_flag,
+    )
+    assert result["models"].empty
+    assert result["failures"]["message"].str.contains("strings are not accepted").any()
+
+    def bad_converged(features, assigned, spec):
+        return pd.DataFrame(
+            [{
+                "term": "x",
+                "estimate": np.nan,
+                "SE": 0.2,
+                "CI_low": 0.6,
+                "CI_high": 1.4,
+                "p_value": np.nan,
+                "model_converged": True,
+                "N": 10,
+            }]
+        )
+
+    result = run_aoi_sensitivity_analysis(
+        data,
+        synthetic_aois(),
+        grid,
+        x_col="x",
+        y_col="y",
+        duration_col="duration",
+        time_col="time",
+        model_callback=bad_converged,
+    )
+    assert result["models"].empty
+    assert result["failures"]["message"].str.contains("finite estimate").any()
 
 
 def test_reports_and_plots():
