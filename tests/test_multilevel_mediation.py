@@ -374,3 +374,217 @@ def test_cross_language_expected_fixture():
         atol=1e-10,
         rtol=1e-10,
     )
+
+
+def test_helper_validation_and_repr_provenance_branches():
+    from eyeprocesspy import multilevel_mediation as mm
+
+    class Custom:
+        def __repr__(self):
+            return "CUSTOM"
+
+    assert mm._json_safe(Custom()) == "CUSTOM"
+    with pytest.raises(TypeError, match="pandas DataFrame"):
+        mm.center_within_participant([], "condition")
+    with pytest.raises(ValueError, match="non-empty column name"):
+        mm.prepare_multilevel_mediation_data(
+            make_data(), x_col="", mediator_col="dwell_ms", outcome_col="override", warn=False
+        )
+    with pytest.raises(ValueError, match="Missing required columns"):
+        mm.center_within_participant(make_data(), "does_not_exist")
+    bad = make_data().astype({"dwell_ms": object})
+    bad.loc[0, "dwell_ms"] = "oops"
+    with pytest.raises(ValueError, match="must be numeric"):
+        mm.center_within_participant(bad, "dwell_ms")
+
+
+def test_boolean_observation_indicator_and_participant_count_property():
+    data = make_data()
+    data["seen"] = pd.Series([True] * len(data), dtype=bool)
+    data.loc[0, "seen"] = False
+    prepared = prepare_multilevel_mediation_data(
+        data,
+        x_col="condition",
+        mediator_col="dwell_ms",
+        outcome_col="override",
+        mediator_observed_col="seen",
+        warn=False,
+    )
+    assert prepared.n_participants == 3
+    assert prepared.data.loc[0, "mediation_mediator_state"] == "not_observed"
+
+
+def test_decomposition_empty_and_grand_mean_centering():
+    with pytest.raises(ValueError, match="at least one variable"):
+        decompose_within_between(make_data(), [])
+    out = decompose_within_between(
+        make_data(), "condition", grand_mean_center_between=True
+    )
+    assert np.isclose(out["condition_between"].mean(), 0.0)
+
+
+def test_variance_empty_singleton_and_constant_level_branches():
+    with pytest.raises(ValueError, match="at least one variable"):
+        summarise_within_between_variance(make_data(), [])
+    one = pd.DataFrame({"participant_id": ["p1"], "trial_id": [1], "v": [2.0]})
+    summary = summarise_within_between_variance(one, "v")
+    assert np.isnan(summary.loc[0, "total_variance"])
+    assert np.isnan(summary.loc[0, "within_variance"])
+    assert np.isnan(summary.loc[0, "between_variance"])
+    constant = make_data()
+    constant["constant"] = 1.0
+    levels = identify_mediation_levels(constant, ["condition", "dwell_ms", "constant"])
+    lookup = levels.set_index("variable")["level"]
+    assert lookup["constant"] == "constant_or_unidentified"
+    both = make_data()
+    both.loc[both["participant_id"].eq("p2"), "condition"] += 1
+    both_level = identify_mediation_levels(both, "condition").loc[0, "level"]
+    assert both_level == "within_and_between"
+    with pytest.raises(ValueError, match="finite non-negative"):
+        identify_mediation_levels(make_data(), "condition", tolerance=-1)
+
+
+def test_missingness_audit_validation_branches_and_empty_proportion():
+    with pytest.raises(ValueError, match="supplied together"):
+        audit_mediation_missingness(
+            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+            quality_col="valid_fraction"
+        )
+    with pytest.raises(ValueError, match="finite numeric"):
+        audit_mediation_missingness(
+            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+            quality_col="valid_fraction", minimum_quality=True
+        )
+    data = make_data()
+    data["m_seen"] = 1
+    data["y_seen"] = 1
+    data.loc[0, "m_seen"] = 0
+    data.loc[1, "y_seen"] = 0
+    audit = audit_mediation_missingness(
+        data, x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+        mediator_observed_col="m_seen", response_observed_col="y_seen"
+    ).set_index("issue")
+    assert audit.loc["mediator_not_observed", "n"] >= 2
+    assert audit.loc["response_missing", "n"] == 1
+    empty = data.iloc[0:0]
+    audit0 = audit_mediation_missingness(
+        empty, x_col="condition", mediator_col="dwell_ms", outcome_col="override"
+    )
+    assert audit0["proportion"].isna().all()
+
+
+def test_trial_count_minimum_validation():
+    for bad in [0, True, 1.5]:
+        with pytest.raises(ValueError, match="integer of at least 1"):
+            check_mediation_trial_counts(make_data(), minimum_trials=bad)
+
+
+def test_validation_reports_identifier_x_mediator_and_outcome_issues():
+    empty = make_data().iloc[0:0]
+    out = validate_multilevel_mediation_data(
+        empty, x_col="condition", mediator_col="dwell_ms", outcome_col="override"
+    )
+    assert "data has no rows" in out["issues"]
+
+    ids = make_data()
+    ids.loc[0, "participant_id"] = np.nan
+    ids.loc[1, "trial_id"] = np.nan
+    out = validate_multilevel_mediation_data(
+        ids, x_col="condition", mediator_col="dwell_ms", outcome_col="override"
+    )
+    assert "participant identifiers contain missing values" in out["issues"]
+    assert "trial identifiers contain missing values" in out["issues"]
+
+    badx = make_data().astype({"condition": object})
+    badx.loc[0, "condition"] = "bad"
+    out = validate_multilevel_mediation_data(
+        badx, x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+        require_within_x=False,
+    )
+    assert "X must be numeric or explicitly coded before decomposition" in out["issues"]
+
+    flatm = make_data()
+    flatm["dwell_ms"] = 1.0
+    flatm.loc[0, "override"] = np.nan
+    out = validate_multilevel_mediation_data(
+        flatm, x_col="condition", mediator_col="dwell_ms", outcome_col="override"
+    )
+    assert "mediator has no detectable within-participant variation" in out["warnings"]
+    assert "outcome contains missing values; rows are preserved and flagged" in out["warnings"]
+
+
+def test_prepare_quality_pair_validation_and_explicit_observation_columns():
+    with pytest.raises(ValueError, match="supplied together"):
+        prepare_multilevel_mediation_data(
+            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+            quality_col="valid_fraction", warn=False
+        )
+    data = make_data()
+    data["m_seen"] = 1
+    data["y_seen"] = 1
+    data.loc[0, "m_seen"] = 0
+    data.loc[1, "y_seen"] = 0
+    prepared = prepare_multilevel_mediation_data(
+        data,
+        x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+        mediator_observed_col="m_seen", response_observed_col="y_seen", warn=False
+    )
+    assert not prepared.data.loc[0, "mediation_mediator_observed"]
+    assert not prepared.data.loc[1, "mediation_response_observed"]
+
+
+def test_bad_provenance_object_and_component_validation_branches():
+    with pytest.raises(TypeError, match="MultilevelMediationData"):
+        mediation_provenance_json({})
+    with pytest.raises(TypeError, match="MultilevelMediationData"):
+        from eyeprocesspy.multilevel_mediation import add_multilevel_mediation_component
+        add_multilevel_mediation_component(
+            {}, value_col="trust", semantic="m2", within_col="M2w", between_col="M2b"
+        )
+
+    from eyeprocesspy.multilevel_mediation import add_multilevel_mediation_component
+    data = make_data()
+    data["trust"] = np.linspace(1, 2, len(data))
+    prepared = prepare_multilevel_mediation_data(
+        data, x_col="condition", mediator_col="dwell_ms", outcome_col="override", warn=False
+    )
+    with pytest.raises(ValueError, match="must be different"):
+        add_multilevel_mediation_component(
+            prepared, value_col="trust", semantic="m2", within_col="same", between_col="same"
+        )
+    explicit = add_multilevel_mediation_component(
+        prepared, value_col="trust", semantic="m2", within_col="M2w", between_col="M2b",
+        grand_mean_center_between=True,
+    )
+    assert np.isclose(explicit.data["M2b"].mean(), 0.0)
+
+
+def test_validator_reports_nonnumeric_mediator_without_accidental_classifier_error():
+    data = make_data().astype({"dwell_ms": object})
+    data.loc[0, "dwell_ms"] = "bad"
+    audit = validate_multilevel_mediation_data(
+        data, x_col="condition", mediator_col="dwell_ms", outcome_col="override"
+    )
+    assert "mediator must be numeric or explicitly coded before decomposition" in audit["issues"]
+    with pytest.raises(ValueError, match="mediator must be numeric"):
+        prepare_multilevel_mediation_data(
+            data, x_col="condition", mediator_col="dwell_ms", outcome_col="override", warn=False
+        )
+
+
+def test_warning_note_branches_independently_cover_missing_and_zero_false_paths():
+    clean = make_data().copy()
+    clean["dwell_ms"] = clean["dwell_ms"].fillna(125.0).replace(0.0, 105.0)
+    prepared_clean = prepare_multilevel_mediation_data(
+        clean, x_col="condition", mediator_col="dwell_ms", outcome_col="override", warn=False
+    )
+    assert not any("missing mediator" in x for x in prepared_clean.warnings)
+    assert not any("observed zero" in x for x in prepared_clean.warnings)
+
+    zero_only = clean.copy()
+    zero_only.loc[0, "dwell_ms"] = 0.0
+    prepared_zero = prepare_multilevel_mediation_data(
+        zero_only, x_col="condition", mediator_col="dwell_ms", outcome_col="override", warn=False
+    )
+    assert any("observed zero" in x for x in prepared_zero.warnings)
+    assert not any("missing mediator" in x for x in prepared_zero.warnings)
