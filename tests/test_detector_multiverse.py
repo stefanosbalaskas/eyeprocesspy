@@ -326,3 +326,78 @@ def test_public_api_exports_are_available():
         "simulate_detector_multiverse_data",
     ]
     assert all(callable(getattr(ep, name, None)) for name in names)
+
+def test_inference_stability_keeps_failed_branches_in_denominator():
+    data = ep.simulate_detector_multiverse_data(n_participants=4, seed=31)
+    result = ep.run_detector_multiverse(data, [ivt("ivt25", 25), ivt("ivt35", 35), idt()])
+    result = ep.propagate_detector_to_aoi(result)
+    result = ep.propagate_detector_to_features(result)
+
+    def selective_failure(data, spec):
+        detector_id = str(data["detector_id"].iloc[0])
+        if detector_id == "ivt35":
+            raise RuntimeError("planned branch failure")
+        return pd.DataFrame([{
+            "term": "condition",
+            "estimate": 1.0,
+            "SE": 0.2,
+            "CI_lower": 0.6,
+            "CI_upper": 1.4,
+            "p": 0.01,
+            "converged": True,
+            "N": len(data),
+        }])
+
+    fit = ep.run_detector_inference_multiverse(
+        result,
+        {"engine": "callback", "outcome": "dwell_time_ms", "aoi_id": "disclosure"},
+        model_callback=selective_failure,
+    )
+    stability = ep.assess_detector_inference_stability(fit, term="condition")
+    row = stability.iloc[0]
+    assert row.specifications == 3
+    assert row.term_available_specifications == 2
+    assert row.model_failure_specifications == 1
+    assert row.converged_specifications == 2
+    assert row.convergence_rate == pytest.approx(2 / 3)
+
+
+def test_model_callback_rejects_duplicate_coefficient_terms():
+    data = ep.simulate_detector_multiverse_data(n_participants=4, seed=32)
+    result = ep.run_detector_multiverse(data, [ivt()])
+    result = ep.propagate_detector_to_aoi(result)
+    result = ep.propagate_detector_to_features(result)
+
+    def duplicate_terms(data, spec):
+        return pd.DataFrame([
+            {
+                "term": "condition",
+                "estimate": 1.0,
+                "SE": 0.2,
+                "CI_lower": 0.6,
+                "CI_upper": 1.4,
+                "p": 0.01,
+                "converged": True,
+                "N": len(data),
+            },
+            {
+                "term": "condition",
+                "estimate": 1.1,
+                "SE": 0.2,
+                "CI_lower": 0.7,
+                "CI_upper": 1.5,
+                "p": 0.01,
+                "converged": True,
+                "N": len(data),
+            },
+        ])
+
+    fit = ep.run_detector_inference_multiverse(
+        result,
+        {"engine": "callback", "outcome": "dwell_time_ms", "aoi_id": "disclosure"},
+        model_callback=duplicate_terms,
+    )
+    assert fit.coefficients.empty
+    assert len(fit.failures) == 1
+    assert "at most one row per coefficient term" in fit.failures.iloc[0].error
+
