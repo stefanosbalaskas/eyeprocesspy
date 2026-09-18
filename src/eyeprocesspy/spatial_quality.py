@@ -515,11 +515,34 @@ def summarise_sampling_quality(data: Any,**kwargs: Any) -> pd.DataFrame:
     return _attach_provenance(out,{"function":"summarise_sampling_quality"})
 
 
+def _validate_thresholds(thresholds: Mapping[str,Any]|None, columns: Sequence[str]) -> None:
+    if not thresholds:
+        return
+    unknown=sorted(set(thresholds)-set(columns))
+    if unknown:
+        raise ValueError(f"threshold metrics are not present in the quality report: {', '.join(unknown)}")
+    for metric,rule in thresholds.items():
+        if isinstance(rule,Mapping):
+            bad=sorted(set(rule)-{"min","max"})
+            if bad or not rule:
+                raise ValueError(f"threshold rule for {metric} must contain only 'min' and/or 'max'")
+            values=list(rule.values())
+        else:
+            values=[rule]
+        for value in values:
+            try:
+                numeric=float(value)
+            except (TypeError,ValueError) as exc:
+                raise ValueError(f"threshold value for {metric} must be finite numeric") from exc
+            if not math.isfinite(numeric):
+                raise ValueError(f"threshold value for {metric} must be finite numeric")
+
+
 def _threshold_flags(row: pd.Series,thresholds: Mapping[str,Any]|None) -> list[str]:
     flags=[]
     if not thresholds: return flags
     for metric,rule in thresholds.items():
-        if metric not in row or not pd.notna(row[metric]): continue
+        if not pd.notna(row[metric]): continue
         value=float(row[metric])
         if isinstance(rule,Mapping):
             if "max" in rule and value>float(rule["max"]): flags.append(f"{metric}>max")
@@ -557,6 +580,7 @@ def create_gaze_quality_report(
     sampling=summarise_sampling_quality(d,time=time,by=keys,time_unit=time_unit,nominal_sampling_hz=nominal_sampling_hz,x=x,y=y,valid=valid)
     loss=compute_gaze_data_loss(d,x=x,y=y,time=time,valid=valid,missing_reason=missing_reason,by=keys,time_unit=time_unit)
     report=_merge_quality_parts([spatial,sampling,loss],keys)
+    _validate_thresholds(thresholds,report.columns)
     issue_map={_group_token([item.get(k) for k in keys]):item["issues"] for item in validation["group_issues"]}
     flags=[]
     for _,row in report.iterrows():
