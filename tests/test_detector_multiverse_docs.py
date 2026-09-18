@@ -28,7 +28,7 @@ def test_detector_multiverse_documentation_surface_exists():
 
 
 def test_detector_multiverse_reference_only_names_public_api():
-    text = (DOCS / "reference/detector-multiverse.md").read_text()
+    text = (DOCS / "reference/detector-multiverse.md").read_text(encoding="utf-8")
     names = re.findall(r"::: eyeprocesspy\.([A-Za-z0-9_]+)", text)
     assert len(names) >= 20
     assert all(callable(getattr(ep, name, None)) for name in names)
@@ -40,7 +40,7 @@ def test_new_documentation_internal_links_resolve():
     ]
     pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]+)?)\)")
     for page in pages:
-        text = page.read_text()
+        text = page.read_text(encoding="utf-8")
         for target in pattern.findall(text):
             target_path = target.split("#", 1)[0]
             resolved = (page.parent / target_path).resolve()
