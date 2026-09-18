@@ -415,6 +415,33 @@ def test_full_sensitivity_pipeline_and_model_provenance():
     assert result["provenance"]["quality_rules"]["missing"] == "preserve"
 
 
+def test_observation_ids_must_be_present_unique_and_nonmissing():
+    data = synthetic_data().head(20).copy()
+    grid = create_aoi_perturbation_grid(dilations=[2])
+    data.loc[data.index[0], "obs"] = np.nan
+    with pytest.raises(EyeProcessValidationError, match="unique and non-missing"):
+        run_aoi_sensitivity_analysis(
+            data,
+            synthetic_aois(),
+            grid,
+            x_col="x",
+            y_col="y",
+            observation_id_col="obs",
+            duration_col="duration",
+        )
+    data = synthetic_data().head(20).copy()
+    with pytest.raises(EyeProcessValidationError, match="absent"):
+        run_aoi_sensitivity_analysis(
+            data,
+            synthetic_aois(),
+            grid,
+            x_col="x",
+            y_col="y",
+            observation_id_col="missing_id",
+            duration_col="duration",
+        )
+
+
 def test_model_callback_failures_and_partial_nonconvergence_are_preserved():
     data = synthetic_data().head(40).copy()
     grid = create_aoi_perturbation_grid(dilations=[5], translations_x=[5])
