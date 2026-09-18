@@ -57,9 +57,50 @@ Canonical `eyeprocess` episode tables can be matched by `participant_id + trial_
 
 A non-default origin must be explicit. For example, if latency begins at stimulus onset rather than trial onset, pass `time_origin="stimulus_onset"` together with `time_origin_col="stimulus_onset"`.
 
+## Worked variant: evidence verification
+
+The same contract can model time to first inspection of a source/evidence AOI. The synthetic verification design has repeated trials under `standard` and `evidence_prompt` conditions; some valid trials never enter the evidence AOI and therefore remain right-censored.
+
+```python
+raw_verify = simulate_gaze_survival_inputs(
+    "verification",
+    seed=20260918,
+    n_participants=36,
+    trials_per_participant=3,
+)
+
+verification = prepare_gaze_survival_data(
+    raw_verify["trials"],
+    raw_verify["events"],
+    target_aoi="source_evidence",
+    event_type="first_aoi_entry",
+    condition_col="condition_id",
+    min_valid_fraction=0.90,
+    time_origin="trial_start",
+    event_detector="synthetic_truth",
+    aoi_specification="fixed synthetic source/evidence AOI",
+)
+
+print(summarise_gaze_censoring(verification, by="condition"))
+```
+
+This is not a binary “looked/did not look” analysis: trials that end without evidence inspection contribute their observed risk time instead of being discarded.
+
 ## Event definitions
 
 `event_type` supports first fixation, first AOI entry, first evidence inspection, first revisit, first transition into the target, and disengagement. Revisit/transition/disengagement are treated as **visit-level** concepts: consecutive identical AOI labels are collapsed before those events are identified, so two successive fixations inside the same visit do not create a false revisit.
+
+### Censoring decision guide
+
+| Trial state | `event_observed` | `analysis_time` | Model eligible? | Interpretation |
+| --- | ---: | ---: | --- | --- |
+| Target event occurs inside a usable window | 1 | Event latency | Yes | Observed event |
+| Target never occurs before a complete usable window ends | 0 | Censoring time | Yes | Right censored |
+| Window incomplete or event status unknowable | NA | NA | No | Review required |
+| Gaze quality fails the declared rule | NA | NA | No | Review/exclusion branch |
+| Event occurs after declared censoring limit | Invalid | Invalid | No | Data-contract error |
+
+The package never converts the last three cases into ordinary censoring automatically.
 
 ## Validation and safeguards
 
