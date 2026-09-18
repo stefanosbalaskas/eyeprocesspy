@@ -33,6 +33,11 @@ nav:
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
           - IRT diagnostics: examples/irt-diagnostics.md
+  - Data Quality:
+      - Overview & equations: guides/data-quality.md
+      - Worked 9-point validation: examples/data-quality-validation.md
+      - Reporting guideline: guides/data-quality-reporting.md
+      - Quality & uncertainty: guides/process-quality-uncertainty.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
