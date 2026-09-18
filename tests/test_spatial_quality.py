@@ -164,7 +164,8 @@ def test_precision_edge_paths_dimensions_and_gap_rules():
 def test_sampling_edge_paths_and_dropped_interval_diagnostics():
     d=pd.DataFrame({"timestamp_ms":[0,10,20,50]})
     i=ep.estimate_sampling_interval(d); j=ep.estimate_sampling_jitter(d); e=ep.estimate_effective_sampling_rate(d,nominal_sampling_hz=100)
-    assert i.max_interval_ms.iloc[0]==pytest.approx(30); assert j.sampling_jitter_ms.iloc[0]>0; assert e.dropped_interval_count.iloc[0]==1
+    assert i.max_interval_ms.iloc[0]==pytest.approx(30); assert j.sampling_jitter_ms.iloc[0]>0
+    assert e.long_interval_count.iloc[0]==1; assert e.dropped_interval_count.iloc[0]==2
     single=pd.DataFrame({"timestamp_ms":[0]})
     assert math.isnan(ep.estimate_sampling_interval(single).median_interval_ms.iloc[0])
     assert math.isnan(ep.estimate_sampling_jitter(single).sampling_jitter_ms.iloc[0])
@@ -223,10 +224,14 @@ def test_plot_passed_axis_dashboard_missing_metrics_and_empty_report():
     fig2=ep.plot_gaze_quality_dashboard(pd.DataFrame({"accuracy_mean":[1.]})); assert hasattr(fig2,"eyeprocess_plot_data")
     assert ep.report_gaze_quality(pd.DataFrame())=="No gaze-quality rows were available."
     assert "Review required" in ep.report_gaze_quality(pd.DataFrame({"accuracy_mean":[np.nan]}))
+    with pytest.raises(ValueError,match="digits"): ep.report_gaze_quality(r,digits=-1)
+    with pytest.raises(ValueError,match="time_unit"): ep.plot_sampling_intervals(pd.DataFrame({"timestamp_ms":[0,10]}),time_unit="minute")
 
 
 def test_simulator_small_sample_guard_and_reason_branches():
     with pytest.raises(ValueError,match="at least 4"): ep.simulate_gaze_quality_calibration(samples_per_target=3)
+    with pytest.raises(ValueError,match="integer"): ep.simulate_gaze_quality_calibration(samples_per_target=4.5)
+    with pytest.raises(ValueError,match="finite positive"): ep.simulate_gaze_quality_calibration(nominal_sampling_hz=0)
     d=ep.simulate_gaze_quality_calibration(samples_per_target=15)
     miss=d[d.profile=="missingness"]
     assert {"blink","tracker_invalidity"}.issubset(set(miss.missing_reason.dropna()))
