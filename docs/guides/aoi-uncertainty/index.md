@@ -10,6 +10,15 @@ Use AOI perturbation analysis when gaze or fixation coordinates cluster near AOI
 
 Do **not** use it to search for a favorable AOI, replace calibration/coordinate-quality checks, or rescue an implausible layout. Define the perturbation envelope from measurement and design knowledge rather than from whichever branch produces the preferred result.
 
+## Method guides
+
+- [AOI Geometry Is an Analytical Assumption](geometry-assumption.md)
+- [AOI Perturbation Sensitivity Analysis](perturbation-sensitivity.md)
+- [Pixels versus Degrees of Visual Angle](pixels-versus-degrees.md)
+- [Interpreting AOI Assignment Stability](assignment-stability.md)
+- [Propagating AOI Uncertainty Into Statistical Models](model-propagation.md)
+- [Reporting AOI Robustness](reporting.md)
+
 ## Scientific pipeline
 
 ```text
