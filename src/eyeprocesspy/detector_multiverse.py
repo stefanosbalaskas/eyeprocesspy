@@ -1179,3 +1179,340 @@ def _pupil_within_fixations(branch: EyeDataset, fixations: pd.DataFrame, recordi
     return float(np.mean(values)) if values.size else np.nan
 
 
+def _derive_branch_features(branch: EyeDataset, spec: EventDetectorSpec) -> pd.DataFrame:
+    trials = _trial_rows(branch)
+    aois = branch["aoi_definitions"].copy()
+    if aois.empty:
+        raise EyeProcessValidationError("AOI definitions are required before feature propagation.")
+    episodes = branch["episodes"].copy()
+    fixations = episodes[episodes["episode_type"].eq("fixation")].copy()
+    if "detector_id" in fixations:
+        fixations = fixations[fixations["detector_id"].eq(spec.detector_id)]
+    rows = []
+    for _, trial in trials.iterrows():
+        rec = trial["recording_id"]
+        trial_id = trial["trial_id"]
+        start = float(trial["start_time"])
+        end = float(trial["end_time"])
+        duration_ms = (end - start) * 1000.0
+        n_samples, valid_fraction = _trial_valid_fraction(branch, rec, trial_id)
+        trial_fix = fixations[fixations["recording_id"].eq(rec) & fixations["trial_id"].eq(trial_id)].sort_values("start_time")
+        seq = [str(value) for value in trial_fix["aoi_id"].dropna().tolist()]
+        collapsed = [value for i, value in enumerate(seq) if i == 0 or value != seq[i - 1]]
+        for _, aoi in aois.iterrows():
+            aoi_id = str(aoi["aoi_id"])
+            target = trial_fix[trial_fix["aoi_id"].astype("string").eq(aoi_id)].copy()
+            observed_trial = n_samples > 0 and np.isfinite(valid_fraction) and valid_fraction > 0
+            count = float(len(target)) if observed_trial else np.nan
+            dwell = float(pd.to_numeric(target["duration_ms"], errors="coerce").sum()) if observed_trial and len(target) else (0.0 if observed_trial else np.nan)
+            mean_duration = float(pd.to_numeric(target["duration_ms"], errors="coerce").mean()) if len(target) else np.nan
+            first_latency = (float(target["start_time"].min()) - start) * 1000.0 if len(target) else np.nan
+            entries = sum(1 for i, state in enumerate(collapsed) if state == aoi_id and (i == 0 or collapsed[i - 1] != aoi_id))
+            revisits = max(entries - 1, 0) if observed_trial else np.nan
+            transitions_from = sum(1 for left, right in zip(collapsed[:-1], collapsed[1:]) if left == aoi_id and right != aoi_id)
+            transitions_to = sum(1 for left, right in zip(collapsed[:-1], collapsed[1:]) if right == aoi_id and left != aoi_id)
+            row = {
+                "detector_id": spec.detector_id,
+                "detector_algorithm": spec.algorithm,
+                "detector_spec_hash": spec.fingerprint,
+                "recording_id": rec,
+                "participant_id": trial.get("participant_id", pd.NA),
+                "trial_id": trial_id,
+                "item_id": trial.get("item_id", pd.NA),
+                "stimulus_id": trial.get("stimulus_id", pd.NA),
+                "condition_id": trial.get("condition_id", pd.NA),
+                "aoi_id": aoi_id,
+                "trial_duration_ms": duration_ms,
+                "n_gaze_samples": n_samples,
+                "valid_data_fraction": valid_fraction,
+                "fixation_count": count,
+                "dwell_time_ms": dwell,
+                "mean_fixation_duration_ms": mean_duration,
+                "first_fixation_latency_ms": first_latency,
+                "ttff_ms": first_latency,
+                "ttff_event_observed": bool(len(target)) if observed_trial else pd.NA,
+                "ttff_censor_time_ms": duration_ms if observed_trial else np.nan,
+                "revisits": revisits,
+                "transition_count_from_aoi": float(transitions_from) if observed_trial else np.nan,
+                "transition_count_to_aoi": float(transitions_to) if observed_trial else np.nan,
+                "scanpath_sequence": " > ".join(collapsed),
+                "pupil_within_fixation_mean": _pupil_within_fixations(branch, target, rec, trial_id),
+                "feature_review_required": bool(np.isfinite(valid_fraction) and valid_fraction < 0.5),
+            }
+            row.update(_lineage_fields(branch, spec))
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def propagate_detector_to_features(
+    x: DetectorMultiverseResult,
+    *,
+    continue_on_error: bool = True,
+) -> DetectorMultiverseResult:
+    """Recompute AOI features for every successful detector branch, including zero-event trials."""
+    if not isinstance(x, DetectorMultiverseResult):
+        raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
+    frames = []
+    failures = [] if x.failures.empty else x.failures.to_dict("records")
+    for spec in x.multiverse.specs:
+        branch = x.branches.get(spec.detector_id)
+        if branch is None:
+            continue
+        try:
+            frames.append(_derive_branch_features(branch, spec))
+        except Exception as exc:
+            failures.append({
+                "detector_id": spec.detector_id,
+                "detector_spec_hash": spec.fingerprint,
+                "stage": "feature_propagation",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            })
+            if not continue_on_error:
+                raise
+    features = pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame()
+    return replace(x, features=features, failures=pd.DataFrame(failures))
+
+
+def _fit_statsmodels(data: pd.DataFrame, model_spec: Mapping[str, Any]) -> tuple[Any, list[str]]:
+    try:
+        import statsmodels.formula.api as smf
+    except ImportError as exc:
+        raise EyeProcessBackendError("This model engine requires statsmodels; no replacement estimator is selected automatically.") from exc
+    formula = model_spec.get("formula")
+    if not isinstance(formula, str) or "~" not in formula:
+        raise EyeProcessValidationError("`model_spec['formula']` must be an explicit formula string.")
+    engine = model_spec.get("engine")
+    captured = []
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        if engine == "statsmodels_ols":
+            fit = smf.ols(formula, data=data, missing="raise").fit()
+            converged = True
+        elif engine == "statsmodels_mixedlm":
+            groups = model_spec.get("groups")
+            if not groups or groups not in data.columns:
+                raise EyeProcessValidationError("MixedLM requires an explicit existing `groups` column.")
+            re_formula = model_spec.get("re_formula")
+            model = smf.mixedlm(formula, data=data, groups=data[groups], re_formula=re_formula, missing="raise")
+            fit = model.fit(
+                reml=bool(model_spec.get("reml", False)),
+                method=model_spec.get("method", "lbfgs"),
+                maxiter=int(model_spec.get("maxiter", 200)),
+                disp=False,
+            )
+            converged = bool(getattr(fit, "converged", False))
+        else:
+            raise EyeProcessValidationError("Unknown statsmodels engine.")
+        captured = [str(item.message) for item in caught]
+    return (fit, captured if converged else captured + ["Model did not converge; estimates are retained for diagnosis but excluded from stability summaries."])
+
+
+def _tidy_statsmodels(fit: Any, converged: bool, n: int) -> pd.DataFrame:
+    params = pd.Series(fit.params)
+    se = pd.Series(fit.bse).reindex(params.index)
+    p = pd.Series(getattr(fit, "pvalues", np.nan), index=params.index).reindex(params.index)
+    try:
+        conf = fit.conf_int().reindex(params.index)
+        lower = conf.iloc[:, 0]
+        upper = conf.iloc[:, 1]
+    except Exception:
+        lower = pd.Series(np.nan, index=params.index)
+        upper = pd.Series(np.nan, index=params.index)
+    return pd.DataFrame({
+        "term": params.index.astype(str),
+        "estimate": params.to_numpy(float),
+        "SE": pd.to_numeric(se, errors="coerce").to_numpy(float),
+        "CI_lower": pd.to_numeric(lower, errors="coerce").to_numpy(float),
+        "CI_upper": pd.to_numeric(upper, errors="coerce").to_numpy(float),
+        "p": pd.to_numeric(p, errors="coerce").to_numpy(float),
+        "converged": bool(converged),
+        "N": int(n),
+    })
+
+
+def run_detector_inference_multiverse(
+    x: DetectorMultiverseResult,
+    model_spec: Mapping[str, Any],
+    *,
+    model_callback: Callable[[pd.DataFrame, Mapping[str, Any]], pd.DataFrame] | None = None,
+    minimum_valid_fraction: float | None = None,
+) -> DetectorInferenceResult:
+    """Fit the identical explicit model specification across detector branches."""
+    if not isinstance(x, DetectorMultiverseResult):
+        raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
+    if x.features.empty:
+        raise EyeProcessValidationError("Run `propagate_detector_to_features()` before inference propagation.")
+    if not isinstance(model_spec, Mapping):
+        raise EyeProcessValidationError("`model_spec` must be a mapping.")
+    engine = model_spec.get("engine")
+    if engine not in {"statsmodels_ols", "statsmodels_mixedlm", "callback"}:
+        raise EyeProcessValidationError("Choose an explicit model engine: statsmodels_ols, statsmodels_mixedlm, or callback.")
+    if engine == "callback" and not callable(model_callback):
+        raise EyeProcessValidationError("`engine='callback'` requires a callable `model_callback`.")
+    outcome = str(model_spec.get("outcome", "")).strip()
+    if not outcome:
+        formula = str(model_spec.get("formula", ""))
+        outcome = formula.split("~", 1)[0].strip() if "~" in formula else ""
+    if not outcome or outcome not in x.features.columns:
+        raise EyeProcessValidationError("The model outcome must be named explicitly and exist in propagated features.")
+    aoi_id = model_spec.get("aoi_id")
+    rows = []
+    failures = []
+    warning_rows = []
+    for spec in x.multiverse.specs:
+        data = x.features[x.features["detector_id"].eq(spec.detector_id)].copy()
+        if aoi_id is not None:
+            data = data[data["aoi_id"].astype(str).eq(str(aoi_id))]
+        if minimum_valid_fraction is not None:
+            if not 0 <= float(minimum_valid_fraction) <= 1:
+                raise EyeProcessValidationError("`minimum_valid_fraction` must lie in [0, 1].")
+            data = data[pd.to_numeric(data["valid_data_fraction"], errors="coerce") >= float(minimum_valid_fraction)]
+        data = data[np.isfinite(pd.to_numeric(data[outcome], errors="coerce"))].copy()
+        if data.empty:
+            failures.append({"detector_id": spec.detector_id, "stage": "model", "error_type": "NoModelData", "error": "No finite model rows remained for this detector."})
+            continue
+        try:
+            if engine == "callback":
+                tidy = model_callback(data.copy(), dict(model_spec))
+                if not isinstance(tidy, pd.DataFrame):
+                    raise EyeProcessValidationError("`model_callback` must return a DataFrame.")
+                required = {"term", "estimate", "SE", "CI_lower", "CI_upper", "p", "converged", "N"}
+                missing = required - set(tidy.columns)
+                if missing:
+                    raise EyeProcessValidationError("Model callback output is missing: " + ", ".join(sorted(missing)))
+                model_warnings: list[str] = []
+            else:
+                fit, model_warnings = _fit_statsmodels(data, model_spec)
+                converged = bool(getattr(fit, "converged", True)) if engine == "statsmodels_mixedlm" else True
+                tidy = _tidy_statsmodels(fit, converged, len(data))
+            tidy = tidy.copy()
+            tidy["detector_id"] = spec.detector_id
+            tidy["detector_algorithm"] = spec.algorithm
+            tidy["detector_spec_hash"] = spec.fingerprint
+            tidy["parameter_spec"] = json.dumps(_jsonable(spec.as_dict()), sort_keys=True)
+            tidy["model_engine"] = engine
+            tidy["model_formula"] = model_spec.get("formula", pd.NA)
+            model_spec_blob = json.dumps(_jsonable(dict(model_spec)), sort_keys=True, separators=(",", ":"))
+            tidy["model_spec_hash"] = sha256(model_spec_blob.encode()).hexdigest()
+            tidy["feature_fingerprint"] = sha256(data.to_json(orient="split", index=False, default_handler=str).encode()).hexdigest()
+            tidy["software"] = "eyeprocesspy"
+            tidy["software_version"] = "0.1.0"
+            tidy["warnings"] = " | ".join(model_warnings) if model_warnings else pd.NA
+            rows.append(tidy)
+            for message in model_warnings:
+                warning_rows.append({"detector_id": spec.detector_id, "stage": "model", "warning": message})
+        except Exception as exc:
+            failures.append({"detector_id": spec.detector_id, "stage": "model", "error_type": type(exc).__name__, "error": str(exc)})
+    coefficients = pd.concat(rows, ignore_index=True, sort=False) if rows else pd.DataFrame()
+    feature_blob = x.features.to_json(orient="split", index=False, default_handler=str)
+    return DetectorInferenceResult(
+        multiverse=x.multiverse,
+        coefficients=coefficients,
+        failures=pd.DataFrame(failures),
+        warnings=pd.DataFrame(warning_rows),
+        model_spec=dict(model_spec),
+        feature_fingerprint=sha256(feature_blob.encode()).hexdigest(),
+    )
+
+
+def assess_detector_inference_stability(
+    x: DetectorInferenceResult,
+    *,
+    term: str,
+    substantive_threshold: float | None = None,
+    direction: str = "above",
+) -> pd.DataFrame:
+    """Summarize coefficient stability across converged detector specifications."""
+    if not isinstance(x, DetectorInferenceResult):
+        raise EyeProcessValidationError("`x` must be a DetectorInferenceResult.")
+    if direction not in {"above", "below", "absolute"}:
+        raise EyeProcessValidationError("`direction` must be above, below, or absolute.")
+    data = x.coefficients[x.coefficients["term"].astype(str).eq(str(term))].copy()
+    all_n = len(data)
+    if data.empty:
+        return pd.DataFrame([{
+            "term": term, "specifications": 0, "converged_specifications": 0, "convergence_rate": np.nan,
+            "median_estimate": np.nan, "estimate_min": np.nan, "estimate_max": np.nan, "estimate_range": np.nan,
+            "same_sign_proportion": np.nan, "ci_overlap": pd.NA, "ci_overlap_lower": np.nan, "ci_overlap_upper": np.nan,
+            "substantive_conclusion_stability": np.nan,
+        }])
+    converged_mask = data["converged"].astype("boolean").fillna(False)
+    valid = data[converged_mask].copy()
+    estimates = pd.to_numeric(valid["estimate"], errors="coerce")
+    valid = valid[np.isfinite(estimates)]
+    estimates = pd.to_numeric(valid["estimate"], errors="coerce")
+    if valid.empty:
+        return pd.DataFrame([{
+            "term": term, "specifications": all_n, "converged_specifications": 0, "convergence_rate": 0.0,
+            "median_estimate": np.nan, "estimate_min": np.nan, "estimate_max": np.nan, "estimate_range": np.nan,
+            "same_sign_proportion": np.nan, "ci_overlap": pd.NA, "ci_overlap_lower": np.nan, "ci_overlap_upper": np.nan,
+            "substantive_conclusion_stability": np.nan,
+        }])
+    nonzero = estimates[estimates != 0]
+    if len(nonzero):
+        majority_positive = float((nonzero > 0).mean()) >= 0.5
+        same_sign = float((nonzero > 0).mean() if majority_positive else (nonzero < 0).mean())
+    else:
+        same_sign = np.nan
+    lowers = pd.to_numeric(valid["CI_lower"], errors="coerce")
+    uppers = pd.to_numeric(valid["CI_upper"], errors="coerce")
+    finite_ci = np.isfinite(lowers) & np.isfinite(uppers)
+    if finite_ci.any():
+        overlap_lower = float(lowers[finite_ci].max())
+        overlap_upper = float(uppers[finite_ci].min())
+        ci_overlap: Any = bool(overlap_lower <= overlap_upper)
+    else:
+        overlap_lower = overlap_upper = np.nan
+        ci_overlap = pd.NA
+    threshold_stability = np.nan
+    if substantive_threshold is not None:
+        threshold = float(substantive_threshold)
+        if direction == "above":
+            decisions = estimates >= threshold
+        elif direction == "below":
+            decisions = estimates <= threshold
+        else:
+            decisions = estimates.abs() >= abs(threshold)
+        threshold_stability = float(max(decisions.mean(), (~decisions).mean()))
+    return pd.DataFrame([{
+        "term": term,
+        "specifications": all_n,
+        "converged_specifications": len(valid),
+        "convergence_rate": len(valid) / all_n if all_n else np.nan,
+        "median_estimate": float(estimates.median()),
+        "estimate_min": float(estimates.min()),
+        "estimate_max": float(estimates.max()),
+        "estimate_range": float(estimates.max() - estimates.min()),
+        "same_sign_proportion": same_sign,
+        "ci_overlap": ci_overlap,
+        "ci_overlap_lower": overlap_lower,
+        "ci_overlap_upper": overlap_upper,
+        "substantive_conclusion_stability": threshold_stability,
+    }])
+
+
+def _feature_sensitivity(features: pd.DataFrame) -> pd.DataFrame:
+    if features.empty:
+        return pd.DataFrame()
+    metrics = [
+        "dwell_time_ms", "fixation_count", "mean_fixation_duration_ms", "ttff_ms", "revisits",
+        "transition_count_from_aoi", "transition_count_to_aoi", "pupil_within_fixation_mean",
+    ]
+    keys = ["recording_id", "trial_id", "aoi_id"]
+    rows = []
+    for metric in metrics:
+        if metric not in features:
+            continue
+        spreads = []
+        for _, group in features.groupby(keys, dropna=False, sort=False):
+            values = pd.to_numeric(group[metric], errors="coerce")
+            values = values[np.isfinite(values)]
+            if len(values) >= 2:
+                spreads.append(float(values.max() - values.min()))
+        rows.append({
+            "feature": metric,
+            "units_with_multiple_detectors": len(spreads),
+            "median_detector_range": float(np.median(spreads)) if spreads else np.nan,
+            "max_detector_range": float(np.max(spreads)) if spreads else np.nan,
+        })
