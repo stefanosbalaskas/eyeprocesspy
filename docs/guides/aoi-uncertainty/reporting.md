@@ -2,6 +2,10 @@
 
 A reproducible report states **what was perturbed, why those changes were defensible, which rows were analyzed, and which assignment/model quantities remained stable**.
 
+## Before results are inspected
+
+Use the [AOI sensitivity analysis plan](analysis-plan.md) to freeze the perturbation envelope, denominator rules, model callback, failure handling, and reporting fields before branch-specific results are examined. Any later amendment should preserve the original plan and state what changed and why.
+
 ## Methods checklist
 
 Report:

@@ -1,0 +1,58 @@
+analysis_id: aoi-sensitivity-primary
+nominal_geometry:
+  source: replace-with-source-or-version
+  representation: rectangle-or-polygon
+  coordinate_space: pixels
+observation_level: fixation
+perturbations:
+  unit: deg
+  dilation: [0.25, 0.50, 1.00]
+  erosion: [0.25]
+  translation_x: [0.50]
+  translation_y: [0.50]
+  translation_xy: []
+  jitter: []
+  anisotropic: []
+display_geometry:
+  screen_width_px: 1920
+  screen_height_px: 1080
+  physical_screen_width: 53.1
+  physical_screen_height: 29.9
+  viewing_distance: 60
+overlap_policy: ambiguous
+boundary_policy: allow
+randomness:
+  jitter_seed: null
+features:
+  duration_column: duration
+  time_column: time
+  zero_rule: valid-observations-but-no-assignment
+  missing_rule: preserve-no-valid-assignment-opportunity
+model:
+  estimator: prespecified-callback
+  model_specification: replace-with-fixed-model-description
+  convergence_required: true
+  required_outputs:
+    - term
+    - estimate
+    - SE
+    - CI_low
+    - CI_high
+    - p_value
+    - model_converged
+    - N
+failure_handling:
+  retain_geometry_failures: true
+  retain_callback_failures: true
+  retain_nonconverged_rows: true
+report:
+  assignment_stability: true
+  reassignment_matrix: true
+  coefficient_range: true
+  confidence_intervals: true
+  convergence: true
+  model_N_range: true
+  failed_branches: true
+interpretation:
+  robustness_is_conditional_on_declared_grid: true
+  robustness_frequency_is_not_probability_of_truth: true

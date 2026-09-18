@@ -34,6 +34,12 @@
 
     [Open worked workflow](gaze-survival-analysis.md)
 
+-   :material-clipboard-text-outline: **AOI analysis plan**
+
+    Fix the perturbation envelope, denominator rules, model specification, failure handling, and interpretation language before branch-specific results are inspected.
+
+    [Open worked plan](aoi-analysis-plan-worked.md)
+
 -   :material-vector-polygon: **AOI perturbation sensitivity**
 
     Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
@@ -205,6 +211,7 @@ All listed examples are deterministic and use no private participant data.
 
 ## AOI uncertainty
 
+- [AOI analysis plan](aoi-analysis-plan-worked.md): filled preregistration-style plan with API mapping and planned interpretation rules.
 - [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
 - [AOI perturbation failure clinic](aoi-perturbation-failure-clinic.md): deliberate geometry/model failure, ambiguity, non-convergence, and retained audit trails.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
