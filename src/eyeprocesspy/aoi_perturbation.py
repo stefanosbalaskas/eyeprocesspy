@@ -112,6 +112,7 @@ def run_aoi_sensitivity_analysis(
             duration_col=duration_col,
             time_col=time_col,
             perturbation_id=pid,
+            aoi_levels=geometry["aoi_id"].astype(str).tolist(),
         )
         features[pid] = feat
         if model_callback is not None:
