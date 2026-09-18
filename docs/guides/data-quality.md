@@ -71,7 +71,7 @@ The probability is explicit (`probability=0.68` by default) and the area unit is
 
 ## Effective versus nominal sampling rate
 
-A hardware label is not an empirical timebase audit. `estimate_effective_sampling_rate()` reports observed timestamp count, the sample count used for effective-Hz estimation, timestamp span, an estimated recording duration (span plus one median positive interval), effective Hz, median interval, and a dropped-interval diagnostic when nominal Hz is supplied. When gaze coordinates/validity are supplied, effective Hz uses valid gaze samples with finite timestamps; otherwise it describes the timestamp stream. `estimate_sampling_interval()` also exposes duplicate and non-monotonic timestamps, while `estimate_sampling_jitter()` summarizes interval variability.
+A hardware label is not an empirical timebase audit. `estimate_effective_sampling_rate()` reports observed timestamp count, the sample count used for effective-Hz estimation, timestamp span, an estimated recording duration (span plus one median positive interval), effective Hz, and median interval. When nominal Hz is supplied it reports both `long_interval_count` (how many positive intervals exceeded the declared multiple of the nominal interval) and `dropped_interval_count` (the estimated number of missing nominal samples represented by those long gaps). When gaze coordinates/validity are supplied, effective Hz uses valid gaze samples with finite timestamps; otherwise it describes the timestamp stream. `estimate_sampling_interval()` also exposes duplicate and non-monotonic timestamps, while `estimate_sampling_jitter()` summarizes interval variability.
 
 ## Data loss and missingness
 
