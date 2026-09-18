@@ -4,6 +4,7 @@ The `eyeprocesspy` public surface follows the frozen eyeprocess 0.11.1 API ledge
 
 [Browse the generated API](api.md){ .md-button .md-button--primary }
 [Plotting reference](plotting.md){ .md-button }
+[Detector multiverse API](detector-multiverse.md){ .md-button }
 [Visual gallery](../gallery.md){ .md-button }
 
 ## Scientific families
@@ -14,6 +15,7 @@ The `eyeprocesspy` public surface follows the frozen eyeprocess 0.11.1 API ledge
 | **Import and adapters** | generic readers, adapter registry, folder workflows, vendor detection |
 | **Gazepoint** | gaze/fixation/event/biometric readers, pairing, real-export validation, workflow helpers |
 | **Preprocessing and features** | fixations, saccades, AOIs, dwell, scanpaths, transitions, entropy, wide/trial feature tables |
+| **Detector robustness** | detector specifications, event matching/agreement, AOI/feature propagation, inference stability, reports |
 | **Pupil and multimodal** | pupil preprocessing, functional pupil, missingness, synchronized/staged multimodal workflows |
 | **Process quality** | reliability, Bland–Altman, sampling irregularity, calibration error, gaze precision, quality profiles |
 | **AOI uncertainty** | calibration propagation, probabilistic AOIs, compositional AOIs, sensitivity/boundary uncertainty |
