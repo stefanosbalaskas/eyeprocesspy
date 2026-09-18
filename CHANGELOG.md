@@ -2,6 +2,15 @@
 
 All notable changes to `eyeprocesspy` are documented here.
 
+## Unreleased
+
+### Censored gaze-latency survival analysis
+
+- Added a vendor-neutral survival-ready trial contract that retains valid never-inspected trials as right-censored observations while keeping incomplete/unusable gaze in explicit review states.
+- Added Kaplan–Meier, Cox PH, participant-clustered Cox, Weibull/log-normal AFT, prediction, latency quantiles, PH diagnostics, sensitivity comparisons, plotting, reporting, provenance, and deterministic synthetic examples.
+- Added a first-class documentation pathway with method overview, when-to-use/not-use guidance, worked example, visual output, reporting/limitations guidance, and dedicated API reference.
+- Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
+
 ## 0.1.0 — 2026-09-03
 
 First public Python release aligned to the frozen R `eyeprocess` 0.11.1 reference.
