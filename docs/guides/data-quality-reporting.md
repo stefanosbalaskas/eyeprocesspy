@@ -12,6 +12,7 @@ Report, when relevant:
 - the precision operationalization (RMS-S2S, SD, BCEA) and BCEA probability when used;
 - nominal sampling frequency and whether sampling was irregular;
 - empirically observed/effective frequency or interval statistics when needed;
+- when long-gap diagnostics are reported, distinguish the number of long intervals from the estimated number of nominal samples lost within those intervals;
 - the definition and amount of data loss;
 - whether loss causes such as blinks or tracker invalidity were distinguishable;
 - preprocessing that can change these metrics;
