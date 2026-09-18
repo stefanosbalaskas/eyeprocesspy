@@ -240,6 +240,28 @@ def test_degree_spec_requires_geometry():
         aoi_perturbation_spec("x", "dilation", margin_x=0.25, unit="deg")
 
 
+def test_grid_accepts_array_inputs_and_combined_xy_translation():
+    grid = create_aoi_perturbation_grid(
+        dilations=np.array([1.0, 2.0]),
+        translations_xy=np.array([[3.0, -4.0], [-1.0, 2.0]]),
+        anisotropic=np.array([[0.5, -0.25], [1.0, 2.0]]),
+    )
+    ids = grid["table"]["perturbation_id"].tolist()
+    assert ids == [
+        "baseline",
+        "dilate_1_px",
+        "dilate_2_px",
+        "shift_xy_3_-4_px",
+        "shift_xy_-1_2_px",
+        "anisotropic_0.5_-0.25_px",
+        "anisotropic_1_2_px",
+    ]
+    applied = apply_aoi_perturbation_grid(rects().iloc[[0]].copy(), grid)
+    shifted = applied["geometries"]["shift_xy_3_-4_px"].iloc[0]
+    assert shifted["xmin"] == 103
+    assert shifted["ymin"] == 76
+
+
 def test_jitter_is_reproducible():
     a = jitter_aoi(rects(), 5, seed=4)
     b = jitter_aoi(rects(), 5, seed=4)
