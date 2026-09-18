@@ -31,7 +31,7 @@ Across trial × AOI units, detector choice changed dwell, fixation counts, mean 
 
 ## Inference stability
 
-For the simulated disclosure-condition term, all five successfully modelled internal detector branches converged and retained the same effect direction. The estimate range was approximately 20.8 ms across branches in this seeded example. These values are demonstration output, not empirical evidence.
+For the simulated disclosure-condition term, six detector specifications were planned, five returned the requested coefficient, and one REMoDNaV branch failed explicitly because the external backend was unavailable. All five modelled internal branches converged and retained the same effect direction, so the planned-specification convergence rate is 5/6 (0.833). The estimate range was approximately 20.8 ms across converged branches in this seeded example. These values are demonstration output, not empirical evidence.
 
 ## Branch failures
 
