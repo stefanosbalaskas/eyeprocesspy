@@ -52,6 +52,7 @@ result = ep.run_aoi_sensitivity_analysis(
     trial_col="trial",
     duration_col="duration",
     time_col="time",
+    observation_level="fixation",
     overlap_policy="ambiguous",
     model_callback=explicit_ols_callback,
 )
