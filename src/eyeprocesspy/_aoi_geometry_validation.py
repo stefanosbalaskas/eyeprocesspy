@@ -9,8 +9,10 @@ import pandas as pd
 from ._aoi_geometry_primitives import (
     _finite_scalar,
     _frame,
+    _on_segment,
     _polygon_array,
     _polygon_self_intersects,
+    _segments_intersect,
     _signed_polygon_area,
     _software_provenance,
     _stable_frame_hash,
@@ -104,17 +106,28 @@ def validate_aoi_geometry(aois: pd.DataFrame, *, allow_overlap: bool = True) -> 
 
 
 def _point_in_polygon(x: np.ndarray, y: np.ndarray, poly: np.ndarray) -> np.ndarray:
+    """Boundary-inclusive point-in-polygon test."""
     inside = np.zeros(len(x), dtype=bool)
+    boundary = np.zeros(len(x), dtype=bool)
     j = len(poly) - 1
     for i in range(len(poly)):
         xi, yi = poly[i]
         xj, yj = poly[j]
+        cross = (x - xi) * (yj - yi) - (y - yi) * (xj - xi)
+        on = (
+            np.isclose(cross, 0.0, atol=1e-12, rtol=0.0)
+            & (x >= min(xi, xj) - 1e-12)
+            & (x <= max(xi, xj) + 1e-12)
+            & (y >= min(yi, yj) - 1e-12)
+            & (y <= max(yi, yj) + 1e-12)
+        )
+        boundary |= on
         intersects = ((yi > y) != (yj > y)) & (
             x < (xj - xi) * (y - yi) / ((yj - yi) + np.finfo(float).eps) + xi
         )
         inside ^= intersects
         j = i
-    return inside
+    return inside | boundary
 
 
 def _aoi_contains(row: pd.Series, x: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -123,38 +136,79 @@ def _aoi_contains(row: pd.Series, x: np.ndarray, y: np.ndarray) -> np.ndarray:
     return _point_in_polygon(x, y, _polygon_array(row["polygon"]))
 
 
+def _row_polygon(row: pd.Series) -> np.ndarray:
+    if row["shape_type"] == "rectangle":
+        xmin, xmax = float(row["xmin"]), float(row["xmax"])
+        ymin, ymax = float(row["ymin"]), float(row["ymax"])
+        return np.asarray(
+            [[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax]],
+            dtype=float,
+        )
+    return _polygon_array(row["polygon"])
+
+
+def _point_strictly_inside_polygon(point: np.ndarray, poly: np.ndarray) -> bool:
+    for i in range(len(poly)):
+        if _on_segment(poly[i], poly[(i + 1) % len(poly)], point):
+            return False
+    return bool(_point_in_polygon(
+        np.asarray([point[0]], dtype=float),
+        np.asarray([point[1]], dtype=float),
+        poly,
+    )[0])
+
+
+def _proper_segments_cross(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray) -> bool:
+    # Segment contact at endpoints/collinear boundaries has zero intersection
+    # area and is therefore not counted as AOI area overlap.
+    def orient(p: np.ndarray, q: np.ndarray, r: np.ndarray) -> float:
+        return float((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]))
+
+    o1, o2, o3, o4 = orient(a, b, c), orient(a, b, d), orient(c, d, a), orient(c, d, b)
+    tol = 1e-12
+    return (
+        ((o1 > tol and o2 < -tol) or (o1 < -tol and o2 > tol))
+        and ((o3 > tol and o4 < -tol) or (o3 < -tol and o4 > tol))
+    )
+
+
+def _polygons_overlap_area(a: np.ndarray, b: np.ndarray) -> bool:
+    for i in range(len(a)):
+        a1, a2 = a[i], a[(i + 1) % len(a)]
+        for j in range(len(b)):
+            b1, b2 = b[j], b[(j + 1) % len(b)]
+            if _proper_segments_cross(a1, a2, b1, b2):
+                return True
+    if any(_point_strictly_inside_polygon(p, b) for p in a):
+        return True
+    if any(_point_strictly_inside_polygon(p, a) for p in b):
+        return True
+    if len(a) == len(b):
+        # Covers identical polygons, whose vertices all lie on boundaries.
+        a_sorted = np.asarray(sorted(map(tuple, np.round(a, 12))))
+        b_sorted = np.asarray(sorted(map(tuple, np.round(b, 12))))
+        if np.array_equal(a_sorted, b_sorted) and abs(_signed_polygon_area(a)) > 1e-12:
+            return True
+    return False
+
+
 def _pairwise_overlap(geometry: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    # Deterministic grid probe is used only to flag likely overlap for arbitrary
-    # polygons. Assignment ambiguity itself is determined exactly at observed
-    # points and is never resolved by this diagnostic.
     for i in range(len(geometry) - 1):
         for j in range(i + 1, len(geometry)):
             a = geometry.iloc[i]
             b = geometry.iloc[j]
-            if a["shape_type"] == b["shape_type"] == "rectangle":
-                ox = min(float(a["xmax"]), float(b["xmax"])) - max(float(a["xmin"]), float(b["xmin"]))
-                oy = min(float(a["ymax"]), float(b["ymax"])) - max(float(a["ymin"]), float(b["ymin"]))
-                flag = ox > 0 and oy > 0
+            pa = _row_polygon(a)
+            pb = _row_polygon(b)
+            ax0, ax1 = float(pa[:, 0].min()), float(pa[:, 0].max())
+            ay0, ay1 = float(pa[:, 1].min()), float(pa[:, 1].max())
+            bx0, bx1 = float(pb[:, 0].min()), float(pb[:, 0].max())
+            by0, by1 = float(pb[:, 1].min()), float(pb[:, 1].max())
+            if min(ax1, bx1) <= max(ax0, bx0) or min(ay1, by1) <= max(ay0, by0):
+                flag = False
             else:
-
-                def bounds(row: pd.Series) -> tuple[float, float, float, float]:
-                    if row["shape_type"] == "rectangle":
-                        return float(row["xmin"]), float(row["xmax"]), float(row["ymin"]), float(row["ymax"])
-                    p = _polygon_array(row["polygon"])
-                    return float(p[:, 0].min()), float(p[:, 0].max()), float(p[:, 1].min()), float(p[:, 1].max())
-
-                ax0, ax1, ay0, ay1 = bounds(a)
-                bx0, bx1, by0, by1 = bounds(b)
-                x0, x1 = max(ax0, bx0), min(ax1, bx1)
-                y0, y1 = max(ay0, by0), min(ay1, by1)
-                if x1 <= x0 or y1 <= y0:
-                    flag = False
-                else:
-                    gx = np.linspace(x0, x1, 21)
-                    gy = np.linspace(y0, y1, 21)
-                    xx, yy = np.meshgrid(gx, gy)
-                    px, py = xx.ravel(), yy.ravel()
-                    flag = bool(np.any(_aoi_contains(a, px, py) & _aoi_contains(b, px, py)))
-            rows.append({"aoi_1": str(a["aoi_id"]), "aoi_2": str(b["aoi_id"]), "overlap": bool(flag)})
+                flag = _polygons_overlap_area(pa, pb)
+            rows.append(
+                {"aoi_1": str(a["aoi_id"]), "aoi_2": str(b["aoi_id"]), "overlap": bool(flag)}
+            )
     return pd.DataFrame(rows, columns=["aoi_1", "aoi_2", "overlap"])
