@@ -177,3 +177,6 @@ from .measurement_accountability_11 import event_marker_qc, pupil_latency_sensit
 from .validation_atlas_09 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
+
+from .detector_multiverse import *
+__all__ = [n for n in globals() if not n.startswith("_")]
