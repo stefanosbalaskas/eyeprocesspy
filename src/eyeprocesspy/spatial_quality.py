@@ -676,17 +676,21 @@ def report_gaze_quality(report: Any,digits: int=3) -> str:
 def simulate_gaze_quality_calibration(seed: int=20260918,samples_per_target: int=18,nominal_sampling_hz: float=60.0) -> pd.DataFrame:
     """Generate a reproducible 9-point validation set with six quality profiles."""
     try:
+        seed_float=float(seed)
         samples_float=float(samples_per_target)
         sampling_hz=float(nominal_sampling_hz)
     except (TypeError,ValueError) as exc:
-        raise ValueError("samples_per_target and nominal_sampling_hz must be numeric") from exc
+        raise ValueError("seed, samples_per_target, and nominal_sampling_hz must be numeric") from exc
+    if not math.isfinite(seed_float) or not seed_float.is_integer() or seed_float<0 or seed_float>2_147_483_647:
+        raise ValueError("seed must be an integer between 0 and 2147483647")
     if not math.isfinite(samples_float) or samples_float<4 or not samples_float.is_integer():
         raise ValueError("samples_per_target must be an integer of at least 4")
     if not math.isfinite(sampling_hz) or sampling_hz<=0:
         raise ValueError("nominal_sampling_hz must be a finite positive value")
+    seed=int(seed_float)
     samples_per_target=int(samples_float)
     nominal_sampling_hz=sampling_hz
-    rng=np.random.default_rng(int(seed)); targets=[(-5,-5),(0,-5),(5,-5),(-5,0),(0,0),(5,0),(-5,5),(0,5),(5,5)]
+    rng=np.random.default_rng(seed); targets=[(-5,-5),(0,-5),(5,-5),(-5,0),(0,0),(5,0),(-5,5),(0,5),(5,5)]
     specs={"good_accuracy_good_precision":(0.0,0.0,.12),"poor_accuracy_good_precision":(.9,-.7,.12),"good_accuracy_poor_precision":(0.0,0.0,.75),"poor_accuracy_poor_precision":(.9,-.7,.75),"irregular_sampling":(.1,-.1,.20),"missingness":(.1,-.1,.20)}
     rows=[]
     for profile,(bx,by,sd) in specs.items():
