@@ -71,6 +71,14 @@ Cox and AFT estimates answer different questions. The package therefore summariz
 | Weibull AFT | `lifelines.WeibullAFTFitter` | `survival::survreg(dist = "weibull")` | Time-ratio estimand aligned; parameterization may differ |
 | Log-normal AFT | `lifelines.LogNormalAFTFitter` | `survival::survreg(dist = "lognormal")` | Time-ratio estimand aligned; parameterization may differ |
 
+## Install the modelling backends
+
+```bash
+pip install "eyeprocesspy[survival]"
+```
+
+The extra installs the tested `statsmodels`, `lifelines`, Patsy, and plotting dependencies used by the modelling and diagnostic examples.
+
 ## Start here
 
 - [Methodological guide](../../guides/gaze-survival-analysis.md)
