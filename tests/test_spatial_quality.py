@@ -65,6 +65,7 @@ def test_mixed_units_fail_and_mixed_targets_flag_review_only():
     ep.validate_gaze_quality_inputs(d,time="timestamp_ms",target_x="target_x",target_y="target_y",unit_column="coordinate_unit")
     bad=d.copy(); bad.loc[3,"coordinate_unit"]="pixels"
     with pytest.raises(ValueError,match="mixed coordinate units"): ep.validate_gaze_quality_inputs(bad,time="timestamp_ms",target_x="target_x",target_y="target_y",unit_column="coordinate_unit")
+    with pytest.raises(ValueError,match="mixed coordinate units"): ep.create_gaze_quality_report(bad)
     r=ep.create_gaze_quality_report(d); assert bool(r.review_required.iloc[0]); assert "mixed_accuracy_targets" in r.quality_flags.iloc[0]
 
 
@@ -109,6 +110,8 @@ def test_provenance_fingerprint_deterministic_and_changes_with_source():
     assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]==b.attrs["gaze_quality_provenance"]["source_fingerprint"]
     d2=d.copy(); d2.loc[0,"gaze_x"]+=.1; c=ep.create_gaze_quality_report(d2,by=["profile","target_id"])
     assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]!=c.attrs["gaze_quality_provenance"]["source_fingerprint"]
+    d3=d.copy(); d3.loc[0,"valid"]=0; e=ep.create_gaze_quality_report(d3,by=["profile","target_id"],valid="valid")
+    assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]!=e.attrs["gaze_quality_provenance"]["source_fingerprint"]
 
 
 def test_validation_and_conversion_error_paths_and_non_dataframe_input():
@@ -144,6 +147,9 @@ def test_precision_edge_paths_dimensions_and_gap_rules():
     assert math.isnan(ep.compute_rms_s2s(one).precision_rms_s2s.iloc[0])
     assert ep.compute_gaze_sd_precision(one).precision_sd.iloc[0]==pytest.approx(0)
     assert math.isnan(ep.compute_bcea(one).bcea.iloc[0])
+    one_report=ep.create_gaze_quality_report(pd.DataFrame({"timestamp_ms":[0],"gaze_x":[1.],"gaze_y":[2.]}),target_x=None,target_y=None)
+    assert "insufficient_bcea_samples" in one_report.quality_flags.iloc[0]
+    assert "insufficient_rms_pairs" in one_report.quality_flags.iloc[0]
     line=pd.DataFrame({"gaze_x":[1.,1.,1.],"gaze_y":[0.,1.,2.]})
     assert ep.compute_bcea(line).correlation_xy.iloc[0]==pytest.approx(0)
     bundle=ep.compute_gaze_precision(d,time="timestamp_ms",probability=.95)
