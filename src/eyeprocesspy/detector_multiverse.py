@@ -1516,3 +1516,358 @@ def _feature_sensitivity(features: pd.DataFrame) -> pd.DataFrame:
             "median_detector_range": float(np.median(spreads)) if spreads else np.nan,
             "max_detector_range": float(np.max(spreads)) if spreads else np.nan,
         })
+    return pd.DataFrame(rows)
+
+
+def summarise_detector_robustness(
+    x: DetectorMultiverseResult,
+    *,
+    inference: DetectorInferenceResult | None = None,
+    term: str | None = None,
+    substantive_threshold: float | None = None,
+    direction: str = "above",
+) -> dict[str, pd.DataFrame]:
+    """Return event-, feature-, and inference-level robustness summaries."""
+    out = {
+        "event_summary": summarise_detector_events(x),
+        "event_agreement": estimate_detector_agreement(x) if not x.events.empty else pd.DataFrame(),
+        "feature_sensitivity": _feature_sensitivity(x.features),
+        "failures": x.failures.copy(),
+    }
+    if inference is not None:
+        if term is None:
+            raise EyeProcessValidationError("`term` is required when inference results are supplied.")
+        out["inference_stability"] = assess_detector_inference_stability(
+            inference, term=term, substantive_threshold=substantive_threshold, direction=direction
+        )
+        out["model_failures"] = inference.failures.copy()
+    else:
+        out["inference_stability"] = pd.DataFrame()
+        out["model_failures"] = pd.DataFrame()
+    return out
+
+
+def plot_detector_event_timeline(
+    x: DetectorMultiverseResult | pd.DataFrame,
+    *,
+    trial_id: str | None = None,
+    event_type: str = "fixation",
+    ax: Any = None,
+):
+    """Plot detected event intervals by detector."""
+    import matplotlib.pyplot as plt
+
+    events = x.events if isinstance(x, DetectorMultiverseResult) else x
+    data = events[events["episode_type"].eq(event_type)].copy()
+    if trial_id is not None:
+        data = data[data["trial_id"].astype(str).eq(str(trial_id))]
+    if ax is None:
+        _, ax = plt.subplots()
+    ids = sorted(data["detector_id"].dropna().astype(str).unique()) if not data.empty else []
+    for y, detector_id in enumerate(ids):
+        subset = data[data["detector_id"].astype(str).eq(detector_id)]
+        for _, row in subset.iterrows():
+            ax.plot([row["start_time"], row["end_time"]], [y, y], linewidth=4)
+    ax.set_yticks(range(len(ids)), ids)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Detector")
+    ax.set_title(f"{event_type.title()} event timeline")
+    return ax
+
+
+def plot_detector_agreement(x: DetectorMultiverseResult, *, metric: str = "mean_event_overlap", ax: Any = None):
+    """Plot pairwise detector agreement as a matrix."""
+    import matplotlib.pyplot as plt
+
+    agreement = estimate_detector_agreement(x)
+    if metric not in agreement.columns and not agreement.empty:
+        raise EyeProcessValidationError(f"Unknown agreement metric: {metric}")
+    ids = sorted(set(agreement.get("detector_a", [])) | set(agreement.get("detector_b", [])))
+    matrix = np.full((len(ids), len(ids)), np.nan)
+    np.fill_diagonal(matrix, 1.0)
+    lookup = {name: i for i, name in enumerate(ids)}
+    for _, row in agreement.iterrows():
+        i, j = lookup[row["detector_a"]], lookup[row["detector_b"]]
+        matrix[i, j] = matrix[j, i] = row[metric]
+    if ax is None:
+        _, ax = plt.subplots()
+    image = ax.imshow(matrix, aspect="auto")
+    ax.set_xticks(range(len(ids)), ids, rotation=45, ha="right")
+    ax.set_yticks(range(len(ids)), ids)
+    ax.set_title(f"Detector agreement: {metric}")
+    ax.figure.colorbar(image, ax=ax)
+    return ax
+
+
+def plot_detector_feature_distributions(
+    x: DetectorMultiverseResult,
+    *,
+    feature: str = "dwell_time_ms",
+    aoi_id: str | None = None,
+    ax: Any = None,
+):
+    """Plot feature distributions by detector."""
+    import matplotlib.pyplot as plt
+
+    data = x.features.copy()
+    if data.empty or feature not in data:
+        raise EyeProcessValidationError("Requested propagated feature is unavailable.")
+    if aoi_id is not None:
+        data = data[data["aoi_id"].astype(str).eq(str(aoi_id))]
+    ids = sorted(data["detector_id"].dropna().astype(str).unique())
+    values = [pd.to_numeric(data.loc[data["detector_id"].astype(str).eq(detector_id), feature], errors="coerce").dropna() for detector_id in ids]
+    if ax is None:
+        _, ax = plt.subplots()
+    ax.boxplot(values, tick_labels=ids)
+    ax.set_ylabel(feature)
+    ax.set_xlabel("Detector")
+    ax.set_title(f"Detector sensitivity of {feature}")
+    ax.tick_params(axis="x", rotation=45)
+    return ax
+
+
+def plot_detector_coefficient_stability(
+    x: DetectorInferenceResult,
+    *,
+    term: str,
+    ax: Any = None,
+):
+    """Plot coefficient estimates and confidence intervals by detector."""
+    import matplotlib.pyplot as plt
+
+    data = x.coefficients[x.coefficients["term"].astype(str).eq(str(term))].copy()
+    if data.empty:
+        raise EyeProcessValidationError("Requested model term is unavailable.")
+    if ax is None:
+        _, ax = plt.subplots()
+    data = data.sort_values("estimate")
+    y = np.arange(len(data))
+    est = pd.to_numeric(data["estimate"], errors="coerce").to_numpy(float)
+    low = pd.to_numeric(data["CI_lower"], errors="coerce").to_numpy(float)
+    high = pd.to_numeric(data["CI_upper"], errors="coerce").to_numpy(float)
+    ax.errorbar(est, y, xerr=np.vstack([est - low, high - est]), fmt="o")
+    ax.axvline(0, linestyle="--", linewidth=1)
+    ax.set_yticks(y, data["detector_id"].astype(str))
+    ax.set_xlabel("Estimate (95% CI)")
+    ax.set_ylabel("Detector")
+    ax.set_title(f"Coefficient stability: {term}")
+    return ax
+
+
+def plot_detector_multiverse(
+    x: DetectorMultiverseResult,
+    *,
+    inference: DetectorInferenceResult | None = None,
+    term: str | None = None,
+    feature: str = "dwell_time_ms",
+    aoi_id: str | None = None,
+):
+    """Return a dictionary of separate detector-multiverse diagnostic figures."""
+    plots = {
+        "agreement": plot_detector_agreement(x).figure,
+        "feature": plot_detector_feature_distributions(x, feature=feature, aoi_id=aoi_id).figure,
+    }
+    if inference is not None and term is not None:
+        plots["coefficient"] = plot_detector_coefficient_stability(inference, term=term).figure
+    return plots
+
+
+def _markdown_table(frame: pd.DataFrame) -> str:
+    if frame.empty:
+        return ""
+    cols = [str(c) for c in frame.columns]
+    def cell(value: Any) -> str:
+        if pd.isna(value):
+            return ""
+        text = str(value).replace("|", "\\|").replace("\n", " ")
+        return text
+    header = "| " + " | ".join(cols) + " |"
+    rule = "| " + " | ".join(["---"] * len(cols)) + " |"
+    rows = ["| " + " | ".join(cell(row[c]) for c in frame.columns) + " |" for _, row in frame.iterrows()]
+    return "\n".join([header, rule, *rows])
+
+
+def report_detector_multiverse(
+    x: DetectorMultiverseResult,
+    *,
+    inference: DetectorInferenceResult | None = None,
+    term: str | None = None,
+    substantive_threshold: float | None = None,
+    path: str | None = None,
+) -> str:
+    """Create a compact reproducible Markdown detector-sensitivity report."""
+    summary = summarise_detector_robustness(
+        x,
+        inference=inference,
+        term=term,
+        substantive_threshold=substantive_threshold,
+    )
+    manifest = x.multiverse.manifest
+    lines = [
+        "# Event-detector multiverse report",
+        "",
+        "## Scope",
+        "",
+        "This report evaluates whether events, AOI features, and statistical conclusions change across the supplied defensible detector specifications. The specification set is not evidence that omitted detector choices are valid or irrelevant.",
+        "",
+        "## Detector specifications",
+        "",
+        _markdown_table(manifest),
+        "",
+        "## Event-level sensitivity",
+        "",
+        _markdown_table(summary["event_summary"]) if not summary["event_summary"].empty else "No successful event catalogues were available.",
+        "",
+        "## AOI-feature sensitivity",
+        "",
+        _markdown_table(summary["feature_sensitivity"]) if not summary["feature_sensitivity"].empty else "AOI features were not propagated or no cross-detector comparison was estimable.",
+        "",
+    ]
+    if inference is not None and term is not None:
+        lines.extend([
+            "## Inference stability",
+            "",
+            _markdown_table(summary["inference_stability"]),
+            "",
+            "Non-converged model branches are retained as diagnostic failures and are excluded from coefficient-stability calculations.",
+            "",
+        ])
+    if not x.failures.empty:
+        lines.extend(["## Branch failures", "", _markdown_table(x.failures), ""])
+    lines.extend([
+        "## Reporting guidance",
+        "",
+        "Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, number of successful/failed specifications, event-level agreement, the range of key AOI features, coefficient distributions with uncertainty, convergence failures, and any substantive threshold used. Do not summarize robustness by counting p-values alone.",
+        "",
+        "## Limitations",
+        "",
+        "Detector sensitivity is conditional on the supplied preprocessing, AOIs, quality rules, model specification, and detector set. Agreement between detectors does not establish event validity, and disagreement does not identify which detector is correct without external evidence.",
+    ])
+    text = "\n".join(lines)
+    if path is not None:
+        from pathlib import Path
+        Path(path).write_text(text, encoding="utf-8")
+    return text
+
+
+def simulate_detector_multiverse_data(
+    *,
+    n_participants: int = 12,
+    sampling_rate: float = 60.0,
+    trial_duration_s: float = 2.0,
+    seed: int = 20260918,
+) -> EyeDataset:
+    """Create a small synthetic 60-Hz dataset with a known disclosure-dwell effect."""
+    from .dataset import new_eye_dataset
+    from .schema import new_coordinate_space
+    from .foundation_09 import new_aoi, register_aois
+
+    if int(n_participants) < 4:
+        raise EyeProcessValidationError("Use at least four participants for the worked multiverse example.")
+    _finite_positive(sampling_rate, "sampling_rate", allow_none=False)
+    _finite_positive(trial_duration_s, "trial_duration_s", allow_none=False)
+    rng = np.random.default_rng(int(seed))
+    recordings = []
+    gaze_rows = []
+    intervals = []
+    sample_counter = 0
+    n_samples = int(round(float(sampling_rate) * float(trial_duration_s)))
+    for participant in range(1, int(n_participants) + 1):
+        rec = f"R{participant:03d}"
+        recordings.append({"recording_id": rec, "participant_id": f"P{participant:03d}", "vendor": "synthetic", "nominal_sampling_rate": sampling_rate})
+        for condition_index, condition in enumerate(("control", "disclosure")):
+            trial_id = f"{rec}_T{condition_index + 1}"
+            start = condition_index * (trial_duration_s + 0.25)
+            end = start + trial_duration_s
+            intervals.append({
+                "interval_id": f"I_{trial_id}", "recording_id": rec, "interval_type": "trial",
+                "start_time": start, "end_time": end, "trial_id": trial_id,
+                "participant_id": f"P{participant:03d}", "item_id": "ad_01", "stimulus_id": "stim_01",
+                "condition_id": condition, "valid_interval": True,
+            })
+            local_t = np.arange(n_samples) / sampling_rate
+            # Piecewise fixation centres; disclosure condition has a longer target-AOI segment.
+            target_start = 0.55 + rng.normal(0, 0.03)
+            target_end = (1.42 if condition == "disclosure" else 1.02) + rng.normal(0, 0.04)
+            x = np.where((local_t >= target_start) & (local_t <= target_end), 6.0, 2.1)
+            y = np.where((local_t >= target_start) & (local_t <= target_end), 2.4, 5.8)
+            x = x + rng.normal(0, 0.10, n_samples)
+            y = y + rng.normal(0, 0.10, n_samples)
+            # Add a brief revisit in a subset of disclosure trials.
+            if condition == "disclosure" and participant % 3 == 0:
+                revisit = (local_t >= 1.62) & (local_t <= 1.82)
+                x[revisit] = 6.1 + rng.normal(0, 0.10, revisit.sum())
+                y[revisit] = 2.3 + rng.normal(0, 0.10, revisit.sum())
+            valid = rng.random(n_samples) > 0.015
+            for k in range(n_samples):
+                sample_counter += 1
+                gaze_rows.append({
+                    "recording_id": rec, "sample_id": f"S{sample_counter:08d}",
+                    "timestamp_seconds": start + local_t[k], "gaze_x": x[k], "gaze_y": y[k],
+                    "valid": bool(valid[k]), "trial_id": trial_id, "stimulus_id": "stim_01",
+                    "coordinate_space_id": "deg_display",
+                })
+    spaces = new_coordinate_space(
+        coordinate_space_id="deg_display",
+        space_type="custom",
+        width=12,
+        height=8,
+        origin="center",
+        x_unit="degrees",
+        y_unit="degrees",
+    )
+    dataset = new_eye_dataset(
+        recordings=pd.DataFrame(recordings),
+        gaze_samples=pd.DataFrame(gaze_rows),
+        intervals=pd.DataFrame(intervals),
+        coordinate_spaces=spaces,
+        validate=False,
+    )
+    dataset = register_aois(
+        dataset,
+        new_aoi(
+            "disclosure", "Disclosure", "stim_01", "rectangle",
+            x=4.0, y=1.0, width=4.0, height=3.0, coordinate_space_id="deg_display",
+        ),
+        new_aoi(
+            "main_content", "Main content", "stim_01", "rectangle",
+            x=0.5, y=4.5, width=3.5, height=2.5, coordinate_space_id="deg_display",
+        ),
+    )
+    return add_provenance(
+        dataset,
+        "simulate_detector_multiverse_data",
+        "dataset",
+        f"n_participants={n_participants};sampling_rate={sampling_rate};seed={seed}",
+    )
+
+
+__all__ = [
+    "EventDetectorSpec",
+    "DetectorMultiverse",
+    "DetectorMultiverseResult",
+    "DetectorInferenceResult",
+    "define_event_detector_spec",
+    "validate_event_detector_spec",
+    "create_detector_multiverse",
+    "detect_events_with_spec",
+    "import_external_detector_events",
+    "run_detector_multiverse",
+    "compare_event_catalogues",
+    "match_detected_events",
+    "estimate_detector_agreement",
+    "summarise_detector_events",
+    "summarise_detector_disagreement",
+    "propagate_detector_to_aoi",
+    "propagate_detector_to_features",
+    "run_detector_inference_multiverse",
+    "assess_detector_inference_stability",
+    "summarise_detector_robustness",
+    "plot_detector_event_timeline",
+    "plot_detector_agreement",
+    "plot_detector_feature_distributions",
+    "plot_detector_coefficient_stability",
+    "plot_detector_multiverse",
+    "report_detector_multiverse",
+    "simulate_detector_multiverse_data",
+]
