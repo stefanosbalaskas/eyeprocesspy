@@ -32,6 +32,12 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Censored gaze latency:
+          - Method overview: methods/gaze-survival/index.md
+          - Decision guide: methods/gaze-survival/decision-guide.md
+          - Methodological guide: guides/gaze-survival-analysis.md
+          - Reporting & limitations: methods/gaze-survival/reporting.md
+          - Reporting template: methods/gaze-survival/reporting-template.md
       - AOI perturbation & uncertainty:
           - Start here: guides/aoi-uncertainty/index.md
           - Geometry is an analytical assumption: guides/aoi-uncertainty/geometry-assumption.md
@@ -49,6 +55,7 @@ nav:
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
+          - Censored gaze latency: examples/gaze-survival-analysis.md
           - IRT diagnostics: examples/irt-diagnostics.md
           - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
           - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
@@ -61,6 +68,7 @@ nav:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
+      - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
