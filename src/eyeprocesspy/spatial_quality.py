@@ -70,6 +70,10 @@ def _header(keys: Sequence[str], values: Sequence[Any]) -> dict[str, Any]:
     return dict(zip(keys, values, strict=True))
 
 
+def _group_token(values: Sequence[Any]) -> tuple[Any, ...]:
+    return tuple("<NA>" if pd.isna(value) else value for value in values)
+
+
 def _unit_area(unit: str) -> str:
     return {"degrees": "deg^2", "pixels": "px^2", "normalized": "normalized^2"}[unit]
 
@@ -553,10 +557,10 @@ def create_gaze_quality_report(
     sampling=summarise_sampling_quality(d,time=time,by=keys,time_unit=time_unit,nominal_sampling_hz=nominal_sampling_hz,x=x,y=y,valid=valid)
     loss=compute_gaze_data_loss(d,x=x,y=y,time=time,valid=valid,missing_reason=missing_reason,by=keys,time_unit=time_unit)
     report=_merge_quality_parts([spatial,sampling,loss],keys)
-    issue_map={tuple(item.get(k) for k in keys):item["issues"] for item in validation["group_issues"]}
+    issue_map={_group_token([item.get(k) for k in keys]):item["issues"] for item in validation["group_issues"]}
     flags=[]
     for _,row in report.iterrows():
-        rf=[]; key=tuple(row.get(k) for k in keys)
+        rf=[]; key=_group_token([row.get(k) for k in keys])
         rf.extend(issue_map.get(key,[]))
         if "n_accuracy_targets" in row and pd.notna(row.get("n_accuracy_targets")) and float(row["n_accuracy_targets"])>1: rf.append("mixed_accuracy_targets")
         if "n_bcea_samples" in row and pd.notna(row.get("n_bcea_samples")) and float(row["n_bcea_samples"])<2: rf.append("insufficient_bcea_samples")
