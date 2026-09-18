@@ -25,6 +25,7 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - AOI perturbation & uncertainty: guides/aoi-uncertainty/index.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
@@ -33,6 +34,7 @@ nav:
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
           - IRT diagnostics: examples/irt-diagnostics.md
+          - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
@@ -42,6 +44,7 @@ nav:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
+      - AOI perturbation API: reference/aoi-perturbation.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
