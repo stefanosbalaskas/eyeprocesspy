@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" role="img" aria-labelledby="title desc">
+<title id="title">Kaplan–Meier time to first disclosure fixation</title>
+<desc id="desc">Synthetic survival curves for control, minimal disclosure, and detailed disclosure conditions. Higher curves indicate a larger proportion of trials that have not yet fixated the disclosure.</desc>
+<style>
+text{font-family:system-ui,-apple-system,sans-serif;fill:currentColor}.axis{stroke:currentColor;stroke-width:1;opacity:.55}.grid{stroke:currentColor;stroke-width:.6;opacity:.16}.curve{fill:none;stroke:currentColor;stroke-width:3}.c2{stroke-dasharray:10 5}.c3{stroke-dasharray:3 5}.tick{font-size:13px}.label{font-size:14px;font-weight:600}.title{font-size:20px;font-weight:700}
+</style>
+<text class="title" x="70" y="32">Time to first disclosure fixation</text>
+<line class="axis" x1="70" y1="365" x2="710" y2="365"/><line class="axis" x1="70" y1="55" x2="70" y2="365"/>
+<line class="grid" x1="70" y1="288" x2="710" y2="288"/><line class="grid" x1="70" y1="210" x2="710" y2="210"/><line class="grid" x1="70" y1="133" x2="710" y2="133"/><line class="grid" x1="230" y1="55" x2="230" y2="365"/><line class="grid" x1="390" y1="55" x2="390" y2="365"/><line class="grid" x1="550" y1="55" x2="550" y2="365"/><line class="grid" x1="710" y1="55" x2="710" y2="365"/>
+<text class="tick" x="52" y="370">0</text><text class="tick" x="42" y="293">.25</text><text class="tick" x="42" y="215">.50</text><text class="tick" x="42" y="138">.75</text><text class="tick" x="48" y="61">1</text>
+<text class="tick" x="66" y="388">0</text><text class="tick" x="224" y="388">1</text><text class="tick" x="384" y="388">2</text><text class="tick" x="544" y="388">3</text><text class="tick" x="704" y="388">4</text>
+<text class="label" x="330" y="416">Seconds from trial start</text><text class="label" transform="rotate(-90 18 250)" x="18" y="250">Not yet fixated</text>
+<path class="curve" d="M70 55 H118 V72 H151 V90 H183 V107 H215 V124 H247 V142 H279 V159 H311 V176 H343 V194 H375 V211 H407 V228 H439 V245 H471 V263 H503 V280 H535 V297 H567 V314 H599 V331 H631 V348 H710"/>
+<path class="curve c2" d="M70 55 H102 V72 H134 V90 H166 V107 H198 V124 H230 V142 H262 V159 H294 V176 H326 V194 H358 V211 H390 V228 H422 V245 H454 V263 H486 V280 H518 V297 H550 V314 H582 V331 H614 V348 H710"/>
+<path class="curve c3" d="M70 55 H86 V72 H118 V90 H150 V107 H182 V124 H214 V142 H246 V159 H278 V176 H310 V194 H342 V211 H374 V228 H406 V245 H438 V263 H470 V280 H502 V297 H534 V314 H566 V331 H598 V348 H630 V365 H710"/>
+<line class="curve" x1="455" y1="78" x2="505" y2="78"/><text class="tick" x="515" y="83">control</text>
+<line class="curve c2" x1="455" y1="101" x2="505" y2="101"/><text class="tick" x="515" y="106">minimal disclosure</text>
+<line class="curve c3" x1="455" y1="124" x2="505" y2="124"/><text class="tick" x="515" y="129">detailed disclosure</text>
+<text class="tick" x="70" y="408">Synthetic data · right-censored trials retained</text>
+</svg>
