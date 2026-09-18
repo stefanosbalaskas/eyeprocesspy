@@ -28,6 +28,10 @@ graph LR
 
 Accuracy is the distance between recorded and known target position. Precision describes reproducibility while the intended gaze position is stable. A constant offset therefore has poor accuracy but can have excellent precision; centered noise can show the opposite pattern.
 
+![Conceptual matrix showing accuracy and precision as separate dimensions](../assets/data-quality-accuracy-precision.svg)
+
+*Conceptual illustration, not empirical data. The target is fixed at the crosshair while sample location and spread vary independently.*
+
 ```python
 import eyeprocesspy as ep
 
