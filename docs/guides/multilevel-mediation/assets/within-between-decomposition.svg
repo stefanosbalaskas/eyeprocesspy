@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+<title id="title">Within and between participant decomposition</title><desc id="desc">A trial value is decomposed into the participant mean and deviation from that mean.</desc>
+<style>text{font-family:system-ui,sans-serif;fill:#222}.box{fill:#f7f7fb;stroke:#5b5f97;stroke-width:2}.arrow{stroke:#444;stroke-width:2;marker-end:url(#a)}.small{font-size:17px}.big{font-size:22px;font-weight:650}</style>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#444"/></marker></defs>
+<rect class="box" x="35" y="120" rx="14" width="225" height="100"/><text class="big" x="147" y="158" text-anchor="middle">Trial value Xᵢⱼ</text><text class="small" x="147" y="190" text-anchor="middle">preserve every trial</text>
+<line class="arrow" x1="260" y1="150" x2="400" y2="90"/><line class="arrow" x1="260" y1="190" x2="400" y2="245"/>
+<rect class="box" x="410" y="45" rx="14" width="245" height="100"/><text class="big" x="532" y="82" text-anchor="middle">Between: X̄ᵢ</text><text class="small" x="532" y="113" text-anchor="middle">participant mean</text>
+<rect class="box" x="410" y="210" rx="14" width="245" height="100"/><text class="big" x="532" y="247" text-anchor="middle">Within: Xᵢⱼ − X̄ᵢ</text><text class="small" x="532" y="278" text-anchor="middle">trial deviation</text>
+<line class="arrow" x1="655" y1="95" x2="790" y2="150"/><line class="arrow" x1="655" y1="260" x2="790" y2="205"/>
+<rect class="box" x="800" y="120" rx="14" width="130" height="100"/><text class="big" x="865" y="159" text-anchor="middle">Model</text><text class="small" x="865" y="190" text-anchor="middle">both levels</text>
+</svg>
