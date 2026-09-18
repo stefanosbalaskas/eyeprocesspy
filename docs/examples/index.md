@@ -34,6 +34,12 @@
 
     [Open worked workflow](aoi-perturbation-sensitivity.md)
 
+-   :material-alert-circle-check: **AOI failure clinic**
+
+    Trigger geometry failure, overlap ambiguity, non-convergence, callback failure, and missing coordinates deliberately, then inspect the retained audit trail.
+
+    [Open failure clinic](aoi-perturbation-failure-clinic.md)
+
 -   :material-chart-bell-curve-cumulative: **IRT diagnostics**
 
     Inspect conditional information, item fit and DIF with publication-ready Matplotlib diagnostics.
@@ -184,6 +190,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
+| `examples/aoi_perturbation_failure_clinic.py` | Deliberate AOI geometry/model failures → retained audits → troubleshooting report | `workflow-output/aoi-failure-clinic/*` |
 
 | `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
 
@@ -192,4 +199,5 @@ All listed examples are deterministic and use no private participant data.
 ## AOI uncertainty
 
 - [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
+- [AOI perturbation failure clinic](aoi-perturbation-failure-clinic.md): deliberate geometry/model failure, ambiguity, non-convergence, and retained audit trails.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
