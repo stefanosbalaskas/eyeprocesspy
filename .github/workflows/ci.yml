@@ -8,6 +8,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  lock-refresh-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+      - name: Generate current universal lock
+        run: uv lock
+      - name: Upload generated lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: survival-lock-preview-${{ github.sha }}
+          path: uv.lock
+          if-no-files-found: error
+          retention-days: 7
+
   lint:
     runs-on: ubuntu-latest
     steps:
