@@ -1,3 +1,4 @@
+# ruff: noqa: E402, F403, I001
 """eyeprocesspy: Python parity implementation of R eyeprocess 0.11.1."""
 __version__ = "0.1.0"
 __r_reference_version__ = "0.11.1"
@@ -178,5 +179,33 @@ from .validation_atlas_09 import *
 
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-from .detector_multiverse import *
+from .detector_multiverse import (
+    DetectorInferenceResult,
+    DetectorMultiverse,
+    DetectorMultiverseResult,
+    EventDetectorSpec,
+    assess_detector_inference_stability,
+    compare_event_catalogues,
+    create_detector_multiverse,
+    define_event_detector_spec,
+    detect_events_with_spec,
+    estimate_detector_agreement,
+    import_external_detector_events,
+    match_detected_events,
+    plot_detector_agreement,
+    plot_detector_coefficient_stability,
+    plot_detector_event_timeline,
+    plot_detector_feature_distributions,
+    plot_detector_multiverse,
+    propagate_detector_to_aoi,
+    propagate_detector_to_features,
+    report_detector_multiverse,
+    run_detector_inference_multiverse,
+    run_detector_multiverse,
+    simulate_detector_multiverse_data,
+    summarise_detector_disagreement,
+    summarise_detector_events,
+    summarise_detector_robustness,
+    validate_event_detector_spec,
+)
 __all__ = [n for n in globals() if not n.startswith("_")]
