@@ -19,6 +19,12 @@ Report:
 11. any predeclared substantive threshold used to interpret stability;
 12. source/preprocessing/detector/AOI/quality/model/software provenance identifiers.
 
+## Denominator discipline
+
+`assess_detector_inference_stability()` treats the declared detector multiverse as the denominator for convergence. The returned `specifications` field is therefore the number of planned detector specifications, `term_available_specifications` is the number that actually returned the requested coefficient, and `model_failure_specifications` is the number with recorded model-stage failures. A failed fit, missing requested term, or non-converged branch cannot disappear from the convergence rate.
+
+Custom model callbacks must return at most one row per coefficient term for each detector branch. Duplicate term rows are rejected because otherwise one branch could be counted more than once and inflate apparent robustness.
+
 ## Example wording
 
 > We repeated the disclosure-dwell analysis across five successfully evaluated event-detection specifications spanning I-VT, I-DT, and an adaptive-velocity reference detector. REMoDNaV was also specified as an external branch and its availability/status was recorded rather than replaced by a surrogate. Detector choice changed event counts and the magnitude of AOI dwell to varying degrees. We therefore report the full coefficient range and confidence intervals across converged branches, together with sign and substantive-threshold stability, rather than a count of nominally significant models.
