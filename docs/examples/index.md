@@ -4,11 +4,11 @@
 
 <div class="grid cards" markdown>
 
--   :material-eye: **Core gaze, AOI and provenance**
+-   :material-vector-link: **Trial-level mediation preparation**
 
-    Validate a canonical `EyeDataset`, recover scanpaths and transitions, compute gaze entropy, render auditable plots and inspect provenance.
+    Preserve every repeated-measures trial while separating within- and between-participant exposure/gaze components and auditing zero, missingness, and quality states.
 
-    [Open worked workflow](core-workflow.md)
+    [Open mediation guide](../guides/multilevel-mediation/index.md)
 
 -   :material-chart-scatter-plot: **Standardized data quality**
 
@@ -21,6 +21,12 @@
     Keep the complete quality report intact, define review rules explicitly, and compare downstream inclusion/stratification decisions without silent deletion.
 
     [Open sensitivity workflow](data-quality-sensitivity.md)
+
+-   :material-eye: **Core gaze, AOI and provenance**
+
+    Validate a canonical `EyeDataset`, recover scanpaths and transitions, compute gaze entropy, render auditable plots and inspect provenance.
+
+    [Open worked workflow](core-workflow.md)
 
 -   :material-target: **Calibration uncertainty → probabilistic AOIs**
 
@@ -184,5 +190,6 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
+| `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
 
-All seven are deterministic and use no private participant data.
+All examples are deterministic and use no private participant data. The quality and mediation examples are CI-small and deliberately include missingness/quality edge cases rather than only idealized inputs.
