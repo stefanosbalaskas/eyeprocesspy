@@ -1,0 +1,3 @@
+fixture_group,n_accuracy_samples,n_accuracy_targets,accuracy_mean,accuracy_horizontal,accuracy_vertical,precision_rms_s2s,n_steps,precision_sd_x,precision_sd_y,precision_sd,bcea,bcea_probability,effective_sampling_hz,median_interval_ms,valid_sample_fraction,data_loss_fraction,missing_run_count
+A,4,1,0.050000000000000003,0.050000000000000003,0,0.10000000000000001,3,0.050000000000000003,0,0.050000000000000003,0,0.68000000000000005,100,10,1,0,0
+B,4,1,0.50495097567963931,0.5,0.050000000000000003,0.10000000000000001,2,0,0.050000000000000003,0.050000000000000003,0,0.68000000000000005,80,10,0.80000000000000004,0.20000000000000001,1
