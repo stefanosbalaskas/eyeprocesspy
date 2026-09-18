@@ -15,6 +15,7 @@ The `eyeprocesspy` public surface follows the frozen eyeprocess 0.11.1 API ledge
 | **Gazepoint** | gaze/fixation/event/biometric readers, pairing, real-export validation, workflow helpers |
 | **Preprocessing and features** | fixations, saccades, AOIs, dwell, scanpaths, transitions, entropy, wide/trial feature tables |
 | **Pupil and multimodal** | pupil preprocessing, functional pupil, missingness, synchronized/staged multimodal workflows |
+| **Trial-level mediation preparation** | within/between decomposition, mediation-level audits, explicit missing/zero states, trial-count support, provenance, serial/moderator preparation |
 | **Process quality** | reliability, Bland–Altman, sampling irregularity, calibration error, gaze precision, quality profiles |
 | **AOI uncertainty** | calibration propagation, probabilistic AOIs, compositional AOIs, sensitivity/boundary uncertainty |
 | **Psychometrics and IRT** | information, scoring, fit, Q3, DIF/DTF, dynamic/process-informed/advanced IRT |
