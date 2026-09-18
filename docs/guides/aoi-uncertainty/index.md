@@ -24,6 +24,7 @@ The full [worked example](../../examples/aoi-perturbation-sensitivity.md) also s
 - [Interpreting AOI Assignment Stability](assignment-stability.md)
 - [Propagating AOI Uncertainty Into Statistical Models](model-propagation.md)
 - [Reporting AOI Robustness](reporting.md)
+- [R/Python Scientific Parity](r-python-parity.md)
 
 ## Scientific pipeline
 
