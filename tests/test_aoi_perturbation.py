@@ -256,6 +256,16 @@ def test_grid_accepts_array_inputs_and_combined_xy_translation():
         "anisotropic_0.5_-0.25_px",
         "anisotropic_1_2_px",
     ]
+    tuple_grid = create_aoi_perturbation_grid(
+        translations_xy=(3.0, -4.0),
+        anisotropic=[0.5, -0.25],
+    )
+    assert tuple_grid["table"]["perturbation_id"].tolist() == [
+        "baseline",
+        "shift_xy_3_-4_px",
+        "anisotropic_0.5_-0.25_px",
+    ]
+
     applied = apply_aoi_perturbation_grid(rects().iloc[[0]].copy(), grid)
     shifted = applied["geometries"]["shift_xy_3_-4_px"].iloc[0]
     assert shifted["xmin"] == 103
