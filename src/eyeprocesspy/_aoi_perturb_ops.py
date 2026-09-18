@@ -205,6 +205,7 @@ def create_aoi_perturbation_grid(
     erosions: Iterable[float] | None = None,
     translations_x: Iterable[float] | None = None,
     translations_y: Iterable[float] | None = None,
+    translations_xy: Iterable[Sequence[float]] | None = None,
     jitters: Iterable[float] | None = None,
     anisotropic: Iterable[Sequence[float]] | None = None,
     unit: str = "px",
@@ -216,17 +217,32 @@ def create_aoi_perturbation_grid(
     specs: list[EyeResult] = []
     if include_baseline:
         specs.append(aoi_perturbation_spec("baseline", "baseline", unit=unit, **geometry_kwargs))
-    for value in dilations or []:
-        specs.append(aoi_perturbation_spec(f"dilate_{value:g}_{unit}", "dilation", margin_x=value, unit=unit, **geometry_kwargs))
-    for value in erosions or []:
-        specs.append(aoi_perturbation_spec(f"erode_{value:g}_{unit}", "erosion", margin_x=value, unit=unit, **geometry_kwargs))
-    for value in translations_x or []:
-        specs.append(aoi_perturbation_spec(f"shift_x_{value:g}_{unit}", "translate", translation_x=value, unit=unit, **geometry_kwargs))
-    for value in translations_y or []:
-        specs.append(aoi_perturbation_spec(f"shift_y_{value:g}_{unit}", "translate", translation_y=value, unit=unit, **geometry_kwargs))
-    for idx, value in enumerate(jitters or []):
-        specs.append(aoi_perturbation_spec(f"jitter_{value:g}_{unit}_{idx+1}", "jitter", translation_x=value, translation_y=value, unit=unit, seed=seed + idx, **geometry_kwargs))
-    for values in anisotropic or []:
+    def values_or_empty(values: Iterable[Any] | None) -> Iterable[Any]:
+        return () if values is None else values
+
+    for value in values_or_empty(dilations):
+        specs.append(aoi_perturbation_spec(f"dilate_{float(value):g}_{unit}", "dilation", margin_x=value, unit=unit, **geometry_kwargs))
+    for value in values_or_empty(erosions):
+        specs.append(aoi_perturbation_spec(f"erode_{float(value):g}_{unit}", "erosion", margin_x=value, unit=unit, **geometry_kwargs))
+    for value in values_or_empty(translations_x):
+        specs.append(aoi_perturbation_spec(f"shift_x_{float(value):g}_{unit}", "translate", translation_x=value, unit=unit, **geometry_kwargs))
+    for value in values_or_empty(translations_y):
+        specs.append(aoi_perturbation_spec(f"shift_y_{float(value):g}_{unit}", "translate", translation_y=value, unit=unit, **geometry_kwargs))
+    for values in values_or_empty(translations_xy):
+        tx, ty = _normalise_pair(values, "translations_xy")
+        specs.append(
+            aoi_perturbation_spec(
+                f"shift_xy_{tx:g}_{ty:g}_{unit}",
+                "translate",
+                translation_x=tx,
+                translation_y=ty,
+                unit=unit,
+                **geometry_kwargs,
+            )
+        )
+    for idx, value in enumerate(values_or_empty(jitters)):
+        specs.append(aoi_perturbation_spec(f"jitter_{float(value):g}_{unit}_{idx+1}", "jitter", translation_x=value, translation_y=value, unit=unit, seed=seed + idx, **geometry_kwargs))
+    for values in values_or_empty(anisotropic):
         mx, my = _normalise_pair(values, "anisotropic")
         specs.append(aoi_perturbation_spec(f"anisotropic_{mx:g}_{my:g}_{unit}", "anisotropic_expansion", margin_x=mx, margin_y=my, unit=unit, **geometry_kwargs))
     if not specs:
