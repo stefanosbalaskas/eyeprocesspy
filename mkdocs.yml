@@ -25,7 +25,14 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
-      - AOI perturbation & uncertainty: guides/aoi-uncertainty/index.md
+      - AOI perturbation & uncertainty:
+          - Start here: guides/aoi-uncertainty/index.md
+          - Geometry is an analytical assumption: guides/aoi-uncertainty/geometry-assumption.md
+          - Perturbation sensitivity analysis: guides/aoi-uncertainty/perturbation-sensitivity.md
+          - Pixels versus degrees: guides/aoi-uncertainty/pixels-versus-degrees.md
+          - Assignment stability: guides/aoi-uncertainty/assignment-stability.md
+          - Model propagation: guides/aoi-uncertainty/model-propagation.md
+          - Reporting robustness: guides/aoi-uncertainty/reporting.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
