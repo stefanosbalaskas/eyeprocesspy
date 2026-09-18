@@ -1,0 +1,13 @@
+participant_id,trial_id,X_within,X_between,M_within,M_between,mediation_mediator_observed,mediation_mediator_true_zero,mediation_poor_quality,mediation_response_observed,mediation_mediator_state,mediation_analysis_eligible
+p1,1,-0.5,0.5,26.66666666666667,73.33333333333333,True,False,False,True,observed_nonzero,True
+p1,2,0.5,0.5,-73.33333333333333,73.33333333333333,True,True,False,True,observed_zero,True
+p1,3,-0.5,0.5,46.66666666666667,73.33333333333333,True,False,False,True,observed_nonzero,True
+p1,4,0.5,0.5,,73.33333333333333,False,False,False,True,not_observed,False
+p2,1,-0.5,0.5,-27.5,117.5,True,False,False,True,observed_nonzero,True
+p2,2,0.5,0.5,22.5,117.5,True,False,True,True,poor_quality,False
+p2,3,-0.5,0.5,-37.5,117.5,True,False,False,True,observed_nonzero,True
+p2,4,0.5,0.5,42.5,117.5,True,False,False,True,observed_nonzero,True
+p3,1,-0.5,0.5,-12.5,122.5,True,False,False,True,observed_nonzero,True
+p3,2,0.5,0.5,7.5,122.5,True,False,False,True,observed_nonzero,True
+p3,3,-0.5,0.5,-22.5,122.5,True,False,False,True,observed_nonzero,True
+p3,4,0.5,0.5,27.5,122.5,True,False,False,True,observed_nonzero,True
