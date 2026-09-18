@@ -10,6 +10,12 @@
 
     [Open worked workflow](core-workflow.md)
 
+-   :material-chart-scatter-plot: **Standardized data quality**
+
+    Run a synthetic 9-point validation with separable accuracy/precision failures, irregular sampling, missingness, review-only thresholds, and a manuscript-ready report.
+
+    [Open worked workflow](data-quality-validation.md)
+
 -   :material-target: **Calibration uncertainty → probabilistic AOIs**
 
     Fit an empirical calibration-error model, propagate coordinate uncertainty and diagnose boundary-sensitive AOI assignments.
@@ -165,11 +171,11 @@ For release-level verification, use the deterministic benchmark, validation evid
 
 | Script | Purpose | Output |
 | --- | --- | --- |
-| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |\n| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
 | `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
 
-All six are deterministic and use no private participant data.
+All seven are deterministic and use no private participant data.
