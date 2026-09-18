@@ -22,6 +22,12 @@
 
     [Open worked workflow](process-reliability.md)
 
+-   :material-vector-polygon: **AOI perturbation sensitivity**
+
+    Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
+
+    [Open worked workflow](aoi-perturbation-sensitivity.md)
+
 -   :material-chart-bell-curve-cumulative: **IRT diagnostics**
 
     Inspect conditional information, item fit and DIF with publication-ready Matplotlib diagnostics.
@@ -171,5 +177,6 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
 | `examples/core_gallery.py` | Eight core gaze/AOI/pupil plots | `gallery-output/*.svg` |
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
+| `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
 
-All six are deterministic and use no private participant data.
+All seven are deterministic and use no private participant data.
