@@ -23,6 +23,7 @@ The full [worked example](../../examples/aoi-perturbation-sensitivity.md) also s
 - [Pixels versus Degrees of Visual Angle](pixels-versus-degrees.md)
 - [Interpreting AOI Assignment Stability](assignment-stability.md)
 - [Propagating AOI Uncertainty Into Statistical Models](model-propagation.md)
+- [AOI Robustness Decision Clinic](decision-clinic.md)
 - [Reporting AOI Robustness](reporting.md)
 - [R/Python Scientific Parity](r-python-parity.md)
 
@@ -105,7 +106,7 @@ Overlapping membership defaults to `__ambiguous__`. Analysts can explicitly requ
 
 ## Recompute features
 
-`recompute_aoi_features()` provides AOI dwell, fixation count, first fixation, and inspection status for each branch. If no duration column is supplied, dwell is returned as missing with a warning rather than inferred from sampling intervals.
+`recompute_aoi_features()` preserves the complete declared AOI universe within observed participant/trial groups. Set `observation_level="fixation"` or `"sample"`: universal observation counts/timing are retained, while fixation- and sample-specific fields are populated only at the matching level. Structural zero cells are distinguished from groups with no valid assignment opportunity.
 
 ## Propagate geometry uncertainty into models
 

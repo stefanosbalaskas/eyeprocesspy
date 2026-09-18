@@ -20,3 +20,6 @@ Use `aoi_perturbation_spec()` for one validated branch or `create_aoi_perturbati
 `run_aoi_sensitivity_analysis()` performs geometry perturbation → AOI remapping → feature recomputation → optional fixed model callback → assignment/model stability summaries while retaining failures and provenance.
 
 See [AOI perturbation and uncertainty analysis](../guides/aoi-uncertainty/) for design, interpretation, limitations, and reporting guidance.
+## Practical guidance
+
+Use the [AOI robustness decision clinic](../guides/aoi-uncertainty/decision-clinic.md) to interpret assignment/model stability patterns, the [fixation-level worked example](../examples/aoi-perturbation-sensitivity.md) for end-to-end model propagation, and the [sample-level worked example](../examples/sample-level-aoi-sensitivity.md) when geometry sensitivity is evaluated directly on gaze samples.

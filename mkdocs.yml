@@ -32,6 +32,7 @@ nav:
           - Pixels versus degrees: guides/aoi-uncertainty/pixels-versus-degrees.md
           - Assignment stability: guides/aoi-uncertainty/assignment-stability.md
           - Model propagation: guides/aoi-uncertainty/model-propagation.md
+          - Decision clinic: guides/aoi-uncertainty/decision-clinic.md
           - Reporting robustness: guides/aoi-uncertainty/reporting.md
           - R/Python parity: guides/aoi-uncertainty/r-python-parity.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
@@ -43,6 +44,7 @@ nav:
           - Process reliability: examples/process-reliability.md
           - IRT diagnostics: examples/irt-diagnostics.md
           - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
+          - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
