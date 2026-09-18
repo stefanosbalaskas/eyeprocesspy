@@ -82,6 +82,29 @@ def test_polygon_dilation_is_true_convex_offset():
     assert abs(cross) > 0
 
 
+def test_polygon_degree_dilation_uses_both_axis_scales():
+    square = pd.DataFrame(
+        {
+            "aoi_id": ["square"],
+            "shape_type": ["polygon"],
+            "polygon": [
+                np.array(
+                    [[100.0, 100.0], [200.0, 100.0], [200.0, 200.0], [100.0, 200.0]]
+                )
+            ],
+        }
+    )
+    out = dilate_aoi(
+        square,
+        0.5,
+        unit="deg",
+        degrees_per_pixel=(0.05, 0.10),
+    )
+    poly = out.iloc[0]["polygon"]
+    assert np.allclose([poly[:, 0].min(), poly[:, 0].max()], [90.0, 210.0])
+    assert np.allclose([poly[:, 1].min(), poly[:, 1].max()], [95.0, 205.0])
+
+
 def test_concave_polygon_dilation_is_not_silently_approximated():
     concave = pd.DataFrame(
         {
