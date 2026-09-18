@@ -37,6 +37,16 @@ Reliability, Bland–Altman evidence, sampling irregularity, calibration error, 
 </div>
 <div class="ep-card" markdown>
 
+### Standardized data quality
+Accuracy, RMS-S2S, population-SD precision, BCEA, effective sampling, jitter, data loss, review flags, and reporting.
+
+[Open guide](data-quality.md)
+
+</div>
+<div class="ep-card" markdown>
+
+<div class="ep-card" markdown>
+
 ### Psychometrics & IRT
 Information, fit, DIF, process-informed measurement, score uncertainty, and validation evidence.
 
