@@ -32,6 +32,10 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Censored gaze latency:
+          - Method overview: methods/gaze-survival/index.md
+          - Methodological guide: guides/gaze-survival-analysis.md
+          - Reporting & limitations: methods/gaze-survival/reporting.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
@@ -39,6 +43,7 @@ nav:
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
+          - Censored gaze latency: examples/gaze-survival-analysis.md
           - IRT diagnostics: examples/irt-diagnostics.md
   - Plot gallery: gallery.md
   - Articles:
@@ -49,6 +54,7 @@ nav:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
+      - Gaze-survival API: reference/gaze-survival.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md

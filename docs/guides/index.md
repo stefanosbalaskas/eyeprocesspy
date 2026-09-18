@@ -45,6 +45,14 @@ Reliability, Bland–Altman evidence, sampling irregularity, calibration error, 
 </div>
 <div class="ep-card" markdown>
 
+### Censored gaze latency
+Retain never-inspected valid trials as right-censored observations; fit Cox/AFT models, diagnose assumptions, and preserve specification provenance.
+
+[Open guide](gaze-survival-analysis.md)
+
+</div>
+<div class="ep-card" markdown>
+
 ### Psychometrics & IRT
 Information, fit, DIF, process-informed measurement, score uncertainty, and validation evidence.
 

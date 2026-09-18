@@ -117,6 +117,12 @@ hide:
     <p>Connect process measures to psychometrics, IRT, information, DIF/DTF, uncertainty, diagnostics, and model-ready analysis objects.</p>
     <span class="ep-question-card__link">Open measurement models →</span>
   </a>
+  <a class="ep-question-card" href="methods/gaze-survival/">
+    <span class="ep-question-card__index">07</span><div class="ep-question-card__icon">⌛</div>
+    <h3>When did gaze arrive?</h3>
+    <p>Retain never-inspected trials as right-censored observations and model first fixation, entry, revisit, transition, or disengagement latency.</p>
+    <span class="ep-question-card__link">Open survival analysis →</span>
+  </a>
 </div>
 
 <div class="ep-method-cta">
@@ -174,6 +180,7 @@ assert audit["valid"]
   <a href="gallery/" class="ep-plot-tile"><img src="assets/gallery/scanpath.svg" alt="Scanpath visualization"><span><b>Scanpaths</b><small>Follow fixation order and movement structure</small></span></a>
   <a href="gallery/" class="ep-plot-tile"><img src="assets/gallery/probabilistic-aoi.svg" alt="Probabilistic AOI visualization"><span><b>Probabilistic AOIs</b><small>Keep coordinate uncertainty visible at boundaries</small></span></a>
   <a href="gallery/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gallery/process-reliability.svg" alt="Process reliability visualization"><span><b>Process reliability</b><small>Inspect repeatability and agreement evidence</small></span></a>
+  <a href="methods/gaze-survival/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gaze-survival/km-disclosure.svg" alt="Censored gaze-latency Kaplan–Meier curves"><span><b>Censored gaze latency</b><small>Keep never-inspected valid trials in the risk set as right-censored observations</small></span></a>
 </div>
 <div class="ep-center-action"><a class="md-button" href="gallery/">Explore the complete plot gallery</a></div>
 
