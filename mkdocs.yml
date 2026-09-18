@@ -46,6 +46,7 @@ nav:
           - Assignment stability: guides/aoi-uncertainty/assignment-stability.md
           - Model propagation: guides/aoi-uncertainty/model-propagation.md
           - Decision clinic: guides/aoi-uncertainty/decision-clinic.md
+          - Analysis plan: guides/aoi-uncertainty/analysis-plan.md
           - Troubleshooting: guides/aoi-uncertainty/troubleshooting.md
           - Reporting robustness: guides/aoi-uncertainty/reporting.md
           - R/Python parity: guides/aoi-uncertainty/r-python-parity.md
@@ -59,6 +60,7 @@ nav:
           - Censored gaze latency: examples/gaze-survival-analysis.md
           - IRT diagnostics: examples/irt-diagnostics.md
           - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
+          - AOI analysis plan: examples/aoi-analysis-plan-worked.md
           - AOI failure clinic: examples/aoi-perturbation-failure-clinic.md
           - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
   - Plot gallery: gallery.md
