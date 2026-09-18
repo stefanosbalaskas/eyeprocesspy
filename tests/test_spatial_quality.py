@@ -110,8 +110,9 @@ def test_provenance_fingerprint_deterministic_and_changes_with_source():
     assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]==b.attrs["gaze_quality_provenance"]["source_fingerprint"]
     d2=d.copy(); d2.loc[0,"gaze_x"]+=.1; c=ep.create_gaze_quality_report(d2,by=["profile","target_id"])
     assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]!=c.attrs["gaze_quality_provenance"]["source_fingerprint"]
+    av=ep.create_gaze_quality_report(d,by=["profile","target_id"],valid="valid")
     d3=d.copy(); d3.loc[0,"valid"]=0; e=ep.create_gaze_quality_report(d3,by=["profile","target_id"],valid="valid")
-    assert a.attrs["gaze_quality_provenance"]["source_fingerprint"]!=e.attrs["gaze_quality_provenance"]["source_fingerprint"]
+    assert av.attrs["gaze_quality_provenance"]["source_fingerprint"]!=e.attrs["gaze_quality_provenance"]["source_fingerprint"]
 
 
 def test_validation_and_conversion_error_paths_and_non_dataframe_input():
