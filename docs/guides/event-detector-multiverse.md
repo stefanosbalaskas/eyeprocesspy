@@ -55,3 +55,19 @@ The detector-multiverse API follows several non-negotiable rules:
 Threshold-based I-VT and I-DT algorithms remain common, but detector performance depends on the signal, task, sampling characteristics, noise, and event types present. Recent methodological guidance emphasizes that detector choice should be aligned with the signal and research question rather than treated as universally interchangeable. REMoDNaV extends adaptive velocity-based classification for natural viewing and detects saccades, post-saccadic oscillations, fixations, and pursuit. Event-matching work also motivates temporal-overlap matching rather than comparing event rows by position.
 
 References include Dar, Wagner, & Hanke (2021), *Behavior Research Methods*, DOI `10.3758/s13428-020-01428-x`; Drews & Dierkes (2024), *Behavior Research Methods*, DOI `10.3758/s13428-024-02360-0`; and the operationalization guidance in Hooge et al. (2025), *Behavior Research Methods*, DOI `10.3758/s13428-024-02590-2`.
+
+
+## R/Python contract parity
+
+The R and Python implementations share the same scientific concepts, detector-spec fields, failure semantics, event-matching fixture, feature names, and tidy inference outputs. The shared fixture is exercised in both test suites.
+
+Backend names differ where the host ecosystems genuinely differ:
+
+| Scientific role | Python | R |
+| --- | --- | --- |
+| ordinary linear model | `statsmodels_ols` | `stats_lm` |
+| mixed model | `statsmodels_mixedlm` | `lme4_lmer` |
+| specialist estimator | `callback` | `callback` |
+| REMoDNaV integration | installed Python REMoDNaV package | installed REMoDNaV CLI |
+
+These are implementation differences, not invitations to change the scientific model between branches or languages. Numerical identity is not required when backends differ; detector definitions, retained observations, model meaning, convergence status, provenance, and semantic output fields are required to align.
