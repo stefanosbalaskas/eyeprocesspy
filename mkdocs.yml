@@ -32,10 +32,16 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
-      - Censored gaze latency:
-          - Method overview: methods/gaze-survival/index.md
-          - Methodological guide: guides/gaze-survival-analysis.md
-          - Reporting & limitations: methods/gaze-survival/reporting.md
+      - AOI perturbation & uncertainty:
+          - Start here: guides/aoi-uncertainty/index.md
+          - Geometry is an analytical assumption: guides/aoi-uncertainty/geometry-assumption.md
+          - Perturbation sensitivity analysis: guides/aoi-uncertainty/perturbation-sensitivity.md
+          - Pixels versus degrees: guides/aoi-uncertainty/pixels-versus-degrees.md
+          - Assignment stability: guides/aoi-uncertainty/assignment-stability.md
+          - Model propagation: guides/aoi-uncertainty/model-propagation.md
+          - Decision clinic: guides/aoi-uncertainty/decision-clinic.md
+          - Reporting robustness: guides/aoi-uncertainty/reporting.md
+          - R/Python parity: guides/aoi-uncertainty/r-python-parity.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
@@ -43,8 +49,9 @@ nav:
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Process reliability: examples/process-reliability.md
-          - Censored gaze latency: examples/gaze-survival-analysis.md
           - IRT diagnostics: examples/irt-diagnostics.md
+          - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
+          - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
@@ -54,7 +61,7 @@ nav:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Plotting reference: reference/plotting.md
-      - Gaze-survival API: reference/gaze-survival.md
+      - AOI perturbation API: reference/aoi-perturbation.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
@@ -74,7 +81,6 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
-    - navigation.path
     - navigation.expand
     - navigation.indexes
     - navigation.top

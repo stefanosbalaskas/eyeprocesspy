@@ -149,6 +149,35 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .compositional_aoi_10 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
+from .aoi_perturbation import (  # noqa: E402, F401, I001
+    AMBIGUOUS,
+    OUTSIDE,
+    aoi_perturbation_spec,
+    apply_aoi_perturbation_grid,
+    assess_aoi_inference_stability,
+    compare_aoi_assignments,
+    convert_aoi_margin_to_degrees,
+    convert_aoi_margin_to_pixels,
+    create_aoi_perturbation_grid,
+    dilate_aoi,
+    erode_aoi,
+    estimate_aoi_assignment_stability,
+    estimate_fixation_assignment_probability,
+    jitter_aoi,
+    perturb_aoi_geometry,
+    plot_aoi_assignment_stability,
+    plot_aoi_coefficient_stability,
+    plot_aoi_perturbations,
+    plot_aoi_robustness_surface,
+    recompute_aoi_features,
+    report_aoi_sensitivity,
+    run_aoi_sensitivity_analysis,
+    summarise_aoi_sensitivity,
+    translate_aoi,
+    validate_aoi_geometry,
+)
+__all__ = [n for n in globals() if not n.startswith("_")]
+
 from .plots_completion_08 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
@@ -179,35 +208,4 @@ from .validation_atlas_09 import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
 from .multilevel_mediation import *
-__all__ = [n for n in globals() if not n.startswith("_")]
-
-
-_survival_module = __import__(f"{__name__}.survival", fromlist=["survival"])
-_survival_exports = (
-    "CANONICAL_GAZE_SURVIVAL_COLUMNS",
-    "GazeSurvivalFit",
-    "prepare_gaze_survival_data",
-    "validate_gaze_survival_data",
-    "summarise_gaze_censoring",
-    "estimate_gaze_survival",
-    "fit_gaze_cox_model",
-    "fit_gaze_mixed_cox_model",
-    "fit_gaze_aft_model",
-    "tidy_gaze_survival_model",
-    "check_gaze_proportional_hazards",
-    "compare_gaze_survival_models",
-    "predict_gaze_survival",
-    "estimate_gaze_latency_quantiles",
-    "plot_gaze_survival_curve",
-    "plot_gaze_cumulative_incidence",
-    "plot_gaze_hazard",
-    "plot_gaze_cox_diagnostics",
-    "compare_gaze_survival_specifications",
-    "report_gaze_survival_model",
-    "simulate_gaze_survival_inputs",
-    "simulate_gaze_survival_example",
-)
-for _survival_name in _survival_exports:
-    globals()[_survival_name] = getattr(_survival_module, _survival_name)
-del _survival_module, _survival_exports, _survival_name
 __all__ = [n for n in globals() if not n.startswith("_")]
