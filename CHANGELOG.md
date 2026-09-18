@@ -10,6 +10,7 @@ All notable changes to `eyeprocesspy` are documented here.
 - Added Kaplan–Meier, Cox PH, participant-clustered Cox, Weibull/log-normal AFT, prediction, latency quantiles, PH diagnostics, sensitivity comparisons, plotting, reporting, provenance, and deterministic synthetic examples. Cox estimation delegates to `statsmodels`; parametric AFT estimation delegates to `lifelines>=0.30.3,<0.31` rather than duplicating the survival likelihood in eyeprocesspy.
 - Added a first-class documentation pathway with method overview, when-to-use/not-use guidance, worked examples, visual output, reporting/limitations guidance, and dedicated API reference.
 - Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
+- Added a standalone evidence-verification workflow for time to first source/evidence AOI entry plus a troubleshooting clinic covering incomplete windows, time-zero events, sparse events, PH flags, low-quality gaze, competing-event boundaries, and explicit failure reporting.
 
 ## 0.1.0 — 2026-09-03
 
