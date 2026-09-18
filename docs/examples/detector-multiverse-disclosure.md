@@ -76,6 +76,8 @@ Participant fixed effects keep the example lightweight for CI. In an empirical r
 
 The synthetic run used to generate this page produced same-direction condition coefficients across all successfully modelled internal detector branches. The exact values are not scientific results and will change if the simulation parameters change.
 
+The stability summary uses the **planned-specification denominator**. In this seeded example, six detector branches were declared, five returned the disclosure coefficient, and the unavailable REMoDNaV branch remains visible as a model-stage failure. Thus `specifications = 6`, `term_available_specifications = 5`, `model_failure_specifications = 1`, and the convergence rate is `5 / 6`, not `5 / 5`.
+
 ## 5. Inspect what changed
 
 ```python
