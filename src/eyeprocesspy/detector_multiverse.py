@@ -423,3 +423,369 @@ def _check_sampling_rate(x: EyeDataset, spec: EventDetectorSpec, tolerance_fract
     empirical = float(np.median(rates))
     expected = float(spec.sampling_rate)
     if abs(empirical - expected) / expected > float(tolerance_fraction):
+        return [f"Empirical sampling rate ({empirical:.3f} Hz) differs from the detector specification ({expected:.3f} Hz)."]
+    return []
+
+
+def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
+    """Transparent robust-MAD adaptive velocity reference detector.
+
+    This is intentionally labelled a reference implementation, not an implementation
+    of REMoDNaV, Nyström-Holmqvist, Engbert-Kliegl, or any other named detector.
+    """
+    params = spec.parameter_dict
+    noise_factor = float(params["noise_factor"])
+    min_threshold = float(params["minimum_velocity_threshold"])
+    out = _clean_branch_dataset(x)
+    rows: list[dict[str, Any]] = []
+    counter = 0
+    for _, group in out["gaze_samples"].groupby(["recording_id", "trial_id"], dropna=False, sort=False):
+        z = group.sort_values("timestamp_seconds", kind="stable").reset_index(drop=True)
+        t = pd.to_numeric(z["timestamp_seconds"], errors="coerce").to_numpy(float)
+        gx = pd.to_numeric(z["gaze_x"], errors="coerce").to_numpy(float)
+        gy = pd.to_numeric(z["gaze_y"], errors="coerce").to_numpy(float)
+        valid = z["valid"].astype("boolean").fillna(False).to_numpy(bool)
+        dt = np.r_[np.nan, np.diff(t)]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            velocity = np.r_[np.nan, np.sqrt(np.diff(gx) ** 2 + np.diff(gy) ** 2) / np.diff(t)]
+        usable = velocity[np.isfinite(velocity) & valid]
+        if usable.size < 3:
+            continue
+        centre = float(np.median(usable))
+        mad = float(np.median(np.abs(usable - centre)))
+        robust_sigma = 1.4826 * mad
+        threshold = max(min_threshold, centre + noise_factor * robust_sigma)
+        is_fix = np.isfinite(velocity) & valid & (velocity <= threshold)
+        if len(is_fix):
+            is_fix[0] = bool(is_fix[1]) if len(is_fix) > 1 else False
+        gap_limit = float(spec.maximum_gap_ms or (1000.0 / float(spec.sampling_rate) * 2.5))
+        run_ids = np.zeros(len(z), dtype=int)
+        run = 0
+        for i in range(len(z)):
+            if i == 0 or (not is_fix[i]) or (not is_fix[i - 1]) or (np.isfinite(dt[i]) and dt[i] * 1000 > gap_limit):
+                run += 1
+            run_ids[i] = run
+        for run_id in pd.unique(run_ids[is_fix]):
+            pos = np.flatnonzero((run_ids == run_id) & is_fix)
+            if not len(pos):
+                continue
+            duration = (np.nanmax(t[pos]) - np.nanmin(t[pos])) * 1000
+            if duration < float(spec.minimum_duration_ms):
+                continue
+            counter += 1
+            rows.append(
+                {
+                    "episode_id": f"{z.iloc[0]['recording_id']}_adaptive_fix_{counter:07d}",
+                    "recording_id": z.iloc[0]["recording_id"],
+                    "episode_type": "fixation",
+                    "eye": "combined",
+                    "start_time": float(t[pos.min()]),
+                    "end_time": float(t[pos.max()]),
+                    "duration_ms": float(duration),
+                    "start_x": float(gx[pos.min()]),
+                    "start_y": float(gy[pos.min()]),
+                    "end_x": float(gx[pos.max()]),
+                    "end_y": float(gy[pos.max()]),
+                    "centroid_x": float(np.nanmean(gx[pos])),
+                    "centroid_y": float(np.nanmean(gy[pos])),
+                    "amplitude": np.nan,
+                    "peak_velocity": float(np.nanmax(velocity[pos])) if np.isfinite(velocity[pos]).any() else np.nan,
+                    "dispersion": float((np.nanmax(gx[pos]) - np.nanmin(gx[pos])) + (np.nanmax(gy[pos]) - np.nanmin(gy[pos]))),
+                    "coordinate_space_id": z.iloc[0]["coordinate_space_id"],
+                    "source_algorithm": "adaptive velocity (robust-MAD reference)",
+                    "source_parameters": f"noise_factor={noise_factor:g};minimum_velocity_threshold={min_threshold:g};adaptive_threshold={threshold:g}",
+                    "derived_by": "eyeprocess",
+                    "trial_id": z.iloc[0]["trial_id"],
+                    "stimulus_id": z.iloc[0]["stimulus_id"],
+                    "aoi_id": pd.NA,
+                }
+            )
+    detected = standardize_eye_table(pd.DataFrame(rows), "episodes") if rows else empty_eye_table("episodes")
+    existing = out["episodes"]
+    out["episodes"] = standardize_eye_table(pd.concat([existing, detected], ignore_index=True, sort=False), "episodes")
+    return add_provenance(
+        out,
+        "detect_fixations_adaptive_velocity",
+        "episodes",
+        f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(detected)}",
+    )
+
+
+def _remodnav_version() -> str | None:
+    try:
+        return importlib.metadata.version("remodnav")
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def _run_remodnav(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
+    try:
+        import remodnav
+    except ImportError as exc:
+        raise EyeProcessBackendError(
+            "REMoDNaV is not installed. Install the optional gaze dependency and rerun; no surrogate detector is substituted."
+        ) from exc
+    params = dict(spec.parameter_dict)
+    px2deg = 1.0 if spec.coordinate_unit == "degrees" else params.pop("px2deg", None)
+    if px2deg is None:
+        raise EyeProcessValidationError("REMoDNaV with pixel coordinates requires an explicit `px2deg` parameter.")
+    if spec.coordinate_unit == "normalized":
+        raise EyeProcessValidationError("REMoDNaV cannot consume normalized coordinates without an explicit coordinate conversion first.")
+
+    classifier_keys = set(inspect.signature(remodnav.EyegazeClassifier.__init__).parameters) - {"self"}
+    preproc_keys = set(inspect.signature(remodnav.EyegazeClassifier.preproc).parameters) - {"self", "data"}
+    classifier_args = {
+        "px2deg": float(px2deg),
+        "sampling_rate": float(spec.sampling_rate),
+        "min_fixation_duration": float(spec.minimum_duration_ms) / 1000.0,
+    }
+    preproc_args: dict[str, Any] = {}
+    unused: dict[str, Any] = {}
+    for key, value in params.items():
+        if key in classifier_keys:
+            classifier_args[key] = value
+        elif key in preproc_keys:
+            preproc_args[key] = value
+        elif key not in {"include_labels"}:
+            unused[key] = value
+    if unused:
+        raise EyeProcessValidationError("Unknown REMoDNaV parameter(s): " + ", ".join(sorted(unused)))
+    include_labels = set(params.get("include_labels", ["FIXA", "SACC", "ISAC", "PURS", "HPSO", "IHPS", "LPSO", "ILPS"]))
+
+    out = _clean_branch_dataset(x)
+    rows = []
+    counter = 0
+    for _, group in out["gaze_samples"].groupby(["recording_id", "trial_id"], dropna=False, sort=False):
+        z = group.sort_values("timestamp_seconds", kind="stable").reset_index(drop=True)
+        if len(z) < 3:
+            continue
+        coords = np.recarray(len(z), dtype=[("x", "f8"), ("y", "f8")])
+        coords.x = pd.to_numeric(z["gaze_x"], errors="coerce").to_numpy(float)
+        coords.y = pd.to_numeric(z["gaze_y"], errors="coerce").to_numpy(float)
+        invalid = ~z["valid"].astype("boolean").fillna(False).to_numpy(bool)
+        coords.x[invalid] = np.nan
+        coords.y[invalid] = np.nan
+        clf = remodnav.EyegazeClassifier(**classifier_args)
+        pp = clf.preproc(coords, **preproc_args)
+        detected = clf(pp, classify_isp=True, sort_events=True)
+        t0 = float(pd.to_numeric(z["timestamp_seconds"], errors="coerce").min())
+        for event in detected:
+            label = str(event.get("label", ""))
+            if label not in include_labels:
+                continue
+            event_type = _EVENT_LABELS.get(label)
+            if event_type is None:
+                continue
+            counter += 1
+            start = t0 + float(event["start_time"])
+            end = t0 + float(event["end_time"])
+            rows.append(
+                {
+                    "episode_id": f"{z.iloc[0]['recording_id']}_remodnav_{counter:07d}",
+                    "recording_id": z.iloc[0]["recording_id"],
+                    "episode_type": event_type,
+                    "eye": "combined",
+                    "start_time": start,
+                    "end_time": end,
+                    "duration_ms": (end - start) * 1000.0,
+                    "start_x": event.get("start_x", np.nan),
+                    "start_y": event.get("start_y", np.nan),
+                    "end_x": event.get("end_x", np.nan),
+                    "end_y": event.get("end_y", np.nan),
+                    "centroid_x": np.nanmean([event.get("start_x", np.nan), event.get("end_x", np.nan)]),
+                    "centroid_y": np.nanmean([event.get("start_y", np.nan), event.get("end_y", np.nan)]),
+                    "amplitude": event.get("amp", np.nan),
+                    "peak_velocity": event.get("peak_vel", np.nan),
+                    "dispersion": np.nan,
+                    "coordinate_space_id": z.iloc[0]["coordinate_space_id"],
+                    "source_algorithm": "REMoDNaV",
+                    "source_parameters": json.dumps(_jsonable({**classifier_args, **preproc_args}), sort_keys=True),
+                    "derived_by": "external",
+                    "trial_id": z.iloc[0]["trial_id"],
+                    "stimulus_id": z.iloc[0]["stimulus_id"],
+                    "aoi_id": pd.NA,
+                }
+            )
+    detected = standardize_eye_table(pd.DataFrame(rows), "episodes") if rows else empty_eye_table("episodes")
+    out["episodes"] = standardize_eye_table(pd.concat([out["episodes"], detected], ignore_index=True, sort=False), "episodes")
+    return add_provenance(
+        out,
+        "detect_events_remodnav",
+        "episodes",
+        f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};remodnav_version={_remodnav_version()};n={len(detected)}",
+    )
+
+
+def import_external_detector_events(
+    events: pd.DataFrame,
+    spec: EventDetectorSpec,
+    *,
+    dataset: EyeDataset | None = None,
+) -> pd.DataFrame:
+    """Validate and normalize an external detector event catalogue."""
+    validate_event_detector_spec(spec)
+    if not isinstance(events, pd.DataFrame):
+        raise EyeProcessValidationError("External detector output must be a pandas DataFrame.")
+    data = events.copy()
+    rename = {}
+    if "onset" in data and "start_time" not in data:
+        rename["onset"] = "start_time"
+    if "label" in data and "episode_type" not in data:
+        rename["label"] = "episode_type"
+    data = data.rename(columns=rename)
+    if "end_time" not in data and {"start_time", "duration"}.issubset(data):
+        data["end_time"] = pd.to_numeric(data["start_time"], errors="coerce") + pd.to_numeric(data["duration"], errors="coerce")
+    required = {"recording_id", "episode_type", "start_time", "end_time"}
+    missing = sorted(required - set(data.columns))
+    if missing:
+        raise EyeProcessValidationError("External detector events are missing: " + ", ".join(missing))
+    data["episode_type"] = data["episode_type"].map(lambda value: _EVENT_LABELS.get(str(value), str(value).lower()))
+    start = pd.to_numeric(data["start_time"], errors="coerce")
+    end = pd.to_numeric(data["end_time"], errors="coerce")
+    if start.isna().any() or end.isna().any() or (end < start).any():
+        raise EyeProcessValidationError("External detector event times must be finite with end_time >= start_time.")
+    if "duration_ms" not in data:
+        data["duration_ms"] = (end - start) * 1000.0
+    if "episode_id" not in data:
+        data["episode_id"] = [f"{spec.detector_id}_external_{i:07d}" for i in range(1, len(data) + 1)]
+    if "eye" not in data:
+        data["eye"] = "combined"
+    if "source_algorithm" not in data:
+        data["source_algorithm"] = spec.implementation
+    if "source_parameters" not in data:
+        data["source_parameters"] = json.dumps(_jsonable(spec.parameter_dict), sort_keys=True)
+    if "derived_by" not in data:
+        data["derived_by"] = "external"
+    if "trial_id" not in data:
+        data["trial_id"] = pd.NA
+    if dataset is not None && data["trial_id"].isna().any() && !dataset["intervals"].empty:
+        intervals = dataset["intervals"].loc[dataset["intervals"]["interval_type"].eq("trial")]
+        for idx in data.index[data["trial_id"].isna()]:
+            rec = data.at[idx, "recording_id"]
+            time = float(data.at[idx, "start_time"])
+            hit = intervals[
+                intervals["recording_id"].eq(rec)
+                & (pd.to_numeric(intervals["start_time"], errors="coerce") <= time)
+                & (pd.to_numeric(intervals["end_time"], errors="coerce") >= time)
+            ]
+            if len(hit) == 1:
+                data.at[idx, "trial_id"] = hit.iloc[0]["trial_id"]
+            elif len(hit) > 1:
+                raise EyeProcessValidationError("An external event maps to multiple trial intervals; resolve the trial definition explicitly.")
+    return _attach_detector_columns(data, spec)
+
+
+def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
+    """Run one explicit detector specification and return an isolated EyeDataset branch."""
+    if not is_eye_dataset(x):
+        raise EyeProcessValidationError("`x` must be an EyeDataset.")
+    validate_event_detector_spec(spec)
+    branch = _clean_branch_dataset(x)
+    sampling_warnings = _check_sampling_rate(branch, spec) if spec.algorithm in _RAW_ALGORITHMS else []
+    for message in sampling_warnings:
+        warnings.warn(message, RuntimeWarning, stacklevel=2)
+
+    if spec.algorithm == "ivt":
+        branch = detect_fixations_ivt(
+            branch,
+            velocity_threshold=float(spec.velocity_threshold),
+            minimum_duration_ms=float(spec.minimum_duration_ms),
+            maximum_gap_ms=float(spec.maximum_gap_ms or 75.0),
+            coordinate_units=spec.coordinate_unit,
+            overwrite=False,
+        )
+        if bool(spec.parameter_dict.get("include_saccades", False)):
+            branch = detect_saccades(
+                branch,
+                velocity_threshold=float(spec.velocity_threshold),
+                minimum_duration_ms=float(spec.parameter_dict.get("minimum_saccade_duration_ms", 10.0)),
+                overwrite=False,
+            )
+    elif spec.algorithm == "idt":
+        branch = detect_fixations_idt(
+            branch,
+            dispersion_threshold=float(spec.dispersion_threshold),
+            minimum_duration_ms=float(spec.minimum_duration_ms),
+            coordinate_units=spec.coordinate_unit,
+            overwrite=False,
+        )
+    elif spec.algorithm == "adaptive_velocity":
+        branch = _run_adaptive_velocity(branch, spec)
+    elif spec.algorithm == "remodnav":
+        branch = _run_remodnav(branch, spec)
+    elif spec.algorithm == "external":
+        output = spec.callback(data=branch.copy(), spec=spec)
+        if is_eye_dataset(output):
+            external = output["episodes"].copy()
+        else:
+            external = output
+        external = import_external_detector_events(external, spec, dataset=branch)
+        branch["episodes"] = standardize_eye_table(
+            pd.concat([branch["episodes"], external], ignore_index=True, sort=False),
+            "episodes",
+        )
+        branch = add_provenance(
+            branch,
+            "detect_events_external",
+            "episodes",
+            f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(external)}",
+        )
+    elif spec.algorithm == "vendor":
+        vendor = x["episodes"].copy()
+        params = spec.parameter_dict
+        if "derived_by" in vendor:
+            vendor = vendor[vendor["derived_by"].eq(params.get("derived_by", "vendor"))]
+        vendor = _attach_detector_columns(vendor, spec)
+        branch["episodes"] = standardize_eye_table(
+            pd.concat([branch["episodes"], vendor], ignore_index=True, sort=False),
+            "episodes",
+        )
+        branch = add_provenance(
+            branch,
+            "import_vendor_detector_events",
+            "episodes",
+            f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(vendor)}",
+        )
+
+    relevant = branch["episodes"].copy()
+    if spec.algorithm != "vendor":
+        relevant = relevant[relevant["episode_type"].isin(["fixation", "saccade", "pursuit", "pso"])]
+    relevant = _attach_detector_columns(relevant, spec)
+    lineage = _lineage_fields(x, spec)
+    for column, value in lineage.items():
+        relevant[column] = value
+    keep_ids = set(relevant["episode_id"].astype(str)) if not relevant.empty else set()
+    episodes = branch["episodes"].copy()
+    for column in relevant.columns:
+        if column not in episodes.columns:
+            episodes[column] = pd.NA
+    if keep_ids:
+        mask = episodes["episode_id"].astype(str).isin(keep_ids)
+        provenance_columns = [
+            c for c in relevant.columns
+            if c.startswith("detector_") or c in {
+                "source_data_hash", "preprocessing_provenance_hash", "aoi_spec_hash",
+                "quality_spec_hash", "software", "software_version"
+            }
+        ]
+        for column in provenance_columns:
+            lookup = relevant.set_index(relevant["episode_id"].astype(str))[column]
+            episodes.loc[mask, column] = episodes.loc[mask, "episode_id"].astype(str).map(lookup)
+    branch["episodes"] = episodes
+    return add_provenance(
+        branch,
+        "detect_events_with_spec",
+        "episodes",
+        f"detector_id={spec.detector_id};algorithm={spec.algorithm};spec_hash={spec.fingerprint}",
+        warnings=" | ".join(sampling_warnings) if sampling_warnings else pd.NA,
+    )
+
+
+def run_detector_multiverse(
+    x: EyeDataset,
+    multiverse: DetectorMultiverse | Sequence[EventDetectorSpec],
+    *,
+    continue_on_error: bool = True,
+) -> DetectorMultiverseResult:
+    """Run all detector branches independently in deterministic detector-id order."""
+    if not is_eye_dataset(x):
