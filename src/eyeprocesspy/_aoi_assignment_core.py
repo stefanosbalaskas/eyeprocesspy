@@ -123,12 +123,20 @@ def estimate_aoi_assignment_stability(
         raise EyeProcessValidationError("No assignment comparisons are available.")
     if "observation_id" not in source.columns:
         source["observation_id"] = source.groupby("perturbation_id").cumcount() + 1
+    source_ids = source["observation_id"].drop_duplicates().tolist()
+    if pd.Series(source_ids).isna().any():
+        raise EyeProcessValidationError("Comparison observation IDs must be non-missing.")
     if metadata is not None:
         meta = _frame(metadata, "metadata")
-        if len(meta) != source["observation_id"].nunique():
+        if len(meta) != len(source_ids):
             raise EyeProcessValidationError("`metadata` must contain one row per observation.")
         if "observation_id" not in meta.columns:
-            meta["observation_id"] = np.arange(1, len(meta) + 1)
+            meta["observation_id"] = source_ids
+        else:
+            if meta["observation_id"].isna().any() or meta["observation_id"].duplicated().any():
+                raise EyeProcessValidationError("Metadata observation IDs must be unique and non-missing.")
+            if set(meta["observation_id"].tolist()) != set(source_ids):
+                raise EyeProcessValidationError("Metadata observation IDs must match the comparison observation IDs exactly.")
         source = source.merge(meta, on="observation_id", how="left", validate="many_to_one")
     source["comparable"] = ~(source["baseline_aoi"].isna() | source["perturbed_aoi"].isna())
     source["unchanged"] = source["comparable"] & source["baseline_aoi"].eq(source["perturbed_aoi"])
@@ -366,12 +374,44 @@ def _validate_model_table(table: Any, perturbation_id: str) -> pd.DataFrame:
     required = ["term", "estimate", "SE", "CI_low", "CI_high", "p_value", "model_converged", "N"]
     missing = [c for c in required if c not in frame.columns]
     if missing:
-        raise EyeProcessValidationError("Model callback result is missing required column(s): " + ", ".join(missing))
+        raise EyeProcessValidationError(
+            "Model callback result is missing required column(s): " + ", ".join(missing)
+        )
     out = frame.copy()
+
+    raw_convergence = out["model_converged"]
+    valid_boolean = raw_convergence.map(
+        lambda v: pd.isna(v) or isinstance(v, (bool, np.bool_)) or v in (0, 1)
+    )
+    if not bool(valid_boolean.all()):
+        raise EyeProcessValidationError(
+            "`model_converged` must contain booleans, 0/1, or missing values; strings are not accepted."
+        )
+    out["model_converged"] = raw_convergence.astype("boolean")
+
+    for column in ("estimate", "SE", "CI_low", "CI_high", "N"):
+        out[column] = pd.to_numeric(out[column], errors="coerce")
+    if (out["N"].dropna() < 0).any():
+        raise EyeProcessValidationError("Model callback `N` must be non-negative when supplied.")
+
+    converged = out["model_converged"].fillna(False).astype(bool)
+    if converged.any():
+        required_finite = ["estimate", "SE", "CI_low", "CI_high", "N"]
+        bad = ~np.isfinite(out.loc[converged, required_finite].to_numpy(dtype=float))
+        if bad.any():
+            raise EyeProcessValidationError(
+                "Converged model rows must contain finite estimate, SE, CI_low, CI_high, and N values."
+            )
+        if (out.loc[converged, "N"] <= 0).any():
+            raise EyeProcessValidationError("Converged model rows must report N > 0.")
+
     out["perturbation_id"] = perturbation_id
-    out["model_converged"] = out["model_converged"].astype("boolean")
-    est = pd.to_numeric(out["estimate"], errors="coerce")
-    out["direction"] = np.where(est > 0, "positive", np.where(est < 0, "negative", "zero"))
+    est = out["estimate"].to_numpy(dtype=float)
+    out["direction"] = np.where(
+        ~np.isfinite(est),
+        "missing",
+        np.where(est > 0, "positive", np.where(est < 0, "negative", "zero")),
+    )
     ordered = ["perturbation_id"] + required + ["direction"]
     extras = [c for c in out.columns if c not in set(ordered)]
     return out[ordered + extras]
