@@ -4,6 +4,12 @@
 
 <div class="grid cards" markdown>
 
+-   :material-vector-link: **Trial-level mediation preparation**
+
+    Preserve every repeated-measures trial while separating within- and between-participant exposure/gaze components and auditing zero, missingness, and quality states.
+
+    [Open mediation guide](../guides/multilevel-mediation/index.md)
+
 -   :material-eye: **Core gaze, AOI and provenance**
 
     Validate a canonical `EyeDataset`, recover scanpaths and transitions, compute gaze entropy, render auditable plots and inspect provenance.
@@ -179,7 +185,9 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/advanced_gallery.py` | Reliability, uncertainty, quality and IRT plot families | `gallery-output/*.svg` |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
 
-All seven are deterministic and use no private participant data.
+| `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
+
+All listed examples are deterministic and use no private participant data.
 
 ## AOI uncertainty
 

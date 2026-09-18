@@ -58,6 +58,7 @@ bayes = ["pymc", "arviz"]
 physio = ["neurokit2", "biosppy"]
 streaming = ["pylsl", "pyxdf"]
 gaze = ["pymovements", "remodnav", "multimatch-gaze"]
+survival = ["patsy>=1.0", "statsmodels>=0.14", "lifelines>=0.30.3,<0.31", "matplotlib>=3.9"]
 psychometrics = ["girth", "catsim", "patsy>=1.0", "statsmodels>=0.14"]
 plots = ["matplotlib>=3.9"]
 ml = ["scikit-learn>=1.5"]
@@ -77,6 +78,7 @@ dev = [
   "matplotlib>=3.9",
   "patsy>=1.0",
   "statsmodels>=0.14",
+  "lifelines>=0.30.3,<0.31",
   "scikit-learn>=1.5",
   "pyarrow>=20",
   "mkdocs>=1.6",

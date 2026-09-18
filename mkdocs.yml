@@ -21,6 +21,13 @@ nav:
       - FAQ: faq.md
   - Workflows:
       - Scientific guide map: guides/index.md
+      - Trial-level mediation:
+          - Overview: guides/multilevel-mediation/index.md
+          - Decision guide: guides/multilevel-mediation/decision-guide.md
+          - Preparing gaze mediators: guides/multilevel-mediation/preparing-gaze-mediators.md
+          - Missingness & quality: guides/multilevel-mediation/missingness-and-quality.md
+          - Readiness checklist: guides/multilevel-mediation/analysis-readiness-checklist.md
+          - Why aggregation can mislead: guides/multilevel-mediation/why-aggregation-can-mislead.md
       - Eye-tracking end to end: guides/end-to-end-eye-tracking.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md

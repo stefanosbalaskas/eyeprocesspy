@@ -5,6 +5,14 @@ The frozen article corpus preserves the scientific workflow context of the R 0.1
 <div class="ep-grid" markdown>
 <div class="ep-card" markdown>
 
+### Trial-level multilevel mediation
+Prepare repeated-measures gaze mediators without collapsing trials: within/between decomposition, missing-vs-zero semantics, quality audits, provenance, and downstream Bayesian handoff.
+
+[Open guide](multilevel-mediation/index.md) · [Readiness checklist](multilevel-mediation/analysis-readiness-checklist.md)
+
+</div>
+<div class="ep-card" markdown>
+
 ### End-to-end eye-tracking
 Import, validate, audit, derive process structure, visualize, and preserve provenance.
 
