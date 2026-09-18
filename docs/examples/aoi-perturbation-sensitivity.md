@@ -71,6 +71,23 @@ The same illustrative disclosure-dwell model is used for every branch. The pertu
 
 ## Visual diagnostics
 
+### Geometry and reassigned fixations
+
+![Nominal and perturbed AOIs with selected reassigned fixations](../assets/aoi-uncertainty/geometry-perturbation.svg)
+
+### Assignment stability
+
+![Unchanged AOI assignment across the seven perturbation branches](../assets/aoi-uncertainty/assignment-stability.svg)
+
+### Coefficient stability
+
+![Synthetic disclosure-dwell coefficient and uncertainty intervals across perturbations](../assets/aoi-uncertainty/coefficient-stability.svg)
+
+### Robustness surface
+
+![Synthetic anisotropic AOI robustness surface](../assets/aoi-uncertainty/robustness-surface.svg)
+
+
 The example produces four plot families:
 
 1. nominal versus perturbed AOIs with reassigned observations;
