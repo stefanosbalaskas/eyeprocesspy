@@ -71,3 +71,23 @@ Backend names differ where the host ecosystems genuinely differ:
 | REMoDNaV integration | installed Python REMoDNaV package | installed REMoDNaV CLI |
 
 These are implementation differences, not invitations to change the scientific model between branches or languages. Numerical identity is not required when backends differ; detector definitions, retained observations, model meaning, convergence status, provenance, and semantic output fields are required to align.
+
+## Interpretation
+
+Treat the multiverse as a **sensitivity analysis over defensible measurement choices**, not as a search for the detector that produces the preferred inferential result. Event-count disagreement shows that segmentation changes; pairwise temporal agreement describes catalogue similarity; neither quantity identifies a ground-truth detector without an external reference.
+
+At the inference level, inspect the coefficient distribution, confidence intervals, sign stability, substantive-threshold stability, and the planned-specification convergence rate together. A stable coefficient across the declared branches supports robustness **conditional on that declared detector set**. It does not establish robustness to omitted preprocessing, AOI geometry, quality rules, outcome definitions, or model specifications.
+
+## Limitations
+
+- The multiverse is only as informative as the scientific justification for the included detector families and parameter ranges.
+- Detector agreement is not accuracy unless one catalogue is independently justified as a reference standard.
+- External backends such as REMoDNaV remain external dependencies; an unavailable backend is recorded as a failed branch rather than replaced by a surrogate.
+- Coordinate units and sampling rate remain part of the detector contract. Pixel/normalized coordinates must not be silently treated as degrees.
+- Non-convergence, missing requested coefficients, and model-stage failures reduce the planned-specification convergence rate and remain part of the scientific record.
+- Stability of a detector-sensitive feature does not by itself establish construct validity or causal interpretation.
+
+## Reporting and API links
+
+Use [Reporting detector sensitivity](reporting-detector-sensitivity.md) for the minimum reporting set, denominator discipline, manuscript wording, and anti-patterns. The [worked disclosure example](../examples/detector-multiverse-disclosure.md) shows event-, feature-, and inference-level propagation with an explicit external-backend failure. Exact signatures and return contracts are collected in the [Detector multiverse API reference](../reference/detector-multiverse.md).
+
