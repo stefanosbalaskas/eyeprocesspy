@@ -53,10 +53,10 @@ Accuracy, RMS-S2S, population-SD precision, BCEA, effective sampling, jitter, da
 </div>
 <div class="ep-card" markdown>
 
-### Censored gaze latency
-Retain never-inspected valid trials as right-censored observations; fit Cox/AFT models, diagnose assumptions, and preserve specification provenance.
+### AOI perturbation & uncertainty
+Stress-test AOI geometry, assignment stability, feature recomputation, and model coefficients under defensible boundary changes.
 
-[Open guide](gaze-survival-analysis.md)
+[Open guide](aoi-uncertainty/)
 
 </div>
 <div class="ep-card" markdown>
