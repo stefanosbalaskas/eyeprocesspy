@@ -36,6 +36,7 @@ nav:
   - Data Quality:
       - Overview & equations: guides/data-quality.md
       - Worked 9-point validation: examples/data-quality-validation.md
+      - Quality-decision sensitivity: examples/data-quality-sensitivity.md
       - Reporting guideline: guides/data-quality-reporting.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
   - Plot gallery: gallery.md
