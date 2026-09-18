@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy import optimize, stats
+from scipy import stats
 
 CANONICAL_GAZE_SURVIVAL_COLUMNS = [
     "participant_id",
@@ -72,6 +72,7 @@ def _software_version() -> dict[str, str | None]:
         "numpy": np.__version__,
         "scipy": _package_version("scipy"),
         "statsmodels": _package_version("statsmodels"),
+        "lifelines": _package_version("lifelines"),
         "patsy": _package_version("patsy"),
         "matplotlib": _package_version("matplotlib"),
         "eyeprocesspy": _package_version("eyeprocesspy"),
@@ -871,36 +872,6 @@ def fit_gaze_mixed_cox_model(
     return fit
 
 
-def _aft_negloglik(
-    theta: np.ndarray,
-    design: np.ndarray,
-    time: np.ndarray,
-    event: np.ndarray,
-    distribution: str,
-) -> float:
-    beta = theta[:-1]
-    sigma = math.exp(theta[-1])
-    mu = design @ beta
-    log_time = np.log(time)
-    if distribution == "lognormal":
-        z = (log_time - mu) / sigma
-        event_ll = stats.norm.logpdf(z) - math.log(sigma) - log_time
-        censored_ll = stats.norm.logsf(z)
-    else:
-        rho = 1.0 / sigma
-        log_lambda = mu
-        log_hazard = math.log(rho) - rho * log_lambda + (rho - 1) * log_time
-        cumulative_hazard = np.exp(
-            np.clip(rho * (log_time - log_lambda), -700, 700)
-        )
-        event_ll = log_hazard - cumulative_hazard
-        censored_ll = -cumulative_hazard
-    ll = np.where(event == 1, event_ll, censored_ll)
-    if not np.isfinite(ll).all():
-        return 1e100
-    return float(-np.sum(ll))
-
-
 def fit_gaze_aft_model(
     data: pd.DataFrame,
     formula: str,
@@ -908,9 +879,14 @@ def fit_gaze_aft_model(
     distribution: str | None = None,
     maxiter: int = 2000,
 ) -> GazeSurvivalFit:
-    """Fit Weibull or log-normal accelerated failure-time model by MLE."""
+    """Fit an explicitly selected Weibull or log-normal AFT model.
+
+    Estimation is delegated to the specialist lifelines survival backend;
+    eyeprocesspy owns validation, provenance, and semantic output rather than
+    reimplementing the AFT likelihood.
+    """
     d = _analysis_rows(data)
-    _require_optional("patsy", "to build survival-model design matrices")
+    _require_optional("lifelines", "for parametric AFT regression")
     if distribution is None:
         raise ValueError(
             "distribution must be specified explicitly as 'weibull' or 'lognormal'."
@@ -925,55 +901,66 @@ def fit_gaze_aft_model(
             "AFT models require strictly positive analysis_time; zero-time events "
             "must be resolved or shifted by a pre-specified measurement-resolution rule."
         )
-    import patsy
 
     rhs = formula.split("~", 1)[1].strip() if "~" in formula else formula.strip()
     if not rhs:
         raise ValueError("Formula must contain at least one predictor.")
-    design = patsy.dmatrix(
-        "1 + " + rhs, d, return_type="dataframe", NA_action="raise"
-    )
-    x = design.to_numpy(float)
-    time = d["analysis_time"].to_numpy(float)
-    event = d["event_observed"].to_numpy(int)
-    beta0 = np.zeros(x.shape[1])
-    beta0[0] = float(np.mean(np.log(time)))
-    initial = np.r_[beta0, math.log(max(float(np.std(np.log(time))), 0.5))]
-    result = optimize.minimize(
-        _aft_negloglik,
-        initial,
-        args=(x, time, event, distribution),
-        method="L-BFGS-B",
-        options={"maxiter": int(maxiter)},
-    )
-    if not result.success:
-        raise RuntimeError(f"AFT convergence failure: {result.message}")
-    theta = np.asarray(result.x, float)
-    inverse_hessian = (
-        result.hess_inv.todense()
-        if hasattr(result.hess_inv, "todense")
-        else np.asarray(result.hess_inv)
-    )
-    se = np.sqrt(np.clip(np.diag(np.asarray(inverse_hessian, float)), 0, np.inf))
-    packed = {
-        "params": theta,
-        "standard_errors": se,
-        "loglik": -float(result.fun),
-        "converged": bool(result.success),
-        "message": str(result.message),
-        "distribution": distribution,
-        "nobs": len(d),
-        "design_columns": list(design.columns),
-    }
+
+    from lifelines import LogNormalAFTFitter, WeibullAFTFitter
+    from lifelines.exceptions import ConvergenceError
+
+    fitter = WeibullAFTFitter() if distribution == "weibull" else LogNormalAFTFitter()
+    try:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = fitter.fit(
+                d,
+                duration_col="analysis_time",
+                event_col="event_observed",
+                formula=rhs,
+                ancillary=False,
+                fit_options={"maxiter": int(maxiter)},
+            )
+    except ConvergenceError as exc:
+        raise RuntimeError(f"AFT convergence failure: {exc}") from exc
+
+    convergence_messages = [
+        str(w.message)
+        for w in caught
+        if "converg" in str(w.message).lower()
+        or "singular" in str(w.message).lower()
+        or "invert" in str(w.message).lower()
+    ]
+    if convergence_messages:
+        raise RuntimeError("AFT convergence failure: " + " | ".join(convergence_messages))
+    for caught_warning in caught:
+        warnings.warn(
+            str(caught_warning.message), caught_warning.category, stacklevel=2
+        )
+
+    if not np.isfinite(float(result.log_likelihood_)):
+        raise RuntimeError("AFT convergence failure: non-finite log-likelihood.")
+    params = result.params_
+    if not np.isfinite(np.asarray(params, dtype=float)).all():
+        raise RuntimeError("AFT convergence failure: non-finite parameter estimate.")
+
+    location_param = "lambda_" if distribution == "weibull" else "mu_"
+    if not isinstance(params.index, pd.MultiIndex):
+        raise RuntimeError("Unexpected lifelines AFT parameter contract.")
+    location_mask = params.index.get_level_values(0).astype(str) == location_param
+    covariates = params.index.get_level_values(1)[location_mask].astype(str).tolist()
+    if not covariates:
+        raise RuntimeError("AFT backend returned no location-model coefficients.")
+
     return GazeSurvivalFit(
         model_family=f"aft_{distribution}",
-        backend="scipy.optimize",
-        result=packed,
+        backend=f"lifelines.{type(result).__name__}",
+        result=result,
         data=d,
         formula=formula,
-        covariate_names=list(design.columns),
-        design_info=design.design_info,
-        provenance=_base_provenance(d, formula, f"{distribution} AFT MLE"),
+        covariate_names=covariates,
+        design_info=None,
+        provenance=_base_provenance(d, formula, f"{distribution} AFT via lifelines"),
     )
 
 
