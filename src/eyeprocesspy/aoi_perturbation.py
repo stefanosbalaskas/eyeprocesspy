@@ -64,6 +64,7 @@ def run_aoi_sensitivity_analysis(
     trial_col: str | None = None,
     duration_col: str | None = None,
     time_col: str | None = None,
+    observation_level: str = "fixation",
     overlap_policy: str = "ambiguous",
     model_callback: Callable[[pd.DataFrame, pd.DataFrame, Any], pd.DataFrame] | None = None,
     preprocessing_specification: Any = None,
@@ -113,6 +114,7 @@ def run_aoi_sensitivity_analysis(
             time_col=time_col,
             perturbation_id=pid,
             aoi_levels=geometry["aoi_id"].astype(str).tolist(),
+            observation_level=observation_level,
         )
         features[pid] = feat
         if model_callback is not None:
@@ -150,6 +152,7 @@ def run_aoi_sensitivity_analysis(
         "quality_rules": quality_rules,
         "model_specification": model_specification,
         "overlap_policy": overlap_policy,
+        "observation_level": observation_level,
         "software": _software_provenance(),
     }
     return _result(
