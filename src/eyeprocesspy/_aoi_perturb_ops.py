@@ -121,10 +121,25 @@ def _transform_geometry(geometry: pd.DataFrame, spec: Any) -> pd.DataFrame:
             out.loc[i, ["xmin", "xmax", "ymin", "ymax"]] = [xmin, xmax, ymin, ymax]
         else:
             poly = _polygon_array(row["polygon"]).copy()
-            if op == "dilation":
-                poly = _offset_convex_polygon(poly, mx)
-            elif op == "erosion":
-                poly = _offset_convex_polygon(poly, -mx)
+            if op in {"dilation", "erosion"}:
+                if str(_spec_value(spec, "unit")) == "deg":
+                    dpp = _spec_value(spec, "degrees_per_pixel")
+                    if dpp is None:
+                        raise EyeProcessValidationError(
+                            "Degree-based polygon perturbation lacks degrees-per-pixel provenance."
+                        )
+                    poly_angle = poly.copy()
+                    poly_angle[:, 0] *= float(dpp[0])
+                    poly_angle[:, 1] *= float(dpp[1])
+                    signed_margin = float(_spec_value(spec, "margin_x"))
+                    if op == "erosion":
+                        signed_margin *= -1.0
+                    poly_angle = _offset_convex_polygon(poly_angle, signed_margin)
+                    poly = poly_angle.copy()
+                    poly[:, 0] /= float(dpp[0])
+                    poly[:, 1] /= float(dpp[1])
+                else:
+                    poly = _offset_convex_polygon(poly, mx if op == "dilation" else -mx)
             elif op in {"translate", "jitter"}:
                 poly[:, 0] += tx
                 poly[:, 1] += ty
