@@ -51,6 +51,39 @@ The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example o
 
 [Open the survival-analysis method →](methods/gaze-survival/index.md)
 
+## Detector sensitivity and inference accountability
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/detector-multiverse/detector-agreement.svg" alt="Pairwise detector event agreement matrix">
+  <figcaption><strong>Event agreement.</strong> Pairwise temporal overlap among successful fixation catalogues; descriptive agreement, not ground-truth accuracy.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/disclosure-dwell-by-detector.svg" alt="Disclosure dwell across detector branches">
+  <figcaption><strong>Feature sensitivity.</strong> The same synthetic condition contrast propagated through alternative defensible detector specifications.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient stability across detector branches">
+  <figcaption><strong>Inference stability.</strong> Coefficient estimates and intervals under the identical downstream model.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/robustness-denominator.svg" alt="Planned detector denominator audit">
+  <figcaption><strong>Denominator accountability.</strong> Failed or unavailable branches remain in the planned robustness denominator.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/model-input-audit.svg" alt="Model input audit row accounting">
+  <figcaption><strong>Model-input audit.</strong> AOI selection, quality exclusion, missing outcome, and model rows remain separately visible.</figcaption>
+</figure>
+
+</div>
+
+[Open the detector visual atlas →](guides/detector-multiverse-visual-atlas.md)
+
 ## Pupil and data-quality workflows
 
 <div class="ep-gallery" markdown>
