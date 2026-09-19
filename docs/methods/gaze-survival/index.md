@@ -88,4 +88,5 @@ The extra installs the tested `statsmodels`, `lifelines`, Patsy, and plotting de
 - [Reporting and limitations](reporting.md)
 - [Copyable reporting template](reporting-template.md)
 - [Troubleshooting clinic](troubleshooting.md)
+- [Reproducibility checklist](reproducibility-checklist.md)
 - [API reference](../../reference/gaze-survival.md)
