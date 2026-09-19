@@ -16,6 +16,34 @@ Do **not** use it to search for a favorable AOI, replace calibration/coordinate-
 
 The full [worked example](../../examples/aoi-perturbation-sensitivity.md) also shows assignment stability, coefficient trajectories, and the two-dimensional robustness surface.
 
+## Four diagnostics, four questions
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/geometry-perturbation.svg" alt="AOI geometry perturbation example">
+  <figcaption><strong>1 · Geometry.</strong> Which observations cross a decision boundary when the AOI changes?</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability example">
+  <figcaption><strong>2 · Assignment.</strong> How much of the measurement mapping changes?</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/coefficient-stability.svg" alt="AOI coefficient stability example">
+  <figcaption><strong>3 · Model.</strong> Does the same prespecified model tell a materially different story?</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/robustness-surface.svg" alt="AOI robustness surface example">
+  <figcaption><strong>4 · Surface.</strong> Where does sensitivity concentrate when geometry changes jointly along two axes?</figcaption>
+</figure>
+
+</div>
+
+Use these plots as diagnostics, not as decoration. A visually stable coefficient does not erase assignment instability, changing model N, failed branches, or an implausible perturbation plan.
+
 ## Method guides
 
 - [AOI Geometry Is an Analytical Assumption](geometry-assumption.md)

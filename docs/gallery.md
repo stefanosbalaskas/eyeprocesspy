@@ -38,6 +38,36 @@ The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example o
 
 </div>
 
+## AOI uncertainty and robustness
+
+These diagnostics come from the synthetic AOI perturbation workflow. Read them together: geometry explains **what changed**, assignment stability quantifies **how much changed**, coefficient stability shows **whether inference moved**, and the robustness surface shows **where sensitivity concentrates across two-dimensional boundary changes**.
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/geometry-perturbation.svg" alt="Nominal and perturbed AOI geometry with reassigned fixations">
+  <figcaption><strong>Geometry perturbation.</strong> Compare nominal and perturbed boundaries and inspect observations that cross an AOI decision boundary.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability across perturbation branches">
+  <figcaption><strong>Assignment stability.</strong> Summarize unchanged, newly assigned, lost, and reassigned observations across declared branches.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/coefficient-stability.svg" alt="Coefficient stability across AOI perturbation branches">
+  <figcaption><strong>Coefficient stability.</strong> Inspect effect magnitude and intervals across evaluable branches instead of reducing robustness to significance counts.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/robustness-surface.svg" alt="Two-dimensional AOI robustness surface">
+  <figcaption><strong>Robustness surface.</strong> Locate regions of higher or lower stability when horizontal and vertical geometry changes are varied jointly.</figcaption>
+</figure>
+
+</div>
+
+[Open the AOI uncertainty workflow →](guides/aoi-uncertainty/)
+
 ## Time-to-event gaze workflows
 
 <div class="ep-gallery" markdown>
