@@ -1855,6 +1855,15 @@ def report_detector_multiverse(
         _markdown_table(summary["feature_sensitivity"]) if not summary["feature_sensitivity"].empty else "AOI features were not propagated or no cross-detector comparison was estimable.",
         "",
     ]
+    if inference is not None:
+        lines.extend([
+            "## Model-input audit",
+            "",
+            _markdown_table(inference.input_audit) if not inference.input_audit.empty else "No model-input audit rows were available.",
+            "",
+            "AOI selection, declared quality exclusions, non-finite outcomes, and model rows used are reported separately; missing outcomes are never converted to zero.",
+            "",
+        ])
     if inference is not None and term is not None:
         lines.extend([
             "## Inference stability",
@@ -1864,12 +1873,14 @@ def report_detector_multiverse(
             "The convergence-rate denominator is every planned detector specification. Model failures, missing requested terms, and non-converged branches therefore remain visible rather than disappearing from robustness accounting.",
             "",
         ])
+    if inference is not None and not inference.failures.empty:
+        lines.extend(["## Model failures", "", _markdown_table(inference.failures), ""])
     if not x.failures.empty:
         lines.extend(["## Branch failures", "", _markdown_table(x.failures), ""])
     lines.extend([
         "## Reporting guidance",
         "",
-        "Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, number of successful/failed specifications, event-level agreement, the range of key AOI features, coefficient distributions with uncertainty, convergence failures, and any substantive threshold used. Do not summarize robustness by counting p-values alone.",
+        "Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, successful/failed specifications, model-input audit counts, event-level agreement, feature ranges, coefficient distributions with uncertainty, convergence failures, and any substantive threshold. Do not summarize robustness by counting p-values alone.",
         "",
         "## Limitations",
         "",
