@@ -13,6 +13,36 @@ from .importers import validate_eye_mapping, infer_eye_mapping, read_eye_generic
 from .adapters import register_eye_adapter, unregister_eye_adapter, supported_eye_formats, detect_eye_format, read_eye_export, read_eye_folder, combine_eye_datasets, remap_recording_ids
 
 from .gazepoint import (is_gazepoint_export, gp_identify_export_type, gp_profile_export, gp_list_export_fields, gp_validate_export, read_gazepoint, read_gazepoint_gaze, read_gazepoint_fixations, read_gazepoint_events, read_gazepoint_folder, gp_pair_exports, gp_match_recordings, gp_match_biometrics, gp_audit_file_pairs, read_gazepoint_biometrics, read_gazepoint_combined, gp_parse_user_events, gp_parse_media_events)
+from .detector_multiverse import (
+    DetectorInferenceResult as DetectorInferenceResult,
+    DetectorMultiverse as DetectorMultiverse,
+    DetectorMultiverseResult as DetectorMultiverseResult,
+    EventDetectorSpec as EventDetectorSpec,
+    assess_detector_inference_stability as assess_detector_inference_stability,
+    compare_event_catalogues as compare_event_catalogues,
+    create_detector_multiverse as create_detector_multiverse,
+    define_event_detector_spec as define_event_detector_spec,
+    detect_events_with_spec as detect_events_with_spec,
+    estimate_detector_agreement as estimate_detector_agreement,
+    import_external_detector_events as import_external_detector_events,
+    match_detected_events as match_detected_events,
+    plot_detector_agreement as plot_detector_agreement,
+    plot_detector_coefficient_stability as plot_detector_coefficient_stability,
+    plot_detector_event_timeline as plot_detector_event_timeline,
+    plot_detector_feature_distributions as plot_detector_feature_distributions,
+    plot_detector_multiverse as plot_detector_multiverse,
+    propagate_detector_to_aoi as propagate_detector_to_aoi,
+    propagate_detector_to_features as propagate_detector_to_features,
+    report_detector_multiverse as report_detector_multiverse,
+    run_detector_inference_multiverse as run_detector_inference_multiverse,
+    run_detector_multiverse as run_detector_multiverse,
+    simulate_detector_multiverse_data as simulate_detector_multiverse_data,
+    summarise_detector_disagreement as summarise_detector_disagreement,
+    summarise_detector_events as summarise_detector_events,
+    summarise_detector_robustness as summarise_detector_robustness,
+    validate_event_detector_spec as validate_event_detector_spec,
+)
+
 register_eye_adapter("gazepoint", is_gazepoint_export, read_gazepoint, gp_validate_export, priority=100, overwrite=True)
 
 from .irt import *

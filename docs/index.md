@@ -71,6 +71,15 @@ hide:
   <a class="md-button" href="articles/measurement-accountability-0-11/">Open measurement accountability</a>
 </div>
 
+<div class="ep-method-cta">
+  <div>
+    <span>Development method · detector sensitivity</span>
+    <strong>Would the scientific conclusion change under another defensible event detector?</strong>
+    <p>Run I-VT, I-DT, adaptive-velocity, REMoDNaV, external, or vendor event branches through the same AOIs, features, and model while preserving failures and provenance.</p>
+  </div>
+  <a class="md-button" href="guides/event-detector-multiverse/">Open detector multiverse</a>
+</div>
+
 <section class="ep-section-intro">
   <span class="ep-section-number">01</span>
   <div>

@@ -29,6 +29,16 @@ nav:
           - Readiness checklist: guides/multilevel-mediation/analysis-readiness-checklist.md
           - Why aggregation can mislead: guides/multilevel-mediation/why-aggregation-can-mislead.md
       - Eye-tracking end to end: guides/end-to-end-eye-tracking.md
+      - Event detector multiverse:
+          - Method overview: guides/event-detector-multiverse.md
+          - Decision guide: guides/detector-multiverse-decision-guide.md
+          - Building the multiverse: guides/building-detector-multiverse.md
+          - Comparing events: guides/comparing-event-catalogues.md
+          - AOI & feature propagation: guides/detector-aoi-features.md
+          - Statistical inference: guides/detector-statistical-inference.md
+          - Reporting guidance: guides/reporting-detector-sensitivity.md
+          - Reporting template: guides/detector-multiverse-reporting-template.md
+          - Troubleshooting: guides/detector-multiverse-troubleshooting.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
@@ -62,6 +72,8 @@ nav:
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
       - Worked examples:
           - Overview: examples/index.md
+          - Detector choice → inference: examples/detector-multiverse-disclosure.md
+          - Detector failure clinic: examples/detector-multiverse-failure-clinic.md
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
           - Data-quality validation: examples/data-quality-validation.md
@@ -83,6 +95,7 @@ nav:
   - Reference:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
+      - Detector multiverse API: reference/detector-multiverse.md
       - Plotting reference: reference/plotting.md
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md

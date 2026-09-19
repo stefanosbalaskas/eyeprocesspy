@@ -76,6 +76,18 @@
 
     [Open worked workflow](irt-diagnostics.md)
 
+-   :material-tune-variant: **Detector choice → inference**
+
+    Compare defensible event detectors, propagate differences into AOI features, fit the same model across branches, and report coefficient stability rather than significance counts.
+
+    [Open worked workflow](detector-multiverse-disclosure.md)
+
+-   :material-alert-circle-outline: **Detector failure clinic**
+
+    Exercise explicit detector failure, quality exclusion, outcome missingness, and callback-contract failure while retaining every state in audit tables.
+
+    [Open failure clinic](detector-multiverse-failure-clinic.md)
+
 </div>
 
 For short task-oriented snippets, use the [Cookbook](../cookbook.md). For visual output, browse the [15-figure gallery](../gallery.md).
@@ -214,6 +226,8 @@ For release-level verification, use the deterministic benchmark, validation evid
 | Script | Purpose | Output |
 | --- | --- | --- |
 | `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |\n| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/detector_multiverse_worked.py` | Detector specs → events → AOIs/features → identical model → robustness report | `detector-multiverse-output/*.svg` + Markdown |
+| `examples/detector_multiverse_failure_clinic.py` | Deliberate detector/model failures → retained status, warnings, input audit, callback validation | console audit tables |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
 | `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
