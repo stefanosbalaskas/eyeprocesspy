@@ -21,6 +21,7 @@ def test_detector_multiverse_documentation_surface_exists():
         "guides/detector-statistical-inference.md",
         "guides/reporting-detector-sensitivity.md",
         "guides/detector-multiverse-decision-guide.md",
+        "guides/detector-multiverse-visual-atlas.md",
         "guides/detector-multiverse-reporting-template.md",
         "guides/detector-multiverse-troubleshooting.md",
         "examples/detector-multiverse-disclosure.md",
@@ -40,7 +41,8 @@ def test_detector_multiverse_reference_only_names_public_api():
 
 def test_new_documentation_internal_links_resolve():
     pages = list((DOCS / "guides").glob("*detector*.md")) + [
-        DOCS / "examples/detector-multiverse-disclosure.md"
+        DOCS / "examples/detector-multiverse-disclosure.md",
+        DOCS / "examples/detector-multiverse-failure-clinic.md",
     ]
     pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md(?:#[^)]+)?)\)")
     for page in pages:
@@ -117,3 +119,28 @@ def test_detector_guidance_documents_input_audit_and_failure_rules():
     assert "outcome_missing_rows" in inference
     assert "no_model_data" in troubleshooting
     assert "planned-specification convergence rate" in reporting
+
+
+def test_detector_visual_atlas_and_assets_are_retained():
+    atlas = DOCS / "guides" / "detector-multiverse-visual-atlas.md"
+    text = atlas.read_text(encoding="utf-8")
+    assets = [
+        "detector-agreement.svg",
+        "disclosure-dwell-by-detector.svg",
+        "condition-coefficient-stability.svg",
+        "robustness-denominator.svg",
+        "model-input-audit.svg",
+    ]
+    for asset in assets:
+        assert (DOCS / "assets" / "detector-multiverse" / asset).exists(), asset
+        assert asset in text
+    assert "5/6" in text
+    assert "16 propagated rows" in text
+    assert "missing outcomes are never recoded as zero" in text
+
+
+def test_global_gallery_exposes_detector_accountability_visuals():
+    text = (DOCS / "gallery.md").read_text(encoding="utf-8")
+    assert "## Detector sensitivity and inference accountability" in text
+    assert "robustness-denominator.svg" in text
+    assert "model-input-audit.svg" in text
