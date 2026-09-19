@@ -46,6 +46,12 @@
 
     [Open worked plan](aoi-analysis-plan-worked.md)
 
+-   :material-package-variant-closed-check: **AOI reporting bundle**
+
+    Package the declared plan, branch audit, assignment/model evidence, failures, provenance, report, figures, and deterministic hashes for manuscript or reviewer handoff.
+
+    [Open reporting bundle](aoi-reporting-bundle.md)
+
 -   :material-vector-polygon: **AOI perturbation sensitivity**
 
     Perturb AOI geometry in pixels or degrees, remap fixations, recompute features, propagate the same model, and inspect robustness visually.
@@ -210,6 +216,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/worked_gaze_survival_analysis.py` | Raw trial/event inputs → censoring → Kaplan–Meier → clustered Cox/AFT → diagnostics/reporting | console summaries + survival plots |
 | `examples/worked_gaze_verification_survival.py` | Source/evidence AOI entry → censoring → clustered Cox/AFT → diagnostics/reporting | CSV/JSON summaries + Kaplan–Meier SVG |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
+| `examples/aoi_reporting_bundle.py` | AOI result → manuscript/reviewer evidence bundle → deterministic SHA-256 manifest | `workflow-output/aoi-reporting-bundle/*` |
 | `examples/aoi_perturbation_failure_clinic.py` | Deliberate AOI geometry/model failures → retained audits → troubleshooting report | `workflow-output/aoi-failure-clinic/*` |
 
 | `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
@@ -219,6 +226,7 @@ All listed examples are deterministic and use no private participant data.
 ## AOI uncertainty
 
 - [AOI analysis plan](aoi-analysis-plan-worked.md): filled preregistration-style plan with API mapping and planned interpretation rules.
+- [AOI reporting bundle](aoi-reporting-bundle.md): deterministic evidence package for manuscript, reviewer, and replication handoff.
 - [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
 - [AOI perturbation failure clinic](aoi-perturbation-failure-clinic.md): deliberate geometry/model failure, ambiguity, non-convergence, and retained audit trails.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
