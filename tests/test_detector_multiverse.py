@@ -485,3 +485,35 @@ def test_all_nonfinite_outcomes_fail_with_audit_instead_of_disappearing():
     assert audit.model_rows_used == 0
     assert fit.failures.iloc[0].outcome_missing_rows == audit.outcome_missing_rows
 
+def test_report_includes_model_input_audit_and_model_failures():
+    data = ep.simulate_detector_multiverse_data(n_participants=4, seed=46)
+    result = ep.run_detector_multiverse(data, [ivt("ivt25", 25), ivt("ivt35", 35)])
+    result = ep.propagate_detector_to_aoi(result)
+    result = ep.propagate_detector_to_features(result)
+
+    def selective(data, spec):
+        if str(data["detector_id"].iloc[0]) == "ivt35":
+            raise RuntimeError("deliberate model failure")
+        return pd.DataFrame([{
+            "term": "condition",
+            "estimate": 1.0,
+            "SE": 0.2,
+            "CI_lower": 0.6,
+            "CI_upper": 1.4,
+            "p": 0.01,
+            "converged": True,
+            "N": len(data),
+        }])
+
+    fit = ep.run_detector_inference_multiverse(
+        result,
+        {"engine": "callback", "outcome": "dwell_time_ms", "aoi_id": "disclosure"},
+        model_callback=selective,
+    )
+    text = ep.report_detector_multiverse(result, inference=fit, term="condition")
+    assert "## Model-input audit" in text
+    assert "quality_excluded_rows" in text
+    assert "outcome_missing_rows" in text
+    assert "## Model failures" in text
+    assert "deliberate model failure" in text
+
