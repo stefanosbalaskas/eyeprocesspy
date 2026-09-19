@@ -4,6 +4,15 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+### Event-detector multiverse and inference robustness
+
+- Added an explicit vendor-neutral detector-sensitivity workflow spanning detector specifications, deterministic branch execution, temporal event matching/agreement, AOI and feature propagation, identical-model inference, stability summaries, visualization, and reproducible Markdown reporting.
+- Added a planned-specification convergence denominator: failed fits, missing focal terms, unavailable external backends, and non-converged branches remain visible rather than disappearing from robustness accounting. Custom model callbacks reject duplicate coefficient terms within a detector branch.
+- Added per-detector model-input accountability through `DetectorInferenceResult.input_audit`, separating propagated rows, target-AOI selection, declared quality exclusions, non-finite outcomes, model rows used, and final branch status. Missing outcomes are never converted to zero.
+- Added a deterministic disclosure worked example, executable failure clinic, decision guide, troubleshooting guide, reporting template, interpretation/limitations guidance, API reference, figures, report asset, and expanded MkDocs discovery.
+
+**Validation record — 2026-09-19:** the detector implementation and regression suite passed **24/24 locally reconstructed detector tests**; the failure clinic and seeded worked example executed successfully; `py_compile` passed for the detector module/example. The merged feature commit is **not GitHub CI-certified** because exact-head Actions did not execute. Re-check Ruff delta, Python 3.11–3.14 across Linux/macOS/Windows, wheel/build, R-oracle parity smoke, documentation build/deployment, and any required status checks when Actions capacity is available.
+
 ### Standardized spatial data quality
 
 - Added vendor-neutral target-referenced accuracy, RMS-S2S and population-SD precision, explicit-probability BCEA, empirical sampling interval/jitter/effective-Hz diagnostics, validity fractions, reason-aware data loss, and a canonical review-oriented quality report.
