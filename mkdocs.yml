@@ -32,6 +32,11 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Standardized Data Quality:
+          - Overview & equations: guides/data-quality.md
+          - Reporting guideline: guides/data-quality-reporting.md
+          - Worked 9-point validation: examples/data-quality-validation.md
+          - Threshold sensitivity: examples/data-quality-sensitivity.md
       - Censored gaze latency:
           - Method overview: methods/gaze-survival/index.md
           - Decision guide: methods/gaze-survival/decision-guide.md
@@ -39,6 +44,7 @@ nav:
           - Reporting & limitations: methods/gaze-survival/reporting.md
           - Reporting template: methods/gaze-survival/reporting-template.md
           - Troubleshooting: methods/gaze-survival/troubleshooting.md
+          - Reproducibility checklist: methods/gaze-survival/reproducibility-checklist.md
       - AOI perturbation & uncertainty:
           - Start here: guides/aoi-uncertainty/index.md
           - Geometry is an analytical assumption: guides/aoi-uncertainty/geometry-assumption.md
@@ -58,6 +64,8 @@ nav:
           - Overview: examples/index.md
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
+          - Data-quality validation: examples/data-quality-validation.md
+          - Data-quality sensitivity: examples/data-quality-sensitivity.md
           - Process reliability: examples/process-reliability.md
           - Disclosure inspection: examples/gaze-survival-analysis.md
           - Evidence verification: examples/gaze-verification-survival.md
@@ -78,6 +86,7 @@ nav:
       - Plotting reference: reference/plotting.md
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md
+      - Data Quality API: reference/data-quality.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
