@@ -31,6 +31,19 @@ Use specialist statistical packages for models that belong there. The callback r
 
 Formula engines are configured with `missing="raise"`. Missing predictors therefore cause an explicit branch failure instead of an unnoticed reduction in N. If complete-case analysis is intended, construct that analysis dataset explicitly before fitting and report the rule.
 
+### Model-input audit
+
+Outcome and quality attrition are also explicit. `run_detector_inference_multiverse()` returns `inference.input_audit`, one row per planned detector specification, with:
+
+- `input_rows`: all propagated feature rows for that detector;
+- `aoi_selected_rows`: rows remaining after an explicit `aoi_id` selection;
+- `quality_excluded_rows`: rows removed by the declared `minimum_valid_fraction`;
+- `outcome_missing_rows`: rows with a non-finite model outcome;
+- `model_rows_used`: rows handed to the estimator;
+- `status`: `modelled`, `failed`, or `no_model_data`.
+
+Quality and non-finite-outcome exclusions also create `model_input` warning rows. The same audit counts are copied onto coefficient rows when a model is fitted and onto failure rows when fitting cannot proceed. A trial can therefore leave the model only with a recorded reason; missing outcomes are never silently converted to zero or silently discarded.
+
 ## Convergence
 
 Each coefficient row stores `converged`, warnings and N. A non-converged branch is retained for diagnosis, but `assess_detector_inference_stability()` excludes it from coefficient-stability calculations.
