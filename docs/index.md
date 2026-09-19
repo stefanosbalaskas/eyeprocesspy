@@ -78,6 +78,15 @@ hide:
     <p>Run I-VT, I-DT, adaptive-velocity, REMoDNaV, external, or vendor event branches through the same AOIs, features, and model while preserving failures and provenance.</p>
   </div>
   <a class="md-button" href="guides/event-detector-multiverse/">Open detector multiverse</a>
+<div class="ep-method-cta">
+  <div>
+    <span>Development method · AOI robustness</span>
+    <strong>Would the conclusion survive another defensible AOI boundary?</strong>
+    <p>Prespecify pixel/degree perturbations, remap samples or fixations, preserve ambiguity and missingness, recompute features, propagate the same model, inspect assignment/coefficient stability, retain failures, and package the evidence for reviewers.</p>
+  </div>
+  <a class="md-button" href="guides/aoi-uncertainty/">Open AOI robustness</a>
+</div>
+
 </div>
 
 <section class="ep-section-intro">
@@ -138,6 +147,18 @@ hide:
     <p>Separate target-referenced accuracy, short-term and spatial precision, BCEA, realized sampling behavior, jitter, and data loss before applying review rules.</p>
     <span class="ep-question-card__link">Audit data quality →</span>
   </a>
+  <a class="ep-question-card" href="guides/aoi-uncertainty/">
+    <span class="ep-question-card__index">09</span><div class="ep-question-card__icon">▱</div>
+    <h3>Are AOI conclusions geometry-sensitive?</h3>
+    <p>Stress-test defensible boundary changes, assignment stability, zero-versus-missing denominators, coefficient trajectories, convergence, and model N.</p>
+    <span class="ep-question-card__link">Stress-test AOIs →</span>
+  </a>
+  <a class="ep-question-card" href="guides/multilevel-mediation/">
+    <span class="ep-question-card__index">10</span><div class="ep-question-card__icon">⇄</div>
+    <h3>Should gaze enter mediation at trial level?</h3>
+    <p>Preserve repeated-measures trials, separate within- and between-person components, audit missingness, and prepare model-ready mediation evidence without premature aggregation.</p>
+    <span class="ep-question-card__link">Prepare trial-level mediation →</span>
+  </a>
 </div>
 
 <div class="ep-method-cta">
@@ -197,9 +218,10 @@ assert audit["valid"]
   <a href="gallery/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gallery/process-reliability.svg" alt="Process reliability visualization"><span><b>Process reliability</b><small>Inspect repeatability and agreement evidence</small></span></a>
   <a href="methods/gaze-survival/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gaze-survival/km-disclosure.svg" alt="Censored gaze-latency Kaplan–Meier curves"><span><b>Censored gaze latency</b><small>Keep never-inspected valid trials in the risk set as right-censored observations</small></span></a>
   <a href="examples/gaze-verification-survival/" class="ep-plot-tile"><img src="assets/gaze-survival/km-evidence-verification.svg" alt="Evidence-verification Kaplan–Meier curves"><span><b>Evidence verification</b><small>Model time to first source/evidence inspection without dropping non-events</small></span></a>
-  <a href="guides/aoi-uncertainty/" class="ep-plot-tile"><img src="assets/aoi-uncertainty/robustness-surface.svg" alt="AOI robustness surface"><span><b>AOI robustness</b><small>Propagate defensible geometry changes into features and models</small></span></a>
-  <a href="guides/event-detector-multiverse/" class="ep-plot-tile"><img src="assets/detector-multiverse/condition-coefficient-stability.svg" alt="Detector coefficient stability"><span><b>Detector multiverse</b><small>See whether the inferential conclusion depends on event definition</small></span></a>
-  <a href="guides/data-quality/" class="ep-plot-tile"><img src="assets/data-quality-accuracy-precision.svg" alt="Standardized data-quality plot"><span><b>Data quality</b><small>Separate accuracy, precision, sampling and data loss before applying review rules</small></span></a>
+  <a href="guides/event-detector-multiverse/" class="ep-plot-tile"><img src="assets/detector-multiverse/condition-coefficient-stability.svg" alt="Detector coefficient stability"><span><b>Detector multiverse</b><small>See whether inference depends on event definition</small></span></a>
+  <a href="guides/data-quality/" class="ep-plot-tile"><img src="assets/data-quality-accuracy-precision.svg" alt="Standardized data-quality plot"><span><b>Data quality</b><small>Separate accuracy and precision before review decisions</small></span></a>
+  <a href="guides/aoi-uncertainty/" class="ep-plot-tile"><img src="assets/aoi-uncertainty/geometry-perturbation.svg" alt="Nominal and perturbed AOI geometry with reassigned fixations"><span><b>AOI geometry robustness</b><small>See which observations change when defensible boundaries move</small></span></a>
+  <a href="guides/aoi-uncertainty/model-propagation/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/aoi-uncertainty/coefficient-stability.svg" alt="Coefficient stability across AOI perturbations"><span><b>Inference under AOI uncertainty</b><small>Track coefficient magnitude, intervals, convergence, and model N across branches</small></span></a>
 </div>
 <div class="ep-center-action"><a class="md-button" href="gallery/">Explore the complete plot gallery</a></div>
 
