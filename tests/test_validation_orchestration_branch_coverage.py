@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -134,7 +134,7 @@ def test_validation_job_plan_guards_metadata_and_safe_identifiers():
 
 
 def test_serialize_deserialize_roundtrip_rich_python_payload():
-    stamp = datetime(2026, 9, 1, 12, 0, tzinfo=timezone.utc)
+    stamp = datetime(2026, 9, 1, 12, 0, tzinfo=UTC)
     payload = {
         "missing": pd.NA,
         "frame": pd.DataFrame({"a": [1, 2], "b": ["x", "y"]}),

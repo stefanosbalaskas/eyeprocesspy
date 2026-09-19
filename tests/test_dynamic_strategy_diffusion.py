@@ -9,7 +9,9 @@ from eyeprocesspy.exceptions import EyeProcessBackendError, EyeProcessModelError
 
 def test_dynamic_irtree_simulation_and_design_preserve_transitions():
     sim = ep.simulate_dynamic_irtree_data(n_person=12, n_item=6, transitions_per_trial=8, seed=11)
-    assert {"participant_id", "item_id", "trial_id", "to_state", "time"}.issubset(sim.transitions.columns)
+    assert {"participant_id", "item_id", "trial_id", "to_state", "time"}.issubset(
+        sim.transitions.columns
+    )
     spec = ep.dynamic_irtree_spec(engine="multinomial", condition_columns=None)
     prepared = ep.prepare_dynamic_irtree_data(sim.transitions, spec)
     design = ep.dynamic_transition_design(prepared, spec)
@@ -20,7 +22,9 @@ def test_dynamic_irtree_simulation_and_design_preserve_transitions():
 
 def test_structural_zeros_are_enforced():
     states = ["prompt", "option", "submit"]
-    mask = ep.structural_transition_mask(states, structural_zeros=pd.DataFrame({"from": ["submit"], "to": ["prompt"]}))
+    mask = ep.structural_transition_mask(
+        states, structural_zeros=pd.DataFrame({"from": ["submit"], "to": ["prompt"]})
+    )
     assert not bool(mask.loc["submit", "prompt"])
     assert bool(mask.loc["prompt", "option"])
 
@@ -73,21 +77,27 @@ def test_dynamic_stan_gate_ppc_guard_and_recovery_plan(monkeypatch):
 
 def test_strategy_signatures_normalized_and_zero_rejected():
     spec = ep.theory_strategy_spec(
-        {"analytic": {"prompt": 1, "evidence": 2}, "heuristic": {"prompt": -1, "evidence": .2}},
-        engine="em", multiple_starts=2,
+        {"analytic": {"prompt": 1, "evidence": 2}, "heuristic": {"prompt": -1, "evidence": 0.2}},
+        engine="em",
+        multiple_starts=2,
     )
     assert spec.eyeprocess_class == "eye_theory_strategy_spec"
-    np.testing.assert_allclose(np.sqrt((spec.signatures.to_numpy() ** 2).sum(axis=1)), [1, 1], atol=1e-8)
+    np.testing.assert_allclose(
+        np.sqrt((spec.signatures.to_numpy() ** 2).sum(axis=1)), [1, 1], atol=1e-8
+    )
     with pytest.raises(Exception, match="non-zero"):
         ep.theory_strategy_spec({"a": {"x": 0}, "b": {"x": 1}})
 
 
 def test_strategy_em_returns_anchored_probabilities():
-    signatures = pd.DataFrame([[1, 1], [-1, .2]], index=["analytic", "heuristic"], columns=["prompt", "evidence"])
+    signatures = pd.DataFrame(
+        [[1, 1], [-1, 0.2]], index=["analytic", "heuristic"], columns=["prompt", "evidence"]
+    )
     sim = ep.simulate_strategy_mixture_data(10, 4, signatures, seed=12)
     spec = ep.theory_strategy_spec(
-        {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": .2}},
-        engine="em", multiple_starts=2,
+        {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": 0.2}},
+        engine="em",
+        multiple_starts=2,
     )
     prepared = ep.prepare_strategy_mixture_data(sim, spec)
     direct = ep.fit_strategy_mixture_em(prepared, starts=2, max_iter=30, seed=5)
@@ -106,17 +116,23 @@ def test_strategy_em_returns_anchored_probabilities():
 
 
 def test_strategy_stan_gate_aoi_sensitivity_and_manipulation(monkeypatch):
-    signatures = pd.DataFrame([[1, 1], [-1, .2]], index=["analytic", "heuristic"], columns=["prompt", "evidence"])
+    signatures = pd.DataFrame(
+        [[1, 1], [-1, 0.2]], index=["analytic", "heuristic"], columns=["prompt", "evidence"]
+    )
     sim = ep.simulate_strategy_mixture_data(8, 3, signatures, seed=21)
     sim["condition"] = np.where(np.arange(len(sim)) % 2 == 0, "A", "B")
     spec = ep.theory_strategy_spec(
-        {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": .2}},
-        condition="condition", engine="em", multiple_starts=1,
+        {"analytic": {"prompt": 1, "evidence": 1}, "heuristic": {"prompt": -1, "evidence": 0.2}},
+        condition="condition",
+        engine="em",
+        multiple_starts=1,
     )
     prepared = ep.prepare_strategy_mixture_data(sim, spec)
 
     def unavailable():
-        raise EyeProcessBackendError("stan backend intentionally unavailable in strategy parity test")
+        raise EyeProcessBackendError(
+            "stan backend intentionally unavailable in strategy parity test"
+        )
 
     monkeypatch.setattr(dynamic_mod, "_cmdstanpy", unavailable)
     with pytest.raises(EyeProcessBackendError, match="intentionally unavailable"):
@@ -133,7 +149,7 @@ def test_strategy_stan_gate_aoi_sensitivity_and_manipulation(monkeypatch):
 
 
 def test_gaze_diffusion_data_and_baseline_fit():
-    sim = ep.simulate_gaze_diffusion_data(8, 4, seed=9, time_step=.01, max_decision_time=2)
+    sim = ep.simulate_gaze_diffusion_data(8, 4, seed=9, time_step=0.01, max_decision_time=2)
     spec = ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline")
     prepared = ep.prepare_gaze_diffusion_data(sim, spec)
     assert prepared.eyeprocess_class == "eye_gaze_diffusion_data"
@@ -141,8 +157,10 @@ def test_gaze_diffusion_data_and_baseline_fit():
     with pytest.raises(Exception, match="only one"):
         ep.gaze_diffusion_spec(drift_features=["x"], boundary_features=["x"])
 
-    sim2 = ep.simulate_gaze_diffusion_data(10, 5, seed=2, time_step=.01, max_decision_time=2)
-    fit = ep.fit_gaze_diffusion_irt(sim2, ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline"))
+    sim2 = ep.simulate_gaze_diffusion_data(10, 5, seed=2, time_step=0.01, max_decision_time=2)
+    fit = ep.fit_gaze_diffusion_irt(
+        sim2, ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline")
+    )
     assert fit.eyeprocess_class == "eye_gaze_diffusion_irt"
     parameters = ep.extract_diffusion_parameters(fit)
     assert {"component", "term", "estimate"}.issubset(parameters.columns)
@@ -158,7 +176,12 @@ def test_gaze_diffusion_data_and_baseline_fit():
 def test_diffusion_identification_plan_and_stan_gate(monkeypatch):
     spec = ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline")
     study = ep.diffusion_identification_study(
-        conditions={"n_person": [8], "n_item": [4], "gaze_effect": [0.2], "contaminant_fraction": [0.0]},
+        conditions={
+            "n_person": [8],
+            "n_item": [4],
+            "gaze_effect": [0.2],
+            "contaminant_fraction": [0.0],
+        },
         replications=1,
         base_seed=11,
         spec=spec,
@@ -166,12 +189,14 @@ def test_diffusion_identification_plan_and_stan_gate(monkeypatch):
     assert study.eyeprocess_class == "eye_diffusion_identification_study"
     assert len(study.plan.jobs) == 1
 
-    sim = ep.simulate_gaze_diffusion_data(8, 4, seed=12, time_step=.01, max_decision_time=2)
+    sim = ep.simulate_gaze_diffusion_data(8, 4, seed=12, time_step=0.01, max_decision_time=2)
     stan_spec = ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="stan")
     prepared = ep.prepare_gaze_diffusion_data(sim, stan_spec)
 
     def unavailable():
-        raise EyeProcessBackendError("stan backend intentionally unavailable in diffusion parity test")
+        raise EyeProcessBackendError(
+            "stan backend intentionally unavailable in diffusion parity test"
+        )
 
     monkeypatch.setattr(dynamic_mod, "_cmdstanpy", unavailable)
     with pytest.raises(EyeProcessBackendError, match="intentionally unavailable"):
@@ -180,9 +205,19 @@ def test_diffusion_identification_plan_and_stan_gate(monkeypatch):
 
 def test_advanced_stan_resources_present_and_syntax_guarded():
     from importlib import resources
-    for name in ["dynamic_irtree_observed.stan", "dynamic_irtree_hidden.stan", "theory_strategy_mixture.stan", "gaze_diffusion_irt.stan"]:
+
+    for name in [
+        "dynamic_irtree_observed.stan",
+        "dynamic_irtree_hidden.stan",
+        "theory_strategy_mixture.stan",
+        "gaze_diffusion_irt.stan",
+    ]:
         assert resources.files("eyeprocesspy").joinpath("resources", "stan", name).is_file()
-    code = resources.files("eyeprocesspy").joinpath("resources", "stan", "gaze_diffusion_irt.stan").read_text()
+    code = (
+        resources.files("eyeprocesspy")
+        .joinpath("resources", "stan", "gaze_diffusion_irt.stan")
+        .read_text()
+    )
     assert "wiener_lcdf_unnorm(rt, boundary, nondecision, starting, drift)" in code
     assert "wiener_lccdf_unnorm(rt, boundary, nondecision, starting, drift)" in code
     assert "fabs(" not in code

@@ -243,7 +243,9 @@ def assign_aois_probabilistic(
         error_model = error_model[0] if error_model else "empirical"
     error_model = str(error_model)
     if error_model not in {"empirical", "gaussian", "ellipse"}:
-        raise EyeProcessValidationError("`error_model` must be 'empirical', 'gaussian', or 'ellipse'.")
+        raise EyeProcessValidationError(
+            "`error_model` must be 'empirical', 'gaussian', or 'ellipse'."
+        )
 
     x_col = x_col or _first_column(
         x,
@@ -257,7 +259,9 @@ def assign_aois_probabilistic(
     )
     missing = [column for column in (x_col, y_col) if column not in x.columns]
     if missing:
-        raise EyeProcessValidationError("`x` is missing required column(s): " + ", ".join(missing) + ".")
+        raise EyeProcessValidationError(
+            "`x` is missing required column(s): " + ", ".join(missing) + "."
+        )
 
     columns = _aoi_columns(aois)
     gx = _numeric(x[x_col])
@@ -343,7 +347,9 @@ def assign_aois_probabilistic(
 
     valid_id_cols = [column for column in requested_ids if column in x.columns]
     if valid_id_cols:
-        repeated_ids = x.loc[:, valid_id_cols].iloc[np.repeat(np.arange(len(x)), k)].reset_index(drop=True)
+        repeated_ids = (
+            x.loc[:, valid_id_cols].iloc[np.repeat(np.arange(len(x)), k)].reset_index(drop=True)
+        )
         membership = pd.concat([repeated_ids, membership], axis=1)
 
     max_index = np.argmax(probability_values, axis=1)
@@ -534,7 +540,9 @@ def _uncertain_aoi_metrics(
 
         hit_times = time[mask & np.isfinite(time)]
         values[f"ttff__{aoi}"] = (
-            float(hit_times.min() - overall_start) if hit_times.size and np.isfinite(overall_start) else np.nan
+            float(hit_times.min() - overall_start)
+            if hit_times.size and np.isfinite(overall_start)
+            else np.nan
         )
 
     values["transitions"] = float(np.sum(labels[1:] != labels[:-1]) if len(labels) > 1 else 0)
@@ -583,7 +591,10 @@ def propagate_aoi_uncertainty(
 
     for draw in range(1, draws + 1):
         sampled = np.asarray(
-            [rng.choice(labels, p=probability_values[row]) for row in range(len(probability_values))],
+            [
+                rng.choice(labels, p=probability_values[row])
+                for row in range(len(probability_values))
+            ],
             dtype=object,
         )
         values = _uncertain_aoi_metrics(
@@ -765,7 +776,9 @@ def plot_aoi_boundary_risk(x, ax=None, **kwargs):
             title="AOI separation audit",
         )
     else:
-        raise EyeProcessValidationError("`x` must be an `eye_probabilistic_aoi` or `eye_aoi_separation_audit` object.")
+        raise EyeProcessValidationError(
+            "`x` must be an `eye_probabilistic_aoi` or `eye_aoi_separation_audit` object."
+        )
 
     axis.eyeprocess_plot_data = data
     return axis
@@ -843,7 +856,10 @@ def plot_aoi_metric_uncertainty(x, ax=None, **kwargs):
             ax,
         )
 
-    values = [pd.to_numeric(draws[metric], errors="coerce").dropna().to_numpy(dtype=float) for metric in metrics]
+    values = [
+        pd.to_numeric(draws[metric], errors="coerce").dropna().to_numpy(dtype=float)
+        for metric in metrics
+    ]
     axis = _axis(ax)
     axis.boxplot(values, tick_labels=metrics)
     axis.tick_params(axis="x", rotation=90)

@@ -1,4 +1,5 @@
 """AOI perturbation and uncertainty analysis public API."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -50,6 +51,7 @@ from .plots_aoi_perturbation import (
 
 class _AssignmentVector(list):
     """List-compatible AOI assignment vector."""
+
     def tolist(self) -> list[Any]:
         return list(self)
 
@@ -86,7 +88,9 @@ def run_aoi_sensitivity_analysis(
     geometry = validate_aoi_geometry(aois)["geometry"]
     if observation_id_col is not None:
         if observation_id_col not in frame.columns:
-            raise EyeProcessValidationError(f"Observation id column `{observation_id_col}` is absent.")
+            raise EyeProcessValidationError(
+                f"Observation id column `{observation_id_col}` is absent."
+            )
         ids = frame[observation_id_col].tolist()
         id_series = pd.Series(ids)
         if id_series.isna().any() or id_series.duplicated().any():
@@ -96,14 +100,25 @@ def run_aoi_sensitivity_analysis(
     else:
         ids = list(range(1, len(frame) + 1))
     grid_result = apply_aoi_perturbation_grid(geometry, grid)
-    completed = grid_result["audit"].loc[grid_result["audit"]["status"].eq("completed"), "perturbation_id"].astype(str).tolist()
+    completed = (
+        grid_result["audit"]
+        .loc[grid_result["audit"]["status"].eq("completed"), "perturbation_id"]
+        .astype(str)
+        .tolist()
+    )
     if "baseline" not in completed:
-        raise EyeProcessValidationError("Sensitivity analysis requires a successful `baseline` perturbation in the grid.")
+        raise EyeProcessValidationError(
+            "Sensitivity analysis requires a successful `baseline` perturbation in the grid."
+        )
 
     assignments: dict[str, pd.Series] = {}
     features: dict[str, pd.DataFrame] = {}
     model_rows: list[pd.DataFrame] = []
-    failure_rows = grid_result["audit"].loc[grid_result["audit"]["status"].eq("failed"), ["perturbation_id", "message"]].copy()
+    failure_rows = (
+        grid_result["audit"]
+        .loc[grid_result["audit"]["status"].eq("failed"), ["perturbation_id", "message"]]
+        .copy()
+    )
     if len(failure_rows):
         failure_rows["stage"] = "geometry"
     else:
@@ -112,7 +127,9 @@ def run_aoi_sensitivity_analysis(
 
     for pid in completed:
         geom = grid_result["geometries"][pid]
-        assigned = _assign_points(frame, geom, x_col=x_col, y_col=y_col, overlap_policy=overlap_policy)
+        assigned = _assign_points(
+            frame, geom, x_col=x_col, y_col=y_col, overlap_policy=overlap_policy
+        )
         assignments[pid] = assigned
         feat = recompute_aoi_features(
             frame,
@@ -131,32 +148,64 @@ def run_aoi_sensitivity_analysis(
             assigned_data["aoi_assignment"] = assigned
             assigned_data["perturbation_id"] = pid
             try:
-                model_table = _validate_model_table(model_callback(feat.copy(), assigned_data, specs[pid]), pid)
+                model_table = _validate_model_table(
+                    model_callback(feat.copy(), assigned_data, specs[pid]), pid
+                )
                 model_rows.append(model_table)
             except Exception as exc:
-                failure_rows = pd.concat([
-                    failure_rows,
-                    pd.DataFrame([{"perturbation_id": pid, "message": str(exc), "stage": "model"}]),
-                ], ignore_index=True)
+                failure_rows = pd.concat(
+                    [
+                        failure_rows,
+                        pd.DataFrame(
+                            [{"perturbation_id": pid, "message": str(exc), "stage": "model"}]
+                        ),
+                    ],
+                    ignore_index=True,
+                )
 
     baseline = assignments["baseline"]
     comparisons: dict[str, Any] = {}
     for pid, assigned in assignments.items():
         comparisons[pid] = compare_aoi_assignments(baseline, assigned, ids=ids)
     metadata_cols = [c for c in (participant_col, trial_col) if c is not None]
-    metadata = frame.loc[:, metadata_cols].copy() if metadata_cols else pd.DataFrame(index=frame.index)
+    metadata = (
+        frame.loc[:, metadata_cols].copy() if metadata_cols else pd.DataFrame(index=frame.index)
+    )
     metadata.insert(0, "observation_id", ids)
-    stability = estimate_aoi_assignment_stability(comparisons, metadata=metadata, group_cols=metadata_cols)
-    assignment_long = pd.concat([
-        pd.DataFrame({"perturbation_id": pid, "observation_id": ids, "aoi_assignment": labels.tolist()})
-        for pid, labels in assignments.items()
-    ], ignore_index=True)
+    stability = estimate_aoi_assignment_stability(
+        comparisons, metadata=metadata, group_cols=metadata_cols
+    )
+    assignment_long = pd.concat(
+        [
+            pd.DataFrame(
+                {"perturbation_id": pid, "observation_id": ids, "aoi_assignment": labels.tolist()}
+            )
+            for pid, labels in assignments.items()
+        ],
+        ignore_index=True,
+    )
     assignment_probability = estimate_fixation_assignment_probability(assignment_long)
     public_assignments = {
-        pid: _AssignmentVector(labels.tolist())
-        for pid, labels in assignments.items()
+        pid: _AssignmentVector(labels.tolist()) for pid, labels in assignments.items()
     }
-    models = pd.concat(model_rows, ignore_index=True) if model_rows else pd.DataFrame(columns=["perturbation_id", "term", "estimate", "SE", "CI_low", "CI_high", "p_value", "model_converged", "N", "direction"])
+    models = (
+        pd.concat(model_rows, ignore_index=True)
+        if model_rows
+        else pd.DataFrame(
+            columns=[
+                "perturbation_id",
+                "term",
+                "estimate",
+                "SE",
+                "CI_low",
+                "CI_high",
+                "p_value",
+                "model_converged",
+                "N",
+                "direction",
+            ]
+        )
+    )
     provenance = {
         "source_data_hash": _stable_frame_hash(frame),
         "aoi_specification_hash": _stable_frame_hash(geometry),
@@ -189,7 +238,22 @@ def run_aoi_sensitivity_analysis(
 def assess_aoi_inference_stability(x: Any, *, term: str | None = None) -> pd.DataFrame:
     models = x["models"].copy()
     if models.empty:
-        return pd.DataFrame(columns=["term", "n_models", "n_converged", "convergence_proportion", "same_sign_proportion", "median_estimate", "min_estimate", "max_estimate", "median_CI_width", "median_N", "min_N", "max_N"])
+        return pd.DataFrame(
+            columns=[
+                "term",
+                "n_models",
+                "n_converged",
+                "convergence_proportion",
+                "same_sign_proportion",
+                "median_estimate",
+                "min_estimate",
+                "max_estimate",
+                "median_CI_width",
+                "median_N",
+                "min_N",
+                "max_N",
+            ]
+        )
     if term is not None:
         models = models.loc[models["term"].astype(str).eq(str(term))].copy()
         if models.empty:
@@ -205,26 +269,36 @@ def assess_aoi_inference_stability(x: Any, *, term: str | None = None) -> pd.Dat
             baseline_est = float(pd.to_numeric(baseline.iloc[0]["estimate"], errors="coerce"))
             baseline_sign = np.sign(baseline_est)
         estimates = pd.to_numeric(usable["estimate"], errors="coerce")
-        ci_width = pd.to_numeric(usable["CI_high"], errors="coerce") - pd.to_numeric(usable["CI_low"], errors="coerce")
+        ci_width = pd.to_numeric(usable["CI_high"], errors="coerce") - pd.to_numeric(
+            usable["CI_low"], errors="coerce"
+        )
         sample_sizes = pd.to_numeric(usable["N"], errors="coerce")
         signs = np.sign(estimates)
-        same = np.nan if not np.isfinite(baseline_sign) or not len(signs) else float(np.mean(signs == baseline_sign))
-        rows.append({
-            "term": current_term,
-            "n_models": len(z),
-            "n_converged": int(converged.sum()),
-            "convergence_proportion": float(converged.mean()) if len(z) else np.nan,
-            "same_sign_proportion": same,
-            "median_estimate": float(estimates.median()) if estimates.notna().any() else np.nan,
-            "min_estimate": float(estimates.min()) if estimates.notna().any() else np.nan,
-            "max_estimate": float(estimates.max()) if estimates.notna().any() else np.nan,
-            "median_CI_width": float(ci_width.median()) if ci_width.notna().any() else np.nan,
-            "median_N": float(sample_sizes.median()) if sample_sizes.notna().any() else np.nan,
-            "min_N": float(sample_sizes.min()) if sample_sizes.notna().any() else np.nan,
-            "max_N": float(sample_sizes.max()) if sample_sizes.notna().any() else np.nan,
-        })
+        same = (
+            np.nan
+            if not np.isfinite(baseline_sign) or not len(signs)
+            else float(np.mean(signs == baseline_sign))
+        )
+        rows.append(
+            {
+                "term": current_term,
+                "n_models": len(z),
+                "n_converged": int(converged.sum()),
+                "convergence_proportion": float(converged.mean()) if len(z) else np.nan,
+                "same_sign_proportion": same,
+                "median_estimate": float(estimates.median()) if estimates.notna().any() else np.nan,
+                "min_estimate": float(estimates.min()) if estimates.notna().any() else np.nan,
+                "max_estimate": float(estimates.max()) if estimates.notna().any() else np.nan,
+                "median_CI_width": float(ci_width.median()) if ci_width.notna().any() else np.nan,
+                "median_N": float(sample_sizes.median()) if sample_sizes.notna().any() else np.nan,
+                "min_N": float(sample_sizes.min()) if sample_sizes.notna().any() else np.nan,
+                "max_N": float(sample_sizes.max()) if sample_sizes.notna().any() else np.nan,
+            }
+        )
     out = pd.DataFrame(rows)
-    out.attrs["caveat"] = "Same-sign and convergence proportions are descriptive sensitivity summaries, not probabilities that an effect is true."
+    out.attrs["caveat"] = (
+        "Same-sign and convergence proportions are descriptive sensitivity summaries, not probabilities that an effect is true."
+    )
     return out
 
 
@@ -251,38 +325,62 @@ def report_aoi_sensitivity(x: Any) -> str:
     """Return a compact manuscript-oriented Markdown report."""
     summary = summarise_aoi_sensitivity(x)
     stability = summary["assignment_stability"]
-    median_unchanged = float(stability["proportion_unchanged"].median()) if len(stability) else np.nan
+    median_unchanged = (
+        float(stability["proportion_unchanged"].median()) if len(stability) else np.nan
+    )
     lines = [
         "## AOI perturbation sensitivity analysis",
         "",
         f"Planned perturbations: {summary['n_planned']}; completed geometry branches: {summary['n_completed']}; geometry failures: {summary['n_geometry_failed']}; model callback failures: {summary['n_model_failures']}.",
-        f"Median unchanged AOI assignment across completed perturbations: {median_unchanged:.3f}." if np.isfinite(median_unchanged) else "Assignment stability could not be summarized.",
+        f"Median unchanged AOI assignment across completed perturbations: {median_unchanged:.3f}."
+        if np.isfinite(median_unchanged)
+        else "Assignment stability could not be summarized.",
         "",
     ]
     inference = summary["inference_stability"]
     if len(inference):
-        lines.append("Model-level sensitivity was summarized using coefficient direction, magnitude, interval width, and convergence rather than significance alone.")
+        lines.append(
+            "Model-level sensitivity was summarized using coefficient direction, magnitude, interval width, and convergence rather than significance alone."
+        )
         for row in inference.itertuples(index=False):
             lines.append(
                 f"- `{row.term}`: {row.n_converged}/{row.n_models} converged; same-sign frequency={row.same_sign_proportion:.3f}; median estimate={row.median_estimate:.4g}; range=[{row.min_estimate:.4g}, {row.max_estimate:.4g}]; N range=[{row.min_N:.0f}, {row.max_N:.0f}]."
             )
         lines.append("")
-    lines.append("Interpretation: these quantities describe robustness to the declared AOI perturbations. They are not probabilities that the scientific conclusion is true.")
+    lines.append(
+        "Interpretation: these quantities describe robustness to the declared AOI perturbations. They are not probabilities that the scientific conclusion is true."
+    )
     if len(summary["failures"]):
-        lines.append("Failed or non-evaluable branches remain in the audit trail and should be reported rather than silently excluded.")
+        lines.append(
+            "Failed or non-evaluable branches remain in the audit trail and should be reported rather than silently excluded."
+        )
     return "\n".join(lines)
 
 
 __all__ = [
-    "OUTSIDE", "AMBIGUOUS", "aoi_perturbation_spec", "validate_aoi_geometry",
-    "convert_aoi_margin_to_degrees", "convert_aoi_margin_to_pixels",
-    "dilate_aoi", "erode_aoi", "translate_aoi", "jitter_aoi",
-    "perturb_aoi_geometry", "create_aoi_perturbation_grid",
-    "apply_aoi_perturbation_grid", "compare_aoi_assignments",
-    "estimate_aoi_assignment_stability", "estimate_fixation_assignment_probability",
-    "recompute_aoi_features", "run_aoi_sensitivity_analysis",
-    "summarise_aoi_sensitivity", "assess_aoi_inference_stability",
-    "report_aoi_sensitivity", "plot_aoi_perturbations",
-    "plot_aoi_assignment_stability", "plot_aoi_coefficient_stability",
+    "OUTSIDE",
+    "AMBIGUOUS",
+    "aoi_perturbation_spec",
+    "validate_aoi_geometry",
+    "convert_aoi_margin_to_degrees",
+    "convert_aoi_margin_to_pixels",
+    "dilate_aoi",
+    "erode_aoi",
+    "translate_aoi",
+    "jitter_aoi",
+    "perturb_aoi_geometry",
+    "create_aoi_perturbation_grid",
+    "apply_aoi_perturbation_grid",
+    "compare_aoi_assignments",
+    "estimate_aoi_assignment_stability",
+    "estimate_fixation_assignment_probability",
+    "recompute_aoi_features",
+    "run_aoi_sensitivity_analysis",
+    "summarise_aoi_sensitivity",
+    "assess_aoi_inference_stability",
+    "report_aoi_sensitivity",
+    "plot_aoi_perturbations",
+    "plot_aoi_assignment_stability",
+    "plot_aoi_coefficient_stability",
     "plot_aoi_robustness_surface",
 ]

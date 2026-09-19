@@ -72,7 +72,10 @@ def test_benchmark_expected_outputs_reproduce_exactly():
 
 def test_import_benchmark_prefers_canonical_dataset_when_available():
     imported = ep.import_benchmark_study()
-    assert ep.is_eye_dataset(imported) or getattr(imported, "eyeprocess_class", None) == "eye_benchmark_tables"
+    assert (
+        ep.is_eye_dataset(imported)
+        or getattr(imported, "eyeprocess_class", None) == "eye_benchmark_tables"
+    )
 
 
 def test_data_dictionary_and_release_audit(tmp_path: Path):

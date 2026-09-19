@@ -269,7 +269,9 @@ def test_canonical_folder_write_read_and_aliases(tmp_path):
     assert Path(out).is_dir()
     assert (folder / "gaze_samples.csv").is_file()
     assert (folder / ".eyeprocess-serialization.json").is_file()
-    assert "__EYEPROCESS_MISSING_6E7A4D2F__" in (folder / "recordings.csv").read_text(encoding="utf-8")
+    assert "__EYEPROCESS_MISSING_6E7A4D2F__" in (folder / "recordings.csv").read_text(
+        encoding="utf-8"
+    )
 
     restored = ep.read_eye_dataset(folder)
     cmp = ep.compare_eye_datasets(x, restored)
@@ -330,7 +332,9 @@ def test_as_eye_biometrics_eye_dataset_and_dataframe():
 def test_schema_coverage_and_summary():
     coverage = ep.schema_coverage(_dataset())
     assert {"table", "field", "critical", "status"} <= set(coverage.columns)
-    hit = coverage[(coverage["table"] == "gaze_samples") & (coverage["field"] == "timestamp_native")]
+    hit = coverage[
+        (coverage["table"] == "gaze_samples") & (coverage["field"] == "timestamp_native")
+    ]
     assert hit.iloc[0]["status"] == "pass"
     summary = ep.schema_coverage_summary(coverage)
     assert "gaze_samples" in set(summary["table"])
@@ -491,7 +495,9 @@ def test_anonymize_eye_dataset_remaps_linked_ids_and_redacts():
     assert out["recordings"].iloc[0]["recording_id"].startswith("R")
     assert out["responses"].iloc[0]["recording_id"] == out["recordings"].iloc[0]["recording_id"]
     assert out["responses"].iloc[0]["response"].startswith("response_")
-    assert out["events"].iloc[0]["event_value"] is pd.NA or pd.isna(out["events"].iloc[0]["event_value"])
+    assert out["events"].iloc[0]["event_value"] is pd.NA or pd.isna(
+        out["events"].iloc[0]["event_value"]
+    )
     assert out.raw == []
     assert out.vendor_metadata == {"redacted": True}
     assert hasattr(out, "anonymization_map")

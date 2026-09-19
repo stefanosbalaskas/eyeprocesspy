@@ -3,6 +3,7 @@
 These independent helpers complement, rather than replace, existing pupil,
 timebase, multimodal, and grouped-validation APIs.
 """
+
 from __future__ import annotations
 
 import math
@@ -112,7 +113,9 @@ def pupil_latency_sensitivity(
     slopes = [(response[i] - response[i - 1]) / (st[i] - st[i - 1]) for i in range(1, len(st))]
     peak_i = max(range(len(slopes)), key=lambda i: slopes[i]) + 1
     slope = slopes[peak_i - 1]
-    tangent_latency = (st[peak_i] - response[peak_i] / slope) - event_time if slope > 0 else math.nan
+    tangent_latency = (
+        (st[peak_i] - response[peak_i] / slope) - event_time if slope > 0 else math.nan
+    )
 
     best = None
     for k in range(2, len(st) - 2):
@@ -156,7 +159,8 @@ def pupil_latency_sensitivity(
     sim_error_ms = [abs(x - reference_latency) * 1000.0 for x in sim_latencies]
     p95_error_ms = (
         sorted(sim_error_ms)[max(0, math.ceil(0.95 * len(sim_error_ms)) - 1)]
-        if sim_error_ms else math.nan
+        if sim_error_ms
+        else math.nan
     )
     if len(finite_est) >= 2 and spread_ms <= 50 and (not sim_error_ms or p95_error_ms <= 100):
         resolvability = "high"
@@ -172,11 +176,19 @@ def pupil_latency_sensitivity(
         "noise_mad_sigma": noise,
         "response_amplitude": amplitude,
         "signal_to_noise": snr,
-        "simulation": {"n": int(simulations), "successful": len(sim_latencies), "p95_abs_error_ms": p95_error_ms},
+        "simulation": {
+            "n": int(simulations),
+            "successful": len(sim_latencies),
+            "p95_abs_error_ms": p95_error_ms,
+        },
         "latency_resolvability": resolvability,
         "provenance": {
-            "direction": direction, "threshold_sigma": threshold_sigma, "sustain_ms": sustain_ms,
-            "baseline_window": baseline_window, "search_window": search_window, "seed": seed,
+            "direction": direction,
+            "threshold_sigma": threshold_sigma,
+            "sustain_ms": sustain_ms,
+            "baseline_window": baseline_window,
+            "search_window": search_window,
+            "seed": seed,
         },
     }
 
@@ -199,8 +211,11 @@ def event_marker_qc(
         raise ValueError("tolerance must be positive")
     if not xs:
         return {
-            "status": "implausible", "reason": "no corroborating offsets", "n": 0,
-            "estimated_offset_s": math.nan, "uncertainty_s": math.nan,
+            "status": "implausible",
+            "reason": "no corroborating offsets",
+            "n": 0,
+            "estimated_offset_s": math.nan,
+            "uncertainty_s": math.nan,
         }
     center = _median(xs)
     uncertainty = 1.4826 * _mad(xs, center) if len(xs) > 1 else 0.0
@@ -211,8 +226,17 @@ def event_marker_qc(
         es = _finite(effects)
         if es:
             m = _median(es)
-            direction_ok = m <= 0 if expected_direction.lower() in {"negative", "decrease", "constriction"} else m >= 0
-    if len(xs) >= min_corroborating and consensus >= min_corroborating and abs(center) <= tolerance and direction_ok:
+            direction_ok = (
+                m <= 0
+                if expected_direction.lower() in {"negative", "decrease", "constriction"}
+                else m >= 0
+            )
+    if (
+        len(xs) >= min_corroborating
+        and consensus >= min_corroborating
+        and abs(center) <= tolerance
+        and direction_ok
+    ):
         status = "confirmed"
     elif consensus >= 1 and abs(center) <= 2 * tolerance and direction_ok:
         status = "plausible"
@@ -221,16 +245,28 @@ def event_marker_qc(
     else:
         status = "implausible"
     return {
-        "status": status, "n": len(xs), "within_tolerance": in_tol,
-        "estimated_offset_s": center, "uncertainty_s": uncertainty,
-        "tolerance_s": tolerance, "direction_consistent": direction_ok,
+        "status": status,
+        "n": len(xs),
+        "within_tolerance": in_tol,
+        "estimated_offset_s": center,
+        "uncertainty_s": uncertainty,
+        "tolerance_s": tolerance,
+        "direction_consistent": direction_ok,
         "note": "Event plausibility only; no clock-drift correction was applied.",
     }
 
 
-def validation_ladder(stages: Mapping[str, str | bool | None], *, claim: str = "descriptive") -> dict:
+def validation_ladder(
+    stages: Mapping[str, str | bool | None], *, claim: str = "descriptive"
+) -> dict:
     """Summarize evidence from acquisition QC through held-out-person validation."""
-    required = ["acquisition_qc", "analytical_qc", "construct_check", "within_person", "held_out_person"]
+    required = [
+        "acquisition_qc",
+        "analytical_qc",
+        "construct_check",
+        "within_person",
+        "held_out_person",
+    ]
 
     def norm(value):
         if value is True:
@@ -241,17 +277,29 @@ def validation_ladder(stages: Mapping[str, str | bool | None], *, claim: str = "
             return "not_assessed"
         value = str(value).lower().replace("-", "_")
         return {
-            "ok": "pass", "passed": "pass", "warning": "warning", "warn": "warning",
-            "failed": "fail", "na": "not_assessed", "missing": "not_assessed",
+            "ok": "pass",
+            "passed": "pass",
+            "warning": "warning",
+            "warn": "warning",
+            "failed": "fail",
+            "na": "not_assessed",
+            "missing": "not_assessed",
         }.get(value, value)
 
     values = {stage: norm(stages.get(stage)) for stage in required}
-    invalid = {k: v for k, v in values.items() if v not in {"pass", "warning", "fail", "not_assessed"}}
+    invalid = {
+        k: v for k, v in values.items() if v not in {"pass", "warning", "fail", "not_assessed"}
+    }
     if invalid:
         raise ValueError(f"invalid stage status: {invalid}")
     first_blocker = next((s for s in required if values[s] in {"fail", "not_assessed"}), None)
     held_out = values["held_out_person"] == "pass"
-    general_claim = claim.lower().replace("-", "_") in {"generalizable", "generalization", "out_of_person", "population"}
+    general_claim = claim.lower().replace("-", "_") in {
+        "generalizable",
+        "generalization",
+        "out_of_person",
+        "population",
+    }
     if any(v == "fail" for v in values.values()) or (general_claim and not held_out):
         claim_status = "not_supported"
     elif any(v in {"warning", "not_assessed"} for v in values.values()):
@@ -259,8 +307,11 @@ def validation_ladder(stages: Mapping[str, str | bool | None], *, claim: str = "
     else:
         claim_status = "supported"
     return {
-        "stages": values, "claim": claim, "claim_status": claim_status,
-        "first_blocker": first_blocker, "held_out_person_generalization": held_out,
+        "stages": values,
+        "claim": claim,
+        "claim_status": claim_status,
+        "first_blocker": first_blocker,
+        "held_out_person_generalization": held_out,
         "interpretation": "Within-person evidence is calibration/personalization evidence unless held-out-person validation passes.",
     }
 

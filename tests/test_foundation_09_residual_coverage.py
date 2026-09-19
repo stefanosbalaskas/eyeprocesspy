@@ -350,7 +350,9 @@ def test_episode_event_trial_and_aoi_filtered_error_branches():
     coverage = ep.audit_trial_coverage(built)
     assert coverage.n_gaze_samples.iloc[0] == 0
 
-    bad_aoi = ep.register_aois(_dataset(), ep.new_aoi("BAD", coordinate_space_id="unknown", x=0, y=0, width=1, height=1))
+    bad_aoi = ep.register_aois(
+        _dataset(), ep.new_aoi("BAD", coordinate_space_id="unknown", x=0, y=0, width=1, height=1)
+    )
     bad_aoi["aoi_geometry"] = bad_aoi["aoi_geometry"].iloc[0:0].copy()
     audit = ep.audit_aois(bad_aoi)
     assert audit.status.iloc[0] == "error"
@@ -434,8 +436,14 @@ def test_analysis_readiness_forced_audit_edges(monkeypatch):
 def test_input_normalisation_comparison_guards_and_episode_aoi_counts():
     x = _dataset()
     assert [name for name, _ in fd._normalise_dataset_inputs(({"named": x},))] == ["named"]
-    assert [name for name, _ in fd._normalise_dataset_inputs(([x, x],))] == ["pipeline_1", "pipeline_2"]
-    assert [name for name, _ in fd._normalise_dataset_inputs((x, x))] == ["pipeline_1", "pipeline_2"]
+    assert [name for name, _ in fd._normalise_dataset_inputs(([x, x],))] == [
+        "pipeline_1",
+        "pipeline_2",
+    ]
+    assert [name for name, _ in fd._normalise_dataset_inputs((x, x))] == [
+        "pipeline_1",
+        "pipeline_2",
+    ]
 
     with pytest.raises(TypeError, match="eye_dataset"):
         ep.compare_preprocessing(x, object())

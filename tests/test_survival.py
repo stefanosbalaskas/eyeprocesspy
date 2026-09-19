@@ -22,26 +22,30 @@ from eyeprocesspy.survival import (
 
 
 def tiny_trials():
-    return pd.DataFrame({
-        "participant_id": ["P1", "P1", "P2", "P2"],
-        "trial_id": ["T1", "T2", "T1", "T2"],
-        "stimulus_id": ["S1", "S2", "S1", "S2"],
-        "condition": ["control", "detail", "control", "detail"],
-        "start_time": [0.0, 0.0, 0.0, 0.0],
-        "end_time": [5.0, 5.0, 5.0, 5.0],
-        "n_valid_samples": [300, 298, 301, 297],
-        "valid_data_fraction": [0.98, 0.97, 0.99, 0.96],
-    })
+    return pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1", "P2", "P2"],
+            "trial_id": ["T1", "T2", "T1", "T2"],
+            "stimulus_id": ["S1", "S2", "S1", "S2"],
+            "condition": ["control", "detail", "control", "detail"],
+            "start_time": [0.0, 0.0, 0.0, 0.0],
+            "end_time": [5.0, 5.0, 5.0, 5.0],
+            "n_valid_samples": [300, 298, 301, 297],
+            "valid_data_fraction": [0.98, 0.97, 0.99, 0.96],
+        }
+    )
 
 
 def tiny_events():
-    return pd.DataFrame({
-        "participant_id": ["P1", "P1", "P1", "P2", "P2"],
-        "trial_id": ["T1", "T1", "T2", "T1", "T2"],
-        "start_time": [1.2, 2.0, 1.0, 0.8, 2.7],
-        "aoi_id": ["disclosure", "body", "body", "disclosure", "body"],
-        "episode_type": ["fixation"] * 5,
-    })
+    return pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1", "P1", "P2", "P2"],
+            "trial_id": ["T1", "T1", "T2", "T1", "T2"],
+            "start_time": [1.2, 2.0, 1.0, 0.8, 2.7],
+            "aoi_id": ["disclosure", "body", "body", "disclosure", "body"],
+            "episode_type": ["fixation"] * 5,
+        }
+    )
 
 
 def test_prepare_retains_never_inspected_as_censored():
@@ -82,7 +86,9 @@ def test_unusable_data_is_review_not_censor():
     tr = tiny_trials()
     tr.loc[1, "valid_data_fraction"] = 0.2
     with pytest.warns(RuntimeWarning):
-        d = prepare_gaze_survival_data(tr, tiny_events(), target_aoi="disclosure", min_valid_fraction=0.8)
+        d = prepare_gaze_survival_data(
+            tr, tiny_events(), target_aoi="disclosure", min_valid_fraction=0.8
+        )
     row = d.iloc[1]
     assert pd.isna(row.event_observed)
     assert row.review_required
@@ -94,31 +100,33 @@ def test_km_truth_and_censor_summary():
     km = estimate_gaze_survival(d)
     first = km.iloc[0]
     assert first.n_risk == 6
-    assert np.isclose(first.survival, 5/6)
+    assert np.isclose(first.survival, 5 / 6)
     s = summarise_gaze_censoring(d).iloc[0]
     assert s.n_observed_events == 4
     assert s.n_censored == 2
-    assert np.isclose(s.censoring_fraction, 2/6)
+    assert np.isclose(s.censoring_fraction, 2 / 6)
 
 
 def tiny_survival_fixture():
-    return pd.DataFrame({
-        "participant_id": ["P1", "P1", "P2", "P2", "P3", "P3"],
-        "trial_id": ["1", "2", "1", "2", "1", "2"],
-        "stimulus_id": ["S"]*6,
-        "condition": ["A", "B"]*3,
-        "target_aoi": ["x"]*6,
-        "time_origin": ["trial_start"]*6,
-        "event_time": [1.0, np.nan, 2.0, 2.5, np.nan, 4.0],
-        "censor_time": [5.0]*6,
-        "analysis_time": [1.0, 5.0, 2.0, 2.5, 5.0, 4.0],
-        "event_observed": [1, 0, 1, 1, 0, 1],
-        "event_type": ["first_fixation"]*6,
-        "n_valid_samples": [300]*6,
-        "valid_data_fraction": [0.98]*6,
-        "trial_duration": [5.0]*6,
-        "analysis_eligible": [True]*6,
-    })
+    return pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1", "P2", "P2", "P3", "P3"],
+            "trial_id": ["1", "2", "1", "2", "1", "2"],
+            "stimulus_id": ["S"] * 6,
+            "condition": ["A", "B"] * 3,
+            "target_aoi": ["x"] * 6,
+            "time_origin": ["trial_start"] * 6,
+            "event_time": [1.0, np.nan, 2.0, 2.5, np.nan, 4.0],
+            "censor_time": [5.0] * 6,
+            "analysis_time": [1.0, 5.0, 2.0, 2.5, 5.0, 4.0],
+            "event_observed": [1, 0, 1, 1, 0, 1],
+            "event_type": ["first_fixation"] * 6,
+            "n_valid_samples": [300] * 6,
+            "valid_data_fraction": [0.98] * 6,
+            "trial_duration": [5.0] * 6,
+            "analysis_eligible": [True] * 6,
+        }
+    )
 
 
 def test_models_fit_and_report():
@@ -327,22 +335,20 @@ def test_cox_matches_direct_statsmodels_backend_call():
         status=d["event_observed"].to_numpy(int),
         ties="breslow",
     ).fit()
-    np.testing.assert_allclose(np.asarray(ours.result.params), np.asarray(direct.params), rtol=1e-10, atol=1e-10)
+    np.testing.assert_allclose(
+        np.asarray(ours.result.params), np.asarray(direct.params), rtol=1e-10, atol=1e-10
+    )
 
 
 def test_aft_matches_direct_lifelines_backend_call():
     from lifelines import LogNormalAFTFitter, WeibullAFTFitter
 
-    d = simulate_gaze_survival_example(
-        seed=19, n_participants=50, trials_per_participant=3
-    )
+    d = simulate_gaze_survival_example(seed=19, n_participants=50, trials_per_participant=3)
     for distribution, backend_class in (
         ("weibull", WeibullAFTFitter),
         ("lognormal", LogNormalAFTFitter),
     ):
-        ours = fit_gaze_aft_model(
-            d, "C(condition)", distribution=distribution, maxiter=2000
-        )
+        ours = fit_gaze_aft_model(d, "C(condition)", distribution=distribution, maxiter=2000)
         direct = backend_class().fit(
             d,
             duration_col="analysis_time",
@@ -440,6 +446,7 @@ def test_worked_example_runs_end_to_end(tmp_path):
     ):
         assert (tmp_path / filename).exists()
     assert result["report"]["N_participants"] == 36
+
 
 def test_survival_public_api_is_available_from_package_root():
     import eyeprocesspy as ep

@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +49,7 @@ _ALLOWED_STATUSES = {
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _tag(value: dict[str, Any], class_name: str) -> dict[str, Any]:
@@ -107,7 +107,9 @@ def _require_columns(
 ) -> None:
     missing = [column for column in columns if column not in frame.columns]
     if missing:
-        raise EyeProcessValidationError(f"{name} is missing required column(s): " + ", ".join(missing) + ".")
+        raise EyeProcessValidationError(
+            f"{name} is missing required column(s): " + ", ".join(missing) + "."
+        )
 
 
 def _length_nonzero(value: Any) -> bool:
@@ -127,7 +129,10 @@ def _length_nonzero(value: Any) -> bool:
 
 def _json_safe(value: Any) -> Any:
     if isinstance(value, pd.DataFrame):
-        return [{str(key): _json_safe(item) for key, item in row.items()} for row in value.to_dict(orient="records")]
+        return [
+            {str(key): _json_safe(item) for key, item in row.items()}
+            for row in value.to_dict(orient="records")
+        ]
     if isinstance(value, pd.Series):
         return [_json_safe(item) for item in value.tolist()]
     if isinstance(value, Mapping):
@@ -195,14 +200,20 @@ def software_paper_claim_matrix(
 
     statuses = [None if value is None else str(value) for value in _recycle(status, n)]
     if any(value is None or value not in _ALLOWED_STATUSES for value in statuses):
-        raise EyeProcessValidationError("status must be one of supported, qualified, pending, or unsupported.")
+        raise EyeProcessValidationError(
+            "status must be one of supported, qualified, pending, or unsupported."
+        )
 
     return pd.DataFrame(
         {
             "claim_id": [f"CL{index:03d}" for index in range(1, n + 1)],
             "claim": [str(value) for value in _recycle(claims, n)],
-            "evidence_id": [None if value is None else str(value) for value in _recycle(evidence_id, n)],
-            "evidence_type": [None if value is None else str(value) for value in _recycle(evidence_type, n)],
+            "evidence_id": [
+                None if value is None else str(value) for value in _recycle(evidence_id, n)
+            ],
+            "evidence_type": [
+                None if value is None else str(value) for value in _recycle(evidence_type, n)
+            ],
             "status": statuses,
             "scope": [None if value is None else str(value) for value in _recycle(scope, n)],
             "source": [None if value is None else str(value) for value in _recycle(source, n)],
@@ -282,7 +293,9 @@ def software_paper_readiness(
     except EyeProcessValidationError:
         claims = pd.DataFrame()
 
-    required_values = [str(value) for value in _as_list(required_statuses) if value is not None and str(value)]
+    required_values = [
+        str(value) for value in _as_list(required_statuses) if value is not None and str(value)
+    ]
     if not required_values:
         raise EyeProcessValidationError("required_statuses cannot be empty.")
 
@@ -344,7 +357,9 @@ def software_paper_gap_analysis(x):
     """Identify gaps in a software-paper evidence bundle."""
     readiness = software_paper_readiness(x)
     checks = readiness["checks"]
-    requirement_gaps = checks.loc[checks["required"].astype(bool) & ~checks["satisfied"].astype(bool)].copy()
+    requirement_gaps = checks.loc[
+        checks["required"].astype(bool) & ~checks["satisfied"].astype(bool)
+    ].copy()
 
     try:
         claims = _as_frame(
@@ -432,7 +447,9 @@ def write_software_paper_evidence(x, path):
     ]
 
     for _, row in readiness["checks"].iterrows():
-        lines.append(f"- {row['requirement']}: required={bool(row['required'])}, satisfied={bool(row['satisfied'])}")
+        lines.append(
+            f"- {row['requirement']}: required={bool(row['required'])}, satisfied={bool(row['satisfied'])}"
+        )
 
     if coverage is not None:
         row = coverage.iloc[0]

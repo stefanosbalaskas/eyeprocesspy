@@ -211,6 +211,7 @@ def test_saccade_short_and_missing_original_defensive_paths(monkeypatch):
     x = _dataset()
 
     with monkeypatch.context() as mp:
+
         def short_velocity(_):
             return pd.DataFrame(
                 {
@@ -226,6 +227,7 @@ def test_saccade_short_and_missing_original_defensive_paths(monkeypatch):
         assert not bool(out["episodes"]["episode_type"].eq("saccade").any())
 
     with monkeypatch.context() as mp:
+
         def missing_velocity(_):
             return pd.DataFrame(
                 {

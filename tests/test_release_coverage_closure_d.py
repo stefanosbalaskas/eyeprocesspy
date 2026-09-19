@@ -17,6 +17,7 @@ import eyeprocesspy.plots_completion_08 as pc
 
 def _close(ax):
     import matplotlib.pyplot as plt
+
     plt.close(ax.figure)
 
 
@@ -63,7 +64,13 @@ def test_core_plot_nonempty_release_paths(monkeypatch):
     assert list(ax.eyeprocess_plot_data.index) == ["A", "B"]
     _close(ax)
 
-    monkeypatch.setattr(cp, "transition_matrix", lambda *a, **k: pd.DataFrame([[0.0, 1.0], [2.0, 0.0]], index=["A", "B"], columns=["A", "B"]))
+    monkeypatch.setattr(
+        cp,
+        "transition_matrix",
+        lambda *a, **k: pd.DataFrame(
+            [[0.0, 1.0], [2.0, 0.0]], index=["A", "B"], columns=["A", "B"]
+        ),
+    )
     ax = cp.plot_transition_matrix(ds2, normalize="row", source="visits")
     assert ax.eyeprocess_plot_matrix.shape == (2, 2)
     _close(ax)
@@ -74,7 +81,12 @@ def test_core_plot_nonempty_release_paths(monkeypatch):
 
 
 def test_gazepoint_private_and_empty_summary_release_paths(monkeypatch, tmp_path):
-    summary = gr.GazepointSummary(software="Gazepoint", software_version="1", aoi_summary=pd.DataFrame(), aoi_statistics=pd.DataFrame())
+    summary = gr.GazepointSummary(
+        software="Gazepoint",
+        software_version="1",
+        aoi_summary=pd.DataFrame(),
+        aoi_statistics=pd.DataFrame(),
+    )
     assert "gazepoint_summary" in repr(summary)
     with pytest.raises(AttributeError):
         _ = summary.no_such_attribute
@@ -84,7 +96,9 @@ def test_gazepoint_private_and_empty_summary_release_paths(monkeypatch, tmp_path
 
     # Force the tolerant csv.reader fallback, including ragged rows.
     real_read_csv = gr.pd.read_csv
-    monkeypatch.setattr(gr.pd, "read_csv", lambda *a, **k: (_ for _ in ()).throw(ValueError("force fallback")))
+    monkeypatch.setattr(
+        gr.pd, "read_csv", lambda *a, **k: (_ for _ in ()).throw(ValueError("force fallback"))
+    )
     out = gr._parse_csv_block(["TITLE", "a,b", " 1 , 2,extra", "3"], "TITLE")
     assert out.shape == (2, 2)
     monkeypatch.setattr(gr.pd, "read_csv", real_read_csv)
@@ -135,11 +149,14 @@ def test_evidence_graph_explicit_edges_cycles_and_outcome_plots(monkeypatch):
 
     with pytest.raises(ep.EyeProcessValidationError, match="from and to"):
         eg.build_evidence_graph(["r"], edges=[{"from": "r"}])
-    explicit = eg.build_evidence_graph(["r"], decisions=["d"], edges=[{"from": "raw_data::r", "to": "decisions::d"}])
+    explicit = eg.build_evidence_graph(
+        ["r"], decisions=["d"], edges=[{"from": "raw_data::r", "to": "decisions::d"}]
+    )
     assert set(explicit.edges.relation) == {"supports"}
 
     cyclic = eg.build_evidence_graph(
-        ["r"], decisions=["d"],
+        ["r"],
+        decisions=["d"],
         edges=[
             {"from": "raw_data::r", "to": "decisions::d", "relation": "supports"},
             {"from": "decisions::d", "to": "raw_data::r", "relation": "supports"},
@@ -149,8 +166,12 @@ def test_evidence_graph_explicit_edges_cycles_and_outcome_plots(monkeypatch):
 
     # Stub recurrence internals so outcome/covariate regression branches are deterministic.
     monkeypatch.setattr(eg, "cross_recurrence", lambda *a, **k: {"ok": True})
-    monkeypatch.setattr(eg, "recurrence_features", lambda r: pd.DataFrame({"recurrence_rate": [0.25]}))
-    model = eg.crossmodal_recurrence_model([1], [2], outcome=[1.0, 2.0, 3.0], covariates={"z": [0.0, 1.0, 2.0]})
+    monkeypatch.setattr(
+        eg, "recurrence_features", lambda r: pd.DataFrame({"recurrence_rate": [0.25]})
+    )
+    model = eg.crossmodal_recurrence_model(
+        [1], [2], outcome=[1.0, 2.0, 3.0], covariates={"z": [0.0, 1.0, 2.0]}
+    )
     assert model.model is not None and "z" in model.model["predictors"]
 
     ax = eg.plot_crossmodal_recurrence_model(model, type="diagnostics")
@@ -172,7 +193,9 @@ def test_partitioned_storage_overwrite_and_atomic_restore(monkeypatch, tmp_path)
 
     # Default-spec line and normal overwrite/backup removal path.
     monkeypatch.setattr(ps, "partition_eye_storage", lambda: spec)
-    default_store = ps.write_partitioned_eye_storage(tables, tmp_path / "default", spec=None, tables="responses")
+    default_store = ps.write_partitioned_eye_storage(
+        tables, tmp_path / "default", spec=None, tables="responses"
+    )
     assert default_store.path
     target = tmp_path / "store"
     ps.write_partitioned_eye_storage(tables, target, spec)

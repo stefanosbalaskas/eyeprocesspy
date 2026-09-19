@@ -76,7 +76,9 @@ def _trapz(x: Any, y: Any) -> float:
     return float(np.trapezoid(yy[order], xx[order]))
 
 
-def _group_frames(data: pd.DataFrame, keys: Sequence[str], *, dropna: bool = True) -> list[pd.DataFrame]:
+def _group_frames(
+    data: pd.DataFrame, keys: Sequence[str], *, dropna: bool = True
+) -> list[pd.DataFrame]:
     if data.empty:
         return []
     keys = [key for key in keys if key in data.columns]
@@ -84,7 +86,9 @@ def _group_frames(data: pd.DataFrame, keys: Sequence[str], *, dropna: bool = Tru
         return [data.copy()]
     if dropna and any(not data[key].notna().any() for key in keys):
         return []
-    return [group.copy() for _, group in data.groupby(keys, sort=False, dropna=dropna, observed=True)]
+    return [
+        group.copy() for _, group in data.groupby(keys, sort=False, dropna=dropna, observed=True)
+    ]
 
 
 # R/009-preprocessing.R -----------------------------------------------------
@@ -271,7 +275,9 @@ def flag_gaze_outliers(x, method=("mad", "velocity", "bounds"), threshold=6, max
             my = np.nanmedian(gy)
             sx = _mad(gx)
             sy = _mad(gy)
-            local = (np.abs(gx - mx) > float(threshold) * sx) | (np.abs(gy - my) > float(threshold) * sy)
+            local = (np.abs(gx - mx) > float(threshold) * sx) | (
+                np.abs(gy - my) > float(threshold) * sy
+            )
             local[~np.isfinite(gx) | ~np.isfinite(gy)] = False
             flag[idx] = local
     elif method == "velocity":
@@ -397,7 +403,9 @@ def filter_pupil(
     for _, idx in d.groupby(["recording_id", "eye"], sort=False, dropna=False).groups.items():
         idx = list(idx)
         order = d.loc[idx, "timestamp_seconds"].astype(float).sort_values(kind="stable").index
-        d.loc[order, "pupil_diameter"] = rolling_apply(d.loc[order, "pupil_diameter"], width=window, FUN=fun)
+        d.loc[order, "pupil_diameter"] = rolling_apply(
+            d.loc[order, "pupil_diameter"], width=window, FUN=fun
+        )
     out = x.copy()
     out["eye_samples"] = d
     return add_provenance(
@@ -437,15 +445,25 @@ def baseline_pupil(
             ["recording_id", "trial_id", "start_time"],
         ]
         if trials.empty:
-            raise EyeProcessValidationError("Trial intervals are required for trial-start baseline correction.")
-        start_map = {(row.recording_id, row.trial_id): row.start_time for row in trials.itertuples(index=False)}
+            raise EyeProcessValidationError(
+                "Trial intervals are required for trial-start baseline correction."
+            )
+        start_map = {
+            (row.recording_id, row.trial_id): row.start_time
+            for row in trials.itertuples(index=False)
+        }
         starts = [
             start_map.get((row.recording_id, row.trial_id), np.nan)
             for row in d[["recording_id", "trial_id"]].itertuples(index=False)
         ]
         start = np.asarray(starts, dtype=float)
     else:
-        start = d.groupby("recording_id", dropna=False)["timestamp_seconds"].transform("min").astype(float).to_numpy()
+        start = (
+            d.groupby("recording_id", dropna=False)["timestamp_seconds"]
+            .transform("min")
+            .astype(float)
+            .to_numpy()
+        )
     relative = _finite(d["timestamp_seconds"]) - start
     d["pupil_baseline"] = np.nan
     lo, hi = (float(baseline_window[0]), float(baseline_window[1]))
@@ -509,7 +527,9 @@ def pupil_deconvolve(x, tau=0.9, regularization=0.01, output_column="pupil_phasi
         "eye_samples",
         f"tau={float(tau):g};regularization={float(regularization):g}",
         reversible=False,
-        warnings=("Exploratory discrete deconvolution; validate assumptions before substantive interpretation."),
+        warnings=(
+            "Exploratory discrete deconvolution; validate assumptions before substantive interpretation."
+        ),
     )
 
 
@@ -573,7 +593,9 @@ def detect_blinks(
                     "dispersion": np.nan,
                     "coordinate_space_id": pd.NA,
                     "source_algorithm": f"eyeprocess_{source}",
-                    "source_parameters": (f"min={float(min_duration_ms):g};max={float(max_duration_ms):g}"),
+                    "source_parameters": (
+                        f"min={float(min_duration_ms):g};max={float(max_duration_ms):g}"
+                    ),
                     "derived_by": "eyeprocess",
                     "trial_id": _mode_value(zz["trial_id"]),
                     "stimulus_id": _mode_value(zz["stimulus_id"]),
@@ -641,7 +663,11 @@ def detect_fixations_ivt(
         for i in range(len(z)):
             if i == 0:
                 current += 1
-            elif not is_fix[i] or not is_fix[i - 1] or (np.isfinite(dt[i]) and dt[i] * 1000 > float(maximum_gap_ms)):
+            elif (
+                not is_fix[i]
+                or not is_fix[i - 1]
+                or (np.isfinite(dt[i]) and dt[i] * 1000 > float(maximum_gap_ms))
+            ):
                 current += 1
             run_ids[i] = current
         for run in pd.unique(run_ids[is_fix]):
@@ -700,7 +726,9 @@ def detect_fixations_ivt(
             )
         )
     out["episodes"] = episodes
-    warning_text = "Threshold units are not visual degrees." if coordinate_units != "degrees" else pd.NA
+    warning_text = (
+        "Threshold units are not visual degrees." if coordinate_units != "degrees" else pd.NA
+    )
     return add_provenance(
         out,
         "detect_fixations_ivt",
@@ -803,7 +831,11 @@ def detect_fixations_idt(
             )
         )
     out["episodes"] = episodes
-    warning_text = "Dispersion threshold units are not visual degrees." if coordinate_units != "degrees" else pd.NA
+    warning_text = (
+        "Dispersion threshold units are not visual degrees."
+        if coordinate_units != "degrees"
+        else pd.NA
+    )
     return add_provenance(
         out,
         "detect_fixations_idt",
@@ -824,11 +856,15 @@ def detect_saccades(x, velocity_threshold=30, minimum_duration_ms=10, overwrite=
     k = 0
     for recording_id, z in vel.groupby("recording_id", sort=False, dropna=False):
         z = z.sort_values("timestamp_seconds", kind="stable").reset_index(drop=True)
-        high = np.isfinite(_finite(z["velocity"])) & (_finite(z["velocity"]) > float(velocity_threshold))
+        high = np.isfinite(_finite(z["velocity"])) & (
+            _finite(z["velocity"]) > float(velocity_threshold)
+        )
         run_ids = np.cumsum(np.r_[True, high[1:] != high[:-1]])
         for run in pd.unique(run_ids[high]):
             pos = np.where((run_ids == run) & high)[0]
-            duration = (z.loc[pos, "timestamp_seconds"].max() - z.loc[pos, "timestamp_seconds"].min()) * 1000
+            duration = (
+                z.loc[pos, "timestamp_seconds"].max() - z.loc[pos, "timestamp_seconds"].min()
+            ) * 1000
             if duration < float(minimum_duration_ms):
                 continue
             sample_ids = z.loc[pos, "sample_id"].tolist()
@@ -1112,7 +1148,9 @@ def scanpath_sequence(
         d = d[d["recording_id"].isin(ids)]
     d = d[d["aoi_id"].notna()].sort_values(["recording_id", "trial_id", "time"], kind="stable")
     rows = []
-    for (rec, trial), z in d.groupby(["recording_id", "trial_id"], sort=False, dropna=True, observed=True):
+    for (rec, trial), z in d.groupby(
+        ["recording_id", "trial_id"], sort=False, dropna=True, observed=True
+    ):
         seq = z["aoi_id"].astype(str).tolist()
         if collapse_consecutive and seq:
             seq = [state for i, state in enumerate(seq) if i == 0 or state != seq[i - 1]]
@@ -1223,7 +1261,9 @@ def transition_entropy(x, source=("visits", "fixations", "samples"), base=2):
     return pd.DataFrame(rows)
 
 
-def _append_features(x: EyeDataset, features: pd.DataFrame, append: bool, action: str, details: str):
+def _append_features(
+    x: EyeDataset, features: pd.DataFrame, append: bool, action: str, details: str
+):
     out = x.copy()
     if append and not out["features"].empty:
         combined = pd.concat([out["features"], features], ignore_index=True, sort=False)
@@ -1247,7 +1287,9 @@ def derive_gaze_features(
         source = source[0]
     trials = trial_table(x)
     if trials.empty:
-        raise EyeProcessValidationError("Trial intervals are required for trial-level gaze features.")
+        raise EyeProcessValidationError(
+            "Trial intervals are required for trial-level gaze features."
+        )
     if source == "fixations":
         d = x["episodes"].loc[x["episodes"]["episode_type"].eq("fixation")].copy()
     elif source == "visits":
@@ -1298,7 +1340,8 @@ def derive_gaze_features(
             "fixation_duration_median_ms": float(np.nanmedian(duration)),
             "dwell_time_ms": dwell,
             "dwell_proportion": dwell / trial_duration if trial_duration else np.nan,
-            "first_fixation_latency_ms": (float(np.nanmin(start_time)) - float(tr0["start_time"])) * 1000,
+            "first_fixation_latency_ms": (float(np.nanmin(start_time)) - float(tr0["start_time"]))
+            * 1000,
             "revisits": revisits,
             "gaze_entropy": entropy,
         }
@@ -1332,7 +1375,9 @@ def derive_gaze_features(
             )
         )
     features = (
-        pd.concat(feature_frames, ignore_index=True, sort=False) if feature_frames else empty_eye_table("features")
+        pd.concat(feature_frames, ignore_index=True, sort=False)
+        if feature_frames
+        else empty_eye_table("features")
     )
     return _append_features(
         x,
@@ -1370,7 +1415,10 @@ def derive_pupil_features(
         )
     feature_frames = []
     for z in _group_frames(d[d["trial_id"].notna()], ["recording_id", "trial_id", "eye"]):
-        tr = trials[trials["recording_id"].eq(z.iloc[0]["recording_id"]) & trials["trial_id"].eq(z.iloc[0]["trial_id"])]
+        tr = trials[
+            trials["recording_id"].eq(z.iloc[0]["recording_id"])
+            & trials["trial_id"].eq(z.iloc[0]["trial_id"])
+        ]
         if tr.empty:
             continue
         tr0 = tr.iloc[0]
@@ -1396,7 +1444,9 @@ def derive_pupil_features(
             "pupil_latency_peak_ms": (float(tt[peak_idx]) - float(tr0["start_time"])) * 1000,
             "pupil_observed_fraction": float(np.isfinite(y).mean()),
             "pupil_interpolated_fraction": (
-                float(z["interpolated"].astype("boolean").fillna(False).mean()) if "interpolated" in z.columns else 0.0
+                float(z["interpolated"].astype("boolean").fillna(False).mean())
+                if "interpolated" in z.columns
+                else 0.0
             ),
         }
         unit = _first_nonmissing(z.loc[ok, "pupil_unit"], "unknown")
@@ -1431,7 +1481,9 @@ def derive_pupil_features(
             )
         )
     features = (
-        pd.concat(feature_frames, ignore_index=True, sort=False) if feature_frames else empty_eye_table("features")
+        pd.concat(feature_frames, ignore_index=True, sort=False)
+        if feature_frames
+        else empty_eye_table("features")
     )
     return _append_features(
         x,
@@ -1498,7 +1550,10 @@ def derive_biometric_features(x, append=True):
         ok = np.isfinite(y) & np.isfinite(t)
         if not ok.any():
             continue
-        tr = trials[trials["recording_id"].eq(z.iloc[0]["recording_id"]) & trials["trial_id"].eq(z.iloc[0]["trial_id"])]
+        tr = trials[
+            trials["recording_id"].eq(z.iloc[0]["recording_id"])
+            & trials["trial_id"].eq(z.iloc[0]["trial_id"])
+        ]
         channel = str(z.iloc[0]["channel"])
         values = {
             f"{channel}_mean": float(np.mean(y[ok])),
@@ -1514,7 +1569,11 @@ def derive_biometric_features(x, append=True):
             "participant_id": tr0["participant_id"] if tr0 is not None else pd.NA,
             "trial_id": z.iloc[0]["trial_id"],
             "item_id": tr0["item_id"] if tr0 is not None else pd.NA,
-            "stimulus_id": (tr0["stimulus_id"] if tr0 is not None else _first_nonmissing(z["stimulus_id"], pd.NA)),
+            "stimulus_id": (
+                tr0["stimulus_id"]
+                if tr0 is not None
+                else _first_nonmissing(z["stimulus_id"], pd.NA)
+            ),
             "aoi_id": pd.NA,
         }
         unit = _first_nonmissing(z["unit"], "unknown")
@@ -1530,7 +1589,9 @@ def derive_biometric_features(x, append=True):
                 parameters=f"channel={channel}",
             )
         )
-    features = pd.concat(frames, ignore_index=True, sort=False) if frames else empty_eye_table("features")
+    features = (
+        pd.concat(frames, ignore_index=True, sort=False) if frames else empty_eye_table("features")
+    )
     return _append_features(
         x,
         features,
@@ -1550,7 +1611,9 @@ def derive_all_features(x, spec=None, reset=False):
     if reset:
         out["features"] = empty_eye_table("features")
     if not out["episodes"].empty or not out["gaze_samples"].empty:
-        source = "fixations" if bool(out["episodes"]["episode_type"].eq("fixation").any()) else "samples"
+        source = (
+            "fixations" if bool(out["episodes"]["episode_type"].eq("fixation").any()) else "samples"
+        )
         out = derive_gaze_features(
             out,
             level="trial_aoi" if spec.level == "trial_aoi" else "trial",
@@ -1582,7 +1645,9 @@ def features_wide(
         return pd.DataFrame()
     id_cols = [col for col in id_cols if col in d.columns]
     rows = []
-    grouped = d.groupby(id_cols, sort=False, dropna=False, observed=True) if id_cols else [(None, d)]
+    grouped = (
+        d.groupby(id_cols, sort=False, dropna=False, observed=True) if id_cols else [(None, d)]
+    )
     for key, z in grouped:
         base = {}
         if id_cols:
@@ -1603,7 +1668,9 @@ def feature_dictionary(x):
     d = x["features"]
     if d.empty:
         return pd.DataFrame()
-    return d[["feature_name", "unit", "level", "method", "parameters"]].drop_duplicates(ignore_index=True)
+    return d[["feature_name", "unit", "level", "method", "parameters"]].drop_duplicates(
+        ignore_index=True
+    )
 
 
 __all__ = [

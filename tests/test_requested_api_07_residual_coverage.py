@@ -31,7 +31,9 @@ def test_private_ols_and_plot_distractor_alternate_paths():
     assert ax.get_title() == "Distractor process information"
     plt.close(ax.figure)
 
-    rc = pd.DataFrame({"response_category": ["A", "B"], "gaze_channel": ["g1", "g2"], "coefficient": [0.1, -0.2]})
+    rc = pd.DataFrame(
+        {"response_category": ["A", "B"], "gaze_channel": ["g1", "g2"], "coefficient": [0.1, -0.2]}
+    )
     fig, ax = plt.subplots()
     out = ep.plot_distractor_information(rc, ax=ax)
     assert out is ax
@@ -62,11 +64,13 @@ def test_gaze_missingness_validation_supplied_theta_continuous_and_reached():
     assert fit.response_model.eyeprocess_class == "eye_reference_linear_fit"
     assert set(fit.reached_summary["reached"]) == {False, True}
 
-    bad = d.copy(); bad.loc[0, "gaze_exposure"] = -0.1
+    bad = d.copy()
+    bad.loc[0, "gaze_exposure"] = -0.1
     with pytest.raises(ep.EyeProcessValidationError, match="non-negative"):
         ep.fit_gaze_informed_missingness_irt(bad, theta="theta")
 
-    nonbinary = d.copy(); nonbinary["response"] = [1.0, 2.0, 1.0, np.nan, 0.0, 1.0]
+    nonbinary = d.copy()
+    nonbinary["response"] = [1.0, 2.0, 1.0, np.nan, 0.0, 1.0]
     with pytest.raises(ep.EyeProcessValidationError, match="binary"):
         ep.fit_gaze_informed_missingness_irt(nonbinary)
 
@@ -75,7 +79,9 @@ def test_named_facet_and_changepoint_guards_and_empty_plot():
     with pytest.raises(ep.EyeProcessValidationError, match="fit_manyfacet"):
         ep.device_facet_effects({})
 
-    fake = EyeResult({"facets": {"session": "session"}}, eyeprocess_class="eye_manyfacet_process_irt")
+    fake = EyeResult(
+        {"facets": {"session": "session"}}, eyeprocess_class="eye_manyfacet_process_irt"
+    )
     with pytest.raises(ep.EyeProcessValidationError, match="Facet device"):
         ep.device_facet_effects(fake)
 
@@ -175,7 +181,8 @@ def test_event_time_external_invalid_engine_and_negative_time_paths():
     assert ext.engine == "external"
     with pytest.raises(ep.EyeProcessValidationError, match="engine"):
         ep.fit_event_time_irt(d, engine="unknown")
-    bad = d.copy(); bad.loc[0, "event_time"] = -1.0
+    bad = d.copy()
+    bad.loc[0, "event_time"] = -1.0
     with pytest.raises(ep.EyeProcessValidationError, match="non-negative"):
         ep.fit_event_time_irt(bad)
 
@@ -250,4 +257,6 @@ def test_roundtrip_callable_and_cross_version_guards():
     with pytest.raises(ep.EyeProcessValidationError, match="must be functions"):
         ep.roundtrip_eye_bids(source, exporter=1, importer=lambda x: x)
     with pytest.raises(ep.EyeProcessValidationError, match="must be functions"):
-        ep.cross_version_adapter_regression(source, baseline_adapter=1, candidate_adapter=lambda x: x)
+        ep.cross_version_adapter_regression(
+            source, baseline_adapter=1, candidate_adapter=lambda x: x
+        )

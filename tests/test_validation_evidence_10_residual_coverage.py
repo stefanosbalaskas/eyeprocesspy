@@ -102,13 +102,13 @@ def test_misspecification_grouped_engine_empirical_and_sensitivity_gates(monkeyp
     )
     assert ve._misspecification_pass(validation)
 
-    assert not ve._misspecification_pass(pd.DataFrame({"expected_failure": [False], "detected": [True]}))
+    assert not ve._misspecification_pass(
+        pd.DataFrame({"expected_failure": [False], "detected": [True]})
+    )
     assert not ve._misspecification_pass(
         pd.DataFrame({"expected_failure": [True], "detected": [pd.NA]})
     )
-    assert ve._misspecification_pass(
-        pd.DataFrame({"expected_failure": [True], "detected": [True]})
-    )
+    assert ve._misspecification_pass(pd.DataFrame({"expected_failure": [True], "detected": [True]}))
     assert not ve._misspecification_pass(object())
 
     assert not ve._grouped_validation_pass({})
@@ -129,9 +129,7 @@ def test_misspecification_grouped_engine_empirical_and_sensitivity_gates(monkeyp
     assert not ve._engine_pass(_Engine(estimates=pd.DataFrame({"equivalent": [pd.NA]})))
     assert ve._engine_pass(_Engine(estimates=pd.DataFrame({"equivalent": [True]})))
 
-    comparison = pd.DataFrame(
-        {"target": [1.0], "absolute_difference": [0.0], "reproduced": [True]}
-    )
+    comparison = pd.DataFrame({"target": [1.0], "absolute_difference": [0.0], "reproduced": [True]})
     empirical = ve._EmpiricalReproduction(comparison=comparison)
     assert ve._empirical_pass(empirical)
     assert not ve._empirical_pass(ve._EmpiricalReproduction(comparison=pd.DataFrame()))
@@ -188,9 +186,7 @@ def test_advanced_audit_argument_record_warning_and_no_required_paths():
     )
     evidence = {
         "model_a": {
-            "misspecification": pd.DataFrame(
-                {"expected_failure": [True], "detected": [True]}
-            )
+            "misspecification": pd.DataFrame({"expected_failure": [True], "detected": [True]})
         }
     }
     warning = ep.audit_advanced_model_evidence(evidence, partial)

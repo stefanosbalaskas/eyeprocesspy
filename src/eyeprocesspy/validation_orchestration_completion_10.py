@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import math
 import platform
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -205,9 +206,13 @@ def validation_recovery_summary(x, by=()):
         empirical_sd = float(np.std(est_ok, ddof=1)) if len(est_ok) > 1 else math.nan
         mean_model_se = float(se_values.loc[model_se].mean()) if bool(model_se.any()) else math.nan
         coverage = (
-            float(covered.loc[covered_ok].astype(bool).astype(float).mean()) if bool(covered_ok.any()) else math.nan
+            float(covered.loc[covered_ok].astype(bool).astype(float).mean())
+            if bool(covered_ok.any())
+            else math.nan
         )
-        mean_interval_width = float(interval_width.loc[covered_ok].mean()) if bool(covered_ok.any()) else math.nan
+        mean_interval_width = (
+            float(interval_width.loc[covered_ok].mean()) if bool(covered_ok.any()) else math.nan
+        )
 
         return {
             "replications": replications,
@@ -217,13 +222,17 @@ def validation_recovery_summary(x, by=()):
             "mean_estimate": float(np.mean(est_ok)) if len(est_ok) else math.nan,
             "bias": float(np.mean(delta)) if len(delta) else math.nan,
             "absolute_bias": (float(np.mean(np.abs(delta))) if len(delta) else math.nan),
-            "relative_bias": (float(relative.loc[relative_mask].mean()) if bool(relative_mask.any()) else math.nan),
+            "relative_bias": (
+                float(relative.loc[relative_mask].mean()) if bool(relative_mask.any()) else math.nan
+            ),
             "rmse": (float(np.sqrt(np.mean(delta**2))) if len(delta) else math.nan),
             "empirical_sd": empirical_sd,
             "mean_model_se": mean_model_se,
             "se_ratio": (
                 float(mean_model_se / empirical_sd)
-                if math.isfinite(mean_model_se) and math.isfinite(empirical_sd) and empirical_sd != 0
+                if math.isfinite(mean_model_se)
+                and math.isfinite(empirical_sd)
+                and empirical_sd != 0
                 else math.nan
             ),
             "coverage": coverage,
@@ -388,7 +397,11 @@ def validation_calibration_summary(
             if not np.any(mask):
                 continue
             bin_weight = float(w[mask].sum())
-            ece += bin_weight / total_weight * abs(_weighted_mean(y[mask], w[mask]) - _weighted_mean(p[mask], w[mask]))
+            ece += (
+                bin_weight
+                / total_weight
+                * abs(_weighted_mean(y[mask], w[mask]) - _weighted_mean(p[mask], w[mask]))
+            )
 
         return {
             "n": int(len(z)),
@@ -422,7 +435,10 @@ def _sbc_ranks(data: pd.DataFrame, by: Sequence[str]) -> pd.DataFrame:
             {
                 "job_id": z.iloc[0]["job_id"],
                 "parameter": z.iloc[0]["parameter"],
-                "rank": (float(np.sum(draw_values < truth_value)) + 0.5 * float(np.sum(draw_values == truth_value))),
+                "rank": (
+                    float(np.sum(draw_values < truth_value))
+                    + 0.5 * float(np.sum(draw_values == truth_value))
+                ),
                 "draws": int(len(draw_values)),
             }
         )
@@ -460,7 +476,9 @@ def validation_sbc_summary(
             bins=np.linspace(0.0, 1.0, bins + 1),
         )
         expected = float(counts.sum() / bins)
-        chi_square = float(np.sum((counts - expected) ** 2 / expected)) if expected > 0 else math.nan
+        chi_square = (
+            float(np.sum((counts - expected) ** 2 / expected)) if expected > 0 else math.nan
+        )
         p_value = float(chi2.sf(chi_square, bins - 1)) if math.isfinite(chi_square) else math.nan
         return {
             "replications": int(len(frame)),
@@ -572,7 +590,8 @@ def _evidence_pass(value: Any, kind: str) -> bool:
 
     class_name = _class_name(value)
     if kind == "completion" and (
-        isinstance(value, EyeValidationCompletionAudit) or class_name == "eye_validation_completion_audit"
+        isinstance(value, EyeValidationCompletionAudit)
+        or class_name == "eye_validation_completion_audit"
     ):
         return _field(value, "status") == "complete"
 
@@ -608,7 +627,11 @@ def _evidence_pass(value: Any, kind: str) -> bool:
 
     if kind == "multi_vendor" and class_name == "eye_vendor_validation":
         if isinstance(value, pd.DataFrame):
-            return not value.empty and "status" in value and value["status"].astype(str).eq("pass").all()
+            return (
+                not value.empty
+                and "status" in value
+                and value["status"].astype(str).eq("pass").all()
+            )
 
     if isinstance(value, pd.DataFrame) and "pass" in value:
         passed = value["pass"].astype("boolean").dropna()
@@ -667,7 +690,9 @@ def audit_validation_completion(
         sbc = validation_sbc_summary(x) if not draws.empty else pd.DataFrame()
     except EyeProcessValidationError:
         sbc = pd.DataFrame()
-    diagnostics = x["diagnostics"] if isinstance(x.get("diagnostics"), pd.DataFrame) else pd.DataFrame()
+    diagnostics = (
+        x["diagnostics"] if isinstance(x.get("diagnostics"), pd.DataFrame) else pd.DataFrame()
+    )
 
     if not diagnostics.empty and "divergences" in diagnostics:
         divergences = pd.to_numeric(diagnostics["divergences"], errors="coerce")
@@ -689,7 +714,9 @@ def audit_validation_completion(
 
     min_replications = _safe_min(recovery["replications"], 0.0) if not recovery.empty else 0.0
     max_failure = _safe_max(failure["failure_rate"], 1.0) if not failure.empty else 1.0
-    max_absolute_bias = _safe_max(recovery["absolute_bias"], math.inf) if not recovery.empty else math.inf
+    max_absolute_bias = (
+        _safe_max(recovery["absolute_bias"], math.inf) if not recovery.empty else math.inf
+    )
     max_rmse = _safe_max(recovery["rmse"], math.inf) if not recovery.empty else math.inf
 
     finite_coverage = (
@@ -703,7 +730,11 @@ def audit_validation_completion(
         else None
     )
 
-    finite_sbc = _finite_numeric(sbc["p_value"]) if not sbc.empty and "p_value" in sbc else pd.Series(dtype=float)
+    finite_sbc = (
+        _finite_numeric(sbc["p_value"])
+        if not sbc.empty and "p_value" in sbc
+        else pd.Series(dtype=float)
+    )
     sbc_observed = float(finite_sbc.min()) if len(finite_sbc) else math.nan
     empirical_pass = _evidence_pass(
         empirical_reproduction,
@@ -766,7 +797,8 @@ def audit_validation_completion(
                     not failure.empty
                     and bool(
                         (
-                            pd.to_numeric(failure["failure_rate"], errors="coerce") <= thresholds["max_failure_rate"]
+                            pd.to_numeric(failure["failure_rate"], errors="coerce")
+                            <= thresholds["max_failure_rate"]
                         ).all()
                     )
                 ),
@@ -775,31 +807,50 @@ def audit_validation_completion(
                     and np.isfinite(pd.to_numeric(recovery["absolute_bias"], errors="coerce")).all()
                     and bool(
                         (
-                            pd.to_numeric(recovery["absolute_bias"], errors="coerce") <= thresholds["max_absolute_bias"]
+                            pd.to_numeric(recovery["absolute_bias"], errors="coerce")
+                            <= thresholds["max_absolute_bias"]
                         ).all()
                     )
                 ),
                 (
                     not recovery.empty
                     and np.isfinite(pd.to_numeric(recovery["rmse"], errors="coerce")).all()
-                    and bool((pd.to_numeric(recovery["rmse"], errors="coerce") <= thresholds["max_rmse"]).all())
+                    and bool(
+                        (
+                            pd.to_numeric(recovery["rmse"], errors="coerce")
+                            <= thresholds["max_rmse"]
+                        ).all()
+                    )
                 ),
                 (
                     not recovery.empty
                     and np.isfinite(pd.to_numeric(recovery["coverage"], errors="coerce")).all()
                     and bool(
                         (
-                            (pd.to_numeric(recovery["coverage"], errors="coerce") >= thresholds["min_coverage"])
-                            & (pd.to_numeric(recovery["coverage"], errors="coerce") <= thresholds["max_coverage"])
+                            (
+                                pd.to_numeric(recovery["coverage"], errors="coerce")
+                                >= thresholds["min_coverage"]
+                            )
+                            & (
+                                pd.to_numeric(recovery["coverage"], errors="coerce")
+                                <= thresholds["max_coverage"]
+                            )
                         ).all()
                     )
                 ),
                 (not math.isfinite(max_rhat) or max_rhat <= thresholds["max_rhat"]),
                 (not math.isfinite(min_ess) or min_ess >= thresholds["min_ess_bulk"]),
-                (not math.isfinite(divergence_rate) or divergence_rate <= thresholds["max_divergence_rate"]),
+                (
+                    not math.isfinite(divergence_rate)
+                    or divergence_rate <= thresholds["max_divergence_rate"]
+                ),
                 (
                     not thresholds["require_sbc"]
-                    or (not sbc.empty and len(finite_sbc) == len(sbc) and bool((finite_sbc >= 0.01).all()))
+                    or (
+                        not sbc.empty
+                        and len(finite_sbc) == len(sbc)
+                        and bool((finite_sbc >= 0.01).all())
+                    )
                 ),
                 (not thresholds["require_empirical_reproduction"] or empirical_pass),
             ],
@@ -859,7 +910,9 @@ def plot_parameter_recovery(
     data["estimate"] = pd.to_numeric(data["estimate"], errors="coerce")
     data = data.loc[np.isfinite(data["truth"]) & np.isfinite(data["estimate"])]
     if parameter is not None:
-        requested = {str(value) for value in ([parameter] if isinstance(parameter, str) else parameter)}
+        requested = {
+            str(value) for value in ([parameter] if isinstance(parameter, str) else parameter)
+        }
         data = data.loc[data["parameter"].astype(str).isin(requested)]
     if data.empty:
         _stop("No recovery rows match the request.")
@@ -912,7 +965,9 @@ def _plot_sbc_ranks(data: pd.DataFrame, parameter=None) -> pd.DataFrame:
     if not {"job_id", "parameter", "draw", "truth"}.issubset(data.columns):
         _stop("SBC draws are unavailable.")
     if parameter is not None:
-        requested = {str(value) for value in ([parameter] if isinstance(parameter, str) else parameter)}
+        requested = {
+            str(value) for value in ([parameter] if isinstance(parameter, str) else parameter)
+        }
         data = data.loc[data["parameter"].astype(str).isin(requested)]
     ranks = _sbc_ranks(data, [])
     if ranks.empty:
@@ -1002,7 +1057,8 @@ def plot_validation_runtime(
     ax = _axis(ax)
     if "scenario_id" in data:
         groups = [
-            group["elapsed_seconds"].to_numpy(dtype=float) for _, group in data.groupby("scenario_id", sort=False)
+            group["elapsed_seconds"].to_numpy(dtype=float)
+            for _, group in data.groupby("scenario_id", sort=False)
         ]
         labels = [str(name) for name, _ in data.groupby("scenario_id", sort=False)]
         ax.boxplot(groups, tick_labels=labels, **kwargs)
@@ -1101,7 +1157,9 @@ def audit_model_promotion(evidence, spec=None):
         lambda frame: {
             "required_gates": int(frame["required"].sum()),
             "passed_required_gates": int((frame["required"] & frame["pass"]).sum()),
-            "status": ("promotable" if bool(frame.loc[frame["required"], "pass"].all()) else "experimental"),
+            "status": (
+                "promotable" if bool(frame.loc[frame["required"], "pass"].all()) else "experimental"
+            ),
         },
     )
     return EyeModelPromotionAudit(
@@ -1119,13 +1177,18 @@ def _markdown_table(data: pd.DataFrame, digits=4) -> str:
     for column in frame:
         if pd.api.types.is_numeric_dtype(frame[column]):
             frame[column] = frame[column].map(
-                lambda value: "" if pd.isna(value) else f"{float(value):.{digits}f}".rstrip("0").rstrip(".")
+                lambda value: (
+                    "" if pd.isna(value) else f"{float(value):.{digits}f}".rstrip("0").rstrip(".")
+                )
             )
         else:
             frame[column] = frame[column].map(lambda value: "" if pd.isna(value) else str(value))
     header = "| " + " | ".join(map(str, frame.columns)) + " |"
     separator = "| " + " | ".join(["---"] * len(frame.columns)) + " |"
-    rows = ["| " + " | ".join(str(value) for value in row) + " |" for row in frame.itertuples(index=False, name=None)]
+    rows = [
+        "| " + " | ".join(str(value) for value in row) + " |"
+        for row in frame.itertuples(index=False, name=None)
+    ]
     return "\n".join([header, separator, *rows])
 
 
@@ -1147,7 +1210,9 @@ def write_validation_release_report(
 
     estimates = x["estimates"] if isinstance(x.get("estimates"), pd.DataFrame) else pd.DataFrame()
     jobs = x["jobs"] if isinstance(x.get("jobs"), pd.DataFrame) else pd.DataFrame()
-    predictions = x["predictions"] if isinstance(x.get("predictions"), pd.DataFrame) else pd.DataFrame()
+    predictions = (
+        x["predictions"] if isinstance(x.get("predictions"), pd.DataFrame) else pd.DataFrame()
+    )
     draws = x["draws"] if isinstance(x.get("draws"), pd.DataFrame) else pd.DataFrame()
 
     recovery = validation_recovery_summary(x) if not estimates.empty else pd.DataFrame()

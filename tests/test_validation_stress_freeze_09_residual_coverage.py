@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import numpy as np
@@ -52,9 +52,7 @@ def _identity_corruptors():
 
 
 def _full_freeze():
-    claims = vs.eyeprocess_validation_claim_matrix(
-        "C1", "claim", "E1", "test", status="supported"
-    )
+    claims = vs.eyeprocess_validation_claim_matrix("C1", "claim", "E1", "test", status="supported")
     return vs.freeze_eyeprocess_validation_evidence(
         design={"id": 1},
         recovery={"rmse": 0.1},
@@ -87,9 +85,7 @@ def test_private_collection_numeric_and_scalar_helpers(tmp_path):
     assert vs._clean_scalar(np.int64(2)) == 2
     assert vs._clean_scalar(Path("a/b")) == "a/b"
     assert vs._clean_scalar(date(2026, 1, 2)) == "2026-01-02"
-    assert vs._clean_scalar(datetime(2026, 1, 2, tzinfo=timezone.utc)).startswith(
-        "2026-01-02"
-    )
+    assert vs._clean_scalar(datetime(2026, 1, 2, tzinfo=UTC)).startswith("2026-01-02")
     assert vs._clean_scalar(pd.NA) is None
     assert vs._clean_scalar(np.nan) is None
     assert vs._clean_scalar(np.inf) is None
@@ -207,13 +203,9 @@ def test_recycle_character_and_claim_matrix_missing_text_guards():
         vs.eyeprocess_validation_claim_matrix([], "claim", "E1", "test")
 
     with pytest.raises(EyeProcessValidationError, match="claim_id"):
-        vs.eyeprocess_validation_claim_matrix(
-            [None, "C2"], ["a", "b"], ["E1", "E2"], "test"
-        )
+        vs.eyeprocess_validation_claim_matrix([None, "C2"], ["a", "b"], ["E1", "E2"], "test")
     with pytest.raises(EyeProcessValidationError, match="claim_id"):
-        vs.eyeprocess_validation_claim_matrix(
-            ["", "C2"], ["a", "b"], ["E1", "E2"], "test"
-        )
+        vs.eyeprocess_validation_claim_matrix(["", "C2"], ["a", "b"], ["E1", "E2"], "test")
 
     for kwargs in (
         {"claim": None},
@@ -352,9 +344,9 @@ def test_metric_output_coercion_series_mapping_named_scalar_and_errors():
         "a": 1.0,
         "b": 2.0,
     }
-    assert vs._coerce_metric_output({"a": np.nan})["a"] != vs._coerce_metric_output(
-        {"a": np.nan}
-    )["a"]
+    assert (
+        vs._coerce_metric_output({"a": np.nan})["a"] != vs._coerce_metric_output({"a": np.nan})["a"]
+    )
     assert vs._coerce_metric_output(_NamedScalar()) == {"metric": 1.5}
 
     for bad in (

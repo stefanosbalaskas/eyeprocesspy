@@ -50,7 +50,9 @@ def test_preprocessing_multiverse_preserves_results_and_failure_rows():
     result = ep.preprocessing_multiverse(
         np.arange(1, 6),
         {"a": 1, "b": 2, "bad": "bad"},
-        transform=lambda x, spec: x * spec if isinstance(spec, int) else (_ for _ in ()).throw(ValueError("bad spec")),
+        transform=lambda x, spec: (
+            x * spec if isinstance(spec, int) else (_ for _ in ()).throw(ValueError("bad spec"))
+        ),
         analyse=lambda x: pd.DataFrame({"estimate": [float(np.mean(x))]}),
     )
     assert result.eyeprocess_class == "eye_multiverse"

@@ -17,8 +17,9 @@ import re
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -159,7 +160,9 @@ def is_tobii_export(path, inspect_rows=20):
         "presented stimulus",
     )
     hits = sum(any(pattern in name for pattern in patterns) for name in names)
-    signature = any("recording timestamp" in name for name in names) and any("gaze point" in name for name in names)
+    signature = any("recording timestamp" in name for name in names) and any(
+        "gaze point" in name for name in names
+    )
     if signature:
         return max(0.85, min(1.0, hits / 8.0))
     return min(0.7, hits / 8.0)
@@ -366,7 +369,9 @@ def read_tobii(
             "source_columns": list(map(str, data.columns)),
             "heterogeneous_rows": True,
             "timestamp_role": time_col,
-            "export_note": ("Rows may represent gaze observations or events; temporal order uses timestamps."),
+            "export_note": (
+                "Rows may represent gaze observations or events; temporal order uses timestamps."
+            ),
         },
     )
     if keep_raw:
@@ -587,13 +592,21 @@ def _read_neon_companions(dataset, folder: Path, keep_raw=True) -> None:
             "duration",
         )
         start = _safe_numeric(data[start_col]) * 1e-9
-        end = _safe_numeric(data[end_col]) * 1e-9 if end_col is not None else pd.Series(np.nan, index=data.index)
-        duration = _safe_numeric(data[duration_col]) if duration_col is not None else (end - start) * 1000
+        end = (
+            _safe_numeric(data[end_col]) * 1e-9
+            if end_col is not None
+            else pd.Series(np.nan, index=data.index)
+        )
+        duration = (
+            _safe_numeric(data[duration_col]) if duration_col is not None else (end - start) * 1000
+        )
         x_col = _pick(names, "fixation x [px]", "x [px]", "x")
         y_col = _pick(names, "fixation y [px]", "y [px]", "y")
         episodes = pd.DataFrame(
             {
-                "episode_id": [f"{recording}_neon_fix_{index:07d}" for index in range(1, len(data) + 1)],
+                "episode_id": [
+                    f"{recording}_neon_fix_{index:07d}" for index in range(1, len(data) + 1)
+                ],
                 "recording_id": recording,
                 "episode_type": "fixation",
                 "eye": "combined",
@@ -641,7 +654,9 @@ def _read_neon_companions(dataset, folder: Path, keep_raw=True) -> None:
         seconds = _safe_numeric(data[time_col]) * 1e-9
         events = pd.DataFrame(
             {
-                "event_id": [f"{recording}_neon_event_{index:07d}" for index in range(1, len(data) + 1)],
+                "event_id": [
+                    f"{recording}_neon_event_{index:07d}" for index in range(1, len(data) + 1)
+                ],
                 "recording_id": recording,
                 "timestamp_native": seconds / 1e-9,
                 "timestamp_seconds": seconds,
@@ -688,7 +703,10 @@ def _read_neon_companions(dataset, folder: Path, keep_raw=True) -> None:
                 pd.DataFrame(
                     {
                         "recording_id": recording,
-                        "sample_id": [f"{recording}_neon_eye_{eye}_{index:09d}" for index in range(1, len(data) + 1)],
+                        "sample_id": [
+                            f"{recording}_neon_eye_{eye}_{index:09d}"
+                            for index in range(1, len(data) + 1)
+                        ],
                         "timestamp_native": seconds / 1e-9,
                         "timestamp_seconds": seconds,
                         "eye": eye,
@@ -817,16 +835,26 @@ def _read_core_companions(dataset, folder: Path, keep_raw=True) -> None:
         method_col = _pick(names, "method")
         seconds = _safe_numeric(data[time_col])
         diameter = (
-            _safe_numeric(data[diameter_col]) if diameter_col is not None else pd.Series(np.nan, index=data.index)
+            _safe_numeric(data[diameter_col])
+            if diameter_col is not None
+            else pd.Series(np.nan, index=data.index)
         )
         confidence = (
-            _safe_numeric(data[confidence_col]) if confidence_col is not None else pd.Series(np.nan, index=data.index)
+            _safe_numeric(data[confidence_col])
+            if confidence_col is not None
+            else pd.Series(np.nan, index=data.index)
         )
-        pupil_unit = "millimetres" if diameter_col is not None and "3d" in diameter_col.lower() else "image_pixels"
+        pupil_unit = (
+            "millimetres"
+            if diameter_col is not None and "3d" in diameter_col.lower()
+            else "image_pixels"
+        )
         eye_samples = pd.DataFrame(
             {
                 "recording_id": recording,
-                "sample_id": [f"{recording}_core_eye_{index:09d}" for index in range(1, len(data) + 1)],
+                "sample_id": [
+                    f"{recording}_core_eye_{index:09d}" for index in range(1, len(data) + 1)
+                ],
                 "timestamp_native": seconds,
                 "timestamp_seconds": seconds,
                 "eye": eye,
@@ -840,7 +868,9 @@ def _read_core_companions(dataset, folder: Path, keep_raw=True) -> None:
                 "gaze_origin_valid": pd.NA,
                 "corneal_reflection_x": np.nan,
                 "corneal_reflection_y": np.nan,
-                "detector_method": (data[method_col].astype("string") if method_col is not None else pd.NA),
+                "detector_method": (
+                    data[method_col].astype("string") if method_col is not None else pd.NA
+                ),
                 "confidence": confidence,
                 "trial_id": pd.NA,
                 "stimulus_id": pd.NA,
@@ -858,17 +888,25 @@ def _read_core_companions(dataset, folder: Path, keep_raw=True) -> None:
         duration_col = _pick(names, "duration", "duration_ms")
         start = _safe_numeric(data[start_col])
         duration = (
-            _safe_numeric(data[duration_col]) if duration_col is not None else pd.Series(np.nan, index=data.index)
+            _safe_numeric(data[duration_col])
+            if duration_col is not None
+            else pd.Series(np.nan, index=data.index)
         )
         finite_duration = duration[np.isfinite(duration)]
-        duration_ms = duration * 1000 if len(finite_duration) and bool((finite_duration < 100).all()) else duration
+        duration_ms = (
+            duration * 1000
+            if len(finite_duration) and bool((finite_duration < 100).all())
+            else duration
+        )
         x_col = _pick(names, "norm_pos_x", "x")
         y_col = _pick(names, "norm_pos_y", "y")
         dispersion_col = _pick(names, "dispersion")
         method_col = _pick(names, "method")
         episodes = pd.DataFrame(
             {
-                "episode_id": [f"{recording}_core_fix_{index:07d}" for index in range(1, len(data) + 1)],
+                "episode_id": [
+                    f"{recording}_core_fix_{index:07d}" for index in range(1, len(data) + 1)
+                ],
                 "recording_id": recording,
                 "episode_type": "fixation",
                 "eye": "combined",
@@ -1047,7 +1085,9 @@ def _parse_eyelink_asc(lines: list[str], recording_id: str):
             start_y = _parse_float(tokens[6]) if row_type == "ESACC" else np.nan
             end_x = _parse_float(tokens[7]) if row_type == "ESACC" else np.nan
             end_y = _parse_float(tokens[8]) if row_type == "ESACC" else np.nan
-            amplitude = _parse_float(tokens[9]) if row_type == "ESACC" and len(tokens) > 9 else np.nan
+            amplitude = (
+                _parse_float(tokens[9]) if row_type == "ESACC" and len(tokens) > 9 else np.nan
+            )
             peak = _parse_float(tokens[10]) if row_type == "ESACC" and len(tokens) > 10 else np.nan
             episodes.append(
                 {
@@ -1124,8 +1164,12 @@ def _parse_eyelink_asc(lines: list[str], recording_id: str):
                         "average_error": numbers[0] if numbers else np.nan,
                         "maximum_error": (numbers[1] if len(numbers) > 1 else np.nan),
                         "error_unit": "degrees",
-                        "validation_status": ("passed" if re.search(r"GOOD|OK|SUCCESS", message, re.I) else pd.NA),
-                        "drift_offset": (numbers[0] if calibration_type == "drift" and numbers else np.nan),
+                        "validation_status": (
+                            "passed" if re.search(r"GOOD|OK|SUCCESS", message, re.I) else pd.NA
+                        ),
+                        "drift_offset": (
+                            numbers[0] if calibration_type == "drift" and numbers else np.nan
+                        ),
                         "source_record": message,
                     }
                 )
@@ -1156,7 +1200,9 @@ def _parse_eyelink_asc(lines: list[str], recording_id: str):
         "eye_samples": pd.DataFrame(eye_samples) if eye_samples else empty_eye_table("eye_samples"),
         "episodes": pd.DataFrame(episodes) if episodes else empty_eye_table("episodes"),
         "events": pd.DataFrame(events) if events else empty_eye_table("events"),
-        "calibrations": pd.DataFrame(calibrations) if calibrations else empty_eye_table("calibrations"),
+        "calibrations": pd.DataFrame(calibrations)
+        if calibrations
+        else empty_eye_table("calibrations"),
         "record_types": record_types,
     }
 
@@ -1299,7 +1345,9 @@ def read_eyelink_edf(
     requested = str(edf2asc or "").strip()
     if requested:
         requested_path = Path(requested).expanduser()
-        converter = str(requested_path.resolve()) if requested_path.is_file() else shutil.which(requested)
+        converter = (
+            str(requested_path.resolve()) if requested_path.is_file() else shutil.which(requested)
+        )
     else:
         converter = shutil.which("edf2asc")
     if not converter:
@@ -1328,7 +1376,9 @@ def read_eyelink_edf(
         )
         if completed.returncode != 0 or not destination.is_file():
             detail = "\n".join(part for part in [completed.stdout, completed.stderr] if part)
-            raise EyeProcessBackendError("EDF2ASC conversion failed" + (f": {detail}" if detail else "."))
+            raise EyeProcessBackendError(
+                "EDF2ASC conversion failed" + (f": {detail}" if detail else ".")
+            )
         out = read_eyelink_asc(destination, **kwargs)
         out = add_provenance(
             out,

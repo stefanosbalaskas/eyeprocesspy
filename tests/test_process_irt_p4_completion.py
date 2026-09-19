@@ -194,7 +194,10 @@ def test_advanced_process_irt_external_gates_and_reference_diagnostics():
         response_matrix,
         q_matrix,
         engine="external",
-        external_engine=lambda response_matrix, q_matrix: {"shape": response_matrix.shape, "q": q_matrix.shape},
+        external_engine=lambda response_matrix, q_matrix: {
+            "shape": response_matrix.shape,
+            "q": q_matrix.shape,
+        },
     )
     assert cognitive.eyeprocess_class == "eye_cognitive_diagnosis_process"
     assert cognitive.response_model["shape"] == (4, 3)
@@ -244,7 +247,9 @@ def test_process_dif_surrogate_and_adjusted_audit_are_explicit():
         process_features=["process_a", "process_b"],
     )
     assert audit.eyeprocess_class == "eye_process_adjusted_dif"
-    assert {"term", "unadjusted", "adjusted", "absolute_reduction"}.issubset(audit.coefficients.columns)
+    assert {"term", "unadjusted", "adjusted", "absolute_reduction"}.issubset(
+        audit.coefficients.columns
+    )
 
 
 def test_recovery_audits_and_engine_comparison_are_numerical():
@@ -335,7 +340,9 @@ def test_validation_stress_families_preserve_scenarios_and_replications():
         replications=1,
         seed=4,
     )
-    preprocessing = ep.stress_test_preprocessing(runner, ["raw", "filtered"], replications=1, seed=5)
+    preprocessing = ep.stress_test_preprocessing(
+        runner, ["raw", "filtered"], replications=1, seed=5
+    )
 
     assert len(generic) == 4 and not generic.failed.any()
     assert len(latent) == 6 and not latent.failed.any()

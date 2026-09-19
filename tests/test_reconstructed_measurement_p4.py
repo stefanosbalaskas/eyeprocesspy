@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -64,17 +65,13 @@ def test_p4_uncertainty_plot_data_contracts() -> None:
 
 def test_p4_calibration_plot_data_contracts() -> None:
     rng = np.random.default_rng(12)
-    reference = pd.DataFrame(
-        {"target_x": rng.random(60), "target_y": rng.random(60)}
-    )
+    reference = pd.DataFrame({"target_x": rng.random(60), "target_y": rng.random(60)})
     observed = reference.assign(
         x=lambda z: z.target_x + 0.05 + rng.normal(0, 0.005, 60),
         y=lambda z: z.target_y - 0.03 + rng.normal(0, 0.005, 60),
         time=np.arange(60),
     )
-    drift = ep.detect_calibration_drift(
-        observed, window=10, x_col="x", y_col="y", time_col="time"
-    )
+    drift = ep.detect_calibration_drift(observed, window=10, x_col="x", y_col="y", time_col="time")
 
     _assert_plot(ep.plot_calibration_error_ellipses(drift))
     _assert_plot(ep.plot_drift_over_time(drift))
@@ -83,9 +80,7 @@ def test_p4_calibration_plot_data_contracts() -> None:
 
 def test_p4_reliability_components_and_plot_contracts() -> None:
     data = _trial_data(seed=13)
-    gstudy = ep.fit_process_gstudy(
-        data, "dwell_ms", facets=["person", "item", "session", "device"]
-    )
+    gstudy = ep.fit_process_gstudy(data, "dwell_ms", facets=["person", "item", "session", "device"])
     components = ep.process_variance_components(gstudy)
     assert set(components.columns) >= {"component", "variance", "proportion"}
     assert np.isclose(components.proportion.sum(), 1.0)
@@ -114,9 +109,7 @@ def test_p4_pupil_registration_audit_and_plot_contracts() -> None:
     data = pd.concat(rows, ignore_index=True)
     registration = ep.register_pupil_curves(data, "time", "pupil")
     decomposition = ep.decompose_pupil_phase_amplitude(registration, components=2)
-    responses = pd.DataFrame(
-        rng.binomial(1, 0.6, (12, 5)), index=[f"P{i + 1}" for i in range(12)]
-    )
+    responses = pd.DataFrame(rng.binomial(1, 0.6, (12, 5)), index=[f"P{i + 1}" for i in range(12)])
     fitted = ep.fit_phase_amplitude_irt(responses, decomposition)
 
     audit = ep.audit_pupil_registration(registration)
@@ -131,9 +124,7 @@ def test_p4_pupil_registration_audit_and_plot_contracts() -> None:
 
 def test_p4_missingness_plot_contracts() -> None:
     data = _trial_data(seed=15)
-    observation = ep.fit_process_observation_model(
-        data, "observed", ["dwell_ms", "pupil"]
-    )
+    observation = ep.fit_process_observation_model(data, "observed", ["dwell_ms", "pupil"])
     values = data.pupil.to_numpy().copy()
     values[data.observed.eq(0)] = np.nan
     sensitivity = ep.process_pattern_mixture(values, delta=[-1, 0, 1])

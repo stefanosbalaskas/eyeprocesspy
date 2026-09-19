@@ -8,9 +8,10 @@ import re
 import shutil
 import sys
 import time
-from datetime import datetime, timezone
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -76,7 +77,7 @@ def _stop(message: str) -> None:
 
 
 def _now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _frame(value: Any) -> pd.DataFrame:
@@ -89,7 +90,9 @@ def _frame(value: Any) -> pd.DataFrame:
     try:
         return pd.DataFrame(value)
     except Exception as exc:
-        raise EyeProcessValidationError("`extract` must return an object coercible to a DataFrame.") from exc
+        raise EyeProcessValidationError(
+            "`extract` must return an object coercible to a DataFrame."
+        ) from exc
 
 
 def _bind_rows(frames: Sequence[pd.DataFrame]) -> pd.DataFrame:
@@ -105,7 +108,10 @@ def _set_frame_class(frame: pd.DataFrame, name: str) -> pd.DataFrame:
 
 
 def _is_multiverse(value: Any) -> bool:
-    return isinstance(value, EyeMultiverse) or getattr(value, "eyeprocess_class", None) == "eye_multiverse"
+    return (
+        isinstance(value, EyeMultiverse)
+        or getattr(value, "eyeprocess_class", None) == "eye_multiverse"
+    )
 
 
 def preprocessing_multiverse(
@@ -218,7 +224,11 @@ def reporting_guideline_audit(x, model=None, sensitivity=None):
     quality = _table(x, "quality")
     aois = _table(x, "aoi_definitions")
 
-    hardware = not recordings.empty and "device_model" in recordings and recordings["device_model"].notna().any()
+    hardware = (
+        not recordings.empty
+        and "device_model" in recordings
+        and recordings["device_model"].notna().any()
+    )
     sampling = False
     if not streams.empty:
         observed = pd.to_numeric(
@@ -230,7 +240,8 @@ def reporting_guideline_audit(x, model=None, sensitivity=None):
             errors="coerce",
         )
         sampling = bool(
-            np.isfinite(observed.to_numpy(dtype=float)).any() or np.isfinite(nominal.to_numpy(dtype=float)).any()
+            np.isfinite(observed.to_numpy(dtype=float)).any()
+            or np.isfinite(nominal.to_numpy(dtype=float)).any()
         )
 
     exclusion = False
@@ -354,9 +365,9 @@ def create_public_benchmark(
             for name in canonical_table_names():
                 table = _table(y, name)
                 if "recording_id" in table:
-                    y[name] = table.loc[table["recording_id"].astype(str).isin(retained_recordings)].reset_index(
-                        drop=True
-                    )
+                    y[name] = table.loc[
+                        table["recording_id"].astype(str).isin(retained_recordings)
+                    ].reset_index(drop=True)
 
     if not include_samples:
         y["gaze_samples"] = empty_eye_table("gaze_samples")
@@ -667,7 +678,9 @@ def run_eyeprocess_validation_program(
         summary.to_csv(output / f"sbc-{name}.csv", index=False, lineterminator="\n")
         ranks = _result_frame(result, "ranks")
         if not ranks.empty and "parameter" in ranks:
-            for parameter, part in ranks.dropna(subset=["parameter"]).groupby("parameter", sort=False):
+            for parameter, part in ranks.dropna(subset=["parameter"]).groupby(
+                "parameter", sort=False
+            ):
                 values = pd.to_numeric(part["normalized_rank"], errors="coerce").dropna()
                 if len(values):
                     _save_bar(

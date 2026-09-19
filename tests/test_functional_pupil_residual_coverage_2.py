@@ -291,7 +291,9 @@ def test_statsmodels_backend_guards_fit_and_comparison_and_fit_object_branch(mon
     prepared = ep.prepare_functional_pupil_data(d, _trial_spec())
     with monkeypatch.context() as m:
         m.setattr(builtins, "__import__", deny_statsmodels)
-        with pytest.raises(ep.EyeProcessBackendError, match="Model comparison requires statsmodels"):
+        with pytest.raises(
+            ep.EyeProcessBackendError, match="Model comparison requires statsmodels"
+        ):
             ep.compare_functional_scalar_models(prepared)
 
 

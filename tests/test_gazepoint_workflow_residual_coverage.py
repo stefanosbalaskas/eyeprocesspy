@@ -234,11 +234,22 @@ def test_summary_wide_analysis_and_response_matrix_empty_paths():
     x = _base_x()
     trials = ep.trial_table(x)
     trial_base = trials[
-        ["recording_id", "participant_id", "trial_id", "item_id", "stimulus_id", "condition_id", "start_time", "end_time"]
+        [
+            "recording_id",
+            "participant_id",
+            "trial_id",
+            "item_id",
+            "stimulus_id",
+            "condition_id",
+            "start_time",
+            "end_time",
+        ]
     ].copy()
 
     assert gpw._wide_features(pd.DataFrame(), ["trial_id"]).empty
-    assert gpw._wide_features(pd.DataFrame({"feature_name": ["x"], "value": [1]}), ["missing"]).empty
+    assert gpw._wide_features(
+        pd.DataFrame({"feature_name": ["x"], "value": [1]}), ["missing"]
+    ).empty
     assert gpw._wide_features(
         pd.DataFrame({"trial_id": ["t"], "feature_name": [pd.NA], "value": [1]}), ["trial_id"]
     ).empty
@@ -280,10 +291,16 @@ def test_summary_wide_analysis_and_response_matrix_empty_paths():
         gpw.gazepoint_analysis_tables(raw)
 
     assert gpw._response_matrix(pd.DataFrame(), "score") is None
-    assert gpw._response_matrix(pd.DataFrame({"participant_id": ["p"], "item_id": ["i"]}), "score") is None
-    assert gpw._response_matrix(
-        pd.DataFrame({"participant_id": ["p"], "item_id": ["i"], "score": [np.nan]}), "score"
-    ) is None
+    assert (
+        gpw._response_matrix(pd.DataFrame({"participant_id": ["p"], "item_id": ["i"]}), "score")
+        is None
+    )
+    assert (
+        gpw._response_matrix(
+            pd.DataFrame({"participant_id": ["p"], "item_id": ["i"], "score": [np.nan]}), "score"
+        )
+        is None
+    )
     duplicate = pd.DataFrame(
         {
             "participant_id": ["p", "p"],
@@ -316,7 +333,9 @@ def test_irt_default_process_report_plot_failure_and_validation_guards(tmp_path)
     assert irt["response_matrix"] is not None
     assert irt["response_time_matrix"] is not None
 
-    failed = gpw._save_workflow_plot(tmp_path / "failed.png", lambda: (_ for _ in ()).throw(RuntimeError("boom")))
+    failed = gpw._save_workflow_plot(
+        tmp_path / "failed.png", lambda: (_ for _ in ()).throw(RuntimeError("boom"))
+    )
     assert failed["status"] == "failed"
     assert "boom" in failed["message"]
 

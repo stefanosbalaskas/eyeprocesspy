@@ -98,7 +98,11 @@ def test_private_dataset_statsmodels_formula_and_feature_guards(monkeypatch):
     assert {"gaze_feature", "pupil_feature"} <= set(fallback.columns)
 
     with monkeypatch.context() as patch:
-        patch.setattr(pd.DataFrame, "pivot_table", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("pivot failed")))
+        patch.setattr(
+            pd.DataFrame,
+            "pivot_table",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("pivot failed")),
+        )
         with pytest.raises(ep.EyeProcessValidationError, match="aggregate feature"):
             lm._features_wide(x)
 
@@ -148,19 +152,26 @@ def test_response_time_matrix_duplicate_and_alignment_edges():
 
     dup = x.copy()
     dup["responses"] = pd.concat([x["responses"], x["responses"].iloc[[0]]], ignore_index=True)
-    with pytest.raises(ep.EyeProcessValidationError, match="Duplicate participant-item response times"):
+    with pytest.raises(
+        ep.EyeProcessValidationError, match="Duplicate participant-item response times"
+    ):
         ep.response_time_matrix(dup)
     assert ep.response_time_matrix(dup, duplicate="last").shape == (8, 3)
     assert ep.response_time_matrix(dup, duplicate="mean").shape == (8, 3)
 
     with pytest.raises(ep.EyeProcessValidationError, match="no common"):
-        ep.align_response_matrices(pd.DataFrame([[1]], index=["P1"], columns=["I1"]), pd.DataFrame([[1]], index=["P2"], columns=["I2"]))
+        ep.align_response_matrices(
+            pd.DataFrame([[1]], index=["P1"], columns=["I1"]),
+            pd.DataFrame([[1]], index=["P2"], columns=["I2"]),
+        )
 
 
 def test_model_data_and_explanatory_irt_validation_branches():
     x = _dataset_with_features()
     with pytest.raises(ep.EyeProcessValidationError, match="No responses"):
-        empty = x.copy(); empty["responses"] = x["responses"].iloc[0:0].copy(); ep.model_data(empty)
+        empty = x.copy()
+        empty["responses"] = x["responses"].iloc[0:0].copy()
+        ep.model_data(empty)
 
     with pytest.raises(ep.EyeProcessValidationError, match="Formula response"):
         ep.fit_explanatory_irt(x, "missing_response ~ gaze_feature", engine="glm")
@@ -218,10 +229,16 @@ def test_fit_irt_accuracy_and_dif_guard_failure_paths(monkeypatch):
         seed=703,
     )
     participants = list(pd.unique(enough["responses"]["participant_id"]))
-    group_map = {pid: ("A" if i < len(participants) // 2 else "B") for i, pid in enumerate(participants)}
+    group_map = {
+        pid: ("A" if i < len(participants) // 2 else "B") for i, pid in enumerate(participants)
+    }
     groups = enough["responses"]["participant_id"].map(group_map).to_numpy()
     with monkeypatch.context() as patch:
-        patch.setattr(lm, "_fit_binomial", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("fit failed")))
+        patch.setattr(
+            lm,
+            "_fit_binomial",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("fit failed")),
+        )
         failed = ep.fit_dif(enough, group=groups, engine="logistic", items=["I001"])
     assert failed.fit.loc[0, "status"] == "fit_failed"
 
@@ -231,7 +248,9 @@ def test_shared_factor_guards_noncentered_unscaled_and_no_append():
     with pytest.raises(ep.EyeProcessValidationError, match="absent"):
         ep.fit_shared_process_factor(x, ["missing_feature"])
     with pytest.raises(ep.EyeProcessValidationError, match="Insufficient"):
-        ep.fit_shared_process_factor(x, ["gaze_feature", "pupil_feature"], n_factors=len(x["responses"]))
+        ep.fit_shared_process_factor(
+            x, ["gaze_feature", "pupil_feature"], n_factors=len(x["responses"])
+        )
 
     result = ep.fit_shared_process_factor(
         x,
@@ -247,7 +266,12 @@ def test_shared_factor_guards_noncentered_unscaled_and_no_append():
 
 
 def test_model_extractors_statistics_and_local_dependence_guards():
-    for fun in (ep.item_parameters, ep.person_scores, ep.model_fit_statistics, ep.check_local_dependence):
+    for fun in (
+        ep.item_parameters,
+        ep.person_scores,
+        ep.model_fit_statistics,
+        ep.check_local_dependence,
+    ):
         with pytest.raises(ep.EyeProcessValidationError, match="eyeprocess_model"):
             fun({})
 
@@ -268,7 +292,9 @@ def test_model_extractors_statistics_and_local_dependence_guards():
     item_fit = SimpleNamespace(params=pd.Series({"C(item_id)[I1]": 0.5}))
     person_fit = SimpleNamespace(params=pd.Series({"C(participant_id)[P1]": -0.3}))
     assert ep.item_parameters(_fake_model("rasch_glm", fit=item_fit)).loc[0, "item_id"] == "I1"
-    assert ep.person_scores(_fake_model("rasch_glm", fit=person_fit)).loc[0, "participant_id"] == "P1"
+    assert (
+        ep.person_scores(_fake_model("rasch_glm", fit=person_fit)).loc[0, "participant_id"] == "P1"
+    )
 
     stats = ep.model_fit_statistics(_fake_model("other", fit=SimpleNamespace(), data=[1, 2, 3]))
     assert stats.loc[0, "nobs"] == 3
@@ -282,7 +308,9 @@ def test_model_extractors_statistics_and_local_dependence_guards():
 def test_joint_dynamic_and_simulation_alternate_paths():
     x = _dataset_with_features()
     with pytest.raises(ep.EyeProcessValidationError, match="engine"):
-        ep.fit_joint_process_model(x, "score ~ gaze_feature", "log_response_time ~ gaze_feature", engine="bad")
+        ep.fit_joint_process_model(
+            x, "score ~ gaze_feature", "log_response_time ~ gaze_feature", engine="bad"
+        )
 
     joint = ep.fit_joint_process_model(
         x,
@@ -296,11 +324,14 @@ def test_joint_dynamic_and_simulation_alternate_paths():
     with pytest.raises(ep.EyeProcessValidationError, match="Invalid dynamic AOI"):
         ep.fit_dynamic_aoi_model(x, source="bad")
 
-    empty = x.copy(); empty["gaze_samples"] = x["gaze_samples"].iloc[0:0].copy()
+    empty = x.copy()
+    empty["gaze_samples"] = x["gaze_samples"].iloc[0:0].copy()
     with pytest.raises(ep.EyeProcessValidationError, match="No AOI transitions"):
         ep.fit_dynamic_aoi_model(empty, source="samples")
 
-    constant = x.copy(); constant["gaze_samples"] = x["gaze_samples"].copy(); constant["gaze_samples"]["true_aoi"] = "prompt"
+    constant = x.copy()
+    constant["gaze_samples"] = x["gaze_samples"].copy()
+    constant["gaze_samples"]["true_aoi"] = "prompt"
     with pytest.raises(ep.EyeProcessValidationError, match="No AOI transitions"):
         ep.fit_dynamic_aoi_model(constant, source="samples")
 
@@ -339,7 +370,11 @@ def test_parameter_recovery_power_process_and_process_spec_failure_paths(monkeyp
     assert "simulation failed" in failed.loc[0, "error"]
 
     with monkeypatch.context() as patch:
-        patch.setattr(lm, "_fit_binomial", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("fit failed")))
+        patch.setattr(
+            lm,
+            "_fit_binomial",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("fit failed")),
+        )
         power = ep.power_process_simulation(4, 2, 0.2, replications=1, seed=3)
     assert power.loc[0, "power"] == 0.0
     assert np.isnan(power.loc[0, "mean_estimate"])
@@ -369,7 +404,8 @@ def test_process_diagnostics_functional_pupil_and_strategy_guards(monkeypatch):
     assert {"w1", "w2"} <= set(diag.warnings)
 
     x = _dataset()
-    empty_eye = x.copy(); empty_eye["eye_samples"] = x["eye_samples"].iloc[0:0].copy()
+    empty_eye = x.copy()
+    empty_eye["eye_samples"] = x["eye_samples"].iloc[0:0].copy()
     assert ep.functional_pupil_features(empty_eye, append=False).empty
     assert ep.functional_pupil_features(empty_eye, append=True) is empty_eye
 

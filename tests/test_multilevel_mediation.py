@@ -25,9 +25,35 @@ def make_data() -> pd.DataFrame:
             "participant_id": np.repeat(["p1", "p2", "p3"], 4),
             "trial_id": list(range(1, 5)) * 3,
             "condition": [0, 1, 0, 1] * 3,
-            "dwell_ms": [100.0, 0.0, 120.0, np.nan, 90.0, 140.0, 80.0, 160.0, 110.0, 130.0, 100.0, 150.0],
+            "dwell_ms": [
+                100.0,
+                0.0,
+                120.0,
+                np.nan,
+                90.0,
+                140.0,
+                80.0,
+                160.0,
+                110.0,
+                130.0,
+                100.0,
+                150.0,
+            ],
             "override": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            "valid_fraction": [0.95, 0.99, 0.92, 0.96, 0.94, 0.40, 0.97, 0.93, 0.96, 0.95, 0.98, 0.92],
+            "valid_fraction": [
+                0.95,
+                0.99,
+                0.92,
+                0.96,
+                0.94,
+                0.40,
+                0.97,
+                0.93,
+                0.96,
+                0.95,
+                0.98,
+                0.92,
+            ],
         }
     )
 
@@ -151,7 +177,9 @@ def test_singleton_participant_is_warning_not_silent_exclusion():
         outcome_col="override",
         warn=False,
     )
-    assert prepared.trial_counts.loc[prepared.trial_counts["participant_id"].eq("p4"), "singleton"].item()
+    assert prepared.trial_counts.loc[
+        prepared.trial_counts["participant_id"].eq("p4"), "singleton"
+    ].item()
     assert len(prepared.data) == len(data)
     assert any("only one observed trial" in x for x in prepared.warnings)
 
@@ -417,9 +445,7 @@ def test_boolean_observation_indicator_and_participant_count_property():
 def test_decomposition_empty_and_grand_mean_centering():
     with pytest.raises(ValueError, match="at least one variable"):
         decompose_within_between(make_data(), [])
-    out = decompose_within_between(
-        make_data(), "condition", grand_mean_center_between=True
-    )
+    out = decompose_within_between(make_data(), "condition", grand_mean_center_between=True)
     assert np.isclose(out["condition_between"].mean(), 0.0)
 
 
@@ -447,13 +473,20 @@ def test_variance_empty_singleton_and_constant_level_branches():
 def test_missingness_audit_validation_branches_and_empty_proportion():
     with pytest.raises(ValueError, match="supplied together"):
         audit_mediation_missingness(
-            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
-            quality_col="valid_fraction"
+            make_data(),
+            x_col="condition",
+            mediator_col="dwell_ms",
+            outcome_col="override",
+            quality_col="valid_fraction",
         )
     with pytest.raises(ValueError, match="finite numeric"):
         audit_mediation_missingness(
-            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
-            quality_col="valid_fraction", minimum_quality=True
+            make_data(),
+            x_col="condition",
+            mediator_col="dwell_ms",
+            outcome_col="override",
+            quality_col="valid_fraction",
+            minimum_quality=True,
         )
     data = make_data()
     data["m_seen"] = 1
@@ -461,8 +494,12 @@ def test_missingness_audit_validation_branches_and_empty_proportion():
     data.loc[0, "m_seen"] = 0
     data.loc[1, "y_seen"] = 0
     audit = audit_mediation_missingness(
-        data, x_col="condition", mediator_col="dwell_ms", outcome_col="override",
-        mediator_observed_col="m_seen", response_observed_col="y_seen"
+        data,
+        x_col="condition",
+        mediator_col="dwell_ms",
+        outcome_col="override",
+        mediator_observed_col="m_seen",
+        response_observed_col="y_seen",
     ).set_index("issue")
     assert audit.loc["mediator_not_observed", "n"] >= 2
     assert audit.loc["response_missing", "n"] == 1
@@ -498,7 +535,10 @@ def test_validation_reports_identifier_x_mediator_and_outcome_issues():
     badx = make_data().astype({"condition": object})
     badx.loc[0, "condition"] = "bad"
     out = validate_multilevel_mediation_data(
-        badx, x_col="condition", mediator_col="dwell_ms", outcome_col="override",
+        badx,
+        x_col="condition",
+        mediator_col="dwell_ms",
+        outcome_col="override",
         require_within_x=False,
     )
     assert "X must be numeric or explicitly coded before decomposition" in out["issues"]
@@ -516,8 +556,12 @@ def test_validation_reports_identifier_x_mediator_and_outcome_issues():
 def test_prepare_quality_pair_validation_and_explicit_observation_columns():
     with pytest.raises(ValueError, match="supplied together"):
         prepare_multilevel_mediation_data(
-            make_data(), x_col="condition", mediator_col="dwell_ms", outcome_col="override",
-            quality_col="valid_fraction", warn=False
+            make_data(),
+            x_col="condition",
+            mediator_col="dwell_ms",
+            outcome_col="override",
+            quality_col="valid_fraction",
+            warn=False,
         )
     data = make_data()
     data["m_seen"] = 1
@@ -526,8 +570,12 @@ def test_prepare_quality_pair_validation_and_explicit_observation_columns():
     data.loc[1, "y_seen"] = 0
     prepared = prepare_multilevel_mediation_data(
         data,
-        x_col="condition", mediator_col="dwell_ms", outcome_col="override",
-        mediator_observed_col="m_seen", response_observed_col="y_seen", warn=False
+        x_col="condition",
+        mediator_col="dwell_ms",
+        outcome_col="override",
+        mediator_observed_col="m_seen",
+        response_observed_col="y_seen",
+        warn=False,
     )
     assert not prepared.data.loc[0, "mediation_mediator_observed"]
     assert not prepared.data.loc[1, "mediation_response_observed"]
@@ -538,11 +586,13 @@ def test_bad_provenance_object_and_component_validation_branches():
         mediation_provenance_json({})
     with pytest.raises(TypeError, match="MultilevelMediationData"):
         from eyeprocesspy.multilevel_mediation import add_multilevel_mediation_component
+
         add_multilevel_mediation_component(
             {}, value_col="trust", semantic="m2", within_col="M2w", between_col="M2b"
         )
 
     from eyeprocesspy.multilevel_mediation import add_multilevel_mediation_component
+
     data = make_data()
     data["trust"] = np.linspace(1, 2, len(data))
     prepared = prepare_multilevel_mediation_data(
@@ -553,7 +603,11 @@ def test_bad_provenance_object_and_component_validation_branches():
             prepared, value_col="trust", semantic="m2", within_col="same", between_col="same"
         )
     explicit = add_multilevel_mediation_component(
-        prepared, value_col="trust", semantic="m2", within_col="M2w", between_col="M2b",
+        prepared,
+        value_col="trust",
+        semantic="m2",
+        within_col="M2w",
+        between_col="M2b",
         grand_mean_center_between=True,
     )
     assert np.isclose(explicit.data["M2b"].mean(), 0.0)

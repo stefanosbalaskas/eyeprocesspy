@@ -8,18 +8,19 @@ missing, observed zero remains an observed zero, poor-quality trials are flagged
 unless the caller explicitly requests mediator masking, and no analysis rows are
 silently removed.
 """
+
 from __future__ import annotations
 
+import json
+import warnings
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from hashlib import sha256
 from importlib.metadata import PackageNotFoundError, version
-import json
-from typing import Any, Iterable, Mapping, Sequence
-import warnings
+from typing import Any
 
 import numpy as np
 import pandas as pd
-
 
 _ALLOWED_QUALITY_ACTIONS = {"flag", "mask_mediator"}
 
@@ -204,7 +205,9 @@ def summarise_within_between_variance(
         tmp = pd.DataFrame({"participant": frame[participant_col], "value": values})
         tmp = tmp.dropna(subset=["participant"])
         means = tmp.groupby("participant", dropna=False)["value"].mean()
-        centered = tmp["value"] - tmp.groupby("participant", dropna=False)["value"].transform("mean")
+        centered = tmp["value"] - tmp.groupby("participant", dropna=False)["value"].transform(
+            "mean"
+        )
         n_obs = int(tmp["value"].notna().sum())
         total_var = float(tmp["value"].var(ddof=1)) if n_obs > 1 else np.nan
         within_var = float(centered.var(ddof=1)) if centered.notna().sum() > 1 else np.nan
@@ -278,19 +281,34 @@ def audit_mediation_missingness(
     """Audit missingness while distinguishing missing gaze from true zero gaze."""
     frame = _require_dataframe(data)
     for value, name in [
-        (x_col, "x_col"), (mediator_col, "mediator_col"), (outcome_col, "outcome_col"),
-        (participant_col, "participant_col"), (trial_col, "trial_col"),
+        (x_col, "x_col"),
+        (mediator_col, "mediator_col"),
+        (outcome_col, "outcome_col"),
+        (participant_col, "participant_col"),
+        (trial_col, "trial_col"),
     ]:
         _require_nonempty_name(value, name)
     _require_columns(
         frame,
-        [participant_col, trial_col, x_col, mediator_col, outcome_col, quality_col,
-         mediator_observed_col, response_observed_col],
+        [
+            participant_col,
+            trial_col,
+            x_col,
+            mediator_col,
+            outcome_col,
+            quality_col,
+            mediator_observed_col,
+            response_observed_col,
+        ],
     )
     if (quality_col is None) != (minimum_quality is None):
         raise ValueError("`quality_col` and `minimum_quality` must be supplied together.")
     if minimum_quality is not None:
-        if isinstance(minimum_quality, bool) or not isinstance(minimum_quality, (int, float)) or not np.isfinite(float(minimum_quality)):
+        if (
+            isinstance(minimum_quality, bool)
+            or not isinstance(minimum_quality, (int, float))
+            or not np.isfinite(float(minimum_quality))
+        ):
             raise ValueError("`minimum_quality` must be one finite numeric value.")
     m = _numeric_series(frame, mediator_col)
     mediator_observed = m.notna()
@@ -335,7 +353,11 @@ def check_mediation_trial_counts(
     """Summarise repeated-measures support without excluding participants."""
     frame = _require_dataframe(data)
     _require_columns(frame, [participant_col, trial_col])
-    if isinstance(minimum_trials, bool) or int(minimum_trials) != minimum_trials or minimum_trials < 1:
+    if (
+        isinstance(minimum_trials, bool)
+        or int(minimum_trials) != minimum_trials
+        or minimum_trials < 1
+    ):
         raise ValueError("`minimum_trials` must be an integer of at least 1.")
     counts = (
         frame.groupby(participant_col, dropna=False)[trial_col]
@@ -360,8 +382,11 @@ def validate_multilevel_mediation_data(
     """Validate identifiers, decomposition inputs, and repeated-measures support."""
     frame = _require_dataframe(data)
     for value, name in [
-        (x_col, "x_col"), (mediator_col, "mediator_col"), (outcome_col, "outcome_col"),
-        (participant_col, "participant_col"), (trial_col, "trial_col")
+        (x_col, "x_col"),
+        (mediator_col, "mediator_col"),
+        (outcome_col, "outcome_col"),
+        (participant_col, "participant_col"),
+        (trial_col, "trial_col"),
     ]:
         _require_nonempty_name(value, name)
     _require_columns(frame, [participant_col, trial_col, x_col, mediator_col, outcome_col])
@@ -464,21 +489,41 @@ def prepare_multilevel_mediation_data(
     """
     frame = _require_dataframe(data)
     for value, name in [
-        (x_col, "x_col"), (mediator_col, "mediator_col"), (outcome_col, "outcome_col"),
-        (participant_col, "participant_col"), (trial_col, "trial_col"),
+        (x_col, "x_col"),
+        (mediator_col, "mediator_col"),
+        (outcome_col, "outcome_col"),
+        (participant_col, "participant_col"),
+        (trial_col, "trial_col"),
     ]:
         _require_nonempty_name(value, name)
     _require_columns(
         frame,
-        [participant_col, trial_col, x_col, mediator_col, outcome_col, quality_col,
-         mediator_observed_col, response_observed_col],
+        [
+            participant_col,
+            trial_col,
+            x_col,
+            mediator_col,
+            outcome_col,
+            quality_col,
+            mediator_observed_col,
+            response_observed_col,
+        ],
     )
     derived = [
-        f"{x_col}_within", f"{x_col}_between", f"{mediator_col}_within",
-        f"{mediator_col}_between", "X_within", "X_between", "M_within",
-        "M_between", "mediation_mediator_observed", "mediation_mediator_true_zero",
-        "mediation_poor_quality", "mediation_response_observed",
-        "mediation_mediator_state", "mediation_analysis_eligible",
+        f"{x_col}_within",
+        f"{x_col}_between",
+        f"{mediator_col}_within",
+        f"{mediator_col}_between",
+        "X_within",
+        "X_between",
+        "M_within",
+        "M_between",
+        "mediation_mediator_observed",
+        "mediation_mediator_true_zero",
+        "mediation_poor_quality",
+        "mediation_response_observed",
+        "mediation_mediator_state",
+        "mediation_analysis_eligible",
     ]
     _check_derived_column_collisions(frame, derived)
     if quality_action not in _ALLOWED_QUALITY_ACTIONS:
@@ -488,7 +533,11 @@ def prepare_multilevel_mediation_data(
     if (quality_col is None) != (minimum_quality is None):
         raise ValueError("`quality_col` and `minimum_quality` must be supplied together.")
     if minimum_quality is not None:
-        if isinstance(minimum_quality, bool) or not isinstance(minimum_quality, (int, float)) or not np.isfinite(float(minimum_quality)):
+        if (
+            isinstance(minimum_quality, bool)
+            or not isinstance(minimum_quality, (int, float))
+            or not np.isfinite(float(minimum_quality))
+        ):
             raise ValueError("`minimum_quality` must be one finite numeric value.")
 
     validation = validate_multilevel_mediation_data(
@@ -542,15 +591,10 @@ def prepare_multilevel_mediation_data(
         default="observed_nonzero",
     )
     decomposed["mediation_analysis_eligible"] = (
-        decomposed[x_col].notna()
-        & mediator_observed
-        & response_observed
-        & ~poor_quality
+        decomposed[x_col].notna() & mediator_observed & response_observed & ~poor_quality
     )
 
-    variance = summarise_within_between_variance(
-        decomposed, [x_col, mediator_col], participant_col
-    )
+    variance = summarise_within_between_variance(decomposed, [x_col, mediator_col], participant_col)
     levels = identify_mediation_levels(decomposed, [x_col, mediator_col], participant_col)
     missingness = audit_mediation_missingness(
         decomposed,
@@ -570,17 +614,27 @@ def prepare_multilevel_mediation_data(
     if bool(poor_quality.any()):
         notes.append(
             "poor-quality trials are flagged; mediator values were "
-            + ("explicitly masked before decomposition" if quality_action == "mask_mediator" else "retained")
+            + (
+                "explicitly masked before decomposition"
+                if quality_action == "mask_mediator"
+                else "retained"
+            )
         )
     if bool((~mediator_observed).any()):
         notes.append("missing mediator observations remain missing and were not converted to zero")
     if bool((mediator_observed & m.eq(0)).any()):
         notes.append("observed zero mediator values are retained and separately identified")
 
-    source_columns = list(dict.fromkeys(
-        [participant_col, trial_col, x_col, mediator_col, outcome_col]
-        + [c for c in [quality_col, mediator_observed_col, response_observed_col] if c is not None]
-    ))
+    source_columns = list(
+        dict.fromkeys(
+            [participant_col, trial_col, x_col, mediator_col, outcome_col]
+            + [
+                c
+                for c in [quality_col, mediator_observed_col, response_observed_col]
+                if c is not None
+            ]
+        )
+    )
     quality_rules = {
         "quality_col": quality_col,
         "minimum_quality": minimum_quality,
@@ -673,8 +727,10 @@ def add_multilevel_mediation_component(
     if not isinstance(prepared, MultilevelMediationData):
         raise TypeError("`prepared` must be a MultilevelMediationData object.")
     for value, name in [
-        (value_col, "value_col"), (semantic, "semantic"),
-        (within_col, "within_col"), (between_col, "between_col")
+        (value_col, "value_col"),
+        (semantic, "semantic"),
+        (within_col, "within_col"),
+        (between_col, "between_col"),
     ]:
         _require_nonempty_name(value, name)
     if within_col == between_col:

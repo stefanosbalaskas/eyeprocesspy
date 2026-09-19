@@ -73,6 +73,7 @@ def test_file_hash_invalid_algorithm_guard():
 
 def test_environment_locale_and_timezone_exception_fallbacks(monkeypatch):
     with monkeypatch.context() as mp:
+
         def fail_locale(*args, **kwargs):
             raise RuntimeError("locale unavailable")
 
@@ -146,9 +147,7 @@ def test_provenance_empty_invalid_type_relation_and_validation_guards():
 
     invalid = {
         "eyeprocess_class": "eye_prov_graph",
-        "nodes": pd.DataFrame(
-            {"id": [""], "type": ["entity"], "label": ["bad"]}
-        ),
+        "nodes": pd.DataFrame({"id": [""], "type": ["entity"], "label": ["bad"]}),
         "edges": pd.DataFrame(columns=["from", "to", "relation"]),
     }
     with pytest.raises(ep.EyeProcessValidationError, match="ids cannot"):

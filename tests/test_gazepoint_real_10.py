@@ -112,7 +112,9 @@ def test_data_summary_import_builds_aoi_features(tmp_path: Path):
         "value",
     ]
     assert list(viewed) == [1.0]
-    assert not (out.validation["severity"].eq("error") if len(out.validation) else pd.Series(dtype=bool)).any()
+    assert not (
+        out.validation["severity"].eq("error") if len(out.validation) else pd.Series(dtype=bool)
+    ).any()
 
 
 def test_reconstruction_aliases_delegate(monkeypatch):

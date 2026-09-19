@@ -148,7 +148,9 @@ def _resolve_compression(codec, *, allow_fallback):
     if available(codec):
         return codec
     if not allow_fallback:
-        raise EyeProcessBackendError(f"Arrow compression codec `{codec}` is unavailable in this PyArrow build.")
+        raise EyeProcessBackendError(
+            f"Arrow compression codec `{codec}` is unavailable in this PyArrow build."
+        )
     if available("snappy"):
         return "snappy"
     return "NONE"
@@ -292,7 +294,11 @@ def open_eye_storage(path, format=None):
                 raise ValueError(f"Storage manifest is missing from: {target}")
             manifest = pd.read_csv(manifest_path)
             paths = manifest.get("path", pd.Series(dtype=str)).astype(str)
-            format = "parquet" if len(paths) and paths.str.lower().str.endswith(".parquet").all() else "arrow_dataset"
+            format = (
+                "parquet"
+                if len(paths) and paths.str.lower().str.endswith(".parquet").all()
+                else "arrow_dataset"
+            )
         else:
             format = "rds"
 
@@ -322,7 +328,9 @@ def collect_eye_storage(x, tables=None):
 
     _, ds, pq = _require_pyarrow()
     available = list(x.manifest["table"].astype(str))
-    selected = available if tables is None else [name for name in map(str, tables) if name in available]
+    selected = (
+        available if tables is None else [name for name in map(str, tables) if name in available]
+    )
     table_values: dict[str, pd.DataFrame] = {}
     for name in selected:
         row = x.manifest.loc[x.manifest["table"].astype(str).eq(name)].iloc[0]
@@ -330,11 +338,17 @@ def collect_eye_storage(x, tables=None):
         if x.spec.format == "parquet":
             data = pq.read_table(source).to_pandas()
         else:
-            data = ds.dataset(str(source), format="parquet", partitioning="hive").to_table().to_pandas()
+            data = (
+                ds.dataset(str(source), format="parquet", partitioning="hive")
+                .to_table()
+                .to_pandas()
+            )
         table_values[name] = data
 
     metadata = _read_metadata(Path(x.spec.path))
-    kwargs = {name: value for name, value in table_values.items() if name in canonical_table_names()}
+    kwargs = {
+        name: value for name, value in table_values.items() if name in canonical_table_names()
+    }
     return new_eye_dataset(
         **kwargs,
         raw=metadata.get("raw", []),
@@ -483,7 +497,8 @@ def export_eye_bids(
     unique_map = pd.DataFrame({"source": original, "participant_id": bids_ids}).drop_duplicates()
     if unique_map["participant_id"].duplicated().any():
         raise ValueError(
-            "Participant identifiers collide after BIDS sanitization: " + ", ".join(unique_map["source"].astype(str))
+            "Participant identifiers collide after BIDS sanitization: "
+            + ", ".join(unique_map["source"].astype(str))
         )
     unique_map[["participant_id"]].to_csv(
         root / "participants.tsv",
@@ -512,7 +527,11 @@ def export_eye_bids(
         coord = _coordinate_metadata(x, rec_id)
         rate = _sampling_rate(x, rec_id)
         if not np.isfinite(rate):
-            rate = float(pd.to_numeric(pd.Series([rec["nominal_sampling_rate"]]), errors="coerce").fillna(1).iloc[0])
+            rate = float(
+                pd.to_numeric(pd.Series([rec["nominal_sampling_rate"]]), errors="coerce")
+                .fillna(1)
+                .iloc[0]
+            )
         if not np.isfinite(rate) or rate <= 0:
             rate = 1.0
 
@@ -724,7 +743,9 @@ def import_eye_bids(path, validate=True):
 
         columns = list(map(str, meta["Columns"]))
         if not {"timestamp", "x_coordinate", "y_coordinate"} <= set(columns):
-            raise ValueError(f"BIDS Columns must include timestamp, x_coordinate, and y_coordinate: {sidecar_path}")
+            raise ValueError(
+                f"BIDS Columns must include timestamp, x_coordinate, and y_coordinate: {sidecar_path}"
+            )
         with gzip.open(file, "rt", encoding="utf-8") as handle:
             data = pd.read_csv(
                 handle,
@@ -796,11 +817,19 @@ def import_eye_bids(path, validate=True):
                     "sample_id": source_id,
                     "timestamp_native": row["timestamp"],
                     "timestamp_seconds": seconds.iloc[row_index],
-                    "gaze_x": pd.to_numeric(pd.Series([row["x_coordinate"]]), errors="coerce").iloc[0],
-                    "gaze_y": pd.to_numeric(pd.Series([row["y_coordinate"]]), errors="coerce").iloc[0],
+                    "gaze_x": pd.to_numeric(pd.Series([row["x_coordinate"]]), errors="coerce").iloc[
+                        0
+                    ],
+                    "gaze_y": pd.to_numeric(pd.Series([row["y_coordinate"]]), errors="coerce").iloc[
+                        0
+                    ],
                     "valid": bool(
-                        np.isfinite(pd.to_numeric(pd.Series([row["x_coordinate"]]), errors="coerce").iloc[0])
-                        and np.isfinite(pd.to_numeric(pd.Series([row["y_coordinate"]]), errors="coerce").iloc[0])
+                        np.isfinite(
+                            pd.to_numeric(pd.Series([row["x_coordinate"]]), errors="coerce").iloc[0]
+                        )
+                        and np.isfinite(
+                            pd.to_numeric(pd.Series([row["y_coordinate"]]), errors="coerce").iloc[0]
+                        )
                     ),
                     "confidence": np.nan,
                     "coordinate_space_id": "coord_bids",
@@ -841,7 +870,9 @@ def import_eye_bids(path, validate=True):
 
     gaze_all["sample_id"] = gaze_all["sample_id"].astype(str).map(source_to_canonical)
     gaze_all = (
-        gaze_all.drop_duplicates(subset=["_gaze_key"], keep="first").drop(columns=["_gaze_key"]).reset_index(drop=True)
+        gaze_all.drop_duplicates(subset=["_gaze_key"], keep="first")
+        .drop(columns=["_gaze_key"])
+        .reset_index(drop=True)
     )
 
     if eye_rows:

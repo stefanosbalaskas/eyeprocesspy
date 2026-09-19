@@ -1,4 +1,5 @@
 """Validation and point-membership helpers for AOI perturbation analysis."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -27,12 +28,18 @@ def _result(cls: str, **kwargs: Any) -> EyeResult:
 def _infer_shape(row: pd.Series) -> str:
     if "shape_type" in row and pd.notna(row["shape_type"]):
         shape = str(row["shape_type"]).lower()
-    elif "polygon" in row and row["polygon"] is not None and not (isinstance(row["polygon"], float) and np.isnan(row["polygon"])):
+    elif (
+        "polygon" in row
+        and row["polygon"] is not None
+        and not (isinstance(row["polygon"], float) and np.isnan(row["polygon"]))
+    ):
         shape = "polygon"
     else:
         shape = "rectangle"
     if shape not in {"rectangle", "polygon"}:
-        raise EyeProcessValidationError("AOI `shape_type` must be 'rectangle' or 'polygon' for perturbation analysis.")
+        raise EyeProcessValidationError(
+            "AOI `shape_type` must be 'rectangle' or 'polygon' for perturbation analysis."
+        )
     return shape
 
 
@@ -43,12 +50,16 @@ def validate_aoi_geometry(aois: pd.DataFrame, *, allow_overlap: bool = True) -> 
         raise EyeProcessValidationError("`aois` must contain at least one AOI.")
     id_col = next((c for c in ("aoi_id", "aoi", "name", "label") if c in frame.columns), None)
     if id_col is None:
-        raise EyeProcessValidationError("`aois` must include an AOI identifier column such as `aoi_id`.")
+        raise EyeProcessValidationError(
+            "`aois` must include an AOI identifier column such as `aoi_id`."
+        )
     ids = frame[id_col].astype("string")
     if ids.isna().any() or (ids.str.len() == 0).any():
         raise EyeProcessValidationError("AOI identifiers must be non-missing and non-empty.")
     if ids.duplicated().any():
-        raise EyeProcessValidationError("AOI identifiers must be unique within an AOI specification.")
+        raise EyeProcessValidationError(
+            "AOI identifiers must be unique within an AOI specification."
+        )
 
     rows: list[dict[str, Any]] = []
     normalized = frame.copy()
@@ -69,10 +80,14 @@ def validate_aoi_geometry(aois: pd.DataFrame, *, allow_overlap: bool = True) -> 
             required = ["xmin", "xmax", "ymin", "ymax"]
             missing = [c for c in required if c not in normalized.columns]
             if missing:
-                raise EyeProcessValidationError("Rectangular AOIs require xmin, xmax, ymin, and ymax columns.")
+                raise EyeProcessValidationError(
+                    "Rectangular AOIs require xmin, xmax, ymin, and ymax columns."
+                )
             vals = {c: _finite_scalar(row[c], f"{aoi_id}.{c}") for c in required}
             if not vals["xmin"] < vals["xmax"] or not vals["ymin"] < vals["ymax"]:
-                raise EyeProcessValidationError(f"AOI `{aoi_id}` has zero or negative rectangle area.")
+                raise EyeProcessValidationError(
+                    f"AOI `{aoi_id}` has zero or negative rectangle area."
+                )
             area = (vals["xmax"] - vals["xmin"]) * (vals["ymax"] - vals["ymin"])
             normalized.loc[i, required] = [vals[c] for c in required]
             rows.append({"aoi_id": aoi_id, "shape_type": shape, "area": area, "valid": True})
@@ -131,7 +146,12 @@ def _point_in_polygon(x: np.ndarray, y: np.ndarray, poly: np.ndarray) -> np.ndar
 
 def _aoi_contains(row: pd.Series, x: np.ndarray, y: np.ndarray) -> np.ndarray:
     if row["shape_type"] == "rectangle":
-        return (x >= float(row["xmin"])) & (x <= float(row["xmax"])) & (y >= float(row["ymin"])) & (y <= float(row["ymax"]))
+        return (
+            (x >= float(row["xmin"]))
+            & (x <= float(row["xmax"]))
+            & (y >= float(row["ymin"]))
+            & (y <= float(row["ymax"]))
+        )
     return _point_in_polygon(x, y, _polygon_array(row["polygon"]))
 
 
@@ -150,11 +170,13 @@ def _point_strictly_inside_polygon(point: np.ndarray, poly: np.ndarray) -> bool:
     for i in range(len(poly)):
         if _on_segment(poly[i], poly[(i + 1) % len(poly)], point):
             return False
-    return bool(_point_in_polygon(
-        np.asarray([point[0]], dtype=float),
-        np.asarray([point[1]], dtype=float),
-        poly,
-    )[0])
+    return bool(
+        _point_in_polygon(
+            np.asarray([point[0]], dtype=float),
+            np.asarray([point[1]], dtype=float),
+            poly,
+        )[0]
+    )
 
 
 def _proper_segments_cross(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray) -> bool:
@@ -165,9 +187,8 @@ def _proper_segments_cross(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.nd
 
     o1, o2, o3, o4 = orient(a, b, c), orient(a, b, d), orient(c, d, a), orient(c, d, b)
     tol = 1e-12
-    return (
-        ((o1 > tol and o2 < -tol) or (o1 < -tol and o2 > tol))
-        and ((o3 > tol and o4 < -tol) or (o3 < -tol and o4 > tol))
+    return ((o1 > tol and o2 < -tol) or (o1 < -tol and o2 > tol)) and (
+        (o3 > tol and o4 < -tol) or (o3 < -tol and o4 > tol)
     )
 
 
@@ -206,7 +227,11 @@ def _pairwise_overlap(geometry: pd.DataFrame) -> pd.DataFrame:
             if min(ax1, bx1) <= max(ax0, bx0) or min(ay1, by1) <= max(ay0, by0):
                 flag = False
             else:
-                flag = True if a["shape_type"] == "rectangle" and b["shape_type"] == "rectangle" else _polygons_overlap_area(pa, pb)
+                flag = (
+                    True
+                    if a["shape_type"] == "rectangle" and b["shape_type"] == "rectangle"
+                    else _polygons_overlap_area(pa, pb)
+                )
             rows.append(
                 {"aoi_1": str(a["aoi_id"]), "aoi_2": str(b["aoi_id"]), "overlap": bool(flag)}
             )

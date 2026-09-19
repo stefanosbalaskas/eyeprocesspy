@@ -13,10 +13,11 @@ from __future__ import annotations
 import json
 import re
 import shutil
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from html import escape
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -217,7 +218,9 @@ def _clean_output(path: str | Path, overwrite: bool) -> Path:
 
 
 def _item_map(item_map: Any, stimuli: Sequence[Any]) -> pd.DataFrame:
-    unique_stimuli = [str(value) for value in pd.unique(pd.Series(stimuli).dropna()) if str(value).strip()]
+    unique_stimuli = [
+        str(value) for value in pd.unique(pd.Series(stimuli).dropna()) if str(value).strip()
+    ]
     if item_map is None:
         return pd.DataFrame(
             {
@@ -336,7 +339,9 @@ def build_gazepoint_media_trials(x, item_map=None, overwrite=True):
     built = standardize_eye_table(pd.DataFrame(rows), "intervals")
     out = x.copy()
     if overwrite:
-        out["intervals"] = out["intervals"][~out["intervals"]["interval_type"].eq("trial")].reset_index(drop=True)
+        out["intervals"] = out["intervals"][
+            ~out["intervals"]["interval_type"].eq("trial")
+        ].reset_index(drop=True)
     out["intervals"] = standardize_eye_table(
         pd.concat([out["intervals"], built], ignore_index=True, sort=False),
         "intervals",
@@ -369,9 +374,13 @@ def _link_features_to_trials(x: EyeDataset) -> EyeDataset:
 
         candidate = trials.iloc[0:0]
         if pd.notna(recording) and str(recording).strip():
-            candidate = trials[trials["recording_id"].eq(recording) & trials["stimulus_id"].eq(stimulus)]
+            candidate = trials[
+                trials["recording_id"].eq(recording) & trials["stimulus_id"].eq(stimulus)
+            ]
         if candidate.empty and pd.notna(participant):
-            candidate = trials[trials["participant_id"].eq(participant) & trials["stimulus_id"].eq(stimulus)]
+            candidate = trials[
+                trials["participant_id"].eq(participant) & trials["stimulus_id"].eq(stimulus)
+            ]
         if len(candidate) == 1:
             row = candidate.iloc[0]
             features.at[index, "trial_id"] = row["trial_id"]
@@ -399,7 +408,8 @@ def _prepare_responses(x, responses=None, score_key=None):
     template["score"] = np.nan
     template["response_time"] = np.nan
     template["trial_duration_seconds"] = (
-        pd.to_numeric(trials["end_time"], errors="coerce") - pd.to_numeric(trials["start_time"], errors="coerce")
+        pd.to_numeric(trials["end_time"], errors="coerce")
+        - pd.to_numeric(trials["start_time"], errors="coerce")
     ).to_numpy()
 
     if responses is None:
@@ -486,7 +496,15 @@ def _prepare_responses(x, responses=None, score_key=None):
     )
 
     observed = canonical[
-        ["recording_id", "participant_id", "trial_id", "item_id", "response", "score", "response_time"]
+        [
+            "recording_id",
+            "participant_id",
+            "trial_id",
+            "item_id",
+            "response",
+            "score",
+            "response_time",
+        ]
     ]
     merged = template.drop(columns=["response", "score", "response_time"]).merge(
         observed,
@@ -549,7 +567,9 @@ def _preprocess_pupil(x, spec: GazepointWorkflowSpec):
             "workflow_pupil_baseline_notice",
             "eye_samples",
             "Baseline window is relative to media onset and is not necessarily pre-stimulus.",
-            warnings=("Do not interpret media-onset baselines as equivalent to a true pre-stimulus baseline."),
+            warnings=(
+                "Do not interpret media-onset baselines as equivalent to a true pre-stimulus baseline."
+            ),
         )
     return out
 
@@ -558,7 +578,8 @@ def _feature_rows_for_trial(x, trial: pd.Series) -> list[dict[str, Any]]:
     recording_id = trial["recording_id"]
     trial_id = trial["trial_id"]
     gaze = x["gaze_samples"][
-        x["gaze_samples"]["recording_id"].eq(recording_id) & x["gaze_samples"]["trial_id"].eq(trial_id)
+        x["gaze_samples"]["recording_id"].eq(recording_id)
+        & x["gaze_samples"]["trial_id"].eq(trial_id)
     ]
     fixation = x["episodes"][
         x["episodes"]["recording_id"].eq(recording_id)
@@ -566,7 +587,8 @@ def _feature_rows_for_trial(x, trial: pd.Series) -> list[dict[str, Any]]:
         & x["episodes"]["episode_type"].eq("fixation")
     ]
     pupil = x["eye_samples"][
-        x["eye_samples"]["recording_id"].eq(recording_id) & x["eye_samples"]["trial_id"].eq(trial_id)
+        x["eye_samples"]["recording_id"].eq(recording_id)
+        & x["eye_samples"]["trial_id"].eq(trial_id)
     ]
 
     gaze_x = pd.to_numeric(gaze["gaze_x"], errors="coerce")
@@ -583,7 +605,10 @@ def _feature_rows_for_trial(x, trial: pd.Series) -> list[dict[str, Any]]:
 
     pupil_value = pd.to_numeric(pupil["pupil_diameter"], errors="coerce")
     pupil_ok = (
-        (pupil["pupil_valid"].fillna(False).astype(bool) & np.isfinite(pupil_value.to_numpy(dtype=float)))
+        (
+            pupil["pupil_valid"].fillna(False).astype(bool)
+            & np.isfinite(pupil_value.to_numpy(dtype=float))
+        )
         if len(pupil)
         else np.array([], dtype=bool)
     )
@@ -593,7 +618,11 @@ def _feature_rows_for_trial(x, trial: pd.Series) -> list[dict[str, Any]]:
         "gaze_sample_count": float(len(gaze)),
         "gaze_valid_fraction": (float(np.mean(gaze_ok)) if len(gaze_ok) else np.nan),
         "fixation_count_vendor": float(
-            (fixation["derived_by"].astype("string").eq("vendor") if len(fixation) else pd.Series(dtype=bool)).sum()
+            (
+                fixation["derived_by"].astype("string").eq("vendor")
+                if len(fixation)
+                else pd.Series(dtype=bool)
+            ).sum()
         ),
         "pupil_observation_count": float(len(pupil)),
         "pupil_valid_fraction": (float(np.mean(pupil_ok)) if len(pupil_ok) else np.nan),
@@ -611,7 +640,9 @@ def _feature_rows_for_trial(x, trial: pd.Series) -> list[dict[str, Any]]:
     for feature_name, value in values.items():
         rows.append(
             {
-                "feature_id": (f"feature_{_workflow_token(recording_id)}_{_workflow_token(trial_id)}_{feature_name}"),
+                "feature_id": (
+                    f"feature_{_workflow_token(recording_id)}_{_workflow_token(trial_id)}_{feature_name}"
+                ),
                 "recording_id": recording_id,
                 "participant_id": trial["participant_id"],
                 "trial_id": trial_id,
@@ -647,7 +678,9 @@ def _workflow_biometric_features(x) -> pd.DataFrame:
     data = x["biometrics"]
     if data.empty:
         return empty_eye_table("features")
-    data = data[data["trial_id"].notna() & data["trial_id"].astype("string").str.strip().ne("")].copy()
+    data = data[
+        data["trial_id"].notna() & data["trial_id"].astype("string").str.strip().ne("")
+    ].copy()
     if data.empty:
         return empty_eye_table("features")
 
@@ -703,7 +736,9 @@ def _workflow_biometric_features(x) -> pd.DataFrame:
     features = standardize_eye_table(pd.DataFrame(rows), "features")
     if features.empty:
         return features
-    trials = trial_table(x)[["recording_id", "trial_id", "participant_id", "item_id", "stimulus_id"]]
+    trials = trial_table(x)[
+        ["recording_id", "trial_id", "participant_id", "item_id", "stimulus_id"]
+    ]
     lookup = trials.set_index(["recording_id", "trial_id"])
     for index, row in features.iterrows():
         key = (row["recording_id"], row["trial_id"])
@@ -743,7 +778,9 @@ def derive_gazepoint_workflow_features(x, reset_workflow_features=True):
             source="fixations",
             append=True,
         )
-        has_aoi = fixations["aoi_id"].notna() & fixations["aoi_id"].astype("string").str.strip().ne("")
+        has_aoi = fixations["aoi_id"].notna() & fixations["aoi_id"].astype("string").str.strip().ne(
+            ""
+        )
         if has_aoi.any():
             out = derive_gaze_features(
                 out,
@@ -854,7 +891,9 @@ def _pupil_summary(x, trial_base: pd.DataFrame) -> pd.DataFrame:
         dropna=False,
     ):
         pupil = pd.to_numeric(group["pupil_diameter"], errors="coerce")
-        valid = group["pupil_valid"].fillna(False).astype(bool) & np.isfinite(pupil.to_numpy(dtype=float))
+        valid = group["pupil_valid"].fillna(False).astype(bool) & np.isfinite(
+            pupil.to_numpy(dtype=float)
+        )
         values = pupil[valid]
         if "interpolated" in group:
             interpolated = group["interpolated"].fillna(False).astype(bool)
@@ -982,9 +1021,9 @@ def gazepoint_analysis_tables(x):
             "end_time",
         ]
     ].copy()
-    trial_base["trial_duration_seconds"] = pd.to_numeric(trial_base["end_time"], errors="coerce") - pd.to_numeric(
-        trial_base["start_time"], errors="coerce"
-    )
+    trial_base["trial_duration_seconds"] = pd.to_numeric(
+        trial_base["end_time"], errors="coerce"
+    ) - pd.to_numeric(trial_base["start_time"], errors="coerce")
 
     features = x["features"]
     no_aoi = features["aoi_id"].isna() | features["aoi_id"].astype("string").str.strip().eq("")
@@ -1099,7 +1138,9 @@ def _response_matrix(responses: pd.DataFrame, value: str) -> pd.DataFrame | None
     data = responses.copy()
     data[value] = pd.to_numeric(data[value], errors="coerce")
     data = data[
-        data["participant_id"].notna() & data["item_id"].notna() & np.isfinite(data[value].to_numpy(dtype=float))
+        data["participant_id"].notna()
+        & data["item_id"].notna()
+        & np.isfinite(data[value].to_numpy(dtype=float))
     ]
     if data.empty:
         return None
@@ -1147,7 +1188,9 @@ def gazepoint_irt_tables(x, process_table=None):
                 "response_time",
             ]
         ]
-        response_template = response_template.drop(columns=["response", "score", "response_time"]).merge(
+        response_template = response_template.drop(
+            columns=["response", "score", "response_time"]
+        ).merge(
             observed,
             on=["recording_id", "participant_id", "trial_id", "item_id"],
             how="left",
@@ -1156,7 +1199,15 @@ def gazepoint_irt_tables(x, process_table=None):
 
     irt_long = process_table.merge(
         response_template[
-            ["recording_id", "participant_id", "trial_id", "item_id", "response", "score", "response_time"]
+            [
+                "recording_id",
+                "participant_id",
+                "trial_id",
+                "item_id",
+                "response",
+                "score",
+                "response_time",
+            ]
         ],
         on=["recording_id", "participant_id", "trial_id", "item_id"],
         how="left",
@@ -1167,7 +1218,8 @@ def gazepoint_irt_tables(x, process_table=None):
     n_items = trials["item_id"].dropna().astype(str).nunique()
     n_trials = len(trials)
     observed_response = (
-        response_template["response"].notna() & response_template["response"].astype("string").str.strip().ne("")
+        response_template["response"].notna()
+        & response_template["response"].astype("string").str.strip().ne("")
     ).sum()
     score = pd.to_numeric(response_template["score"], errors="coerce")
     observed_score = int(np.isfinite(score.to_numpy(dtype=float)).sum())
@@ -1242,8 +1294,12 @@ def gazepoint_irt_tables(x, process_table=None):
         "response_time_matrix": response_time_matrix,
         "guidance": [
             "No IRT model is fitted automatically.",
-            ("Provide observed responses and defensible scoring before estimating ability or item parameters."),
-            ("Use grouped, person-aware validation and prespecified process covariates in substantive studies."),
+            (
+                "Provide observed responses and defensible scoring before estimating ability or item parameters."
+            ),
+            (
+                "Use grouped, person-aware validation and prespecified process covariates in substantive studies."
+            ),
         ],
     }
 
@@ -1324,7 +1380,9 @@ def plot_gazepoint_workflow(x, directory, channels=None, expected_hz=60):
         gaze = x["gaze_samples"]
         eye = x["eye_samples"]
         gaze_valid = float(gaze["valid"].fillna(False).astype(bool).mean()) if len(gaze) else np.nan
-        pupil_valid = float(eye["pupil_valid"].fillna(False).astype(bool).mean()) if len(eye) else np.nan
+        pupil_valid = (
+            float(eye["pupil_valid"].fillna(False).astype(bool).mean()) if len(eye) else np.nan
+        )
         ax.bar(["gaze", "pupil"], [gaze_valid, pupil_valid])
         ax.set_ylim(0, 1)
         ax.set_ylabel("Valid fraction")
@@ -1355,7 +1413,8 @@ def plot_gazepoint_workflow(x, directory, channels=None, expected_hz=60):
             trial_id = trial["trial_id"]
             stem = f"{_workflow_token(recording_id)}__{_workflow_token(trial_id)}"
             gaze = x["gaze_samples"][
-                x["gaze_samples"]["recording_id"].eq(recording_id) & x["gaze_samples"]["trial_id"].eq(trial_id)
+                x["gaze_samples"]["recording_id"].eq(recording_id)
+                & x["gaze_samples"]["trial_id"].eq(trial_id)
             ]
             fixation = x["episodes"][
                 x["episodes"]["recording_id"].eq(recording_id)
@@ -1363,7 +1422,8 @@ def plot_gazepoint_workflow(x, directory, channels=None, expected_hz=60):
                 & x["episodes"]["episode_type"].eq("fixation")
             ]
             pupil = x["eye_samples"][
-                x["eye_samples"]["recording_id"].eq(recording_id) & x["eye_samples"]["trial_id"].eq(trial_id)
+                x["eye_samples"]["recording_id"].eq(recording_id)
+                & x["eye_samples"]["trial_id"].eq(trial_id)
             ]
 
             if not gaze.empty:
@@ -1459,7 +1519,9 @@ def _markdown_table(data: pd.DataFrame, max_rows=30) -> str:
         return "_No rows._"
     table = data.head(max_rows).copy()
     for column in table:
-        table[column] = table[column].map(lambda value: "" if pd.isna(value) else str(value).replace("|", r"\|"))
+        table[column] = table[column].map(
+            lambda value: "" if pd.isna(value) else str(value).replace("|", r"\|")
+        )
     header = "| " + " | ".join(map(str, table.columns)) + " |"
     rule = "| " + " | ".join(["---"] * len(table.columns)) + " |"
     rows = ["| " + " | ".join(map(str, row)) + " |" for row in table.to_numpy()]
@@ -1521,7 +1583,9 @@ def write_gazepoint_workflow_report(
         "## Governance",
         "",
         "- No IRT model is fitted automatically.",
-        ("- Observed responses and defensible scoring are required before estimating ability or item parameters."),
+        (
+            "- Observed responses and defensible scoring are required before estimating ability or item parameters."
+        ),
         ("- Process covariates should use grouped, person-aware validation and prespecification."),
     ]
     destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1749,7 +1813,10 @@ def validate_gazepoint_workflow(x):
         ),
     ]
     return pd.DataFrame(
-        [{"check": name, "passed": bool(passed), "message": message} for name, passed, message in checks]
+        [
+            {"check": name, "passed": bool(passed), "message": message}
+            for name, passed, message in checks
+        ]
     )
 
 

@@ -8,9 +8,9 @@ import pickle
 import sys
 import time
 import warnings
-from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
-from typing import Any, Callable
+from collections.abc import Callable, Mapping, Sequence
+from datetime import UTC, datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -328,10 +328,14 @@ def run_eye_benchmark(
             {
                 "benchmark_id": benchmark_id,
                 "n_obs": n_value,
-                "repetition": (raw_row["repetition"] if "repetition" in frame.columns else math.nan),
+                "repetition": (
+                    raw_row["repetition"] if "repetition" in frame.columns else math.nan
+                ),
                 "elapsed_sec": float(elapsed),
                 "input_bytes": float(_deep_size(input_value)),
-                "output_bytes": (float(_deep_size(operated["value"])) if operated["error"] is None else math.nan),
+                "output_bytes": (
+                    float(_deep_size(operated["value"])) if operated["error"] is None else math.nan
+                ),
                 "status": ("success" if operated["error"] is None else "operation_error"),
                 "error": operated["error"],
             }
@@ -340,9 +344,11 @@ def run_eye_benchmark(
     return {
         "design": frame,
         "results": pd.DataFrame(rows),
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "status": "computational_benchmark",
-        "caveat": ("Benchmark timings are hardware-, operating-system-, Python-version-, and workload-dependent."),
+        "caveat": (
+            "Benchmark timings are hardware-, operating-system-, Python-version-, and workload-dependent."
+        ),
         "eyeprocess_class": "eye_benchmark_result",
     }
 
@@ -379,7 +385,9 @@ def summarise_eye_benchmark(x):
                 "median_input_mb": float(np.nanmedian(input_bytes)) / 1024**2,
                 "median_output_mb": float(np.nanmedian(output_bytes)) / 1024**2,
                 "throughput_obs_per_sec": (
-                    float(n_value) / median_elapsed if np.isfinite(median_elapsed) and median_elapsed > 0 else math.nan
+                    float(n_value) / median_elapsed
+                    if np.isfinite(median_elapsed) and median_elapsed > 0
+                    else math.nan
                 ),
             }
         )
@@ -393,7 +401,9 @@ def benchmark_scaling_curve(x):
         return pd.DataFrame([{"exponent": math.nan, "intercept": math.nan, "n_sizes": 0}])
 
     valid = summary.loc[
-        np.isfinite(summary["median_elapsed_sec"]) & (summary["median_elapsed_sec"] > 0) & (summary["n_obs"] > 0)
+        np.isfinite(summary["median_elapsed_sec"])
+        & (summary["median_elapsed_sec"] > 0)
+        & (summary["n_obs"] > 0)
     ].copy()
 
     if len(valid) < 2:
@@ -486,7 +496,9 @@ def synthetic_corruption_plan(
     for name, value in zip(offset_names, offset_values):
         number = _first_number(value)
         if not np.isfinite(number):
-            raise EyeProcessValidationError("Corruption offsets, jitter, and device shift must be finite.")
+            raise EyeProcessValidationError(
+                "Corruption offsets, jitter, and device shift must be finite."
+            )
         offsets[name] = number
 
     if offsets["sampling_jitter_sd"] < 0:
@@ -649,7 +661,10 @@ def inject_trial_imbalance(
 
 
 def _is_plan(plan: Any) -> bool:
-    return isinstance(plan, Mapping) and plan.get("eyeprocess_class") == "eye_synthetic_corruption_plan"
+    return (
+        isinstance(plan, Mapping)
+        and plan.get("eyeprocess_class") == "eye_synthetic_corruption_plan"
+    )
 
 
 def apply_synthetic_corruption(
@@ -815,7 +830,7 @@ def stress_test_process_pipeline(
         "plans": list(plans),
         "results": pd.DataFrame(rows),
         "baseline_hash": _stable_hash(data),
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "caveat": (
             "Synthetic stress tests probe declared perturbations only and do not replace empirical external validation."
         ),
@@ -870,7 +885,9 @@ def stress_tolerance_frontier(
         elif isinstance(result, (bool, np.bool_)):
             accepted.append(bool(result))
         else:
-            raise EyeProcessValidationError("acceptable must return one TRUE/FALSE value per metric value.")
+            raise EyeProcessValidationError(
+                "acceptable must return one TRUE/FALSE value per metric value."
+            )
 
     severity_values = pd.to_numeric(
         data[severity],
@@ -892,7 +909,9 @@ def stress_tolerance_frontier(
         [
             {
                 "max_acceptable_severity": (float(max(known_true)) if known_true else math.nan),
-                "first_unacceptable_severity": (float(min(known_false)) if known_false else math.nan),
+                "first_unacceptable_severity": (
+                    float(min(known_false)) if known_false else math.nan
+                ),
             }
         ]
     )

@@ -125,7 +125,12 @@ def test_preflight_defaults_invalid_audit_application_and_unmatched_rows():
     assert np.isnan(a.target_sampling_rate_hz)
     assert set(a.table.preflight_decision) == {"pass_preflight"}
 
-    for fun in [ep.preflight_decisions, ep.preflight_failures, ep.preflight_passed, ep.preflight_exclusion_manifest]:
+    for fun in [
+        ep.preflight_decisions,
+        ep.preflight_failures,
+        ep.preflight_passed,
+        ep.preflight_exclusion_manifest,
+    ]:
         with pytest.raises(EyeProcessValidationError):
             fun({})
     with pytest.raises(EyeProcessValidationError, match="spec"):
@@ -170,7 +175,9 @@ def test_anomaly_and_presentation_validation_paths():
         ep.audit_process_anomalies(one, metrics=["m1", "m2"], aggregate=False)
 
     with pytest.raises(EyeProcessValidationError, match="review_quantile"):
-        ep.audit_presentation_accessibility(d, rt="m1", dwell="m2", revisits="m3", review_quantile=1.0)
+        ep.audit_presentation_accessibility(
+            d, rt="m1", dwell="m2", revisits="m3", review_quantile=1.0
+        )
     with pytest.raises(EyeProcessValidationError, match="At least three"):
         ep.audit_presentation_accessibility(d[["person_id", "m1"]], rt="m1")
 
@@ -227,7 +234,9 @@ def test_drift_reference_batch_ordering_comparison_and_grouping_paths():
     spec = ep.process_drift_spec(baseline="reference_batch")
     with pytest.raises(EyeProcessValidationError, match="reference_batch"):
         ep.audit_process_drift(d, spec=spec, metrics=["irt_difficulty"])
-    ref = ep.audit_process_drift(d, spec=spec, reference_batch="b1", metrics=["irt_difficulty", "dwell_ms"])
+    ref = ep.audit_process_drift(
+        d, spec=spec, reference_batch="b1", metrics=["irt_difficulty", "dwell_ms"]
+    )
     assert len(ref.table) == 2
 
     dt = ep.audit_process_drift(_drift_data("datetime"), metrics=["irt_difficulty"])
@@ -247,7 +256,12 @@ def test_drift_reference_batch_ordering_comparison_and_grouping_paths():
     with pytest.raises(EyeProcessValidationError, match="No non-missing"):
         ep.drift_by_device(all_missing, metrics=["irt_difficulty"])
 
-    for fun in [ep.drift_by_device, ep.drift_by_site, ep.drift_by_vendor, ep.drift_by_stimulus_version]:
+    for fun in [
+        ep.drift_by_device,
+        ep.drift_by_site,
+        ep.drift_by_vendor,
+        ep.drift_by_stimulus_version,
+    ]:
         grouped = fun(d, metrics=["irt_difficulty"])
         assert not grouped.empty
     with pytest.raises(EyeProcessValidationError):
@@ -317,13 +331,20 @@ def test_window_helpers_extraction_binding_validation_and_sensitivity_paths():
 
     with pytest.raises(EyeProcessValidationError):
         ep.validate_process_windows({})
-    malformed = EyeResult({"data": pd.DataFrame({"window_start": [0.0]})}, eyeprocess_class="eye_process_windows")
+    malformed = EyeResult(
+        {"data": pd.DataFrame({"window_start": [0.0]})}, eyeprocess_class="eye_process_windows"
+    )
     val = ep.validate_process_windows(malformed)
     assert bool(val.valid.iloc[0]) is False and "missing columns" in val.issue.iloc[0]
     bad = EyeResult(
         {
             "data": pd.DataFrame(
-                {"window_start": [1.0], "window_end": [1.0], "window_mid": [1.0], "n_samples_window": [0]}
+                {
+                    "window_start": [1.0],
+                    "window_end": [1.0],
+                    "window_mid": [1.0],
+                    "n_samples_window": [0],
+                }
             )
         },
         eyeprocess_class="eye_process_windows",
@@ -427,7 +448,9 @@ def test_pupil_deconvolution_event_and_empty_fit_paths():
 
     invalid_event = d.copy()
     invalid_event["event_ms"] = np.nan
-    empty = ep.fit_pupil_event_deconvolution(invalid_event, events={"stim": "event_ms"}, min_samples=4)
+    empty = ep.fit_pupil_event_deconvolution(
+        invalid_event, events={"stim": "event_ms"}, min_samples=4
+    )
     assert empty.effects.empty
 
     constant = d.copy()
@@ -437,7 +460,9 @@ def test_pupil_deconvolution_event_and_empty_fit_paths():
 
     with pytest.raises(EyeProcessValidationError):
         ep.pupil_event_effects({})
-    kernels = ep.compare_pupil_kernels(constant, tmax_values=[500, 930], events={"stim": 0}, min_samples=4)
+    kernels = ep.compare_pupil_kernels(
+        constant, tmax_values=[500, 930], events={"stim": 0}, min_samples=4
+    )
     assert kernels.n_groups.tolist() == [0, 0]
 
 
@@ -458,7 +483,11 @@ def test_pupil_confound_fatigue_and_filter_residual_paths():
     assert not ep.compare_raw_adjusted_pupil(fit).empty
     assert not ep.adjust_pupil_confounds(fit).empty
     assert not ep.pupil_confound_effects(fit).empty
-    for fun in [ep.adjust_pupil_confounds, ep.pupil_confound_effects, ep.compare_raw_adjusted_pupil]:
+    for fun in [
+        ep.adjust_pupil_confounds,
+        ep.pupil_confound_effects,
+        ep.compare_raw_adjusted_pupil,
+    ]:
         with pytest.raises(EyeProcessValidationError):
             fun({})
 
@@ -467,7 +496,9 @@ def test_pupil_confound_fatigue_and_filter_residual_paths():
     with pytest.raises(EyeProcessValidationError, match="20 complete"):
         ep.audit_pupil_fatigue_drift(d.iloc[:10])
     with pytest.raises(EyeProcessBackendError, match="plm"):
-        ep.audit_pupil_fatigue_drift(d, luminance="screen_luminance", difficulty="difficulty", engine="plm")
+        ep.audit_pupil_fatigue_drift(
+            d, luminance="screen_luminance", difficulty="difficulty", engine="plm"
+        )
     fatigue = ep.audit_pupil_fatigue_drift(
         d, luminance="screen_luminance", difficulty="difficulty", engine="auto"
     )

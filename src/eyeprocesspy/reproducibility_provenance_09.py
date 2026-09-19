@@ -18,7 +18,7 @@ import math
 import platform
 import sys
 from collections.abc import Mapping, Sequence
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -82,7 +82,9 @@ def _require_columns(
 ) -> None:
     missing = [column for column in columns if column not in frame.columns]
     if missing:
-        raise EyeProcessValidationError(f"`{name}` is missing required column(s): " + ", ".join(missing) + ".")
+        raise EyeProcessValidationError(
+            f"`{name}` is missing required column(s): " + ", ".join(missing) + "."
+        )
 
 
 def _recycle(value: Any, n: int) -> list[Any]:
@@ -113,7 +115,10 @@ def _canonicalize(value: Any) -> Any:
             "__type__": "dataframe",
             "columns": [str(column) for column in value.columns],
             "index": [_clean_scalar(item) for item in value.index.tolist()],
-            "data": [[_canonicalize(item) for item in row] for row in value.astype(object).to_numpy().tolist()],
+            "data": [
+                [_canonicalize(item) for item in row]
+                for row in value.astype(object).to_numpy().tolist()
+            ],
             "attrs": _canonicalize(dict(value.attrs)),
         }
 
@@ -235,7 +240,7 @@ def file_hash_manifest(
         stat = path.stat()
         modified = datetime.fromtimestamp(
             stat.st_mtime,
-            tz=timezone.utc,
+            tz=UTC,
         ).strftime("%Y-%m-%d %H:%M:%S UTC")
         rows.append(
             {
@@ -252,9 +257,13 @@ def file_hash_manifest(
 def analysis_environment_snapshot(packages=None):
     """Snapshot the active Python analysis environment."""
     if packages is None:
-        package_names = sorted({name.split(".", 1)[0] for name in sys.modules if name and not name.startswith("_")})
+        package_names = sorted(
+            {name.split(".", 1)[0] for name in sys.modules if name and not name.startswith("_")}
+        )
     else:
-        package_names = sorted({str(value) for value in _as_list(packages) if value is not None and str(value)})
+        package_names = sorted(
+            {str(value) for value in _as_list(packages) if value is not None and str(value)}
+        )
 
     rows = []
     for name in package_names:
@@ -303,7 +312,7 @@ def eye_session_manifest(
 ):
     """Create a session-level provenance manifest."""
     return {
-        "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "created_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "eyeprocess_version": "0.11.1",
         "data_hash": None if data is None else object_hash(data),
         "files": (pd.DataFrame() if files is None else file_hash_manifest(files)),
@@ -386,13 +395,20 @@ def verify_reproducibility_fingerprint(x):
     if not _class_is(x, _FINGERPRINT_CLASS):
         raise EyeProcessValidationError("x must be an eye_reproducibility_fingerprint.")
 
-    payload = {key: value for key, value in x.items() if key not in {"fingerprint_hash", "eyeprocess_class"}}
+    payload = {
+        key: value
+        for key, value in x.items()
+        if key not in {"fingerprint_hash", "eyeprocess_class"}
+    }
     return x.get("fingerprint_hash") == object_hash(payload)
 
 
 def _jsonify(value: Any) -> Any:
     if isinstance(value, pd.DataFrame):
-        return [{str(key): _jsonify(item) for key, item in row.items()} for row in value.to_dict(orient="records")]
+        return [
+            {str(key): _jsonify(item) for key, item in row.items()}
+            for row in value.to_dict(orient="records")
+        ]
     if isinstance(value, pd.Series):
         return [_jsonify(item) for item in value.tolist()]
     if isinstance(value, Mapping):
@@ -459,7 +475,11 @@ def read_reproducibility_fingerprint(
 ):
     """Read a JSON fingerprint; RDS/dput inputs remain R-specific."""
     input_path = Path(path)
-    format_value = input_path.suffix.lower().lstrip(".") if format is None else str(_as_list(format)[0]).lower()
+    format_value = (
+        input_path.suffix.lower().lstrip(".")
+        if format is None
+        else str(_as_list(format)[0]).lower()
+    )
 
     if format_value in {"rds", "dput", "r"}:
         raise EyeProcessValidationError(
@@ -683,7 +703,9 @@ def export_ro_crate_metadata(
         resolved = [Path(item).expanduser().resolve(strict=True) for item in file_values]
         basenames = [item.name for item in resolved]
         if len(set(basenames)) != len(basenames):
-            raise EyeProcessValidationError("RO-Crate file basenames must be unique in this minimal exporter.")
+            raise EyeProcessValidationError(
+                "RO-Crate file basenames must be unique in this minimal exporter."
+            )
         dataset["hasPart"] = [{"@id": basename} for basename in basenames]
         for item in resolved:
             graph.append(

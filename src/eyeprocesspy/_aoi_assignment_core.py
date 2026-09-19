@@ -1,4 +1,5 @@
 """Internal AOI assignment and feature-recomputation contracts."""
+
 from __future__ import annotations
 
 import warnings
@@ -47,12 +48,16 @@ def _assign_points(
     ambiguous = np.where(counts > 1)[0]
     if len(ambiguous):
         if overlap_policy == "error":
-            raise EyeProcessValidationError(f"{len(ambiguous)} observations have ambiguous overlapping AOI membership.")
+            raise EyeProcessValidationError(
+                f"{len(ambiguous)} observations have ambiguous overlapping AOI membership."
+            )
         if overlap_policy == "ambiguous":
             labels[ambiguous] = AMBIGUOUS
         else:
             for i in ambiguous:
-                labels[i] = "|".join(geom.iloc[np.flatnonzero(memberships[i])]["aoi_id"].astype(str).tolist())
+                labels[i] = "|".join(
+                    geom.iloc[np.flatnonzero(memberships[i])]["aoi_id"].astype(str).tolist()
+                )
     return pd.Series(labels, index=frame.index, dtype="object", name="aoi_assignment")
 
 
@@ -65,7 +70,9 @@ def compare_aoi_assignments(
     base = pd.Series(list(baseline), dtype="object")
     alt = pd.Series(list(perturbed), dtype="object")
     if len(base) != len(alt):
-        raise EyeProcessValidationError("Baseline and perturbed assignments must have equal length.")
+        raise EyeProcessValidationError(
+            "Baseline and perturbed assignments must have equal length."
+        )
     if ids is None:
         ids = np.arange(1, len(base) + 1)
     if len(ids) != len(base):
@@ -75,30 +82,38 @@ def compare_aoi_assignments(
     newly = (~missing) & base.eq(OUTSIDE) & ~alt.eq(OUTSIDE)
     lost = (~missing) & ~base.eq(OUTSIDE) & alt.eq(OUTSIDE)
     reassigned = (~missing) & ~unchanged & ~newly & ~lost
-    detail = pd.DataFrame({
-        "observation_id": list(ids),
-        "baseline_aoi": base,
-        "perturbed_aoi": alt,
-        "unchanged": unchanged,
-        "newly_assigned": newly,
-        "lost_assignment": lost,
-        "reassigned": reassigned,
-        "missing_comparison": missing,
-    })
+    detail = pd.DataFrame(
+        {
+            "observation_id": list(ids),
+            "baseline_aoi": base,
+            "perturbed_aoi": alt,
+            "unchanged": unchanged,
+            "newly_assigned": newly,
+            "lost_assignment": lost,
+            "reassigned": reassigned,
+            "missing_comparison": missing,
+        }
+    )
     comparable = ~missing
     n = int(comparable.sum())
-    summary = pd.DataFrame([{
-        "n_total": len(base),
-        "n_comparable": n,
-        "proportion_unchanged": float(unchanged[comparable].mean()) if n else np.nan,
-        "proportion_newly_assigned": float(newly[comparable].mean()) if n else np.nan,
-        "proportion_lost": float(lost[comparable].mean()) if n else np.nan,
-        "proportion_reassigned": float(reassigned[comparable].mean()) if n else np.nan,
-        "proportion_missing_comparison": float(missing.mean()) if len(base) else np.nan,
-    }])
+    summary = pd.DataFrame(
+        [
+            {
+                "n_total": len(base),
+                "n_comparable": n,
+                "proportion_unchanged": float(unchanged[comparable].mean()) if n else np.nan,
+                "proportion_newly_assigned": float(newly[comparable].mean()) if n else np.nan,
+                "proportion_lost": float(lost[comparable].mean()) if n else np.nan,
+                "proportion_reassigned": float(reassigned[comparable].mean()) if n else np.nan,
+                "proportion_missing_comparison": float(missing.mean()) if len(base) else np.nan,
+            }
+        ]
+    )
     valid_pairs = detail.loc[comparable, ["baseline_aoi", "perturbed_aoi"]]
     matrix = pd.crosstab(valid_pairs["baseline_aoi"], valid_pairs["perturbed_aoi"], dropna=False)
-    return _result("eye_aoi_assignment_comparison", detail=detail, summary=summary, reassignment_matrix=matrix)
+    return _result(
+        "eye_aoi_assignment_comparison", detail=detail, summary=summary, reassignment_matrix=matrix
+    )
 
 
 def estimate_aoi_assignment_stability(
@@ -111,7 +126,9 @@ def estimate_aoi_assignment_stability(
     if isinstance(comparisons, pd.DataFrame):
         required = {"perturbation_id", "baseline_aoi", "perturbed_aoi"}
         if not required.issubset(comparisons.columns):
-            raise EyeProcessValidationError("Comparison data must contain perturbation_id, baseline_aoi, and perturbed_aoi.")
+            raise EyeProcessValidationError(
+                "Comparison data must contain perturbation_id, baseline_aoi, and perturbed_aoi."
+            )
         source = comparisons.copy()
     else:
         for pid, comparison in comparisons.items():
@@ -134,15 +151,29 @@ def estimate_aoi_assignment_stability(
             meta["observation_id"] = source_ids
         else:
             if meta["observation_id"].isna().any() or meta["observation_id"].duplicated().any():
-                raise EyeProcessValidationError("Metadata observation IDs must be unique and non-missing.")
+                raise EyeProcessValidationError(
+                    "Metadata observation IDs must be unique and non-missing."
+                )
             if set(meta["observation_id"].tolist()) != set(source_ids):
-                raise EyeProcessValidationError("Metadata observation IDs must match the comparison observation IDs exactly.")
+                raise EyeProcessValidationError(
+                    "Metadata observation IDs must match the comparison observation IDs exactly."
+                )
         source = source.merge(meta, on="observation_id", how="left", validate="many_to_one")
     source["comparable"] = ~(source["baseline_aoi"].isna() | source["perturbed_aoi"].isna())
     source["unchanged"] = source["comparable"] & source["baseline_aoi"].eq(source["perturbed_aoi"])
-    source["newly_assigned"] = source["comparable"] & source["baseline_aoi"].eq(OUTSIDE) & ~source["perturbed_aoi"].eq(OUTSIDE)
-    source["lost_assignment"] = source["comparable"] & ~source["baseline_aoi"].eq(OUTSIDE) & source["perturbed_aoi"].eq(OUTSIDE)
-    source["reassigned"] = source["comparable"] & ~(source["unchanged"] | source["newly_assigned"] | source["lost_assignment"])
+    source["newly_assigned"] = (
+        source["comparable"]
+        & source["baseline_aoi"].eq(OUTSIDE)
+        & ~source["perturbed_aoi"].eq(OUTSIDE)
+    )
+    source["lost_assignment"] = (
+        source["comparable"]
+        & ~source["baseline_aoi"].eq(OUTSIDE)
+        & source["perturbed_aoi"].eq(OUTSIDE)
+    )
+    source["reassigned"] = source["comparable"] & ~(
+        source["unchanged"] | source["newly_assigned"] | source["lost_assignment"]
+    )
 
     def summarise(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
         out_rows = []
@@ -152,14 +183,24 @@ def estimate_aoi_assignment_stability(
             comparable = z["comparable"]
             n = int(comparable.sum())
             row = {k: v for k, v in zip(keys, key)}
-            row.update({
-                "n_total": len(z),
-                "n_comparable": n,
-                "proportion_unchanged": float(z.loc[comparable, "unchanged"].mean()) if n else np.nan,
-                "proportion_newly_assigned": float(z.loc[comparable, "newly_assigned"].mean()) if n else np.nan,
-                "proportion_lost": float(z.loc[comparable, "lost_assignment"].mean()) if n else np.nan,
-                "proportion_reassigned": float(z.loc[comparable, "reassigned"].mean()) if n else np.nan,
-            })
+            row.update(
+                {
+                    "n_total": len(z),
+                    "n_comparable": n,
+                    "proportion_unchanged": float(z.loc[comparable, "unchanged"].mean())
+                    if n
+                    else np.nan,
+                    "proportion_newly_assigned": float(z.loc[comparable, "newly_assigned"].mean())
+                    if n
+                    else np.nan,
+                    "proportion_lost": float(z.loc[comparable, "lost_assignment"].mean())
+                    if n
+                    else np.nan,
+                    "proportion_reassigned": float(z.loc[comparable, "reassigned"].mean())
+                    if n
+                    else np.nan,
+                }
+            )
             out_rows.append(row)
         return pd.DataFrame(out_rows)
 
@@ -167,7 +208,9 @@ def estimate_aoi_assignment_stability(
     by_group: dict[str, pd.DataFrame] = {}
     for col in group_cols or []:
         if col not in source.columns:
-            raise EyeProcessValidationError(f"Grouping column `{col}` is not available in comparison metadata.")
+            raise EyeProcessValidationError(
+                f"Grouping column `{col}` is not available in comparison metadata."
+            )
         by_group[col] = summarise(source, ["perturbation_id", col])
     aoi_level = summarise(source.assign(aoi=source["baseline_aoi"]), ["perturbation_id", "aoi"])
     return _result(
@@ -190,13 +233,17 @@ def estimate_fixation_assignment_probability(
     if isinstance(assignments, pd.DataFrame):
         required = {"perturbation_id", "observation_id", "aoi_assignment"}
         if not required.issubset(assignments.columns):
-            raise EyeProcessValidationError("Assignment table must contain perturbation_id, observation_id, and aoi_assignment.")
+            raise EyeProcessValidationError(
+                "Assignment table must contain perturbation_id, observation_id, and aoi_assignment."
+            )
         long = assignments.loc[:, list(required)].copy()
     else:
         rows = []
         lengths = {len(v) for v in assignments.values()}
         if len(lengths) != 1:
-            raise EyeProcessValidationError("All perturbation assignment vectors must have the same length.")
+            raise EyeProcessValidationError(
+                "All perturbation assignment vectors must have the same length."
+            )
         n = next(iter(lengths), 0)
         obs = list(ids) if ids is not None else list(range(1, n + 1))
         if len(obs) != n:
@@ -204,17 +251,49 @@ def estimate_fixation_assignment_probability(
         for pid, labels in assignments.items():
             if not include_baseline and str(pid) == "baseline":
                 continue
-            rows.append(pd.DataFrame({"perturbation_id": str(pid), "observation_id": obs, "aoi_assignment": list(labels)}))
-        long = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(columns=["perturbation_id", "observation_id", "aoi_assignment"])
+            rows.append(
+                pd.DataFrame(
+                    {
+                        "perturbation_id": str(pid),
+                        "observation_id": obs,
+                        "aoi_assignment": list(labels),
+                    }
+                )
+            )
+        long = (
+            pd.concat(rows, ignore_index=True)
+            if rows
+            else pd.DataFrame(columns=["perturbation_id", "observation_id", "aoi_assignment"])
+        )
     long = long.dropna(subset=["aoi_assignment"])
     if long.empty:
-        return pd.DataFrame(columns=["observation_id", "aoi", "assignment_count", "n_perturbations", "assignment_frequency"])
-    counts = long.groupby(["observation_id", "aoi_assignment"], dropna=False).size().rename("assignment_count").reset_index()
-    denominators = long.groupby("observation_id")["perturbation_id"].nunique().rename("n_perturbations").reset_index()
+        return pd.DataFrame(
+            columns=[
+                "observation_id",
+                "aoi",
+                "assignment_count",
+                "n_perturbations",
+                "assignment_frequency",
+            ]
+        )
+    counts = (
+        long.groupby(["observation_id", "aoi_assignment"], dropna=False)
+        .size()
+        .rename("assignment_count")
+        .reset_index()
+    )
+    denominators = (
+        long.groupby("observation_id")["perturbation_id"]
+        .nunique()
+        .rename("n_perturbations")
+        .reset_index()
+    )
     out = counts.merge(denominators, on="observation_id", how="left")
     out["assignment_frequency"] = out["assignment_count"] / out["n_perturbations"]
     out = out.rename(columns={"aoi_assignment": "aoi"})
-    out.attrs["caveat"] = "Assignment frequency is a descriptive perturbation frequency, not a posterior probability of true AOI membership."
+    out.attrs["caveat"] = (
+        "Assignment frequency is a descriptive perturbation frequency, not a posterior probability of true AOI membership."
+    )
     return out
 
 
@@ -282,7 +361,9 @@ def recompute_aoi_features(
     else:
         levels = [str(v) for v in aoi_levels]
         if any(not v for v in levels) or len(set(levels)) != len(levels):
-            raise EyeProcessValidationError("`aoi_levels` must contain unique non-empty AOI identifiers.")
+            raise EyeProcessValidationError(
+                "`aoi_levels` must contain unique non-empty AOI identifiers."
+            )
 
     columns = group_cols + [
         "aoi",
@@ -401,7 +482,9 @@ def _validate_model_table(table: Any, perturbation_id: str) -> pd.DataFrame:
     out = frame.copy()
     terms = out["term"].astype("string")
     if terms.isna().any() or (terms.str.len() == 0).any():
-        raise EyeProcessValidationError("Model callback term values must be non-missing and non-empty.")
+        raise EyeProcessValidationError(
+            "Model callback term values must be non-missing and non-empty."
+        )
     out["term"] = terms.astype(str)
 
     raw_convergence = out["model_converged"]

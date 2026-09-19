@@ -66,8 +66,14 @@ def test_grouped_folds_combined_key_blocks_repeated_crossed_cells():
         seed=9,
     )
     for fold in folds["folds"]:
-        train = {tuple(row) for row in data.iloc[fold["analysis"]][["participant_id", "item_id"]].to_numpy()}
-        test = {tuple(row) for row in data.iloc[fold["assessment"]][["participant_id", "item_id"]].to_numpy()}
+        train = {
+            tuple(row)
+            for row in data.iloc[fold["analysis"]][["participant_id", "item_id"]].to_numpy()
+        }
+        test = {
+            tuple(row)
+            for row in data.iloc[fold["assessment"]][["participant_id", "item_id"]].to_numpy()
+        }
         assert train.isdisjoint(test)
 
 

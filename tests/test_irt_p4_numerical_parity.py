@@ -156,13 +156,17 @@ def test_p4_linking_anchor_invariance_and_device_contracts() -> None:
     assert len(stability.table) == 2
     assert np.all(stability.table.n_anchors == 3)
 
-    dif = pd.DataFrame({"item_id": reference.item_id, "effect": [0.01, 0.02, 0.03, 0.2, 0.01, 0.02]})
+    dif = pd.DataFrame(
+        {"item_id": reference.item_id, "effect": [0.01, 0.02, 0.03, 0.2, 0.01, 0.02]}
+    )
     anchor_audit = ep.eyeprocess_irt_anchor_audit(reference, dif=dif, max_abs_effect=0.1)
     assert int((~anchor_audit.eligible).sum()) == 1
 
     purified = ep.eyeprocess_irt_anchor_purification(
         reference,
-        effect_fun=lambda anchors: pd.DataFrame({"item_id": anchors, "effect": np.zeros(len(anchors))}),
+        effect_fun=lambda anchors: pd.DataFrame(
+            {"item_id": anchors, "effect": np.zeros(len(anchors))}
+        ),
         threshold=0.1,
     )
     assert purified.anchors == reference.item_id.tolist()
@@ -321,9 +325,7 @@ def test_p4_multidimensional_testlet_and_latent_regression_contracts() -> None:
     assert regression.matrix.shape == (3, 3)
     assert regression.complete.all()
 
-    spec = ep.eyeprocess_irt_testlet_spec(
-        ["I1", "I2", "I3", "I4"], ["T1", "T1", "T2", "T2"]
-    )
+    spec = ep.eyeprocess_irt_testlet_spec(["I1", "I2", "I3", "I4"], ["T1", "T1", "T2", "T2"])
     assert spec.attrs["eyeprocess_class"] == "eye_irt_testlet_spec"
     audit = ep.eyeprocess_irt_testlet_audit(spec, min_items=2)
     assert len(audit) == 2

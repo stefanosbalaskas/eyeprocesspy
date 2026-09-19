@@ -216,7 +216,9 @@ def test_promotion_defaults_to_experimental_without_evidence():
     )
     assert audit.eyeprocess_class == "eye_model_promotion_audit"
     assert audit["models"]["status"].iloc[0] == "experimental"
-    assert audit["models"]["passed_required_gates"].iloc[0] < audit["models"]["required_gates"].iloc[0]
+    assert (
+        audit["models"]["passed_required_gates"].iloc[0] < audit["models"]["required_gates"].iloc[0]
+    )
 
 
 def test_promotion_requires_only_declared_gates():

@@ -164,7 +164,9 @@ def test_function_fingerprint_signature_fallback_and_call_signature_failure(monk
         return value + kwargs.get("extra", 0)
 
     real_signature = vo.inspect.signature
-    monkeypatch.setattr(vo.inspect, "signature", lambda function: (_ for _ in ()).throw(ValueError("no signature")))
+    monkeypatch.setattr(
+        vo.inspect, "signature", lambda function: (_ for _ in ()).throw(ValueError("no signature"))
+    )
     assert vo._call_supported(target, named={"value": 2, "extra": 3}) == 5
     monkeypatch.setattr(vo.inspect, "signature", real_signature)
 
@@ -220,10 +222,34 @@ def test_standardize_explicit_intervals_series_and_default_diagnostics():
 @pytest.mark.parametrize(
     ("stage", "simulator", "fitter", "extractor", "truth_extractor"),
     [
-        ("simulation", lambda **kwargs: (_ for _ in ()).throw(RuntimeError("sim")), _fitter, _extractor, _truth),
-        ("fit", _simulator, lambda simulation: (_ for _ in ()).throw(RuntimeError("fit")), _extractor, _truth),
-        ("extract", _simulator, _fitter, lambda fit: (_ for _ in ()).throw(RuntimeError("extract")), _truth),
-        ("truth", _simulator, _fitter, _extractor, lambda simulation: (_ for _ in ()).throw(RuntimeError("truth"))),
+        (
+            "simulation",
+            lambda **kwargs: (_ for _ in ()).throw(RuntimeError("sim")),
+            _fitter,
+            _extractor,
+            _truth,
+        ),
+        (
+            "fit",
+            _simulator,
+            lambda simulation: (_ for _ in ()).throw(RuntimeError("fit")),
+            _extractor,
+            _truth,
+        ),
+        (
+            "extract",
+            _simulator,
+            _fitter,
+            lambda fit: (_ for _ in ()).throw(RuntimeError("extract")),
+            _truth,
+        ),
+        (
+            "truth",
+            _simulator,
+            _fitter,
+            _extractor,
+            lambda simulation: (_ for _ in ()).throw(RuntimeError("truth")),
+        ),
     ],
 )
 def test_run_job_core_failure_stages(stage, simulator, fitter, extractor, truth_extractor):

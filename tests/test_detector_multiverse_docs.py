@@ -55,6 +55,7 @@ def test_new_documentation_internal_links_resolve():
 
 def test_worked_example_is_runnable_and_records_optional_backend_failure():
     import importlib.util
+
     path = ROOT / "examples" / "detector_multiverse_worked.py"
     spec = importlib.util.spec_from_file_location("detector_worked", path)
     module = importlib.util.module_from_spec(spec)
@@ -66,6 +67,7 @@ def test_worked_example_is_runnable_and_records_optional_backend_failure():
     assert "remodnav" in set(result.status.detector_id)
     assert not inference.coefficients.empty
 
+
 def test_method_landing_page_keeps_interpretation_limitations_and_reporting_handoff():
     text = (DOCS / "guides/event-detector-multiverse.md").read_text(encoding="utf-8")
     assert "## Interpretation" in text
@@ -76,14 +78,12 @@ def test_method_landing_page_keeps_interpretation_limitations_and_reporting_hand
 
 
 def test_generated_report_uses_planned_detector_denominator():
-    text = (
-        DOCS
-        / "assets"
-        / "detector-multiverse"
-        / "detector-multiverse-report.md"
-    ).read_text(encoding="utf-8")
+    text = (DOCS / "assets" / "detector-multiverse" / "detector-multiverse-report.md").read_text(
+        encoding="utf-8"
+    )
     assert "six detector specifications were planned" in text
     assert "planned-specification convergence rate is 5/6 (0.833)" in text
+
 
 def test_detector_failure_clinic_is_runnable():
     import importlib.util
@@ -113,8 +113,12 @@ def test_detector_failure_clinic_is_runnable():
 
 def test_detector_guidance_documents_input_audit_and_failure_rules():
     inference = (DOCS / "guides/detector-statistical-inference.md").read_text(encoding="utf-8")
-    troubleshooting = (DOCS / "guides/detector-multiverse-troubleshooting.md").read_text(encoding="utf-8")
-    reporting = (DOCS / "guides/detector-multiverse-reporting-template.md").read_text(encoding="utf-8")
+    troubleshooting = (DOCS / "guides/detector-multiverse-troubleshooting.md").read_text(
+        encoding="utf-8"
+    )
+    reporting = (DOCS / "guides/detector-multiverse-reporting-template.md").read_text(
+        encoding="utf-8"
+    )
     assert "input_audit" in inference
     assert "outcome_missing_rows" in inference
     assert "no_model_data" in troubleshooting

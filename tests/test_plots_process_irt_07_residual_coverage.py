@@ -86,9 +86,7 @@ def test_nominal_plot_nonempty_and_empty_map_branches(monkeypatch):
 
 def test_omission_plot_missingness_table_and_fallback_branch():
     x = SimpleNamespace(
-        missingness=pd.DataFrame(
-            {"missingness_class": ["answered", "omitted", "answered"]}
-        )
+        missingness=pd.DataFrame({"missingness_class": ["answered", "omitted", "answered"]})
     )
     ax = pp.plot_eye_omission_survival_irt(x)
     assert set(ax.gp3_data["missingness_class"]) == {"answered", "omitted"}
@@ -168,9 +166,7 @@ def test_hmm_transition_and_occupancy_dispatch(monkeypatch):
     assert len(ax.gp3_data) == 4
     _close(ax)
 
-    occupancy = pd.DataFrame(
-        {"state_a_occupancy": [0.7, 0.5], "state_b_occupancy": [0.3, 0.5]}
-    )
+    occupancy = pd.DataFrame({"state_a_occupancy": [0.7, 0.5], "state_b_occupancy": [0.3, 0.5]})
     monkeypatch.setattr(pp, "process_state_occupancy", lambda x: occupancy.copy())
     ax = pp.plot_eye_process_hmm_irt(object(), type="occupancy")
     assert len(ax.patches) == 2

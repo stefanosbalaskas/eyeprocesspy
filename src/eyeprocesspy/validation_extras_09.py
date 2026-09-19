@@ -210,13 +210,17 @@ def sbc_rank_diagnostics(
     ok_expected = expected > 0
 
     if np.any(ok_expected):
-        chi_square = float(np.sum((counts[ok_expected] - expected[ok_expected]) ** 2 / expected[ok_expected]))
+        chi_square = float(
+            np.sum((counts[ok_expected] - expected[ok_expected]) ** 2 / expected[ok_expected])
+        )
     else:
         chi_square = math.nan
 
     degrees_freedom = int(np.sum(ok_expected) - 1)
     chi_square_p = (
-        float(chi2.sf(chi_square, degrees_freedom)) if np.isfinite(chi_square) and degrees_freedom > 0 else math.nan
+        float(chi2.sf(chi_square, degrees_freedom))
+        if np.isfinite(chi_square) and degrees_freedom > 0
+        else math.nan
     )
 
     uniformized = np.sort((ranks_int.astype(float) + 0.5) / (n_draws_int + 1))
@@ -250,7 +254,9 @@ def sbc_ecdf_deviation(
     n_draws=None,
 ):
     """Return the frozen maximum ECDF deviation for SBC ranks."""
-    if isinstance(x, Mapping) and (x.get("eyeprocess_class") == "eye_sbc_diagnostics" or "ecdf_max_deviation" in x):
+    if isinstance(x, Mapping) and (
+        x.get("eyeprocess_class") == "eye_sbc_diagnostics" or "ecdf_max_deviation" in x
+    ):
         return float(x["ecdf_max_deviation"])
 
     diagnostics = sbc_rank_diagnostics(
@@ -273,7 +279,9 @@ def _interval_matrix(value: Any) -> np.ndarray:
             matrix = matrix.reshape(-1, 1)
 
     if matrix.ndim != 2:
-        raise EyeProcessValidationError("interval limits must be vectors or two-dimensional tables.")
+        raise EyeProcessValidationError(
+            "interval limits must be vectors or two-dimensional tables."
+        )
 
     numeric = np.empty(matrix.shape, dtype=float)
     for column in range(matrix.shape[1]):
@@ -321,11 +329,17 @@ def coverage_calibration_curve(
         or np.any(nominal_value < 0)
         or np.any(nominal_value > 1)
     ):
-        raise EyeProcessValidationError("nominal must contain one finite probability in [0,1] per interval column.")
+        raise EyeProcessValidationError(
+            "nominal must contain one finite probability in [0,1] per interval column."
+        )
 
     empirical = np.full(n_intervals, np.nan, dtype=float)
     for column in range(n_intervals):
-        valid = ~np.isnan(truth_value) & ~np.isnan(lower_value[:, column]) & ~np.isnan(upper_value[:, column])
+        valid = (
+            ~np.isnan(truth_value)
+            & ~np.isnan(lower_value[:, column])
+            & ~np.isnan(upper_value[:, column])
+        )
         if np.any(valid):
             covered = (lower_value[valid, column] <= truth_value[valid]) & (
                 upper_value[valid, column] >= truth_value[valid]
@@ -485,7 +499,9 @@ def audit_pupil_preprocessing_order(
         except TypeError as exc:
             raise EyeProcessValidationError("cleaning_patterns must be non-empty strings.") from exc
 
-    if not cleaning_value or any(pd.isna(pattern) or str(pattern) == "" for pattern in cleaning_value):
+    if not cleaning_value or any(
+        pd.isna(pattern) or str(pattern) == "" for pattern in cleaning_value
+    ):
         raise EyeProcessValidationError("cleaning_patterns must be non-empty strings.")
     cleaning_value = [str(pattern) for pattern in cleaning_value]
 
@@ -501,14 +517,18 @@ def audit_pupil_preprocessing_order(
             baseline_values = [baseline_pattern]
         baseline_raw = baseline_values[0] if baseline_values else None
 
-    baseline_value = str(baseline_raw) if baseline_raw is not None and not pd.isna(baseline_raw) else ""
+    baseline_value = (
+        str(baseline_raw) if baseline_raw is not None and not pd.isna(baseline_raw) else ""
+    )
     if baseline_value == "":
         raise EyeProcessValidationError("baseline_pattern must be a non-empty string.")
 
     lowered = [step.lower() for step in steps_value]
 
     baseline_positions = [
-        index + 1 for index, step in enumerate(lowered) if re.search(baseline_value, step) is not None
+        index + 1
+        for index, step in enumerate(lowered)
+        if re.search(baseline_value, step) is not None
     ]
 
     cleaning_positions = []
@@ -644,7 +664,9 @@ def pupil_baseline_sensitivity(
                 errors="coerce",
             ).to_numpy(dtype=float)
 
-            baseline_values = pupil_value[(time_value >= start) & (time_value <= end) & np.isfinite(pupil_value)]
+            baseline_values = pupil_value[
+                (time_value >= start) & (time_value <= end) & np.isfinite(pupil_value)
+            ]
             baseline = float(np.mean(baseline_values)) if baseline_values.size else math.nan
 
             post_values = pupil_value[(time_value > end) & np.isfinite(pupil_value)]

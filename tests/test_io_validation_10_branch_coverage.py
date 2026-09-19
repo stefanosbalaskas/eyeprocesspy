@@ -10,9 +10,7 @@ import eyeprocesspy as ep
 
 
 def _mini_dataset():
-    recordings = pd.DataFrame(
-        [{"recording_id": "R1", "participant_id": "P1", "vendor": "Generic"}]
-    )
+    recordings = pd.DataFrame([{"recording_id": "R1", "participant_id": "P1", "vendor": "Generic"}])
     spaces = ep.new_coordinate_space("C1")
     gaze = pd.DataFrame(
         {
@@ -136,9 +134,12 @@ def test_format_validation_spec_rejects_non_boolean_flags(field):
 
 def test_format_compatibility_matrix_without_corpus_has_zero_empirical_counts():
     matrix = ep.format_compatibility_matrix()
-    assert matrix[
-        ["empirical_cases", "empirical_passes", "empirical_warnings", "empirical_failures"]
-    ].to_numpy().sum() == 0
+    assert (
+        matrix[["empirical_cases", "empirical_passes", "empirical_warnings", "empirical_failures"]]
+        .to_numpy()
+        .sum()
+        == 0
+    )
 
 
 def test_inspect_eye_source_guards_and_no_hash_mode(tmp_path):

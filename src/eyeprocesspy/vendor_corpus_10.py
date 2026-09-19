@@ -16,9 +16,10 @@ import math
 import os
 import shutil
 import tempfile
-from datetime import datetime, timezone
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -239,9 +240,9 @@ def _coerce_bool_series(series: pd.Series) -> pd.Series:
         "0": False,
         "no": False,
     }
-    return series.map(lambda value: pd.NA if pd.isna(value) else mapping.get(str(value).strip().lower(), pd.NA)).astype(
-        "boolean"
-    )
+    return series.map(
+        lambda value: pd.NA if pd.isna(value) else mapping.get(str(value).strip().lower(), pd.NA)
+    ).astype("boolean")
 
 
 def init_vendor_corpus(path, overwrite=False):
@@ -362,7 +363,9 @@ def fingerprint_validation_case(
     if isinstance(algorithms, str):
         algorithms = [algorithms]
     algorithms = [str(value).lower() for value in algorithms]
-    unsupported = [algorithm for algorithm in algorithms if algorithm not in hashlib.algorithms_available]
+    unsupported = [
+        algorithm for algorithm in algorithms if algorithm not in hashlib.algorithms_available
+    ]
     if unsupported:
         _stop("Unsupported hash algorithm(s): " + ", ".join(unsupported))
     files = _iter_case_files(source, bool(include_hidden))
@@ -379,7 +382,7 @@ def fingerprint_validation_case(
             "bytes": int(stat.st_size),
             "modified_utc": datetime.fromtimestamp(
                 stat.st_mtime,
-                tz=timezone.utc,
+                tz=UTC,
             ).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "md5": _file_digest(file, "md5"),
         }
@@ -388,7 +391,9 @@ def fingerprint_validation_case(
         rows.append(row)
 
     frame = pd.DataFrame(rows)
-    key = "|".join(f"{row.relative_path} {int(row.bytes)} {row.md5}" for row in frame.itertuples(index=False))
+    key = "|".join(
+        f"{row.relative_path} {int(row.bytes)} {row.md5}" for row in frame.itertuples(index=False)
+    )
     frame["case_fingerprint"] = f"case-{_hash_int(key):010d}"
     return _tag_frame(frame, "eye_validation_case_fingerprint")
 
@@ -477,7 +482,9 @@ def register_validation_case(
     if not pd.isna(sampling) and (not math.isfinite(float(sampling)) or float(sampling) <= 0):
         _stop("`sampling_rate_hz` must be missing or a positive finite value.")
 
-    if support == "empirically-validated" and (independent_source is not True or licence_reviewed is not True):
+    if support == "empirically-validated" and (
+        independent_source is not True or licence_reviewed is not True
+    ):
         _stop("Empirically validated cases require independent-source and licence-review evidence.")
 
     if case_id is None:
@@ -613,16 +620,18 @@ def redact_validation_case(
             except Exception as exc:  # mirrors R's retained read-error status
                 status = f"read-error: {exc}"
             else:
-                keep = [column for column in data.columns if str(column).lower() not in lowered_remove]
+                keep = [
+                    column for column in data.columns if str(column).lower() not in lowered_remove
+                ]
                 data = data.loc[:, keep]
                 for column in list(data.columns):
                     if str(column).lower() in lowered_ids:
                         data[column] = _hash_ids(data[column].tolist(), str(salt))
                 if callable(text_redactor):
                     for column in list(data.columns):
-                        if pd.api.types.is_object_dtype(data[column].dtype) or pd.api.types.is_string_dtype(
+                        if pd.api.types.is_object_dtype(
                             data[column].dtype
-                        ):
+                        ) or pd.api.types.is_string_dtype(data[column].dtype):
                             data[column] = text_redactor(data[column], str(column))
                 delimiter = "\t" if extension == "tsv" else ","
                 _write_delimited(data, target, delimiter)
@@ -768,7 +777,8 @@ def compare_vendor_semantics(x, vendors=None):
     keys = data.loc[:, ["canonical_table", "canonical_field"]].drop_duplicates()
     for key in keys.itertuples(index=False):
         subset = data.loc[
-            data["canonical_table"].eq(key.canonical_table) & data["canonical_field"].eq(key.canonical_field)
+            data["canonical_table"].eq(key.canonical_table)
+            & data["canonical_field"].eq(key.canonical_field)
         ]
         names = sorted(set(subset["vendor"].dropna().astype(str)))
         native_fields = "; ".join(
@@ -783,12 +793,18 @@ def compare_vendor_semantics(x, vendors=None):
             dict.fromkeys(subset.get("transformation", pd.Series(dtype=str)).dropna().astype(str))
         )
         observed = [
-            LOSS_RISK_ORDER[value] for value in subset["loss_risk"].dropna().astype(str) if value in LOSS_RISK_ORDER
+            LOSS_RISK_ORDER[value]
+            for value in subset["loss_risk"].dropna().astype(str)
+            if value in LOSS_RISK_ORDER
         ]
         maximum = (
             max(LOSS_RISK_ORDER, key=LOSS_RISK_ORDER.get)
             if False
-            else (next(name for name, rank in LOSS_RISK_ORDER.items() if rank == max(observed)) if observed else pd.NA)
+            else (
+                next(name for name, rank in LOSS_RISK_ORDER.items() if rank == max(observed))
+                if observed
+                else pd.NA
+            )
         )
         rows.append(
             {
@@ -897,7 +913,9 @@ def _compare_columns(
         )
         comparable = source.notna() & roundtrip.notna()
         if numeric:
-            difference = (pd.to_numeric(source, errors="coerce") - pd.to_numeric(roundtrip, errors="coerce")).abs()
+            difference = (
+                pd.to_numeric(source, errors="coerce") - pd.to_numeric(roundtrip, errors="coerce")
+            ).abs()
         else:
             difference = source.astype("string").ne(roundtrip.astype("string")).astype(float)
         comparison = difference.loc[comparable]
@@ -907,11 +925,17 @@ def _compare_columns(
                 "source_nonmissing": int(source.notna().sum()),
                 "roundtrip_nonmissing": int(roundtrip.notna().sum()),
                 "missingness_change": (
-                    float(roundtrip.isna().mean() - source.isna().mean()) if len(merged) else math.nan
+                    float(roundtrip.isna().mean() - source.isna().mean())
+                    if len(merged)
+                    else math.nan
                 ),
                 "comparable": int(comparable.sum()),
-                "mismatch_rate": (float((comparison > tolerance).mean()) if len(comparison) else math.nan),
-                "max_absolute_difference": (float(comparison.max()) if numeric and len(comparison) else math.nan),
+                "mismatch_rate": (
+                    float((comparison > tolerance).mean()) if len(comparison) else math.nan
+                ),
+                "max_absolute_difference": (
+                    float(comparison.max()) if numeric and len(comparison) else math.nan
+                ),
             }
         )
     return pd.DataFrame(rows, columns=columns)
@@ -985,12 +1009,18 @@ def audit_roundtrip_loss(
                 "row_difference": len(b) - len(a),
                 "source_columns": len(a.columns),
                 "roundtrip_columns": len(b.columns),
-                "missing_source_columns": ",".join(column for column in a.columns if column not in b.columns),
-                "extra_roundtrip_columns": ",".join(column for column in b.columns if column not in a.columns),
+                "missing_source_columns": ",".join(
+                    column for column in a.columns if column not in b.columns
+                ),
+                "extra_roundtrip_columns": ",".join(
+                    column for column in b.columns if column not in a.columns
+                ),
                 "maximum_mismatch_rate": maximum,
                 "status": (
                     "lossless"
-                    if len(a) == len(b) and not any(column not in b.columns for column in a.columns) and mismatch_ok
+                    if len(a) == len(b)
+                    and not any(column not in b.columns for column in a.columns)
+                    and mismatch_ok
                     else "review"
                 ),
             }
@@ -1050,7 +1080,9 @@ def audit_vendor_field_coverage(semantics, required_fields):
             )
         }
         for (table, field), key in zip(
-            required_fields[["canonical_table", "canonical_field"]].itertuples(index=False, name=None),
+            required_fields[["canonical_table", "canonical_field"]].itertuples(
+                index=False, name=None
+            ),
             required_keys,
             strict=True,
         ):
@@ -1186,7 +1218,9 @@ def build_compatibility_matrix(
             else "none"
         )
         devices = sorted(set(subset.get("device_model", pd.Series(dtype=str)).dropna().astype(str)))
-        versions = sorted(set(subset.get("software_version", pd.Series(dtype=str)).dropna().astype(str)))
+        versions = sorted(
+            set(subset.get("software_version", pd.Series(dtype=str)).dropna().astype(str))
+        )
         empirical_count = int(empirical.sum())
         rows.append(
             {
@@ -1232,7 +1266,9 @@ def write_vendor_case_report(
         _stop(f"Unknown case: {case_id}")
     fingerprint_path = corpus / "fingerprints" / f"{case_id}.csv"
     fingerprint = (
-        pd.read_csv(fingerprint_path, dtype_backend="numpy_nullable") if fingerprint_path.exists() else pd.DataFrame()
+        pd.read_csv(fingerprint_path, dtype_backend="numpy_nullable")
+        if fingerprint_path.exists()
+        else pd.DataFrame()
     )
     lines = [
         f"# Vendor validation case: {case_id}",

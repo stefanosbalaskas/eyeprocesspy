@@ -21,9 +21,10 @@ import tempfile
 import time
 import uuid
 import warnings
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -479,7 +480,11 @@ def write_partitioned_eye_storage(
             for group in _partition_groups(data, keys):
                 for chunk in _chunks(group, spec.max_rows):
                     file_index += 1
-                    values = [data.iloc[chunk[0]][key] for key in keys] if keys and chunk else ["NA"] * len(keys)
+                    values = (
+                        [data.iloc[chunk[0]][key] for key in keys]
+                        if keys and chunk
+                        else ["NA"] * len(keys)
+                    )
                     destination = _partition_path(
                         staging,
                         table,
@@ -663,7 +668,9 @@ def query_eye_storage(
     if not isinstance(filters, Mapping):
         _stop("`filters` must be a mapping of equality filters.")
     projection = (
-        [] if columns is None else ([columns] if isinstance(columns, str) else [str(value) for value in columns])
+        []
+        if columns is None
+        else ([columns] if isinstance(columns, str) else [str(value) for value in columns])
     )
 
     if storage_format == "rds":
@@ -719,7 +726,11 @@ def validate_eye_storage_metadata(storage, verify_hashes=True):
             pd.Series([row.bytes]),
             errors="coerce",
         ).iloc[0]
-        bytes_match = bool(exists) and not pd.isna(expected_bytes) and int(actual_bytes) == int(expected_bytes)
+        bytes_match = (
+            bool(exists)
+            and not pd.isna(expected_bytes)
+            and int(actual_bytes) == int(expected_bytes)
+        )
         if verify_hashes and exists:
             fingerprint_match: Any = _md5(file) == str(row.fingerprint)
         elif verify_hashes:
@@ -748,7 +759,13 @@ def validate_eye_storage_metadata(storage, verify_hashes=True):
         valid = True
     else:
         fingerprint_ok = findings["fingerprint_match"].fillna(True).astype(bool)
-        valid = bool((findings["exists"].astype(bool) & findings["bytes_match"].astype(bool) & fingerprint_ok).all())
+        valid = bool(
+            (
+                findings["exists"].astype(bool)
+                & findings["bytes_match"].astype(bool)
+                & fingerprint_ok
+            ).all()
+        )
     return EyeStorageValidation(
         valid=valid,
         findings=findings,
@@ -766,11 +783,13 @@ def detect_corrupt_partitions(storage):
     if findings.empty:
         out = findings.copy()
     else:
-        bad_fingerprint = findings["fingerprint_match"].notna() & ~findings["fingerprint_match"].fillna(False).astype(
-            bool
-        )
+        bad_fingerprint = findings["fingerprint_match"].notna() & ~findings[
+            "fingerprint_match"
+        ].fillna(False).astype(bool)
         out = findings.loc[
-            ~findings["exists"].astype(bool) | ~findings["bytes_match"].astype(bool) | bad_fingerprint
+            ~findings["exists"].astype(bool)
+            | ~findings["bytes_match"].astype(bool)
+            | bad_fingerprint
         ].reset_index(drop=True)
     return _tag_frame(out, "eye_corrupt_partitions")
 
@@ -791,7 +810,9 @@ def migrate_eye_storage_schema(
     handle = _ensure_storage(storage)
     if str(target_version) != _STORAGE_SCHEMA_VERSION:
         _stop("This release can migrate storage only to schema version 2.0.0.")
-    target_format = str(handle.metadata.get("format")) if format is None else _normalize_format(format)
+    target_format = (
+        str(handle.metadata.get("format")) if format is None else _normalize_format(format)
+    )
     if target_format == "rds":
         raise EyeProcessBackendError("Native R RDS serialization is not available in eyeprocesspy.")
 
@@ -816,7 +837,9 @@ def migrate_eye_storage_schema(
     migration = pd.DataFrame(
         [
             {
-                "transaction_id": (f"tx-migrate-{_hash_int(f'{handle.path}|{Path(target_path).resolve()}'):010d}"),
+                "transaction_id": (
+                    f"tx-migrate-{_hash_int(f'{handle.path}|{Path(target_path).resolve()}'):010d}"
+                ),
                 "action": "migrate",
                 "timestamp_utc": timestamp,
                 "tables": ",".join(tables),
@@ -884,13 +907,19 @@ def benchmark_eye_storage(
             stacklevel=2,
         )
 
-    root = Path(directory).expanduser().resolve() if directory is not None else Path(tempfile.gettempdir()).resolve()
+    root = (
+        Path(directory).expanduser().resolve()
+        if directory is not None
+        else Path(tempfile.gettempdir()).resolve()
+    )
     root.mkdir(parents=True, exist_ok=True)
 
     rows = []
     for storage_format in supported:
         for replication in range(1, repetitions + 1):
-            path = root / (f"eye-storage-benchmark-{storage_format}-{replication}-{uuid.uuid4().hex}")
+            path = root / (
+                f"eye-storage-benchmark-{storage_format}-{replication}-{uuid.uuid4().hex}"
+            )
             try:
                 write_start = time.perf_counter()
                 storage = write_partitioned_eye_storage(

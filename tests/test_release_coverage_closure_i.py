@@ -48,7 +48,9 @@ def test_validation_completion_multiverse_jobs_and_public_benchmark(monkeypatch,
         return str(output)
 
     monkeypatch.setattr(vc, "export_canonical", fake_export)
-    monkeypatch.setattr(vc, "reporting_guideline_audit", lambda data: pd.DataFrame({"covered": [True]}))
+    monkeypatch.setattr(
+        vc, "reporting_guideline_audit", lambda data: pd.DataFrame({"covered": [True]})
+    )
     outdir = tmp_path / "bench"
     outdir.mkdir()
     (outdir / "old").write_text("x", encoding="utf-8")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -35,7 +35,10 @@ def test_vendor_private_helpers_cover_failure_empty_append_and_boolean_routes(tm
     vi._append_table(dataset, "episodes", pd.DataFrame({"z": [3]}))
     assert dataset["episodes"].z.tolist() == [3]
 
-    assert vi._tobii_valid(pd.Series([True, False], dtype=bool)).astype(bool).tolist() == [True, False]
+    assert vi._tobii_valid(pd.Series([True, False], dtype=bool)).astype(bool).tolist() == [
+        True,
+        False,
+    ]
     parsed = vi._tobii_valid(pd.Series(["Valid", "Invalid", "0", "1", "unknown"]))
     assert parsed.iloc[:4].astype(bool).tolist() == [True, False, True, False]
     assert pd.isna(parsed.iloc[4])
@@ -249,15 +252,15 @@ def test_eyelink_detector_parser_and_asc_error_routes(tmp_path: Path):
         ep.read_eyelink_asc(empty)
 
     lines = [
-        "",                              # ignored blank
-        "1000 1 2",                     # short sample
-        "1001 . 2 3",                   # invalid x
-        "1002 10 20 3000",              # valid sample
-        "EFIX R 1000 1030",             # short event
+        "",  # ignored blank
+        "1000 1 2",  # short sample
+        "1001 . 2 3",  # invalid x
+        "1002 10 20 3000",  # valid sample
+        "EFIX R 1000 1030",  # short event
         "EFIX R 1000 1030 30 11 21 3000",
         "ESACC R 1030 1060 30 11 21 31 41 2.5 150",
         "EBLINK R 1060 1080 20",
-        "MSG 1000",                     # short MSG
+        "MSG 1000",  # short MSG
         "MSG 1001 CALIBRATION GOOD 0.4 0.8",
         "MSG 1002 VALIDATION OK 0.5",
         "MSG 1003 DRIFT 0.2",

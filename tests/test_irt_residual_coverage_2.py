@@ -31,7 +31,9 @@ def _focal() -> pd.DataFrame:
 
 def test_foundation_residual_guards_and_precision_success():
     spec = irt.eyeprocess_irt_model_spec(family="2pl", identification="anchor")
-    audit = irt.eyeprocess_irt_identification_audit(spec, constraints={"anchor_items": ["I1", "I2"]}, n_items=6, n_persons=4)
+    audit = irt.eyeprocess_irt_identification_audit(
+        spec, constraints={"anchor_items": ["I1", "I2"]}, n_items=6, n_persons=4
+    )
     assert audit.valid
     with pytest.raises(EyeProcessValidationError, match="n_persons"):
         irt.eyeprocess_irt_identification_audit(spec, n_persons=-1)
@@ -42,14 +44,18 @@ def test_foundation_residual_guards_and_precision_success():
     with pytest.raises(EyeProcessValidationError, match="non-empty scalar"):
         irt.eyeprocess_irt_sparse_design_audit(pd.DataFrame({"": [1], "item": ["I1"]}), "", "item")
     with pytest.raises(EyeProcessValidationError, match="minimum counts"):
-        irt.eyeprocess_irt_sparse_design_audit(pd.DataFrame({"person": [1], "item": ["I1"]}), "person", "item", min_person_items=0)
+        irt.eyeprocess_irt_sparse_design_audit(
+            pd.DataFrame({"person": [1], "item": ["I1"]}), "person", "item", min_person_items=0
+        )
 
     with pytest.raises(EyeProcessValidationError, match="steps"):
         irt.eyeprocess_irt_gpcm_probability([0.0], steps=[])
     with pytest.raises(EyeProcessValidationError, match="slopes and intercepts"):
         irt.eyeprocess_irt_nominal_probability([0.0], slopes=[1.0], intercepts=[0.0])
 
-    prof = irt.eyeprocess_irt_measurement_precision_profile(np.linspace(-2, 2, 9), _items(), target=(-1, 1))
+    prof = irt.eyeprocess_irt_measurement_precision_profile(
+        np.linspace(-2, 2, 9), _items(), target=(-1, 1)
+    )
     assert prof.area >= 0
 
 
@@ -75,7 +81,9 @@ def test_empty_fit_tables_score_loop_and_marginal_reliability_edges():
 def test_information_targeting_adaptive_and_penalty_short_circuits():
     default = irt.eyeprocess_irt_information_targeting(_items(), [-1.0, 0.0, 1.0])
     assert default.weighted_information >= 0
-    custom = irt.eyeprocess_irt_information_targeting(_items(), [-1.0, 0.0, 1.0], weights=[1.0, 2.0, 1.0])
+    custom = irt.eyeprocess_irt_information_targeting(
+        _items(), [-1.0, 0.0, 1.0], weights=[1.0, 2.0, 1.0]
+    )
     assert custom.weights.sum() == pytest.approx(1.0)
     for weights in ([1.0], [1.0, np.nan, 1.0], [1.0, -1.0, 1.0], [0.0, 0.0, 0.0]):
         with pytest.raises(EyeProcessValidationError, match="weights"):
@@ -85,7 +93,9 @@ def test_information_targeting_adaptive_and_penalty_short_circuits():
     with pytest.raises(EyeProcessValidationError, match="no content labels"):
         irt.eyeprocess_irt_content_balance_audit(["I1"], bare)
 
-    trace = irt.eyeprocess_irt_adaptive_trace(["I1", "I2"], [0, 0], [0.1, 0.2], [0.8, 0.7], [1.0, 1.2])
+    trace = irt.eyeprocess_irt_adaptive_trace(
+        ["I1", "I2"], [0, 0], [0.1, 0.2], [0.8, 0.7], [1.0, 1.2]
+    )
     assert trace.response.isna().all()
     one = irt.eyeprocess_irt_adaptive_trace(["I1"], [0], [0.1], [0.8], [1.0], response=1)
     assert one.loc[0, "response"] == 1
@@ -97,7 +107,9 @@ def test_information_targeting_adaptive_and_penalty_short_circuits():
     with pytest.raises(EyeProcessValidationError, match="SE values"):
         irt.eyeprocess_irt_information_gain([1.0], [0.0])
 
-    score = irt.eyeprocess_irt_process_aware_selection_penalty([2.0, 3.0], 1.0, burden_weight=0.2, quality_risk=0.5, quality_weight=0.1)
+    score = irt.eyeprocess_irt_process_aware_selection_penalty(
+        [2.0, 3.0], 1.0, burden_weight=0.2, quality_risk=0.5, quality_weight=0.1
+    )
     assert score.shape == (2,)
     with pytest.raises(EyeProcessValidationError, match="compatible vectors"):
         irt.eyeprocess_irt_process_aware_selection_penalty([1.0, 2.0], [1.0, 2.0, 3.0])
@@ -114,9 +126,12 @@ def test_linking_anchor_loop_and_empty_effect_paths(monkeypatch):
     with pytest.raises(EyeProcessValidationError, match="difficulty SD"):
         irt.eyeprocess_irt_mean_sigma_link(_items(), flat)
 
-    fake_r = _items().copy(); fake_f = _focal().copy()
+    fake_r = _items().copy()
+    fake_f = _focal().copy()
     fake_r["a"] = 0.0
-    monkeypatch.setattr(irt, "_anchor_merge", lambda *args, **kwargs: (fake_r, fake_f, ["I1", "I2", "I3"]))
+    monkeypatch.setattr(
+        irt, "_anchor_merge", lambda *args, **kwargs: (fake_r, fake_f, ["I1", "I2", "I3"])
+    )
     with pytest.raises(EyeProcessValidationError, match="mean discrimination"):
         irt.eyeprocess_irt_mean_mean_link(_items(), _focal())
     monkeypatch.undo()
@@ -126,21 +141,28 @@ def test_linking_anchor_loop_and_empty_effect_paths(monkeypatch):
     with pytest.raises(EyeProcessValidationError, match="link must"):
         irt.eyeprocess_irt_apply_link(_items(), {})
 
-    seq = irt.eyeprocess_irt_link_stability(_items(), _focal(), [["I1", "I2"], ["I2", "I3"]], method="mean-mean")
+    seq = irt.eyeprocess_irt_link_stability(
+        _items(), _focal(), [["I1", "I2"], ["I2", "I3"]], method="mean-mean"
+    )
     assert len(seq.table) == 2
 
     plain_audit = irt.eyeprocess_irt_anchor_audit(_items())
     assert plain_audit.eligible.all()
-    zero_iter = irt.eyeprocess_irt_anchor_purification(_items(), lambda ids: pd.DataFrame({"item_id": ids, "effect": 0.0}), max_iter=0)
+    zero_iter = irt.eyeprocess_irt_anchor_purification(
+        _items(), lambda ids: pd.DataFrame({"item_id": ids, "effect": 0.0}), max_iter=0
+    )
     assert zero_iter.history.empty
 
     with pytest.raises(EyeProcessValidationError, match="exactly one item"):
         irt.eyeprocess_irt_dif_effect_curve(_items().iloc[:2], _focal().iloc[:1])
-    no_common = _focal().copy(); no_common["item_id"] = ["J1", "J2", "J3"]
+    no_common = _focal().copy()
+    no_common["item_id"] = ["J1", "J2", "J3"]
     with pytest.raises(EyeProcessValidationError, match="No common items"):
         irt.eyeprocess_irt_dtf_curve(_items(), no_common)
 
-    summary = irt.eyeprocess_irt_functioning_effect_summary(pd.DataFrame({"absolute_difference": [np.nan], "signed_difference": [np.nan]}))
+    summary = irt.eyeprocess_irt_functioning_effect_summary(
+        pd.DataFrame({"absolute_difference": [np.nan], "signed_difference": [np.nan]})
+    )
     assert math.isnan(summary["max_abs"]) and math.isnan(summary["signed_area"])
 
 
@@ -159,9 +181,13 @@ def test_process_concordance_drift_and_empty_group_loops():
     cols_device = pd.DataFrame(columns=["item_id", "device", "b"])
     assert irt.eyeprocess_irt_session_drift(cols_session).empty
     assert irt.eyeprocess_irt_device_drift(cols_device).empty
-    nan_s = irt.eyeprocess_irt_session_drift(pd.DataFrame({"item_id": ["I1"], "session": [1], "b": [np.nan]}))
+    nan_s = irt.eyeprocess_irt_session_drift(
+        pd.DataFrame({"item_id": ["I1"], "session": [1], "b": [np.nan]})
+    )
     assert math.isnan(nan_s.loc[0, "change"])
-    nan_d = irt.eyeprocess_irt_device_drift(pd.DataFrame({"item_id": ["I1"], "device": ["D1"], "b": [np.nan]}))
+    nan_d = irt.eyeprocess_irt_device_drift(
+        pd.DataFrame({"item_id": ["I1"], "device": ["D1"], "b": [np.nan]})
+    )
     assert math.isnan(nan_d.loc[0, "mean"])
 
 
@@ -181,13 +207,25 @@ def test_joint_process_contract_validation_and_empty_group_profiles():
     bundle = irt.eyeprocess_process_irt_data_bundle(base, "p", "i", "y")
     assert bundle.response_time is None
     with pytest.raises(EyeProcessValidationError, match="binary"):
-        irt.eyeprocess_process_irt_data_bundle(pd.DataFrame({"p": [1], "i": [1], "y": [2]}), "p", "i", "y")
+        irt.eyeprocess_process_irt_data_bundle(
+            pd.DataFrame({"p": [1], "i": [1], "y": [2]}), "p", "i", "y"
+        )
     with pytest.raises(EyeProcessValidationError, match="positive"):
-        irt.eyeprocess_process_irt_data_bundle(pd.DataFrame({"p": [1], "i": [1], "y": [1], "rt": [0]}), "p", "i", "y", response_time="rt")
+        irt.eyeprocess_process_irt_data_bundle(
+            pd.DataFrame({"p": [1], "i": [1], "y": [1], "rt": [0]}),
+            "p",
+            "i",
+            "y",
+            response_time="rt",
+        )
     with pytest.raises(EyeProcessValidationError, match="No positive"):
-        irt.eyeprocess_response_time_profile(pd.DataFrame({"p": [1], "i": [1], "rt": [np.nan]}), "p", "i", "rt")
+        irt.eyeprocess_response_time_profile(
+            pd.DataFrame({"p": [1], "i": [1], "rt": [np.nan]}), "p", "i", "rt"
+        )
 
-    empty_speed = irt.eyeprocess_speed_accuracy_profile(pd.DataFrame(columns=["p", "y", "rt"]), "p", "y", "rt")
+    empty_speed = irt.eyeprocess_speed_accuracy_profile(
+        pd.DataFrame(columns=["p", "y", "rt"]), "p", "y", "rt"
+    )
     assert empty_speed.person.empty and math.isnan(empty_speed.pooled_correlation)
     empty_group = irt._group_channel_profile(pd.DataFrame(columns=["id", "x"]), "id", ["x"], "id")
     assert empty_group.empty
@@ -195,12 +233,15 @@ def test_joint_process_contract_validation_and_empty_group_profiles():
 
 def test_process_alignment_explicit_missing_and_correlation_paths():
     profile = pd.DataFrame({"item_id": ["I1", "I2", "I3"], "mean_dwell": [1.0, 2.0, 4.0]})
-    out = irt.eyeprocess_irt_process_alignment(_items(), profile, process_columns=["missing", "mean_dwell"])
+    out = irt.eyeprocess_irt_process_alignment(
+        _items(), profile, process_columns=["missing", "mean_dwell"]
+    )
     assert out.correlations["channel"].tolist() == ["mean_dwell"]
     assert np.isfinite(out.correlations.loc[0, "correlation_discrimination"])
     assert np.isfinite(out.correlations.loc[0, "correlation_difficulty"])
 
-    flat = profile.copy(); flat["mean_dwell"] = 1.0
+    flat = profile.copy()
+    flat["mean_dwell"] = 1.0
     out2 = irt.eyeprocess_irt_process_alignment(_items(), flat)
     assert math.isnan(out2.correlations.loc[0, "correlation_discrimination"])
 
@@ -216,10 +257,14 @@ def test_external_engine_and_fit_validation_residuals():
     with pytest.raises(EyeProcessValidationError, match="Engine mismatch"):
         irt.validate_eyeprocess_external_irt_fit(gated, engine="TAM")
 
-    bad_external = irt.EyeResult({"engine": "mirt", "fit": None}, eyeprocess_class="eye_external_irt_fit")
+    bad_external = irt.EyeResult(
+        {"engine": "mirt", "fit": None}, eyeprocess_class="eye_external_irt_fit"
+    )
     with pytest.raises(EyeProcessValidationError, match="NULL fit"):
         irt.validate_eyeprocess_external_irt_fit(bad_external)
-    bad_gated = irt.EyeResult({"engine": "mirt", "fit": object()}, eyeprocess_class="eye_gated_irt_engine")
+    bad_gated = irt.EyeResult(
+        {"engine": "mirt", "fit": object()}, eyeprocess_class="eye_gated_irt_engine"
+    )
     with pytest.raises(EyeProcessValidationError, match="must have NULL fit"):
         irt.validate_eyeprocess_external_irt_fit(bad_gated)
 
@@ -255,7 +300,9 @@ def test_simulation_recovery_design_short_circuits_and_success_variants():
         with pytest.raises(EyeProcessValidationError, match="invalid recovery design"):
             irt.eyeprocess_irt_recovery_design(**kwargs)
 
-    design = irt.eyeprocess_irt_recovery_design(sample_size=[20], n_items=[4], missing_rate=[0], testlet_sd=[0], replications=1, seed=1)
+    design = irt.eyeprocess_irt_recovery_design(
+        sample_size=[20], n_items=[4], missing_rate=[0], testlet_sd=[0], replications=1, seed=1
+    )
     with pytest.raises(EyeProcessValidationError, match="design must"):
         irt.run_eyeprocess_irt_recovery(pd.DataFrame())
     with pytest.raises(EyeProcessValidationError, match="requires engine"):
@@ -265,7 +312,9 @@ def test_simulation_recovery_design_short_circuits_and_success_variants():
 def test_recovery_summary_failures_and_one_dimensional_sbc():
     with pytest.raises(EyeProcessValidationError, match="recovery_result"):
         irt.eyeprocess_irt_recovery_summary({})
-    empty_result = irt.EyeResult({"estimates": pd.DataFrame()}, eyeprocess_class="eye_irt_recovery_result")
+    empty_result = irt.EyeResult(
+        {"estimates": pd.DataFrame()}, eyeprocess_class="eye_irt_recovery_result"
+    )
     assert irt.eyeprocess_irt_recovery_summary(empty_result).empty
 
     estimates = pd.DataFrame(
@@ -284,10 +333,15 @@ def test_recovery_summary_failures_and_one_dimensional_sbc():
     with pytest.raises(EyeProcessValidationError, match="recovery_result"):
         irt.eyeprocess_irt_recovery_failures({})
     design = pd.DataFrame({"scenario_id": ["S1"], "replications": [2]})
-    nofail = irt.EyeResult({"design": design, "failures": pd.DataFrame()}, eyeprocess_class="eye_irt_recovery_result")
+    nofail = irt.EyeResult(
+        {"design": design, "failures": pd.DataFrame()}, eyeprocess_class="eye_irt_recovery_result"
+    )
     ft = irt.eyeprocess_irt_recovery_failures(nofail)
     assert ft.loc[0, "failures"] == 0
-    somefail = irt.EyeResult({"design": design, "failures": pd.DataFrame({"scenario_id": ["S1"]})}, eyeprocess_class="eye_irt_recovery_result")
+    somefail = irt.EyeResult(
+        {"design": design, "failures": pd.DataFrame({"scenario_id": ["S1"]})},
+        eyeprocess_class="eye_irt_recovery_result",
+    )
     assert irt.eyeprocess_irt_recovery_failures(somefail).loc[0, "failures"] == 1
 
     ranks = irt.eyeprocess_irt_sbc_ranks([0.0], [-1.0, 0.0, 1.0], randomize_ties=False)
@@ -374,17 +428,25 @@ def test_prior_grid_summary_model_card_short_circuit_guards():
         with pytest.raises(EyeProcessValidationError, match="Prior grid"):
             irt.eyeprocess_irt_prior_sensitivity_grid(**kwargs)
 
-    empty = irt.eyeprocess_irt_prior_sensitivity_summary(pd.DataFrame({"prior_id": ["P1"], "estimate": [np.nan]}))
+    empty = irt.eyeprocess_irt_prior_sensitivity_summary(
+        pd.DataFrame({"prior_id": ["P1"], "estimate": [np.nan]})
+    )
     assert empty.n_finite == 0 and math.isnan(empty.median)
-    finite = irt.eyeprocess_irt_prior_sensitivity_summary(pd.DataFrame({"prior_id": ["P1", "P2"], "estimate": [1.0, 2.0]}))
+    finite = irt.eyeprocess_irt_prior_sensitivity_summary(
+        pd.DataFrame({"prior_id": ["P1", "P2"], "estimate": [1.0, 2.0]})
+    )
     assert finite.n_finite == 2 and np.isfinite(finite.sd)
 
     with pytest.raises(EyeProcessValidationError, match="spec must"):
         irt.eyeprocess_irt_model_card({})
     spec = irt.eyeprocess_joint_process_irt_spec()
-    card = irt.eyeprocess_irt_model_card(spec, engine_status={}, identification=[], fit_evidence="present")
+    card = irt.eyeprocess_irt_model_card(
+        spec, engine_status={}, identification=[], fit_evidence="present"
+    )
     audit = irt.eyeprocess_irt_model_card_audit(card)
     present = dict(zip(audit.field, audit.present))
-    assert not present["engine_status"] and not present["identification"] and present["fit_evidence"]
+    assert (
+        not present["engine_status"] and not present["identification"] and present["fit_evidence"]
+    )
     with pytest.raises(EyeProcessValidationError, match="card must"):
         irt.eyeprocess_irt_model_card_audit({})

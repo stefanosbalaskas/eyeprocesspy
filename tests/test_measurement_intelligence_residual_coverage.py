@@ -52,9 +52,7 @@ def test_device_linking_validation_guards():
 
     with pytest.raises(ep.EyeProcessValidationError, match="reference_device"):
         ep.fit_device_linking(
-            pd.DataFrame(
-                {"person_id": [1], "metric": [1.0], "device": ["candidate"]}
-            ),
+            pd.DataFrame({"person_id": [1], "metric": [1.0], "device": ["candidate"]}),
             "metric",
             "ref",
             id_cols=("person_id",),
@@ -106,9 +104,7 @@ def test_array_objectives_constraints_and_optimizer_residual_paths():
 
     with pytest.raises(ep.EyeProcessValidationError, match="invalid optimization method"):
         ep.optimize_item_bank(pareto, 1, spec, method="bad")
-    with pytest.raises(
-        ep.EyeProcessValidationError, match="outside the available item count"
-    ):
+    with pytest.raises(ep.EyeProcessValidationError, match="outside the available item count"):
         ep.optimize_item_bank(pareto, 0, spec)
     with pytest.raises(ep.EyeProcessValidationError, match="fewer items"):
         ep.optimize_item_bank(
@@ -118,9 +114,7 @@ def test_array_objectives_constraints_and_optimizer_residual_paths():
             constraints=lambda t: np.zeros(len(t), dtype=bool),
         )
 
-    zero_iter = ep.optimize_item_bank(
-        pareto, 1, spec, method="evolutionary", iterations=0, seed=1
-    )
+    zero_iter = ep.optimize_item_bank(pareto, 1, spec, method="evolutionary", iterations=0, seed=1)
     assert len(zero_iter.selected) == 1
 
     exact = ep.optimize_item_bank(
@@ -134,9 +128,7 @@ def test_array_objectives_constraints_and_optimizer_residual_paths():
     )
     assert set(exact.selected["item_id"]) == {"item_1"}
 
-    evolved = ep.optimize_item_bank(
-        pareto, 1, spec, method="evolutionary", iterations=3, seed=2
-    )
+    evolved = ep.optimize_item_bank(pareto, 1, spec, method="evolutionary", iterations=3, seed=2)
     assert len(evolved.selected) == 1
 
     with pytest.raises(ep.EyeProcessValidationError, match="item-bank optimization"):
@@ -163,9 +155,7 @@ def test_drift_and_fairness_single_item_context_residual_paths():
         )
     )
     assert transport.summary.loc[0, "contexts"] == 1
-    assert transport.summary.loc[
-        0, "mean_cross_context_correlation"
-    ] == pytest.approx(1.0)
+    assert transport.summary.loc[0, "mean_cross_context_correlation"] == pytest.approx(1.0)
 
 
 def test_norm_guards_explicit_family_and_plot_residual_paths(monkeypatch):
@@ -197,9 +187,7 @@ def test_norm_guards_explicit_family_and_plot_residual_paths(monkeypatch):
     with pytest.raises(ep.EyeProcessValidationError, match="eye_process_norms"):
         ep.predict_process_centiles({}, pd.DataFrame({"group": ["A"]}))
     with pytest.raises(ep.EyeProcessValidationError, match="eye_process_norms"):
-        ep.score_process_deviation(
-            {}, pd.DataFrame({"group": ["A"], "metric": [1.0]})
-        )
+        ep.score_process_deviation({}, pd.DataFrame({"group": ["A"], "metric": [1.0]}))
     with pytest.raises(ep.EyeProcessValidationError, match="invalid score type"):
         ep.score_process_deviation(model, ref.iloc[:1], "bad")
 

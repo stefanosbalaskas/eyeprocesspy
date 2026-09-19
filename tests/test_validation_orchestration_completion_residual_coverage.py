@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import math
-from pathlib import Path
 import types
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -159,9 +159,7 @@ def test_calibration_guards_empty_weights_and_failed_optimizer(monkeypatch):
     with pytest.raises(ep.EyeProcessValidationError, match="Prediction data"):
         voc.validation_calibration_summary(pd.DataFrame({"observed": [1]}))
     with pytest.raises(ep.EyeProcessValidationError, match="binary"):
-        voc.validation_calibration_summary(
-            pd.DataFrame({"observed": [2], "predicted": [0.5]})
-        )
+        voc.validation_calibration_summary(pd.DataFrame({"observed": [2], "predicted": [0.5]}))
 
     empty = voc.validation_calibration_summary(
         pd.DataFrame(
@@ -182,9 +180,7 @@ def test_calibration_guards_empty_weights_and_failed_optimizer(monkeypatch):
         return types.SimpleNamespace(success=False, x=np.asarray(x0, dtype=float))
 
     monkeypatch.setattr(voc, "minimize", failed_minimize)
-    intercept, slope = voc._calibration_coefficients(
-        [0, 1], [0.25, 0.75], [1, 1]
-    )
+    intercept, slope = voc._calibration_coefficients([0, 1], [0.25, 0.75], [1, 1])
     assert math.isnan(intercept)
     assert math.isnan(slope)
 
@@ -402,9 +398,7 @@ def test_plot_engine_and_plot_guard_residuals():
     with pytest.raises(ep.EyeProcessValidationError, match="Coverage summary"):
         voc.plot_interval_coverage(pd.DataFrame({"coverage": [0.9]}))
     with pytest.raises(ep.EyeProcessValidationError, match="No finite coverage"):
-        voc.plot_interval_coverage(
-            pd.DataFrame({"parameter": ["a"], "coverage": [np.nan]})
-        )
+        voc.plot_interval_coverage(pd.DataFrame({"parameter": ["a"], "coverage": [np.nan]}))
 
     with pytest.raises(ep.EyeProcessValidationError, match="SBC draws"):
         voc._plot_sbc_ranks(pd.DataFrame({"job_id": ["j"]}))
@@ -440,9 +434,7 @@ def test_plot_engine_and_plot_guard_residuals():
     finally:
         plt.close(fig)
 
-    ax = voc.plot_validation_runtime(
-        pd.DataFrame({"elapsed_seconds": [0.1, 0.2]})
-    )
+    ax = voc.plot_validation_runtime(pd.DataFrame({"elapsed_seconds": [0.1, 0.2]}))
     try:
         assert ax.get_title() == "Validation runtime"
     finally:

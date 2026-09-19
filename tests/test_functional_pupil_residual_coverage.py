@@ -108,7 +108,9 @@ def test_first_table_find_col_and_binary_response_variants():
 
 def test_prepare_frame_guards_timestamp_scaling_and_response_contracts():
     spec = _event_spec()
-    with pytest.raises(ep.EyeProcessValidationError, match="eye dataset or a long pupil data frame"):
+    with pytest.raises(
+        ep.EyeProcessValidationError, match="eye dataset or a long pupil data frame"
+    ):
         fp._prepare_frame(object(), spec)
     with pytest.raises(ep.EyeProcessValidationError, match="Pupil column `pupil` is unavailable"):
         fp._prepare_frame(pd.DataFrame({"time_ms": [0.0]}), spec)
@@ -230,7 +232,9 @@ def test_prepare_data_nuisance_residualization_and_varying_response_guard():
 
 def test_functional_basis_bspline_and_guard_paths():
     time = np.linspace(-1, 1, 20)
-    bs = ep.functional_pupil_basis(time, df=4, basis="bspline", degree=2, boundary_knots=(-1, 1), knots=(-0.2, 0.2))
+    bs = ep.functional_pupil_basis(
+        time, df=4, basis="bspline", degree=2, boundary_knots=(-1, 1), knots=(-0.2, 0.2)
+    )
     assert bs.shape == (20, 4)
     assert bs.attrs["basis"] == "bspline"
     assert bs.attrs["knots"] == (-0.2, 0.2)
@@ -243,7 +247,9 @@ def test_functional_basis_bspline_and_guard_paths():
 
 
 def test_trial_coefficients_length_and_unsupported_basis_contract():
-    prepared = ep.prepare_functional_pupil_data(_long_pupil(n_person=2, n_item=2, n_time=9), _event_spec())
+    prepared = ep.prepare_functional_pupil_data(
+        _long_pupil(n_person=2, n_item=2, n_time=9), _event_spec()
+    )
     basis = ep.functional_pupil_basis(prepared, df=3)
     with pytest.raises(ep.EyeProcessValidationError, match="one row per prepared"):
         fp._trial_coefficients(prepared, basis.iloc[:-1])
@@ -276,12 +282,16 @@ def test_joint_fit_guards_small_sample_backend_and_mocked_stan(monkeypatch):
 
 
 def test_functional_stan_success_contract_with_fake_cmdstan(monkeypatch):
-    prepared = ep.prepare_functional_pupil_data(_long_pupil(n_person=2, n_item=2, n_time=9), _event_spec(engine="stan"))
+    prepared = ep.prepare_functional_pupil_data(
+        _long_pupil(n_person=2, n_item=2, n_time=9), _event_spec(engine="stan")
+    )
     basis = ep.functional_pupil_basis(prepared, df=3)
 
     class FakeFit:
         def summary(self):
-            return pd.DataFrame({"Mean": [0.1], "StdDev": [0.2], "R_hat": [1.01]}, index=["beta[1]"])
+            return pd.DataFrame(
+                {"Mean": [0.1], "StdDev": [0.2], "R_hat": [1.01]}, index=["beta[1]"]
+            )
 
     class FakeModel:
         def __init__(self, stan_file):
@@ -326,9 +336,21 @@ def test_sensitivity_grid_guards_error_capture_and_reraise():
     with pytest.raises(ep.EyeProcessValidationError, match="baseline window"):
         ep.pupil_preprocessing_grid(baseline_windows=())
     with pytest.raises(ep.EyeProcessValidationError, match="basis_df"):
-        ep.pupil_preprocessing_grid(baseline_windows=((-400, 0),), latency_ms=(0,), basis_df=(1,), baseline_methods=("subtract",), max_interpolated_fraction=(0.2,))
+        ep.pupil_preprocessing_grid(
+            baseline_windows=((-400, 0),),
+            latency_ms=(0,),
+            basis_df=(1,),
+            baseline_methods=("subtract",),
+            max_interpolated_fraction=(0.2,),
+        )
     with pytest.raises(ep.EyeProcessValidationError, match="Interpolation thresholds"):
-        ep.pupil_preprocessing_grid(baseline_windows=((-400, 0),), latency_ms=(0,), basis_df=(3,), baseline_methods=("subtract",), max_interpolated_fraction=(2.0,))
+        ep.pupil_preprocessing_grid(
+            baseline_windows=((-400, 0),),
+            latency_ms=(0,),
+            basis_df=(3,),
+            baseline_methods=("subtract",),
+            max_interpolated_fraction=(2.0,),
+        )
 
     with pytest.raises(ep.EyeProcessValidationError, match="non-empty"):
         ep.pupil_preprocessing_sensitivity(d, grid=pd.DataFrame())
@@ -347,14 +369,20 @@ def test_sensitivity_grid_guards_error_capture_and_reraise():
             }
         ]
     )
-    captured = ep.pupil_preprocessing_sensitivity(d, grid=bad_grid, base_spec=_event_spec(), fit=True, continue_on_error=True)
+    captured = ep.pupil_preprocessing_sensitivity(
+        d, grid=bad_grid, base_spec=_event_spec(), fit=True, continue_on_error=True
+    )
     assert captured.results.loc[0, "parameter"] == ".error"
     with pytest.raises(ep.EyeProcessValidationError, match="Too few supported"):
-        ep.pupil_preprocessing_sensitivity(d, grid=bad_grid, base_spec=_event_spec(), fit=True, continue_on_error=False)
+        ep.pupil_preprocessing_sensitivity(
+            d, grid=bad_grid, base_spec=_event_spec(), fit=True, continue_on_error=False
+        )
 
 
 def test_compare_functional_scalar_models_aic_logloss_and_guards():
-    prepared = ep.prepare_functional_pupil_data(_long_pupil(n_person=12, n_item=4, n_time=9), _event_spec())
+    prepared = ep.prepare_functional_pupil_data(
+        _long_pupil(n_person=12, n_item=4, n_time=9), _event_spec()
+    )
     aic = ep.compare_functional_scalar_models(prepared, criterion="AIC")
     assert set(aic["model"]) == {"functional", "scalar"}
     assert aic["value"].notna().all()
@@ -367,6 +395,8 @@ def test_compare_functional_scalar_models_aic_logloss_and_guards():
     with pytest.raises(ep.EyeProcessValidationError, match="No requested scalar"):
         ep.compare_functional_scalar_models(prepared, scalar_features=("missing",))
 
-    small = ep.prepare_functional_pupil_data(_long_pupil(n_person=2, n_item=2, n_time=9), _event_spec())
+    small = ep.prepare_functional_pupil_data(
+        _long_pupil(n_person=2, n_item=2, n_time=9), _event_spec()
+    )
     with pytest.raises(ep.EyeProcessValidationError, match="Too few complete grouped"):
         ep.compare_functional_scalar_models(small)

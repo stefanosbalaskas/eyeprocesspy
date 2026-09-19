@@ -80,7 +80,11 @@ def _as_numeric_frame(value: Any, *, columns: Sequence[str] | None = None) -> pd
         array = np.asarray(value)
         if array.ndim != 2:
             raise EyeProcessValidationError("A composition must be a two-dimensional matrix.")
-        names = list(columns) if columns is not None else [f"part_{index + 1}" for index in range(array.shape[1])]
+        names = (
+            list(columns)
+            if columns is not None
+            else [f"part_{index + 1}" for index in range(array.shape[1])]
+        )
         frame = pd.DataFrame(array, columns=names)
 
     if frame.shape[1] < 2:
@@ -162,7 +166,9 @@ def derive_aoi_composition(
     if isinstance(denominator, (tuple, list)):
         denominator = denominator[0] if denominator else "total_aoi_dwell"
     if denominator not in {"total_aoi_dwell", "trial_duration"}:
-        raise EyeProcessValidationError("`denominator` must be 'total_aoi_dwell' or 'trial_duration'.")
+        raise EyeProcessValidationError(
+            "`denominator` must be 'total_aoi_dwell' or 'trial_duration'."
+        )
 
     if isinstance(zero_method, (tuple, list)):
         zero_method = zero_method[0] if zero_method else "multiplicative"
@@ -347,7 +353,9 @@ def _expand_formula_terms(rhs: str) -> tuple[bool, list[str]]:
         if "*" in term:
             factors = [part.strip() for part in term.split("*") if part.strip()]
             if len(factors) != 2:
-                raise EyeProcessValidationError("The dependency-free formula engine supports two-way `*` interactions.")
+                raise EyeProcessValidationError(
+                    "The dependency-free formula engine supports two-way `*` interactions."
+                )
             expanded.extend([factors[0], factors[1], f"{factors[0]}:{factors[1]}"])
         else:
             expanded.append(term)
@@ -415,11 +423,15 @@ class _OLSFit:
 
 def _fit_formula_ols(formula: Any, data: pd.DataFrame) -> _OLSFit:
     if not isinstance(formula, str) or "~" not in formula:
-        raise EyeProcessValidationError("Python formula arguments must be R-style strings such as `outcome ~ ilr_1`.")
+        raise EyeProcessValidationError(
+            "Python formula arguments must be R-style strings such as `outcome ~ ilr_1`."
+        )
 
     response_name, rhs = [part.strip() for part in formula.split("~", 1)]
     if not response_name or response_name not in data.columns:
-        raise EyeProcessValidationError(f"Formula response `{response_name}` is not available in model data.")
+        raise EyeProcessValidationError(
+            f"Formula response `{response_name}` is not available in model data."
+        )
 
     intercept, terms = _expand_formula_terms(rhs)
     blocks = [_design_for_term(data, term) for term in terms]
@@ -437,7 +449,9 @@ def _fit_formula_ols(formula: Any, data: pd.DataFrame) -> _OLSFit:
     finite = np.isfinite(response.to_numpy(dtype=float))
     finite &= np.isfinite(design.to_numpy(dtype=float)).all(axis=1)
     if finite.sum() <= design.shape[1]:
-        raise EyeProcessValidationError("Insufficient complete observations for the requested compositional model.")
+        raise EyeProcessValidationError(
+            "Insufficient complete observations for the requested compositional model."
+        )
 
     y = response.loc[finite].to_numpy(dtype=float)
     X = design.loc[finite].to_numpy(dtype=float)
@@ -662,7 +676,9 @@ def aoi_balance_coordinates(x, balances):
         names = list(map(str, balances.columns))
     elif isinstance(balances, np.ndarray):
         matrix = np.asarray(balances, dtype=float)
-        names = [f"balance_{index + 1}" for index in range(matrix.shape[1])] if matrix.ndim == 2 else []
+        names = (
+            [f"balance_{index + 1}" for index in range(matrix.shape[1])] if matrix.ndim == 2 else []
+        )
     else:
         matrix = None
         names = []
@@ -703,7 +719,9 @@ def aoi_balance_coordinates(x, balances):
         ):
             numerator, denominator = balance[0], balance[1]
         else:
-            raise EyeProcessValidationError("Each balance requires numerator and denominator AOI parts.")
+            raise EyeProcessValidationError(
+                "Each balance requires numerator and denominator AOI parts."
+            )
 
         numerator = [
             str(part)
@@ -717,7 +735,9 @@ def aoi_balance_coordinates(x, balances):
         ]
 
         if not numerator or not denominator:
-            raise EyeProcessValidationError("Each balance requires valid numerator and denominator parts.")
+            raise EyeProcessValidationError(
+                "Each balance requires valid numerator and denominator parts."
+            )
 
         r = len(numerator)
         s = len(denominator)
@@ -726,7 +746,8 @@ def aoi_balance_coordinates(x, balances):
         denominator_index = [parts.index(part) for part in denominator]
 
         output[str(name)] = coefficient * (
-            log_composition[:, numerator_index].mean(axis=1) - log_composition[:, denominator_index].mean(axis=1)
+            log_composition[:, numerator_index].mean(axis=1)
+            - log_composition[:, denominator_index].mean(axis=1)
         )
 
     return pd.DataFrame(output)

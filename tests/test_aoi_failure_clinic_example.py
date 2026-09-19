@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+
 import pandas as pd
 
 
@@ -26,8 +27,7 @@ def test_failure_clinic_example_outputs_and_audit(tmp_path):
     assert set(failures["stage"]) == {"geometry", "model"}
     assert models["model_converged"].tolist() == [True, False]
     ambiguous = assignments.loc[
-        (assignments["perturbation_id"] == "dilate_1_px")
-        & (assignments["observation_id"] == "o2"),
+        (assignments["perturbation_id"] == "dilate_1_px") & (assignments["observation_id"] == "o2"),
         "aoi_assignment",
     ].iloc[0]
     assert ambiguous == "__ambiguous__"

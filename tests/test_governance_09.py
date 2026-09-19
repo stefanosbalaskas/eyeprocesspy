@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,7 +44,9 @@ def _param_names(fn):
 def test_all_80_frozen_governance_exports_resolve_and_signatures_cover_r_arguments():
     exports = _frozen_exports()
     assert len(exports) == 80
-    sigs = json.loads((Path(__file__).resolve().parents[1] / "reference" / "R_SIGNATURES.json").read_text())
+    sigs = json.loads(
+        (Path(__file__).resolve().parents[1] / "reference" / "R_SIGNATURES.json").read_text()
+    )
     for name in exports:
         fn = getattr(ep, name, None)
         assert callable(fn), name
@@ -58,10 +61,17 @@ def test_all_80_frozen_governance_exports_resolve_and_signatures_cover_r_argumen
 
 def _small_design(misspec=False, reps=2, seed=9):
     return ep.process_validation_design(
-        n_persons=20, n_trials=8, missingness=0,
-        sampling_rate_hz=60, aoi_error="low", calibration_error=0,
-        pupil_dropout=0, heterogeneity="low",
-        model_misspecification=misspec, replications=reps, seed=seed,
+        n_persons=20,
+        n_trials=8,
+        missingness=0,
+        sampling_rate_hz=60,
+        aoi_error="low",
+        calibration_error=0,
+        pupil_dropout=0,
+        heterogeneity="low",
+        model_misspecification=misspec,
+        replications=reps,
+        seed=seed,
     )
 
 
@@ -91,10 +101,17 @@ def test_validation_design_expands_runs_freezes_and_matches_reference():
 
 def test_validation_misspecification_changes_dgp_and_reference_requires_complete_keys():
     d = ep.process_validation_design(
-        n_persons=20, n_trials=8, missingness=0,
-        sampling_rate_hz=60, aoi_error="low", calibration_error=0,
-        pupil_dropout=0, heterogeneity="low",
-        model_misspecification=(False, True), replications=1, seed=19,
+        n_persons=20,
+        n_trials=8,
+        missingness=0,
+        sampling_rate_hz=60,
+        aoi_error="low",
+        calibration_error=0,
+        pupil_dropout=0,
+        heterogeneity="low",
+        model_misspecification=(False, True),
+        replications=1,
+        seed=19,
     )
     g = ep.expand_process_validation_design(d)
     ok = ep.simulate_process_validation_data(g[g.model_misspecification == False], 1, 919)  # noqa: E712
@@ -104,7 +121,8 @@ def test_validation_misspecification_changes_dgp_and_reference_requires_complete
 
     x = ep.run_process_validation(_small_design(reps=2, seed=29))
     ref = ep.freeze_validation_reference(x)
-    extra = ref.summary.iloc[[0]].copy(); extra["condition_id"] = "C_MISSING_FROM_CURRENT"
+    extra = ref.summary.iloc[[0]].copy()
+    extra["condition_id"] = "C_MISSING_FROM_CURRENT"
     ref["summary"] = pd.concat([ref.summary, extra], ignore_index=True)
     cmp = ep.validate_against_reference(x, ref, tolerance=1e-8)
     assert cmp["pass"] is False
@@ -140,7 +158,10 @@ def test_governed_pipeline_dependencies_outputs_resumption_and_exports(tmp_path)
     assert Path(ep.write_eye_pipeline_report(r, tmp_path / "report.md")).exists()
     assert Path(ep.export_eye_pipeline(r, tmp_path / "pipeline.csv")).exists()
 
-    p2 = ep.eye_analysis_pipeline([ep.eye_pipeline_step("dot", lambda _context, _spec: len(_context) + len(_spec.decisions))], spec=spec)
+    p2 = ep.eye_analysis_pipeline(
+        [ep.eye_pipeline_step("dot", lambda _context, _spec: len(_context) + len(_spec.decisions))],
+        spec=spec,
+    )
     assert np.isfinite(ep.pipeline_result(ep.run_eye_pipeline(p2, context={"x": 1}), "dot"))
     with pytest.raises(Exception, match="syntactic"):
         ep.eye_pipeline_step("not valid", lambda x: x)
@@ -150,7 +171,9 @@ def test_governed_pipeline_dependencies_outputs_resumption_and_exports(tmp_path)
     with pytest.raises(Exception, match="not declared"):
         ep.eye_analysis_pipeline([a, b], strict=True)
 
-    p3 = ep.eye_analysis_pipeline([ep.eye_pipeline_step("a", lambda context, spec: context["value"])])
+    p3 = ep.eye_analysis_pipeline(
+        [ep.eye_pipeline_step("a", lambda context, spec: context["value"])]
+    )
     rr = ep.run_eye_pipeline(p3, context={"value": 2})
     assert ep.pipeline_result(ep.resume_eye_pipeline(p3, rr, context={"value": 2}), "a") == 2
     with pytest.raises(Exception, match="different context"):
@@ -162,7 +185,9 @@ def test_api_lifecycle_registry_is_frozen_complete_and_auditable(tmp_path):
     assert len(reg) == 1182
     assert reg.name.nunique() == 1182
     assert not (reg.status == "unreviewed").any()
-    reg2 = ep.register_eye_api_status(reg, "run_eye_pipeline", "workflow", canonical="run_eye_pipeline")
+    reg2 = ep.register_eye_api_status(
+        reg, "run_eye_pipeline", "workflow", canonical="run_eye_pipeline"
+    )
     assert ep.eye_api_status("run_eye_pipeline", reg2).status.iloc[0] == "workflow"
     assert ep.eye_api_status("unknown_symbol", reg2).status.iloc[0] == "unreviewed"
     assert "run_eye_pipeline" in set(ep.canonical_eye_api(reg2).name)
@@ -182,8 +207,17 @@ def test_api_lifecycle_registry_is_frozen_complete_and_auditable(tmp_path):
     ep.write_api_lifecycle_registry(reg, path)
     assert len(ep.read_api_lifecycle_registry(path)) == 1182
 
-    small = pd.DataFrame({"name": ["run_eye_pipeline"], "status": ["unreviewed"], "canonical": [np.nan], "replacement": [np.nan]})
-    badreg = ep.register_eye_api_status(reg, "run_eye_pipeline", "workflow", canonical="missing_canonical_api")
+    small = pd.DataFrame(
+        {
+            "name": ["run_eye_pipeline"],
+            "status": ["unreviewed"],
+            "canonical": [np.nan],
+            "replacement": [np.nan],
+        }
+    )
+    badreg = ep.register_eye_api_status(
+        reg, "run_eye_pipeline", "workflow", canonical="missing_canonical_api"
+    )
     bad = ep.audit_eye_api(small, badreg)
     assert bad.valid is False
     assert bad.invalid_canonical == ["run_eye_pipeline"]
@@ -192,18 +226,30 @@ def test_api_lifecycle_registry_is_frozen_complete_and_auditable(tmp_path):
 
 def test_sensitivity_grid_run_summary_stability_and_comparison_helpers():
     g = ep.process_sensitivity_grid(method=("a", "b", "c"))
-    x = EyeResult({
-        "grid": g,
-        "results": pd.DataFrame({"specification_id": g.specification_id, "effect": [.2, .3, .1], "p_value": [.04, .01, .2], "method": ["a", "b", "c"]}),
-        "failures": pd.DataFrame(), "warnings": pd.DataFrame(), "grid_hash": "x",
-    }, eyeprocess_class="eye_process_sensitivity")
+    x = EyeResult(
+        {
+            "grid": g,
+            "results": pd.DataFrame(
+                {
+                    "specification_id": g.specification_id,
+                    "effect": [0.2, 0.3, 0.1],
+                    "p_value": [0.04, 0.01, 0.2],
+                    "method": ["a", "b", "c"],
+                }
+            ),
+            "failures": pd.DataFrame(),
+            "warnings": pd.DataFrame(),
+            "grid_hash": "x",
+        },
+        eyeprocess_class="eye_process_sensitivity",
+    )
     s = ep.summarise_process_sensitivity(x, p_value="p_value")
     assert s.specifications.iloc[0] == 3
     assert np.isfinite(ep.sensitivity_sign_stability(x))
-    assert ep.sensitivity_significance_stability(x, alpha=.05) == pytest.approx(2 / 3)
-    assert ep.sensitivity_threshold_stability(x, threshold=.15) == pytest.approx(2 / 3)
+    assert ep.sensitivity_significance_stability(x, alpha=0.05) == pytest.approx(2 / 3)
+    assert ep.sensitivity_threshold_stability(x, threshold=0.15) == pytest.approx(2 / 3)
     assert ep.decision_stability(x, p_value="p_value").eyeprocess_class == "eye_decision_stability"
-    assert ep.sensitivity_rank_stability([(1, 2, 3), (1, 3, 2)]) == pytest.approx(.5)
+    assert ep.sensitivity_rank_stability([(1, 2, 3), (1, 3, 2)]) == pytest.approx(0.5)
     assert len(ep.specification_curve_data(x)) == 3
     assert ep.specification_coverage(x) == 1
     assert len(ep.sensitivity_decision_leverage(x)) == 1
@@ -212,7 +258,9 @@ def test_sensitivity_grid_run_summary_stability_and_comparison_helpers():
     assert isinstance(ep.sensitivity_branch_fingerprint(g.iloc[[0]]), str)
 
     data = pd.DataFrame({"v": [1, 2, 3]})
-    run = ep.run_process_sensitivity(data, g, lambda d, spec: float({"a": .2, "b": .3, "c": .1}[spec.method.iloc[0]]))
+    run = ep.run_process_sensitivity(
+        data, g, lambda d, spec: float({"a": 0.2, "b": 0.3, "c": 0.1}[spec.method.iloc[0]])
+    )
     assert len(run.results) == 3
     methods = {"m1": 1, "m2": 2}
     analysis = lambda d, method, spec: float(method)
@@ -243,31 +291,64 @@ def test_decision_manifests_hash_lock_compare_io_blinding_entropy_and_coverage(t
     assert ent.attrs["joint_specifications"] == 4
     grid = ep.process_sensitivity_grid(method=("a", "b"))
     cov = ep.decision_space_coverage(grid, ["S00001"])
-    assert cov.coverage.iloc[0] == .5
+    assert cov.coverage.iloc[0] == 0.5
     audit = ep.audit_decision_provenance(x)
     assert audit.complete is False
 
 
 def test_governance_plot_counterparts_return_axes_with_plot_data():
     d = _small_design(reps=1)
-    ax = ep.plot_eye_process_validation_design(d); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_process_validation_design(d)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
     x = ep.run_process_validation(d)
     for kind in ["recovery", "bias", "coverage", "failure"]:
-        ax = ep.plot_eye_process_validation_result(x, type=kind); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
-    ref = ep.freeze_validation_reference(x); cmp = ep.validate_against_reference(x, ref)
-    ax = ep.plot_eye_validation_reference_comparison(cmp); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+        ax = ep.plot_eye_process_validation_result(x, type=kind)
+        assert hasattr(ax, "eyeprocess_plot_data")
+        plt.close(ax.figure)
+    ref = ep.freeze_validation_reference(x)
+    cmp = ep.validate_against_reference(x, ref)
+    ax = ep.plot_eye_validation_reference_comparison(cmp)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
 
     p = ep.eye_analysis_pipeline([ep.eye_pipeline_step("a", lambda context, spec: 1)])
-    ax = ep.plot_eye_analysis_pipeline(p); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_analysis_pipeline(p)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
     audit = ep.audit_eye_pipeline(ep.run_eye_pipeline(p))
-    ax = ep.plot_eye_pipeline_audit(audit); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_pipeline_audit(audit)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
     aa = ep.audit_eye_api(ep.eye_api_inventory().head(20), ep.eye_api_lifecycle())
-    ax = ep.plot_eye_api_audit(aa); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_api_audit(aa)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
 
     sg = ep.process_sensitivity_grid(method=("a", "b"))
-    sx = EyeResult({"grid": sg, "results": pd.DataFrame({"specification_id": sg.specification_id, "effect": [.1, .2], "method": ["a", "b"]}), "failures": pd.DataFrame(), "warnings": pd.DataFrame()}, eyeprocess_class="eye_process_sensitivity")
-    ax = ep.plot_eye_process_sensitivity(sx, type="decision_leverage"); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    sx = EyeResult(
+        {
+            "grid": sg,
+            "results": pd.DataFrame(
+                {
+                    "specification_id": sg.specification_id,
+                    "effect": [0.1, 0.2],
+                    "method": ["a", "b"],
+                }
+            ),
+            "failures": pd.DataFrame(),
+            "warnings": pd.DataFrame(),
+        },
+        eyeprocess_class="eye_process_sensitivity",
+    )
+    ax = ep.plot_eye_process_sensitivity(sx, type="decision_leverage")
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
     ds = ep.decision_stability(sx)
-    ax = ep.plot_eye_decision_stability(ds); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_decision_stability(ds)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)
     dm = ep.eye_decision_manifest(model={"family": "gaussian"})
-    ax = ep.plot_eye_decision_manifest(dm); assert hasattr(ax, "eyeprocess_plot_data"); plt.close(ax.figure)
+    ax = ep.plot_eye_decision_manifest(dm)
+    assert hasattr(ax, "eyeprocess_plot_data")
+    plt.close(ax.figure)

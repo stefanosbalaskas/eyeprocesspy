@@ -46,10 +46,12 @@ def test_private_coercion_collection_group_and_capture_paths(monkeypatch):
     sentinel = object()
     real_asarray = np.asarray
     with monkeypatch.context() as mp:
+
         def flaky_asarray(value, *args, **kwargs):
             if value is sentinel:
                 raise RuntimeError("first coercion fails")
             return real_asarray(value, *args, **kwargs)
+
         mp.setattr(nc.np, "asarray", flaky_asarray)
         assert math.isnan(nc._numeric_vector(sentinel)[0])
     assert math.isnan(nc._first_numeric([]))
@@ -222,7 +224,9 @@ def test_run_negative_controls_validation_extraction_and_warning_paths():
         ep.run_process_negative_controls(data, "y", lambda d: 0.0, controls="shift", shift_lags=[])
     for lags in ([np.nan], [1.5], [0]):
         with pytest.raises(ep.EyeProcessValidationError, match="shift_lags"):
-            ep.run_process_negative_controls(data, "y", lambda d: 0.0, controls="shift", shift_lags=lags)
+            ep.run_process_negative_controls(
+                data, "y", lambda d: 0.0, controls="shift", shift_lags=lags
+            )
 
     with pytest.raises(ep.EyeProcessValidationError, match="functions"):
         ep.run_process_negative_controls(data, "y", object())
@@ -266,7 +270,9 @@ def test_run_negative_controls_validation_extraction_and_warning_paths():
         warnings.warn("analysis warning", RuntimeWarning)
         return 1.0
 
-    warned = ep.run_process_negative_controls(data, "y", warns, controls="permutation", replications=1)
+    warned = ep.run_process_negative_controls(
+        data, "y", warns, controls="permutation", replications=1
+    )
     assert "analysis warning" in warned["results"].loc[0, "warnings"]
 
     def extract_fails(value):
@@ -313,7 +319,9 @@ def test_summary_object_threshold_empty_finite_and_null_benchmark_edges():
     with pytest.raises(ep.EyeProcessValidationError, match="missing required"):
         ep.summarise_process_negative_controls(_control(pd.DataFrame({"control": ["p"]})))
     with pytest.raises(ep.EyeProcessValidationError, match="threshold"):
-        ep.summarise_process_negative_controls(_control(pd.DataFrame({"control": ["p"], "effect": [0]})), threshold=np.nan)
+        ep.summarise_process_negative_controls(
+            _control(pd.DataFrame({"control": ["p"], "effect": [0]})), threshold=np.nan
+        )
 
     c = _control(pd.DataFrame({"control": ["p", "q"], "effect": [np.nan, 1.0]}))
     summary = ep.summarise_process_negative_controls(c, threshold=0.5)
@@ -325,7 +333,11 @@ def test_summary_object_threshold_empty_finite_and_null_benchmark_edges():
     empty = ep.process_null_benchmark(np.nan, [])
     assert empty["n_null"] == 0 and math.isnan(empty["percentile"])
     one = ep.process_null_benchmark(2.0, [1.0])
-    assert one["n_null"] == 1 and math.isnan(one["null_sd"]) and math.isnan(one["standardized_distance"])
+    assert (
+        one["n_null"] == 1
+        and math.isnan(one["null_sd"])
+        and math.isnan(one["standardized_distance"])
+    )
     flat = ep.process_null_benchmark(2.0, [1.0, 1.0])
     assert flat["null_sd"] == 0 and math.isnan(flat["standardized_distance"])
 

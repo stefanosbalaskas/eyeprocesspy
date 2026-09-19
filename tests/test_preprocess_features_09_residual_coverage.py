@@ -10,16 +10,25 @@ import eyeprocesspy.preprocess_features_09 as pf
 
 def _dataset(*, with_episodes: bool = True):
     recordings = pd.DataFrame(
-        [{"recording_id": "R1", "participant_id": "P1", "vendor": "Generic", "nominal_sampling_rate": 10.0}]
+        [
+            {
+                "recording_id": "R1",
+                "participant_id": "P1",
+                "vendor": "Generic",
+                "nominal_sampling_rate": 10.0,
+            }
+        ]
     )
     streams = pd.DataFrame(
-        [{
-            "stream_id": "G1",
-            "recording_id": "R1",
-            "stream_type": "gaze_combined",
-            "timestamp_unit": "seconds",
-            "observed_rate_hz": 10.0,
-        }]
+        [
+            {
+                "stream_id": "G1",
+                "recording_id": "R1",
+                "stream_type": "gaze_combined",
+                "timestamp_unit": "seconds",
+                "observed_rate_hz": 10.0,
+            }
+        ]
     )
     spaces = ep.new_coordinate_space("C1")
     t = np.arange(0.0, 0.7, 0.1)
@@ -169,7 +178,9 @@ def test_feature_rows_empty_scalar_and_single_unit_expansion():
     assert pf._feature_rows({}, {}, "unit", "trial", "test").empty
     one = pf._feature_rows({"recording_id": "R1"}, {"a": 1.0, "b": 2.0}, "unit", "trial", "test")
     assert one["unit"].tolist() == ["unit", "unit"]
-    expanded = pf._feature_rows({"recording_id": "R1"}, {"a": 1.0, "b": 2.0}, ["u"], "trial", "test")
+    expanded = pf._feature_rows(
+        {"recording_id": "R1"}, {"a": 1.0, "b": 2.0}, ["u"], "trial", "test"
+    )
     assert expanded["unit"].tolist() == ["u", "u"]
 
 
@@ -184,7 +195,9 @@ def test_flag_gaze_outliers_mad_duplicate_velocity_and_pixel_bounds():
 
     duplicate = x.copy()
     duplicate["gaze_samples"].loc[1, "sample_id"] = duplicate["gaze_samples"].loc[0, "sample_id"]
-    duplicate["gaze_samples"].loc[1, "timestamp_seconds"] = duplicate["gaze_samples"].loc[0, "timestamp_seconds"]
+    duplicate["gaze_samples"].loc[1, "timestamp_seconds"] = duplicate["gaze_samples"].loc[
+        0, "timestamp_seconds"
+    ]
     velocity = ep.flag_gaze_outliers(duplicate, method="velocity", threshold=0.01)
     assert "outlier_flag" in velocity["gaze_samples"]
 

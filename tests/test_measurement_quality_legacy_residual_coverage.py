@@ -4,6 +4,7 @@ import math
 from types import SimpleNamespace
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -79,9 +80,13 @@ def test_uncertainty_spec_sequence_vector_and_estimation_guards_cluster_paths():
     one = ep.estimate_process_uncertainty([1.0, 2.0, 3.0], spec=spec)
     assert one.metrics == ["metric"]
     d = _unc_data()
-    clustered = ep.estimate_process_uncertainty(d, spec=spec, metrics=["metric", "missing"], cluster="person")
+    clustered = ep.estimate_process_uncertainty(
+        d, spec=spec, metrics=["metric", "missing"], cluster="person"
+    )
     assert clustered.metrics == ["metric"]
-    assert (clustered.components.loc[clustered.components.source == "calibration", "source_sd"] == 0).all()
+    assert (
+        clustered.components.loc[clustered.components.source == "calibration", "source_sd"] == 0
+    ).all()
 
     singleton = ep.estimate_process_uncertainty(pd.DataFrame({"x": [1.0]}), metrics=["x"])
     assert len(singleton.summary) == 1
@@ -90,7 +95,9 @@ def test_uncertainty_spec_sequence_vector_and_estimation_guards_cluster_paths():
 def test_uncertainty_propagation_invalid_posterior_empty_simulation_and_failed_estimand():
     with pytest.raises(ep.EyeProcessValidationError, match="Unknown propagation"):
         ep.propagate_process_uncertainty([1, 2], method="bad")
-    post = ep.propagate_process_uncertainty({"draws": [1.0, 2.0, np.nan]}, method="posterior", draws=5, seed=1)
+    post = ep.propagate_process_uncertainty(
+        {"draws": [1.0, 2.0, np.nan]}, method="posterior", draws=5, seed=1
+    )
     assert len(post.draws) == 5
     with pytest.raises(ep.EyeProcessValidationError, match="numeric draws"):
         ep.propagate_process_uncertainty({"draws": [np.nan]}, method="posterior")
@@ -99,7 +106,11 @@ def test_uncertainty_propagation_invalid_posterior_empty_simulation_and_failed_e
 
     unc = ep.estimate_process_uncertainty(_unc_data(), metrics=["metric"])
     sim = ep.propagate_process_uncertainty(
-        unc, method="simulation", draws=3, seed=3, estimand=lambda z: pd.to_numeric(z["metric"]).mean()
+        unc,
+        method="simulation",
+        draws=3,
+        seed=3,
+        estimand=lambda z: pd.to_numeric(z["metric"]).mean(),
     )
     assert sim.summary.loc[0, "draws"] == 3
     bad = ep.propagate_process_uncertainty(
@@ -199,7 +210,9 @@ def test_gstudy_missing_columns_no_facets_singletons_and_dstudy_paths():
     with pytest.raises(ep.EyeProcessValidationError, match="At least one facet"):
         ep.fit_process_gstudy(d, "metric", facets=["absent"])
 
-    single = ep.fit_process_gstudy(pd.DataFrame({"metric": [1.0], "person": ["p1"]}), "metric", facets=["person"])
+    single = ep.fit_process_gstudy(
+        pd.DataFrame({"metric": [1.0], "person": ["p1"]}), "metric", facets=["person"]
+    )
     assert single.variance_components.variance.ge(0).all()
     gs = ep.fit_process_gstudy(d, "metric", facets=["person", "item"])
     ds = ep.design_process_dstudy(gs, persons=4, items=[0, 2], sessions=[0, 2], devices=[0, 1])
@@ -222,7 +235,9 @@ def test_reliability_icc_gtheory_split_half_bootstrap_and_labels():
         assert fit.summary.loc[0, "method"] == method
         assert fit.summary.loc[0, "interpretation"] in {"limited", "moderate", "good", "excellent"}
 
-    sparse = pd.DataFrame({"person_id": ["p1", "p2"], "item_id": ["i1", "i1"], "metric": [1.0, 2.0]})
+    sparse = pd.DataFrame(
+        {"person_id": ["p1", "p2"], "item_id": ["i1", "i1"], "metric": [1.0, 2.0]}
+    )
     split = ep.audit_process_reliability(sparse, "metric", method="split_half")
     assert math.isnan(split.summary.loc[0, "estimate"])
 

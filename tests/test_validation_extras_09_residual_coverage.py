@@ -11,7 +11,9 @@ import eyeprocesspy.validation_extras_09 as ve
 
 
 def test_private_numeric_frame_column_and_recycle_residual_paths(monkeypatch):
-    np.testing.assert_allclose(ve._numeric_vector(pd.Series(["1", "bad"])), [1.0, np.nan], equal_nan=True)
+    np.testing.assert_allclose(
+        ve._numeric_vector(pd.Series(["1", "bad"])), [1.0, np.nan], equal_nan=True
+    )
     np.testing.assert_allclose(ve._numeric_vector(np.asarray([1, 2])), [1.0, 2.0])
     np.testing.assert_allclose(ve._numeric_vector("3"), [3.0])
     assert math.isnan(ve._first_numeric([]))
@@ -109,9 +111,23 @@ def test_resolution_guard_remaining_validation_and_failure_states():
     cases = [
         ({"event_duration_ms": 100, "effective_hz": 0}, "effective_hz"),
         ({"event_duration_ms": 100, "effective_hz": 60, "min_samples": 0}, "min_samples"),
-        ({"event_duration_ms": 100, "effective_hz": 60, "max_error_fraction": -0.1}, "max_error_fraction"),
-        ({"event_duration_ms": 100, "effective_hz": 60, "spatial_feature_size": 0}, "spatial_feature_size"),
-        ({"event_duration_ms": 100, "effective_hz": 60, "spatial_feature_size": 1, "radial_error": -0.1}, "radial_error"),
+        (
+            {"event_duration_ms": 100, "effective_hz": 60, "max_error_fraction": -0.1},
+            "max_error_fraction",
+        ),
+        (
+            {"event_duration_ms": 100, "effective_hz": 60, "spatial_feature_size": 0},
+            "spatial_feature_size",
+        ),
+        (
+            {
+                "event_duration_ms": 100,
+                "effective_hz": 60,
+                "spatial_feature_size": 1,
+                "radial_error": -0.1,
+            },
+            "radial_error",
+        ),
     ]
     for kwargs, message in cases:
         with pytest.raises(ep.EyeProcessValidationError, match=message):
@@ -121,7 +137,9 @@ def test_resolution_guard_remaining_validation_and_failure_states():
     assert temporal["temporal_ok"] is False
     assert temporal["overall"] is False
 
-    spatial = ep.analysis_resolution_guard(100, 60, spatial_feature_size=0.1, radial_error=0.2, max_error_fraction=0.5)
+    spatial = ep.analysis_resolution_guard(
+        100, 60, spatial_feature_size=0.1, radial_error=0.2, max_error_fraction=0.5
+    )
     assert spatial["spatial_ok"] is False
     assert spatial["overall"] is False
 
@@ -148,7 +166,9 @@ def test_preprocessing_order_input_coercion_and_pattern_guards():
         with pytest.raises(ep.EyeProcessValidationError, match="cleaning_patterns"):
             ep.audit_pupil_preprocessing_order(["baseline"], cleaning_patterns=patterns)
 
-    list_baseline = ep.audit_pupil_preprocessing_order(["baseline correction"], baseline_pattern=["baseline", "other"])
+    list_baseline = ep.audit_pupil_preprocessing_order(
+        ["baseline correction"], baseline_pattern=["baseline", "other"]
+    )
     assert list_baseline["baseline_positions"] == [1]
     numeric_baseline = ep.audit_pupil_preprocessing_order(["step 7"], baseline_pattern=7)
     assert numeric_baseline["baseline_positions"] == [1]
