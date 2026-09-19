@@ -70,6 +70,26 @@ inference = ep.run_detector_inference_multiverse(
 
 Participant fixed effects keep the example lightweight for CI. In an empirical repeated-measures study, a mixed model may be preferable; use `statsmodels_mixedlm` or an explicit callback to the specialist modelling stack chosen for the study.
 
+### Model-input audit
+
+Before interpreting coefficients, inspect the row-accounting table:
+
+```python
+inference.input_audit[
+    [
+        "detector_id",
+        "input_rows",
+        "aoi_selected_rows",
+        "quality_excluded_rows",
+        "outcome_missing_rows",
+        "model_rows_used",
+        "status",
+    ]
+]
+```
+
+This table distinguishes AOI selection, prespecified quality filtering, outcome missingness, and model failure. Those states should not be collapsed into a single post-hoc N.
+
 ### Coefficient stability
 
 ![Condition coefficient across detector branches](../assets/detector-multiverse/condition-coefficient-stability.svg)
