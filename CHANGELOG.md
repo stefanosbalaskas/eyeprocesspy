@@ -18,6 +18,9 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ### Standardized spatial data quality
 
+- Added a dedicated Data Quality plot gallery with exact seeded synthetic previews for the four-panel dashboard and irregular sampling intervals, runnable focused plot calls, interpretation boundaries, reporting wording, and API links.
+- Added site-contract coverage for Data Quality navigation/assets and removed escaped-newline artifacts from the worked documentation.
+
 - Added vendor-neutral target-referenced accuracy, RMS-S2S and population-SD precision, explicit-probability BCEA, empirical sampling interval/jitter/effective-Hz diagnostics, validity fractions, reason-aware data loss, and a canonical review-oriented quality report.
 - Added metric-specific units, explicit coordinate conversion, missing-gap-safe RMS-S2S, localized timestamp diagnostics, NA-group preservation, threshold validation, provenance fingerprints, insufficiency flags, and distinct long-interval versus estimated dropped-sample counts.
 - Added deterministic six-profile 9-point validation data, frozen R/Python parity fixtures, focused tests, dashboard/reporting helpers, a worked validation example, sensitivity example, methodological/reporting guides, conceptual figure, dedicated Data Quality API/site navigation, and homepage discovery.

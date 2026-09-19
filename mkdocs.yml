@@ -47,6 +47,7 @@ nav:
           - Overview & equations: guides/data-quality.md
           - Reporting guideline: guides/data-quality-reporting.md
           - Worked 9-point validation: examples/data-quality-validation.md
+          - Plot gallery: examples/data-quality-plot-gallery.md
           - Threshold sensitivity: examples/data-quality-sensitivity.md
       - Censored gaze latency:
           - Method overview: methods/gaze-survival/index.md
