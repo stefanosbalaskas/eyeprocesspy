@@ -26,6 +26,29 @@ title: Censored gaze-latency survival analysis
 
 ![Kaplan–Meier curves for the synthetic disclosure-inspection example](../../assets/gaze-survival/km-disclosure.svg)
 
+## How to read the visual outputs
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../../assets/gaze-survival/km-evidence-verification.svg" alt="Kaplan–Meier evidence-verification curves">
+  <figcaption><strong>Kaplan–Meier.</strong> Higher survival means a larger share of trials has not yet inspected the target.</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/gaze-survival/event-incidence-verification.svg" alt="One minus Kaplan-Meier evidence-verification curves">
+  <figcaption><strong>1−KM.</strong> The same single-event process shown as the proportion already inspected.</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/gaze-survival/censoring-audit-verification.svg" alt="Event and censor counts by condition">
+  <figcaption><strong>Censoring audit.</strong> Always inspect event and censor counts by condition before model interpretation.</figcaption>
+</figure>
+
+</div>
+
+The 1−KM panel is appropriate for this single-event example only. When event types compete, use a dedicated competing-risks framework rather than relabelling 1−KM as a competing-risks cumulative-incidence estimator.
+
 ## When to use it
 
 Use this pathway when the outcome is genuinely **time to an event**: first fixation, first AOI entry, first evidence inspection, first revisit, first transition into a target AOI, or a substantively defined disengagement latency. It is especially important when a non-trivial number of trials end before that event occurs.
