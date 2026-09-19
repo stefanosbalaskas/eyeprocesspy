@@ -967,7 +967,14 @@ def option_process_information(object: Any) -> pd.DataFrame:
         raise EyeProcessValidationError("object must be an eye_nominal_gaze_irt.")
     pf = np.asarray(object.model.fitted_probability, float)
     pb = np.asarray(object.baseline_model.fitted_probability, float)
-    entropy = lambda p: -np.sum(np.clip(p, _EPS, 1) * np.log(np.clip(p, _EPS, 1)), axis=1)
+
+    def entropy(p):
+        clipped = np.clip(p, _EPS, 1)
+        return -np.sum(
+            clipped * np.log(clipped),
+            axis=1,
+        )
+
     full, base = entropy(pf), entropy(pb)
     out = pd.DataFrame(
         {

@@ -501,7 +501,6 @@ def fit_process_dif(
         y = pd.to_numeric(g[response], errors="coerce").to_numpy(float)
         proc = _z(g[process])
         groups = pd.Categorical(g[group])
-        levels = list(groups.categories)
         dummy = pd.get_dummies(groups, drop_first=True, dtype=float)
         Xparts = [
             np.ones(len(g)),

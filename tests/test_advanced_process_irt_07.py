@@ -193,9 +193,11 @@ def test_sbc_ppc_and_negative_control_r_contracts():
 
 
 def test_stress_transport_incremental_and_evidence_contracts():
-    runner = lambda sc, r: pd.DataFrame(
-        [{"value": float(r) + float(sc["strength"].iloc[0] if "strength" in sc else 0)}]
-    )
+    def runner(sc, r):
+        return pd.DataFrame(
+            [{"value": float(r) + float(sc["strength"].iloc[0] if "strength" in sc else 0)}]
+        )
+
     st = ep.stress_test_local_dependence(runner, strengths=[0, 0.5], replications=2, seed=1)
     assert len(st) == 4 and not st.failed.any()
     data = pd.DataFrame(
@@ -205,9 +207,19 @@ def test_stress_transport_incremental_and_evidence_contracts():
             "x": np.arange(18, dtype=float),
         }
     )
-    fitter = lambda tr: {"mean": tr.y.mean()}
-    predictor = lambda fit, te: np.repeat(fit["mean"], len(te))
-    scorer = lambda te, p: pd.DataFrame([{"brier": np.mean((te.y.to_numpy() - p) ** 2)}])
+
+    def fitter(tr):
+        return {"mean": tr.y.mean()}
+
+    def predictor(fit, te):
+        return np.repeat(
+            fit["mean"],
+            len(te),
+        )
+
+    def scorer(te, p):
+        return pd.DataFrame([{"brier": np.mean((te.y.to_numpy() - p) ** 2)}])
+
     lv = ep.leave_device_out_validation(data, "group", fitter, predictor, scorer)
     assert len(lv) == 3 and not lv.failed.any()
     ta = ep.audit_measurement_transportability(lv, "brier", max_range=1)

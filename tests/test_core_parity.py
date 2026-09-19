@@ -85,8 +85,13 @@ def test_sampling_rate_r_algorithm():
 def test_clock_transform_offset_and_linear():
     o = ep.estimate_clock_transform([0, 1], [2, 3], method="offset")
     assert o.offset == pytest.approx(2) and o.slope == 1
-    l = ep.estimate_clock_transform([0, 1, 2], [1, 3, 5], method="linear")
-    assert l.offset == pytest.approx(1) and l.slope == pytest.approx(2)
+    linear = ep.estimate_clock_transform(
+        [0, 1, 2],
+        [1, 3, 5],
+        method="linear",
+    )
+    assert linear.offset == pytest.approx(1)
+    assert linear.slope == pytest.approx(2)
 
 
 def test_normalize_timebase_per_recording():

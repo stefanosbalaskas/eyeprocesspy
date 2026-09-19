@@ -2140,9 +2140,13 @@ def validate_eye_corpus(
     ]
     for _, row in manifest.iterrows():
         case_spec = copy.deepcopy(spec)
-        for field in override_fields:
-            if field in manifest and pd.notna(row[field]):
-                setattr(case_spec, field, bool(row[field]))
+        for override_field in override_fields:
+            if override_field in manifest and pd.notna(row[override_field]):
+                setattr(
+                    case_spec,
+                    override_field,
+                    bool(row[override_field]),
+                )
         if (
             isinstance(import_args, Mapping)
             and str(row["case_id"]) in import_args
@@ -2180,8 +2184,8 @@ def validate_eye_corpus(
         if c in manifest
     ]
     lookup = manifest.set_index("case_id")
-    for field in extras:
-        summary[field] = summary["case_id"].map(lookup[field])
+    for extra_field in extras:
+        summary[extra_field] = summary["case_id"].map(lookup[extra_field])
     summary["validation_status"] = summary["status"]
     expected = (
         summary.get("expected_import", pd.Series(True, index=summary.index))

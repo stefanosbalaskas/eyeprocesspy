@@ -283,7 +283,7 @@ def test_bayesian_and_3pl_diagnostics_helpers_preserve_review_semantics():
 
 
 def test_08_plot_counterparts_return_axes():
-    mpl = pytest.importorskip("matplotlib.pyplot")
+    pytest.importorskip("matplotlib.pyplot")
     import matplotlib.pyplot as plt
 
     gated = ep.fit_kde_latent_distribution_irt(np.ones((20, 5)))

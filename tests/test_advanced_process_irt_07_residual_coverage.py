@@ -288,7 +288,12 @@ def test_gpirt_validation_external_comparison_and_custom_grid_paths():
 
 
 def test_external_engine_success_gates_and_variational_failure():
-    engine = lambda **kw: {"keys": sorted(kw), "value": next(iter(kw.values()))}
+    def engine(**kw):
+        return {
+            "keys": sorted(kw),
+            "value": next(iter(kw.values())),
+        }
+
     d = pd.DataFrame({"x": [1, 2]})
     R = np.asarray([[0, 1], [1, 0]])
     assert ep.fit_dynamic_gpirt(d, external_engine=engine, alpha=1).engine == "external"

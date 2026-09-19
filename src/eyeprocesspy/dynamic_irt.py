@@ -1897,7 +1897,6 @@ def extract_diffusion_parameters(
         )
     s = object.model.summary.copy()
     keep = np.zeros(len(s), bool)
-    namecol = "variable" if "variable" in s else s.index.astype(str)
     vals = (
         s["variable"].astype(str)
         if "variable" in s
@@ -1934,11 +1933,6 @@ def diffusion_posterior_predictive(
     object: EyeResult, draws: int = 200, method: str = "rtdists", seed: int = 1
 ) -> EyeResult:
     if getattr(object.model, "eyeprocess_class", None) == "eye_gaze_diffusion_baseline":
-        p = (
-            expit(np.column_stack([np.ones(len(object.prepared.data))]).dot(np.array([0.0])))
-            if False
-            else object.prepared.y
-        )
         observed = pd.DataFrame(
             [
                 {

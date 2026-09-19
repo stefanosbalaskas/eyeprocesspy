@@ -624,7 +624,10 @@ def read_gazepoint_fixations(
     nms = list(data.columns)
     identity = _gp_filename_identity(path, participant_id, recording_id, session_id)
     info = _gp_time_info(data)
-    pick = lambda *xs: _first_existing(nms, list(xs))
+
+    def pick(*xs):
+        return _first_existing(nms, list(xs))
+
     duration = _safe_numeric(
         _map_column(data, {"duration": pick("FPOGD", "FIXATION_DURATION", "duration")}, "duration")
     )

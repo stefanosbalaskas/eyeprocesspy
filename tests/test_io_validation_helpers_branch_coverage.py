@@ -45,8 +45,8 @@ def test_restore_column_numeric_boolean_datetime_string_and_object():
     assert pd.isna(numeric.iloc[1])
 
     boolean = io._restore_column(pd.Series(["yes", "N", "unknown", None]), "boolean")
-    assert boolean.iloc[0] == True
-    assert boolean.iloc[1] == False
+    assert boolean.iloc[0]
+    assert not boolean.iloc[1]
     assert pd.isna(boolean.iloc[2])
     assert pd.isna(boolean.iloc[3])
 

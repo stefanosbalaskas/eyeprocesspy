@@ -104,9 +104,18 @@ def test_custom_adapter_tie_priority_and_unregister(tmp_path: Path):
     p = tmp_path / "x.dat"
     p.write_text("x", encoding="utf-8")
     d = pd.DataFrame({"t": [0], "x": [0.1], "y": [0.2]})
-    reader = lambda path, **kw: ep.read_eye_generic(
-        d, mapping=ep.eye_mapping(timestamp="t", x="x", y="y"), quiet=True
-    )
+
+    def reader(path, **kw):
+        return ep.read_eye_generic(
+            d,
+            mapping=ep.eye_mapping(
+                timestamp="t",
+                x="x",
+                y="y",
+            ),
+            quiet=True,
+        )
+
     ep.register_eye_adapter(
         "unit_a", lambda path, inspect_rows=20: 0.8, reader, priority=5, overwrite=True
     )

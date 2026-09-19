@@ -73,8 +73,8 @@ def test_vendor_private_mapping_argument_and_character_guards():
     boolean = vc._coerce_bool_series(pd.Series([True, False], dtype=bool))
     assert boolean.tolist() == [True, False]
     mapped = vc._coerce_bool_series(pd.Series(["yes", "0", "unknown", None]))
-    assert mapped.iloc[0] == True
-    assert mapped.iloc[1] == False
+    assert mapped.iloc[0]
+    assert not mapped.iloc[1]
     assert pd.isna(mapped.iloc[2])
     assert pd.isna(mapped.iloc[3])
 

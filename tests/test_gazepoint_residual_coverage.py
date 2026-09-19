@@ -146,7 +146,7 @@ def test_profile_list_fields_and_validation_failure_paths(tmp_path, monkeypatch)
     d = tmp_path / "files"
     d.mkdir()
     low = _write_csv(d / "plain.csv", pd.DataFrame({"foo": [1], "bar": [2]}))
-    good = _write_csv(
+    _write_csv(
         d / "sample.csv",
         pd.DataFrame({"TIME": [0], "BPOGX": [0.2], "BPOGY": [0.3]}),
     )

@@ -73,7 +73,7 @@ def plot_eye_multimodal_simulation(x, type="latent_correlation", ax=None):
         if isinstance(persons, pd.DataFrame):
             nums = persons.select_dtypes(include="number")
             mat = nums.corr()
-            im = ax.imshow(mat, aspect="auto", vmin=-1, vmax=1)
+            ax.imshow(mat, aspect="auto", vmin=-1, vmax=1)
             ax.set_xticks(range(len(mat)), mat.columns, rotation=45, ha="right")
             ax.set_yticks(range(len(mat)), mat.index)
             ax.set_title("Simulated latent correlation")

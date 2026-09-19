@@ -263,7 +263,10 @@ def test_sensitivity_grid_run_summary_stability_and_comparison_helpers():
     )
     assert len(run.results) == 3
     methods = {"m1": 1, "m2": 2}
-    analysis = lambda d, method, spec: float(method)
+
+    def analysis(d, method, spec):
+        return float(method)
+
     assert len(ep.compare_aoi_methods(data, methods, analysis).results) == 2
     assert len(ep.compare_fixation_methods(data, methods, analysis).results) == 2
     assert len(ep.compare_pupil_preprocessing(data, methods, analysis).results) == 2

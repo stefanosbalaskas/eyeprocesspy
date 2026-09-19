@@ -2103,7 +2103,6 @@ def multimodal_m4_negative_controls(
     fit_args: Mapping[str, Any] | None = None,
 ) -> EyeResult:
     d = _extract_data(x)
-    rng = np.random.default_rng(int(seed))
     out = d.copy()  # deterministic design object; data itself unchanged when run=False
     if run:
         raise EyeProcessBackendError(

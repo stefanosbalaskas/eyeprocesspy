@@ -12,14 +12,21 @@ import eyeprocesspy.coordinates as co
 import eyeprocesspy.foundation_09 as fd
 import eyeprocesspy.gazepoint as gp
 import eyeprocesspy.gazepoint_real_10 as gr
+import eyeprocesspy.gazepoint_workflow_10 as gw
+import eyeprocesspy.governance_09 as gov09
+import eyeprocesspy.interoperability_storage_10 as ist
+import eyeprocesspy.io_validation_10 as io10
 import eyeprocesspy.legacy_models as lm
 import eyeprocesspy.multimodal_staged as ms
+import eyeprocesspy.partitioned_storage_10 as ps
 import eyeprocesspy.preprocess_features_09 as pf
 import eyeprocesspy.process_governance_08 as pg
 import eyeprocesspy.pupil_missingness as pm
 import eyeprocesspy.requested_api_07 as ra
 import eyeprocesspy.semantic_validation_07 as sv
 import eyeprocesspy.timebase as tb
+import eyeprocesspy.validation_completion_10 as vcomp
+import eyeprocesspy.validation_orchestration_10 as vo
 import eyeprocesspy.vendor_corpus_10 as vc
 import eyeprocesspy.vendor_importers_10 as vi
 from eyeprocesspy.irt import EyeResult
@@ -377,10 +384,6 @@ def test_vendor_corpus_false_paths(monkeypatch, tmp_path):
     assert Path(path).exists()
 
 
-import eyeprocesspy.gazepoint_workflow_10 as gw
-import eyeprocesspy.io_validation_10 as io10
-
-
 def _workflow_dataset(two_trials=False, matching=False):
     x = _base()
     trials = [
@@ -592,11 +595,6 @@ def test_io_redact_validation_source_false_loops():
     assert len(b.source) == 1
 
 
-import eyeprocesspy.governance_09 as gov09
-import eyeprocesspy.interoperability_storage_10 as ist
-import eyeprocesspy.partitioned_storage_10 as ps
-
-
 def test_governance_missing_required_after_optional_failure():
     pipe = ep.eye_analysis_pipeline(
         ep.eye_pipeline_step("up", lambda: (_ for _ in ()).throw(RuntimeError("x")), optional=True),
@@ -694,10 +692,6 @@ def test_partition_inner_commit_restore(monkeypatch, tmp_path):
             overwrite=True,
         )
     assert target.is_file() and target.read_text() == "original"
-
-
-import eyeprocesspy.validation_completion_10 as vcomp
-import eyeprocesspy.validation_orchestration_10 as vo
 
 
 def test_partition_inner_commit_no_backup_false(monkeypatch, tmp_path):

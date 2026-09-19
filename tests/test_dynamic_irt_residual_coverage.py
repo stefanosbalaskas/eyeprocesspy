@@ -534,7 +534,7 @@ def test_strategy_stan_posterior_nonem_diagnostics_sequence_and_single_condition
     posterior = ep.strategy_posterior_probabilities(obj)
     assert len(posterior) == 4
     diag = ep.strategy_label_switching_diagnostics(obj)
-    assert diag.assessed.iloc[0] == False
+    assert not diag.assessed.iloc[0]
 
     validation = ep.validate_strategy_manipulation(obj, "condition", "analytic", minimum_contrast=0)
     assert validation.contrast == 0.0

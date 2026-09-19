@@ -184,7 +184,7 @@ def test_scanpath_episodes_evidence_adapters():
         diagnostics=["high_effort_evidence"],
         decisions=["item_I01_revise"],
     )
-    trace = ep.trace_item_decision(graph, "I01")
+    ep.trace_item_decision(graph, "I01")
     assert ep.audit_evidence_dependencies(graph).summary.passed.iloc[0]
     assert ep.compare_decision_provenance(graph, graph).summary["count"].sum() == 0
     assert ep.plot_evidence_graph(graph)

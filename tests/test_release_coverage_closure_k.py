@@ -109,7 +109,9 @@ def test_bayesian_3pl_defensive_and_review_paths():
 
 
 def test_frontier_external_engine_paths():
-    engine = lambda data, **kw: {"ok": data}
+    def engine(data, **kw):
+        return {"ok": data}
+
     assert fr.fit_persistence_gaze_diffusion_irt(3, engine=engine)["fit"]["ok"] == 3
     assert fr.fit_nonignorable_missing_irt(4, engine=engine)["fit"]["ok"] == 4
     assert fr.fit_crossclassified_process_irt_mhrm(5, engine=engine)["fit"]["ok"] == 5

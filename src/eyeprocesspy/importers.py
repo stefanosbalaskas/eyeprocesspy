@@ -132,7 +132,10 @@ def infer_eye_mapping(data: pd.DataFrame, vendor: str | None = None):
     if not isinstance(data, pd.DataFrame):
         raise TypeError("`data` must be a pandas DataFrame.")
     nms = list(map(str, data.columns))
-    pick = lambda *xs: _first_existing(nms, list(xs))
+
+    def pick(*xs):
+        return _first_existing(nms, list(xs))
+
     return eye_mapping(
         participant=pick(
             "participant_id",

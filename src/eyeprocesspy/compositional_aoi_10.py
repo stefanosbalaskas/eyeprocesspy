@@ -793,7 +793,6 @@ def plot_aoi_ternary(x, ax=None, **kwargs):
         axis.eyeprocess_plot_data = composition
         return axis
 
-    a = composition.iloc[:, 0].to_numpy(dtype=float)
     b = composition.iloc[:, 1].to_numpy(dtype=float)
     c = composition.iloc[:, 2].to_numpy(dtype=float)
     xx = b + 0.5 * c

@@ -516,7 +516,10 @@ def audit_presentation_accessibility(
     q = d[[person, *cols]].copy()
     q[cols] = q[cols].apply(pd.to_numeric, errors="coerce")
     agg = q.groupby(person, sort=True, as_index=False)[cols].mean()
-    get = lambda c: _num(agg[c]) if c in agg else np.full(len(agg), np.nan)
+
+    def get(c):
+        return _num(agg[c]) if c in agg else np.full(len(agg), np.nan)
+
     reading = _z(get(rt)) + _z(get(dwell)) + _z(get(revisits))
     search = _z(get(entropy)) - _z(get(gaze_validity))
     phys = _z(get(pupil))
@@ -577,7 +580,6 @@ def compare_presentation_fairness(
         q = q.groupby([person, variant], sort=True, as_index=False)[outcome].mean()
     if q[variant].nunique() < 2:
         raise EyeProcessValidationError("At least two presentation variants are required.")
-    levels = list(pd.unique(q[variant]))
     X = pd.get_dummies(q[variant], drop_first=True, dtype=float)
     model = _ols(q[outcome].to_numpy(float), X)
     summ = (
