@@ -27,6 +27,7 @@ The full [worked example](../../examples/aoi-perturbation-sensitivity.md) also s
 - [AOI Sensitivity Analysis Plan](analysis-plan.md)
 - [AOI Perturbation Troubleshooting](troubleshooting.md)
 - [Reporting AOI Robustness](reporting.md)
+- [AOI Robustness Reporting Bundle](reporting-bundle.md)
 - [R/Python Scientific Parity](r-python-parity.md)
 
 ## Scientific pipeline
@@ -155,4 +156,4 @@ Use `report_aoi_sensitivity()` to generate a compact Markdown summary, then edit
 
 ## Next steps
 
-Start with the [worked filled plan](../../examples/aoi-analysis-plan-worked.md), then run the [worked synthetic advertising example](../../examples/aoi-perturbation-sensitivity.md), use the [worked failure clinic](../../examples/aoi-perturbation-failure-clinic.md) to inspect non-evaluable branches, then use the focused [API reference](../../reference/aoi-perturbation.md).
+Start with the [worked filled plan](../../examples/aoi-analysis-plan-worked.md), then run the [worked synthetic advertising example](../../examples/aoi-perturbation-sensitivity.md), use the [worked failure clinic](../../examples/aoi-perturbation-failure-clinic.md) to inspect non-evaluable branches, package the evidence with the [worked reporting bundle](../../examples/aoi-reporting-bundle.md), then use the focused [API reference](../../reference/aoi-perturbation.md).
