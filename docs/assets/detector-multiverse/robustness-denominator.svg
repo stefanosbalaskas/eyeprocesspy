@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="390" viewBox="0 0 760 390">
+<style>text{font-family:system-ui,sans-serif;fill:currentColor;font-size:14px}.title{font-size:21px;font-weight:650}.k{font-size:13px}.n{font-size:28px;font-weight:700}.small{font-size:12px}.box{fill:currentColor;fill-opacity:.055;stroke:currentColor;stroke-opacity:.35;stroke-width:1.5}.line{stroke:currentColor;stroke-opacity:.55;stroke-width:2;fill:none}</style>
+<text x="380" y="30" text-anchor="middle" class="title">Planned-specification denominator</text>
+<text x="380" y="54" text-anchor="middle" class="small">Seeded synthetic disclosure example</text>
+<rect class="box" x="55" y="105" rx="14" ry="14" width="145" height="110"/>
+<text x="127.5" y="138" text-anchor="middle" class="k">Planned branches</text><text x="127.5" y="182" text-anchor="middle" class="n">6</text>
+<path class="line" d="M200 160 H250"/><path d="M250 160 l-11 -7 v14 z" fill="currentColor" fill-opacity=".55"/>
+<rect class="box" x="260" y="105" rx="14" ry="14" width="145" height="110"/>
+<text x="332.5" y="134" text-anchor="middle" class="k">Requested term</text><text x="332.5" y="153" text-anchor="middle" class="k">available</text><text x="332.5" y="190" text-anchor="middle" class="n">5</text>
+<path class="line" d="M405 160 H455"/><path d="M455 160 l-11 -7 v14 z" fill="currentColor" fill-opacity=".55"/>
+<rect class="box" x="465" y="105" rx="14" ry="14" width="145" height="110"/>
+<text x="537.5" y="138" text-anchor="middle" class="k">Converged</text><text x="537.5" y="182" text-anchor="middle" class="n">5</text>
+<rect class="box" x="250" y="265" rx="14" ry="14" width="170" height="75"/>
+<text x="335" y="292" text-anchor="middle" class="k">Failed / unavailable</text><text x="335" y="323" text-anchor="middle" class="n">1</text>
+<path class="line" d="M332 215 V265"/>
+<rect class="box" x="485" y="265" rx="14" ry="14" width="170" height="75"/>
+<text x="570" y="292" text-anchor="middle" class="k">Same direction</text><text x="570" y="323" text-anchor="middle" class="n">5 / 5</text>
+<path class="line" d="M538 215 V265"/>
+<text x="127.5" y="239" text-anchor="middle" class="small">Denominator is declared before execution.</text>
+<text x="380" y="375" text-anchor="middle" class="small">Planned-specification convergence = 5 / 6 = 0.833; failures do not disappear from the robustness denominator.</text>
+</svg>
