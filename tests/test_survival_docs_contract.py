@@ -38,6 +38,7 @@ def test_survival_discovery_contract() -> None:
     assert "Troubleshooting clinic" in method
     assert "Reproducibility checklist" in method
     assert "gaze-verification-survival" in readme
+    assert "reproducibility-checklist" in readme
     assert "censored gaze-latency" in changelog.lower()
 
 
