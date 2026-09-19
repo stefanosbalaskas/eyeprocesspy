@@ -1,6 +1,6 @@
 # Visual gallery
 
-The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example outputs. Run `python examples/core_gallery.py` and `python examples/advanced_gallery.py` to generate the full Matplotlib figures directly through the package plotting API. The scripts were validated against the CI-built wheel and use no private participant data.
+The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example outputs. Core plots come from the gallery scripts; method-specific panels come from the synthetic survival, detector-multiverse, AOI-uncertainty, and standardized-quality examples. No private participant data are used.
 
 ## Gaze, fixation and AOI workflows
 
@@ -73,8 +73,23 @@ These diagnostics come from the synthetic AOI perturbation workflow. Read them t
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="../assets/gaze-survival/km-disclosure.svg" alt="Kaplan–Meier gaze-latency curves">
-  <figcaption><strong>Censored gaze latency.</strong> Kaplan–Meier curves retain valid trials that end before the target AOI is inspected.</figcaption>
+  <img src="../assets/gaze-survival/km-disclosure.svg" alt="Kaplan–Meier disclosure-inspection curves">
+  <figcaption><strong>Disclosure inspection.</strong> Kaplan–Meier curves retain valid trials that end before first disclosure fixation.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/km-evidence-verification.svg" alt="Kaplan–Meier evidence-verification curves">
+  <figcaption><strong>Evidence verification.</strong> Time to first source/evidence AOI entry under repeated conditions.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/event-incidence-verification.svg" alt="One minus Kaplan–Meier evidence inspection curves">
+  <figcaption><strong>Single-event incidence.</strong> 1−KM shows the share already inspected; it is not a competing-risks estimator.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/censoring-audit-verification.svg" alt="Observed and right-censored evidence inspection trials">
+  <figcaption><strong>Censoring audit.</strong> Event and right-censor counts are reported explicitly by condition before modelling.</figcaption>
 </figure>
 
 </div>
@@ -126,6 +141,11 @@ These diagnostics come from the synthetic AOI perturbation workflow. Read them t
 <figure>
   <img src="../assets/gallery/sampling-irregularity.svg" alt="Sampling irregularity audit">
   <figcaption><strong>Sampling irregularity.</strong> Effective sampling diagnostics with an explicit review threshold.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/data-quality-accuracy-precision.svg" alt="Standardized eye-tracking accuracy and precision">
+  <figcaption><strong>Standardized data quality.</strong> Separate target-referenced accuracy from spatial and short-term precision before review decisions.</figcaption>
 </figure>
 
 <figure>

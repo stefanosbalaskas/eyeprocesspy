@@ -31,6 +31,7 @@ All notable changes to `eyeprocesspy` are documented here.
 - Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
 - Added a standalone evidence-verification workflow for time to first source/evidence AOI entry plus a troubleshooting clinic covering incomplete windows, time-zero events, sparse events, PH flags, low-quality gaze, competing-event boundaries, and explicit failure reporting.
 - Added a survival reproducibility/preregistration checklist and a documentation-integrity regression test that fails if required survival pages, examples, API links, or navigation entries disappear from the repository.
+- Added a plot-rich website consolidation with evidence-verification Kaplan-Meier, single-event 1-KM, and censoring-audit visuals, while promoting detector-multiverse and standardized data-quality plots alongside the existing AOI robustness gallery.
 
 ## 0.1.0 — 2026-09-03
 
