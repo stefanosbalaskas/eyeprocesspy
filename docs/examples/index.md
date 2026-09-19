@@ -22,6 +22,12 @@
 
     [Open worked workflow](calibration-probabilistic-aoi.md)
 
+-   :material-chart-scatter-plot: **Standardized data quality**
+
+    Use a synthetic 9-point validation to separate accuracy from precision, inspect realized sampling and data loss, apply review-only thresholds, and carry quality decisions into sensitivity analysis.
+
+    [Open validation workflow](data-quality-validation.md) · [Open sensitivity workflow](data-quality-sensitivity.md)
+
 -   :material-chart-timeline-variant: **Process-measure reliability**
 
     Estimate repeated-measure ICC, Bland–Altman agreement and temporal stability without confusing reliability with construct validity.
@@ -201,7 +207,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 
 | Script | Purpose | Output |
 | --- | --- | --- |
-| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |\n| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
 | `examples/process_reliability.py` | ICC, Bland–Altman and temporal stability | `workflow-output/process-reliability.svg` |
 | `examples/irt_diagnostics.py` | Information, item fit and DIF diagnostics | `workflow-output/*.svg` |
@@ -222,3 +228,11 @@ All listed examples are deterministic and use no private participant data.
 - [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
 - [AOI perturbation failure clinic](aoi-perturbation-failure-clinic.md): deliberate geometry/model failure, ambiguity, non-convergence, and retained audit trails.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
+
+
+## Standardized data quality
+
+- [Worked 9-point validation](data-quality-validation.md): six synthetic quality profiles separating target error, short-term precision, timing instability, and missingness.
+- [Quality-rule sensitivity](data-quality-sensitivity.md): compare defensible review/exclusion specifications while keeping the canonical quality report intact.
+- [Methodological guide](../guides/data-quality.md): equations, units, interpretation boundaries, and when not to use each metric.
+- [Reporting guideline](../guides/data-quality-reporting.md): manuscript items, suggested wording, limitations, and long-gap versus estimated dropped-sample reporting.
