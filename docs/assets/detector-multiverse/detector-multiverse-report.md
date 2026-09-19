@@ -29,9 +29,28 @@ This report evaluates whether events, AOI features, and statistical conclusions 
 
 Across trial × AOI units, detector choice changed dwell, fixation counts, mean fixation duration, and TTFF. The synthetic example retained zero-event trials and kept all-invalid trials missing rather than recoding them as zero.
 
+## Model-input audit
+
+| detector_id | input_rows | aoi_selected_rows | quality_excluded_rows | outcome_missing_rows | model_rows_used | status |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| adaptive | 32 | 16 | 0 | 0 | 16 | modelled |
+| idt_A | 32 | 16 | 0 | 0 | 16 | modelled |
+| ivt25 | 32 | 16 | 0 | 0 | 16 | modelled |
+| ivt30 | 32 | 16 | 0 | 0 | 16 | modelled |
+| ivt35 | 32 | 16 | 0 | 0 | 16 | modelled |
+| remodnav | 0 | 0 | 0 | 0 | 0 | no_model_data |
+
+AOI selection, declared quality exclusions, non-finite outcomes, and model rows used are reported separately; missing outcomes are never converted to zero.
+
 ## Inference stability
 
 For the simulated disclosure-condition term, six detector specifications were planned, five returned the requested coefficient, and one REMoDNaV branch failed explicitly because the external backend was unavailable. All five modelled internal branches converged and retained the same effect direction, so the planned-specification convergence rate is 5/6 (0.833). The estimate range was approximately 20.8 ms across converged branches in this seeded example. These values are demonstration output, not empirical evidence.
+
+## Model failures
+
+| detector_id | stage | error_type | error | input_rows | aoi_selected_rows | quality_excluded_rows | outcome_missing_rows | model_rows_used |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| remodnav | model | NoModelData | No finite model rows remained for this detector. See input_audit for row attrition. | 0 | 0 | 0 | 0 | 0 |
 
 ## Branch failures
 
@@ -39,7 +58,7 @@ The REMoDNaV branch was explicitly recorded as unavailable in the environment us
 
 ## Reporting guidance
 
-Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, number of successful/failed specifications, event-level agreement, the range of key AOI features, coefficient distributions with uncertainty, convergence failures, and any substantive threshold used. Do not summarize robustness by counting p-values alone.
+Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, number of successful/failed specifications, model-input audit counts, event-level agreement, the range of key AOI features, coefficient distributions with uncertainty, convergence failures, and any substantive threshold used. Do not summarize robustness by counting p-values alone.
 
 ## Limitations
 
