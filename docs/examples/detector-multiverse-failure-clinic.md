@@ -45,6 +45,10 @@ For the I-VT branch the audit records one `quality_excluded_rows`, one `outcome_
 
 This distinction matters: **AOI selection, quality exclusion, outcome missingness, and backend failure are different scientific states.**
 
+![Model-input audit for the deliberate failure clinic](../assets/detector-multiverse/model-input-audit.svg)
+
+In the seeded clinic, the successful I-VT branch has 16 propagated rows, 8 target-AOI rows, 1 declared quality exclusion, 1 non-finite outcome, and 6 rows supplied to the callback estimator. The deliberately failing external detector has no model rows and remains `no_model_data`. The figure therefore visualizes exact recorded audit counts rather than reconstructing them from the final coefficient table.
+
 ## 3. Invalid callback output
 
 Finally, a deliberately invalid callback returns the same coefficient term twice. The branch fails with an `EyeProcessValidationError` rather than allowing one detector to contribute multiple rows to the stability summary.
