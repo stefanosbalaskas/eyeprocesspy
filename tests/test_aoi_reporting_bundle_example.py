@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -125,4 +125,3 @@ def test_reporting_bundle(tmp_path: Path):
     )
     manifest2 = json.loads(paths2["manifest.json"].read_text(encoding="utf-8"))
     assert manifest == manifest2
-
