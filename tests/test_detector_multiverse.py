@@ -401,3 +401,87 @@ def test_model_callback_rejects_duplicate_coefficient_terms():
     assert len(fit.failures) == 1
     assert "at most one row per coefficient term" in fit.failures.iloc[0].error
 
+def test_model_input_attrition_is_audited_and_warned():
+    data = ep.simulate_detector_multiverse_data(n_participants=4, seed=41)
+    result = ep.run_detector_multiverse(data, [ivt()])
+    result = ep.propagate_detector_to_aoi(result)
+    result = ep.propagate_detector_to_features(result)
+    target = result.features[
+        result.features.detector_id.eq("ivt30")
+        & result.features.aoi_id.astype(str).eq("disclosure")
+    ].index
+    assert len(target) >= 3
+    result.features.loc[target[0], "valid_data_fraction"] = 0.1
+    result.features.loc[target[1], "dwell_time_ms"] = np.nan
+
+    def callback(data, spec):
+        return pd.DataFrame([{
+            "term": "condition",
+            "estimate": 1.0,
+            "SE": 0.2,
+            "CI_lower": 0.6,
+            "CI_upper": 1.4,
+            "p": 0.01,
+            "converged": True,
+            "N": len(data),
+        }])
+
+    fit = ep.run_detector_inference_multiverse(
+        result,
+        {"engine": "callback", "outcome": "dwell_time_ms", "aoi_id": "disclosure"},
+        model_callback=callback,
+        minimum_valid_fraction=0.5,
+    )
+    audit = fit.input_audit.iloc[0]
+    assert audit.input_rows > audit.aoi_selected_rows
+    assert audit.quality_excluded_rows == 1
+    assert audit.outcome_missing_rows == 1
+    assert audit.model_rows_used == audit.aoi_selected_rows - 2
+    assert audit.status == "modelled"
+    assert {
+        "input_rows", "aoi_selected_rows", "quality_excluded_rows",
+        "outcome_missing_rows", "model_rows_used",
+    }.issubset(fit.coefficients.columns)
+    assert (fit.coefficients.quality_excluded_rows == 1).all()
+    assert (fit.coefficients.outcome_missing_rows == 1).all()
+    messages = " | ".join(fit.warnings.warning.astype(str))
+    assert "minimum_valid_fraction" in messages
+    assert "non-finite outcome" in messages
+
+
+def test_all_nonfinite_outcomes_fail_with_audit_instead_of_disappearing():
+    data = ep.simulate_detector_multiverse_data(n_participants=4, seed=42)
+    result = ep.run_detector_multiverse(data, [ivt()])
+    result = ep.propagate_detector_to_aoi(result)
+    result = ep.propagate_detector_to_features(result)
+    target = result.features[
+        result.features.detector_id.eq("ivt30")
+        & result.features.aoi_id.astype(str).eq("disclosure")
+    ].index
+    result.features.loc[target, "dwell_time_ms"] = np.nan
+
+    def callback(data, spec):
+        return pd.DataFrame([{
+            "term": "condition",
+            "estimate": 1.0,
+            "SE": 0.2,
+            "CI_lower": 0.6,
+            "CI_upper": 1.4,
+            "p": 0.01,
+            "converged": True,
+            "N": len(data),
+        }])
+
+    fit = ep.run_detector_inference_multiverse(
+        result,
+        {"engine": "callback", "outcome": "dwell_time_ms", "aoi_id": "disclosure"},
+        model_callback=callback,
+    )
+    assert fit.coefficients.empty
+    assert len(fit.failures) == 1
+    audit = fit.input_audit.iloc[0]
+    assert audit.status == "no_model_data"
+    assert audit.outcome_missing_rows == audit.aoi_selected_rows
+    assert audit.model_rows_used == 0
+    assert fit.failures.iloc[0].outcome_missing_rows == audit.outcome_missing_rows
+
