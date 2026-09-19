@@ -196,6 +196,10 @@ assert audit["valid"]
   <a href="gallery/" class="ep-plot-tile"><img src="assets/gallery/probabilistic-aoi.svg" alt="Probabilistic AOI visualization"><span><b>Probabilistic AOIs</b><small>Keep coordinate uncertainty visible at boundaries</small></span></a>
   <a href="gallery/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gallery/process-reliability.svg" alt="Process reliability visualization"><span><b>Process reliability</b><small>Inspect repeatability and agreement evidence</small></span></a>
   <a href="methods/gaze-survival/" class="ep-plot-tile ep-plot-tile--wide"><img src="assets/gaze-survival/km-disclosure.svg" alt="Censored gaze-latency Kaplan–Meier curves"><span><b>Censored gaze latency</b><small>Keep never-inspected valid trials in the risk set as right-censored observations</small></span></a>
+  <a href="examples/gaze-verification-survival/" class="ep-plot-tile"><img src="assets/gaze-survival/km-evidence-verification.svg" alt="Evidence-verification Kaplan–Meier curves"><span><b>Evidence verification</b><small>Model time to first source/evidence inspection without dropping non-events</small></span></a>
+  <a href="guides/aoi-uncertainty/" class="ep-plot-tile"><img src="assets/aoi-uncertainty/robustness-surface.svg" alt="AOI robustness surface"><span><b>AOI robustness</b><small>Propagate defensible geometry changes into features and models</small></span></a>
+  <a href="guides/event-detector-multiverse/" class="ep-plot-tile"><img src="assets/detector-multiverse/condition-coefficient-stability.svg" alt="Detector coefficient stability"><span><b>Detector multiverse</b><small>See whether the inferential conclusion depends on event definition</small></span></a>
+  <a href="guides/data-quality/" class="ep-plot-tile"><img src="assets/data-quality-accuracy-precision.svg" alt="Standardized data-quality plot"><span><b>Data quality</b><small>Separate accuracy, precision, sampling and data loss before applying review rules</small></span></a>
 </div>
 <div class="ep-center-action"><a class="md-button" href="gallery/">Explore the complete plot gallery</a></div>
 
