@@ -57,6 +57,35 @@ def test_survival_required_assets_exist() -> None:
         "docs/examples/gaze-survival-analysis.md",
         "docs/examples/gaze-verification-survival.md",
         "docs/reference/gaze-survival.md",
+        "docs/assets/gaze-survival/km-disclosure.svg",
+        "docs/assets/gaze-survival/km-evidence-verification.svg",
+        "docs/assets/gaze-survival/event-incidence-verification.svg",
+        "docs/assets/gaze-survival/censoring-audit-verification.svg",
     )
     for item in required:
         assert (ROOT / item).is_file(), f"required survival asset is missing: {item}"
+
+
+
+def test_recent_method_visual_discovery_contract() -> None:
+    gallery = _read("docs/gallery.md")
+    home = _read("docs/index.md")
+
+    survival_assets = (
+        "gaze-survival/km-disclosure.svg",
+        "gaze-survival/km-evidence-verification.svg",
+        "gaze-survival/event-incidence-verification.svg",
+        "gaze-survival/censoring-audit-verification.svg",
+    )
+    for asset in survival_assets:
+        assert asset in gallery, f"survival gallery visual disappeared: {asset}"
+
+    recent_method_assets = (
+        "aoi-uncertainty/robustness-surface.svg",
+        "detector-multiverse/condition-coefficient-stability.svg",
+        "data-quality-accuracy-precision.svg",
+    )
+    for asset in recent_method_assets:
+        assert asset in gallery or asset in home, (
+            f"recent-method visual disappeared from discovery surfaces: {asset}"
+        )

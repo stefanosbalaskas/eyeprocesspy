@@ -1,6 +1,6 @@
 # Visual gallery
 
-The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example outputs. Run `python examples/core_gallery.py` and `python examples/advanced_gallery.py` to generate the full Matplotlib figures directly through the package plotting API. The scripts were validated against the CI-built wheel and use no private participant data.
+The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example outputs. Core plots come from the gallery scripts; method-specific panels come from the synthetic survival, detector-multiverse, AOI-uncertainty, and standardized-quality examples. No private participant data are used.
 
 ## Gaze, fixation and AOI workflows
 
@@ -38,18 +38,96 @@ The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example o
 
 </div>
 
+## AOI uncertainty and robustness
+
+These diagnostics come from the synthetic AOI perturbation workflow. Read them together: geometry explains **what changed**, assignment stability quantifies **how much changed**, coefficient stability shows **whether inference moved**, and the robustness surface shows **where sensitivity concentrates across two-dimensional boundary changes**.
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/geometry-perturbation.svg" alt="Nominal and perturbed AOI geometry with reassigned fixations">
+  <figcaption><strong>Geometry perturbation.</strong> Compare nominal and perturbed boundaries and inspect observations that cross an AOI decision boundary.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability across perturbation branches">
+  <figcaption><strong>Assignment stability.</strong> Summarize unchanged, newly assigned, lost, and reassigned observations across declared branches.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/coefficient-stability.svg" alt="Coefficient stability across AOI perturbation branches">
+  <figcaption><strong>Coefficient stability.</strong> Inspect effect magnitude and intervals across evaluable branches instead of reducing robustness to significance counts.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/robustness-surface.svg" alt="Two-dimensional AOI robustness surface">
+  <figcaption><strong>Robustness surface.</strong> Locate regions of higher or lower stability when horizontal and vertical geometry changes are varied jointly.</figcaption>
+</figure>
+
+</div>
+
+[Open the AOI uncertainty workflow →](guides/aoi-uncertainty/)
+
 ## Time-to-event gaze workflows
 
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="../assets/gaze-survival/km-disclosure.svg" alt="Kaplan–Meier gaze-latency curves">
-  <figcaption><strong>Censored gaze latency.</strong> Kaplan–Meier curves retain valid trials that end before the target AOI is inspected.</figcaption>
+  <img src="../assets/gaze-survival/km-disclosure.svg" alt="Kaplan–Meier disclosure-inspection curves">
+  <figcaption><strong>Disclosure inspection.</strong> Kaplan–Meier curves retain valid trials that end before first disclosure fixation.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/km-evidence-verification.svg" alt="Kaplan–Meier evidence-verification curves">
+  <figcaption><strong>Evidence verification.</strong> Time to first source/evidence AOI entry under repeated conditions.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/event-incidence-verification.svg" alt="One minus Kaplan–Meier evidence inspection curves">
+  <figcaption><strong>Single-event incidence.</strong> 1−KM shows the share already inspected; it is not a competing-risks estimator.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/gaze-survival/censoring-audit-verification.svg" alt="Observed and right-censored evidence inspection trials">
+  <figcaption><strong>Censoring audit.</strong> Event and right-censor counts are reported explicitly by condition before modelling.</figcaption>
 </figure>
 
 </div>
 
 [Open the survival-analysis method →](methods/gaze-survival/index.md)
+
+## Detector sensitivity and inference accountability
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/detector-multiverse/detector-agreement.svg" alt="Pairwise detector event agreement matrix">
+  <figcaption><strong>Event agreement.</strong> Pairwise temporal overlap among successful fixation catalogues; descriptive agreement, not ground-truth accuracy.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/disclosure-dwell-by-detector.svg" alt="Disclosure dwell across detector branches">
+  <figcaption><strong>Feature sensitivity.</strong> The same synthetic condition contrast propagated through alternative defensible detector specifications.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient stability across detector branches">
+  <figcaption><strong>Inference stability.</strong> Coefficient estimates and intervals under the identical downstream model.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/robustness-denominator.svg" alt="Planned detector denominator audit">
+  <figcaption><strong>Denominator accountability.</strong> Failed or unavailable branches remain in the planned robustness denominator.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/model-input-audit.svg" alt="Model input audit row accounting">
+  <figcaption><strong>Model-input audit.</strong> AOI selection, quality exclusion, missing outcome, and model rows remain separately visible.</figcaption>
+</figure>
+
+</div>
+
+[Open the detector visual atlas →](guides/detector-multiverse-visual-atlas.md)
 
 ## Pupil and data-quality workflows
 
@@ -63,6 +141,11 @@ The previews on this page summarize deterministic `eyeprocesspy 0.1.0` example o
 <figure>
   <img src="../assets/gallery/sampling-irregularity.svg" alt="Sampling irregularity audit">
   <figcaption><strong>Sampling irregularity.</strong> Effective sampling diagnostics with an explicit review threshold.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/data-quality-accuracy-precision.svg" alt="Standardized eye-tracking accuracy and precision">
+  <figcaption><strong>Standardized data quality.</strong> Separate target-referenced accuracy from spatial and short-term precision before review decisions.</figcaption>
 </figure>
 
 <figure>

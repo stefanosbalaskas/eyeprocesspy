@@ -10,8 +10,11 @@ All notable changes to `eyeprocesspy` are documented here.
 - Added a planned-specification convergence denominator: failed fits, missing focal terms, unavailable external backends, and non-converged branches remain visible rather than disappearing from robustness accounting. Custom model callbacks reject duplicate coefficient terms within a detector branch.
 - Added per-detector model-input accountability through `DetectorInferenceResult.input_audit`, separating propagated rows, target-AOI selection, declared quality exclusions, non-finite outcomes, model rows used, and final branch status. Missing outcomes are never converted to zero.
 - Added a deterministic disclosure worked example, executable failure clinic, decision guide, troubleshooting guide, reporting template, interpretation/limitations guidance, API reference, figures, report asset, and expanded MkDocs discovery.
+- Expanded the website with a detector-multiverse visual diagnostic atlas, global gallery coverage, a planned-specification denominator/accountability figure, a model-input attrition/failure figure, publication-oriented figure guidance, interpretation boundaries, and regression-protected navigation/assets.
 
 **Validation record — 2026-09-19:** the detector implementation and regression suite passed **24/24 locally reconstructed detector tests**; the failure clinic and seeded worked example executed successfully; `py_compile` passed for the detector module/example. The merged feature commit is **not GitHub CI-certified** because exact-head Actions did not execute. Re-check Ruff delta, Python 3.11–3.14 across Linux/macOS/Windows, wheel/build, R-oracle parity smoke, documentation build/deployment, and any required status checks when Actions capacity is available.
+
+**Website-visualization validation — 2026-09-19:** the locally reconstructed detector smoke suite passed **19/19** after restoring the exact repository contract fixture omitted from the historical sdist. Exact feature-branch structural checks confirmed every visual-atlas Markdown link and SVG target resolves, all five detector visuals are exposed, the new navigation and gallery entries are present, and regression tests protect the site surface. MkDocs/Material and Ruff are not installed in the local runtime, so a full local site build/lint was not claimed. Exact-head GitHub Actions documentation/build/deployment checks remain pending.
 
 ### Standardized spatial data quality
 
@@ -31,6 +34,7 @@ All notable changes to `eyeprocesspy` are documented here.
 - Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
 - Added a standalone evidence-verification workflow for time to first source/evidence AOI entry plus a troubleshooting clinic covering incomplete windows, time-zero events, sparse events, PH flags, low-quality gaze, competing-event boundaries, and explicit failure reporting.
 - Added a survival reproducibility/preregistration checklist and a documentation-integrity regression test that fails if required survival pages, examples, API links, or navigation entries disappear from the repository.
+- Added a plot-rich website consolidation with evidence-verification Kaplan-Meier, single-event 1-KM, and censoring-audit visuals, while promoting detector-multiverse and standardized data-quality plots alongside the existing AOI robustness gallery.
 
 ## 0.1.0 — 2026-09-03
 

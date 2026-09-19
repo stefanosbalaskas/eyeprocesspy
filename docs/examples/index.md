@@ -252,6 +252,29 @@ All listed examples are deterministic and use no private participant data.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
 
 
+## AOI robustness learning path
+
+| Step | Question | Start here |
+| --- | --- | --- |
+| 1. Plan | What boundary changes are scientifically defensible? | [Filled analysis plan](aoi-analysis-plan-worked.md) |
+| 2. Run | How do assignments, features, and the same model change? | [Perturbation sensitivity workflow](aoi-perturbation-sensitivity.md) |
+| 3. Diagnose | What if geometry, assignment, or model branches fail? | [Failure clinic](aoi-perturbation-failure-clinic.md) |
+| 4. Report | What evidence should accompany the manuscript/reviewer response? | [Reporting bundle](aoi-reporting-bundle.md) |
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability">
+  <figcaption><strong>Measurement layer.</strong> Check how frequently observations keep, gain, lose, or change AOI assignment.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/aoi-uncertainty/coefficient-stability.svg" alt="AOI coefficient stability">
+  <figcaption><strong>Inference layer.</strong> Compare coefficient magnitude and intervals across evaluable AOI branches.</figcaption>
+</figure>
+
+</div>
+
 ## Standardized data quality
 
 - [Worked 9-point validation](data-quality-validation.md): six synthetic quality profiles separating target error, short-term precision, timing instability, and missingness.

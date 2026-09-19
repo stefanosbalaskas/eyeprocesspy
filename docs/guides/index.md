@@ -24,7 +24,7 @@ Import, validate, audit, derive process structure, visualize, and preserve prove
 ### Event detector multiverse
 Propagate detector uncertainty from events through AOI features to the same statistical model, with explicit failures, provenance, and robustness diagnostics.
 
-[Open guide](event-detector-multiverse.md) · [Decision guide](detector-multiverse-decision-guide.md) · [Troubleshooting](detector-multiverse-troubleshooting.md) · [Reporting template](detector-multiverse-reporting-template.md)
+[Open guide](event-detector-multiverse.md) · [Visual atlas](detector-multiverse-visual-atlas.md) · [Decision guide](detector-multiverse-decision-guide.md) · [Troubleshooting](detector-multiverse-troubleshooting.md) · [Reporting template](detector-multiverse-reporting-template.md)
 
 </div>
 <div class="ep-card" markdown>
@@ -72,7 +72,7 @@ Retain valid never-inspected trials as right-censored observations, choose Cox/A
 ### AOI perturbation & uncertainty
 Stress-test AOI geometry, assignment stability, feature recomputation, and model coefficients under defensible boundary changes.
 
-[Open guide](aoi-uncertainty/)
+[Open guide](aoi-uncertainty/) · [Analysis plan](aoi-uncertainty/analysis-plan.md) · [Troubleshooting](aoi-uncertainty/troubleshooting.md) · [Reporting bundle](aoi-uncertainty/reporting-bundle.md)
 
 </div>
 <div class="ep-card" markdown>

@@ -117,6 +117,20 @@ ax.set_title("Time to first source/evidence AOI entry")
 
 Lower survival at a given time means a larger share of trials has already inspected the evidence AOI.
 
+![Evidence-verification Kaplan–Meier curves](../assets/gaze-survival/km-evidence-verification.svg)
+
+### Read the same process as 1−KM
+
+![Single-event cumulative evidence inspection](../assets/gaze-survival/event-incidence-verification.svg)
+
+Here 1−KM is simply the complement of the Kaplan–Meier survival function for one target event. It should not be interpreted as a competing-risks cumulative-incidence estimator.
+
+### Audit event and censor counts
+
+![Observed and censored trials by condition](../assets/gaze-survival/censoring-audit-verification.svg)
+
+The synthetic verification example contains 54 trials per condition. The visual makes the event/censor balance inspectable before any regression coefficient is interpreted.
+
 ## 8. Manuscript interpretation
 
 A compact interpretation should state the event definition, AOI, time origin, censoring rule, repeated-participant structure, effect measure, diagnostics, and whether the conclusion is robust to alternative AOI/event/quality specifications.

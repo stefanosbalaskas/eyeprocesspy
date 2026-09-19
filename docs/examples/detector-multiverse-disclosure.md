@@ -98,6 +98,12 @@ The synthetic run used to generate this page produced same-direction condition c
 
 The stability summary uses the **planned-specification denominator**. In this seeded example, six detector branches were declared, five returned the disclosure coefficient, and the unavailable REMoDNaV branch remains visible as a model-stage failure. Thus `specifications = 6`, `term_available_specifications = 5`, `model_failure_specifications = 1`, and the convergence rate is `5 / 6`, not `5 / 5`.
 
+### Planned-denominator audit
+
+![Planned detector denominator](../assets/detector-multiverse/robustness-denominator.svg)
+
+This figure is a reporting aid, not a new statistic: it visualizes the same planned-specification accounting returned by the stability summary. See the [visual diagnostic atlas](../guides/detector-multiverse-visual-atlas.md) for a publication-oriented reading sequence.
+
 ## 5. Inspect what changed
 
 ```python

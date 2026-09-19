@@ -32,6 +32,7 @@ nav:
       - Event detector multiverse:
           - Method overview: guides/event-detector-multiverse.md
           - Decision guide: guides/detector-multiverse-decision-guide.md
+          - Visual diagnostic atlas: guides/detector-multiverse-visual-atlas.md
           - Building the multiverse: guides/building-detector-multiverse.md
           - Comparing events: guides/comparing-event-catalogues.md
           - AOI & feature propagation: guides/detector-aoi-features.md
