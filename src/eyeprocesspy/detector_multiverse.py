@@ -198,6 +198,7 @@ class DetectorInferenceResult:
     warnings: pd.DataFrame
     model_spec: Mapping[str, Any]
     feature_fingerprint: str | None = None
+    input_audit: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
 def define_event_detector_spec(
@@ -1340,45 +1341,108 @@ def run_detector_inference_multiverse(
     model_callback: Callable[[pd.DataFrame, Mapping[str, Any]], pd.DataFrame] | None = None,
     minimum_valid_fraction: float | None = None,
 ) -> DetectorInferenceResult:
-    """Fit the identical explicit model specification across detector branches."""
+    """Fit the identical explicit model specification across detector branches.
+
+    Row attrition is never silent: AOI selection, quality filtering, non-finite
+    outcomes, model rows used, and branch status are retained in input_audit and
+    propagated to coefficient rows when a model is fitted.
+    """
     if not isinstance(x, DetectorMultiverseResult):
-        raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
+        raise EyeProcessValidationError("\`x\` must be a DetectorMultiverseResult.")
     if x.features.empty:
-        raise EyeProcessValidationError("Run `propagate_detector_to_features()` before inference propagation.")
+        raise EyeProcessValidationError("Run \`propagate_detector_to_features()\` before inference propagation.")
     if not isinstance(model_spec, Mapping):
-        raise EyeProcessValidationError("`model_spec` must be a mapping.")
+        raise EyeProcessValidationError("\`model_spec\` must be a mapping.")
     engine = model_spec.get("engine")
     if engine not in {"statsmodels_ols", "statsmodels_mixedlm", "callback"}:
         raise EyeProcessValidationError("Choose an explicit model engine: statsmodels_ols, statsmodels_mixedlm, or callback.")
     if engine == "callback" and not callable(model_callback):
-        raise EyeProcessValidationError("`engine='callback'` requires a callable `model_callback`.")
+        raise EyeProcessValidationError("\`engine='callback'\` requires a callable \`model_callback\`.")
     outcome = str(model_spec.get("outcome", "")).strip()
     if not outcome:
         formula = str(model_spec.get("formula", ""))
         outcome = formula.split("~", 1)[0].strip() if "~" in formula else ""
     if not outcome or outcome not in x.features.columns:
         raise EyeProcessValidationError("The model outcome must be named explicitly and exist in propagated features.")
+    if minimum_valid_fraction is not None and not 0 <= float(minimum_valid_fraction) <= 1:
+        raise EyeProcessValidationError("\`minimum_valid_fraction\` must lie in [0, 1].")
+
     aoi_id = model_spec.get("aoi_id")
     rows = []
     failures = []
     warning_rows = []
+    audit_rows = []
     for spec in x.multiverse.specs:
         data = x.features[x.features["detector_id"].eq(spec.detector_id)].copy()
+        input_rows = len(data)
+
         if aoi_id is not None:
-            data = data[data["aoi_id"].astype(str).eq(str(aoi_id))]
+            data = data[data["aoi_id"].astype(str).eq(str(aoi_id))].copy()
+        aoi_selected_rows = len(data)
+
+        quality_excluded_rows = 0
         if minimum_valid_fraction is not None:
-            if not 0 <= float(minimum_valid_fraction) <= 1:
-                raise EyeProcessValidationError("`minimum_valid_fraction` must lie in [0, 1].")
-            data = data[pd.to_numeric(data["valid_data_fraction"], errors="coerce") >= float(minimum_valid_fraction)]
-        data = data[np.isfinite(pd.to_numeric(data[outcome], errors="coerce"))].copy()
+            quality = pd.to_numeric(data["valid_data_fraction"], errors="coerce")
+            quality_keep = quality >= float(minimum_valid_fraction)
+            quality_excluded_rows = int((~quality_keep).sum())
+            data = data[quality_keep].copy()
+            if quality_excluded_rows:
+                warning_rows.append({
+                    "detector_id": spec.detector_id,
+                    "stage": "model_input",
+                    "warning": (
+                        f"Excluded {quality_excluded_rows} row(s) below minimum_valid_fraction="
+                        f"{float(minimum_valid_fraction):g}; exclusion count is retained in input_audit."
+                    ),
+                })
+
+        finite_outcome = np.isfinite(pd.to_numeric(data[outcome], errors="coerce"))
+        outcome_missing_rows = int((~finite_outcome).sum())
+        if outcome_missing_rows:
+            warning_rows.append({
+                "detector_id": spec.detector_id,
+                "stage": "model_input",
+                "warning": (
+                    f"Excluded {outcome_missing_rows} row(s) with non-finite outcome \`{outcome}\`; "
+                    "exclusion count is retained in input_audit."
+                ),
+            })
+        data = data[finite_outcome].copy()
+        model_rows_used = len(data)
+        audit = {
+            "detector_id": spec.detector_id,
+            "detector_spec_hash": spec.fingerprint,
+            "input_rows": int(input_rows),
+            "aoi_selected_rows": int(aoi_selected_rows),
+            "quality_excluded_rows": int(quality_excluded_rows),
+            "outcome_missing_rows": int(outcome_missing_rows),
+            "model_rows_used": int(model_rows_used),
+            "aoi_id": aoi_id if aoi_id is not None else pd.NA,
+            "minimum_valid_fraction": (
+                float(minimum_valid_fraction) if minimum_valid_fraction is not None else np.nan
+            ),
+            "status": "pending",
+        }
         if data.empty:
-            failures.append({"detector_id": spec.detector_id, "stage": "model", "error_type": "NoModelData", "error": "No finite model rows remained for this detector."})
+            audit["status"] = "no_model_data"
+            audit_rows.append(audit)
+            failures.append({
+                "detector_id": spec.detector_id,
+                "stage": "model",
+                "error_type": "NoModelData",
+                "error": "No finite model rows remained for this detector. See input_audit for row attrition.",
+                "input_rows": int(input_rows),
+                "aoi_selected_rows": int(aoi_selected_rows),
+                "quality_excluded_rows": int(quality_excluded_rows),
+                "outcome_missing_rows": int(outcome_missing_rows),
+                "model_rows_used": 0,
+            })
             continue
         try:
             if engine == "callback":
                 tidy = model_callback(data.copy(), dict(model_spec))
                 if not isinstance(tidy, pd.DataFrame):
-                    raise EyeProcessValidationError("`model_callback` must return a DataFrame.")
+                    raise EyeProcessValidationError("\`model_callback\` must return a DataFrame.")
                 required = {"term", "estimate", "SE", "CI_lower", "CI_upper", "p", "converged", "N"}
                 missing = required - set(tidy.columns)
                 if missing:
@@ -1404,12 +1468,31 @@ def run_detector_inference_multiverse(
             tidy["feature_fingerprint"] = sha256(data.to_json(orient="split", index=False, default_handler=str).encode()).hexdigest()
             tidy["software"] = "eyeprocesspy"
             tidy["software_version"] = "0.1.0"
+            tidy["input_rows"] = int(input_rows)
+            tidy["aoi_selected_rows"] = int(aoi_selected_rows)
+            tidy["quality_excluded_rows"] = int(quality_excluded_rows)
+            tidy["outcome_missing_rows"] = int(outcome_missing_rows)
+            tidy["model_rows_used"] = int(model_rows_used)
             tidy["warnings"] = " | ".join(model_warnings) if model_warnings else pd.NA
             rows.append(tidy)
+            audit["status"] = "modelled"
+            audit_rows.append(audit)
             for message in model_warnings:
                 warning_rows.append({"detector_id": spec.detector_id, "stage": "model", "warning": message})
         except Exception as exc:
-            failures.append({"detector_id": spec.detector_id, "stage": "model", "error_type": type(exc).__name__, "error": str(exc)})
+            audit["status"] = "failed"
+            audit_rows.append(audit)
+            failures.append({
+                "detector_id": spec.detector_id,
+                "stage": "model",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "input_rows": int(input_rows),
+                "aoi_selected_rows": int(aoi_selected_rows),
+                "quality_excluded_rows": int(quality_excluded_rows),
+                "outcome_missing_rows": int(outcome_missing_rows),
+                "model_rows_used": int(model_rows_used),
+            })
     coefficients = pd.concat(rows, ignore_index=True, sort=False) if rows else pd.DataFrame()
     feature_blob = x.features.to_json(orient="split", index=False, default_handler=str)
     return DetectorInferenceResult(
@@ -1419,6 +1502,7 @@ def run_detector_inference_multiverse(
         warnings=pd.DataFrame(warning_rows),
         model_spec=dict(model_spec),
         feature_fingerprint=sha256(feature_blob.encode()).hexdigest(),
+        input_audit=pd.DataFrame(audit_rows),
     )
 
 
