@@ -70,3 +70,7 @@ RMS-S2S never joins the sample before a missing observation to the sample after 
 
 A strong workflow reports results under the pre-specified quality rule and then repeats the key analysis under plausible alternative review/exclusion decisions. The quality subsystem preserves the metadata needed for that audit rather than performing deletion itself.
 \n\n## Continue with sensitivity analysis\n\nAfter inspecting the baseline quality report, use the [quality-rule sensitivity example](data-quality-sensitivity.md) to compare defensible review/exclusion specifications without deleting observations inside the quality subsystem.\n
+
+## Continue with visual diagnostics
+
+Use the [plot gallery](data-quality-plot-gallery.md) for focused accuracy, RMS-S2S, BCEA, sampling-interval, and dashboard examples. Then use the [quality-rule sensitivity example](data-quality-sensitivity.md) to compare defensible downstream decisions without deleting observations inside the quality subsystem.
