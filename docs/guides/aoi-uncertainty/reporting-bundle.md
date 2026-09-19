@@ -37,6 +37,31 @@ The worked Python example writes `manifest.json` without timestamps. Each file e
 
 The manifest is **not** a scientific validity certificate. It verifies bundle identity and file integrity; interpretation still depends on the declared AOI envelope, data quality, estimator, and study design.
 
+## Recommended figure set
+
+A compact reviewer/manuscript bundle usually needs three visuals:
+
+<div class="ep-gallery" markdown>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/geometry-perturbation.svg" alt="AOI geometry perturbation figure">
+  <figcaption><strong>Geometry evidence.</strong> Show what changed spatially and which observations crossed boundaries.</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability figure">
+  <figcaption><strong>Measurement evidence.</strong> Show how much assignment changed across the declared perturbation set.</figcaption>
+</figure>
+
+<figure>
+  <img src="../../assets/aoi-uncertainty/coefficient-stability.svg" alt="AOI coefficient stability figure">
+  <figcaption><strong>Inference evidence.</strong> Show coefficient magnitude/interval stability across evaluable branches.</figcaption>
+</figure>
+
+</div>
+
+Add the robustness surface when two-dimensional perturbations are substantively important rather than automatically including every available plot.
+
 ## Reviewer-facing reading order
 
 1. Read `analysis-plan.yml` to see what was fixed before branch results.
