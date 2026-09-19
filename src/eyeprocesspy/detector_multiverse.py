@@ -1348,16 +1348,16 @@ def run_detector_inference_multiverse(
     propagated to coefficient rows when a model is fitted.
     """
     if not isinstance(x, DetectorMultiverseResult):
-        raise EyeProcessValidationError("\`x\` must be a DetectorMultiverseResult.")
+        raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
     if x.features.empty:
-        raise EyeProcessValidationError("Run \`propagate_detector_to_features()\` before inference propagation.")
+        raise EyeProcessValidationError("Run `propagate_detector_to_features()` before inference propagation.")
     if not isinstance(model_spec, Mapping):
-        raise EyeProcessValidationError("\`model_spec\` must be a mapping.")
+        raise EyeProcessValidationError("`model_spec` must be a mapping.")
     engine = model_spec.get("engine")
     if engine not in {"statsmodels_ols", "statsmodels_mixedlm", "callback"}:
         raise EyeProcessValidationError("Choose an explicit model engine: statsmodels_ols, statsmodels_mixedlm, or callback.")
     if engine == "callback" and not callable(model_callback):
-        raise EyeProcessValidationError("\`engine='callback'\` requires a callable \`model_callback\`.")
+        raise EyeProcessValidationError("`engine='callback'` requires a callable `model_callback`.")
     outcome = str(model_spec.get("outcome", "")).strip()
     if not outcome:
         formula = str(model_spec.get("formula", ""))
@@ -1365,7 +1365,7 @@ def run_detector_inference_multiverse(
     if not outcome or outcome not in x.features.columns:
         raise EyeProcessValidationError("The model outcome must be named explicitly and exist in propagated features.")
     if minimum_valid_fraction is not None and not 0 <= float(minimum_valid_fraction) <= 1:
-        raise EyeProcessValidationError("\`minimum_valid_fraction\` must lie in [0, 1].")
+        raise EyeProcessValidationError("`minimum_valid_fraction` must lie in [0, 1].")
 
     aoi_id = model_spec.get("aoi_id")
     rows = []
@@ -1403,7 +1403,7 @@ def run_detector_inference_multiverse(
                 "detector_id": spec.detector_id,
                 "stage": "model_input",
                 "warning": (
-                    f"Excluded {outcome_missing_rows} row(s) with non-finite outcome \`{outcome}\`; "
+                    f"Excluded {outcome_missing_rows} row(s) with non-finite outcome `{outcome}`; "
                     "exclusion count is retained in input_audit."
                 ),
             })
@@ -1442,7 +1442,7 @@ def run_detector_inference_multiverse(
             if engine == "callback":
                 tidy = model_callback(data.copy(), dict(model_spec))
                 if not isinstance(tidy, pd.DataFrame):
-                    raise EyeProcessValidationError("\`model_callback\` must return a DataFrame.")
+                    raise EyeProcessValidationError("`model_callback` must return a DataFrame.")
                 required = {"term", "estimate", "SE", "CI_lower", "CI_upper", "p", "converged", "N"}
                 missing = required - set(tidy.columns)
                 if missing:
