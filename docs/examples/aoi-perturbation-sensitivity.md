@@ -107,4 +107,4 @@ The test suite also deliberately includes geometry collapse, callback failure, a
 
 Assignment stability and coefficient stability answer different questions. A result can show many reassigned observations without reversing a coefficient, or show high assignment stability while the model estimate remains sensitive. Report both layers.
 
-Continue with the [methodological guide](../guides/aoi-uncertainty/) and [API reference](../reference/aoi-perturbation.md).
+Continue with the [methodological guide](../guides/aoi-uncertainty/index.md) and [API reference](../reference/aoi-perturbation.md).

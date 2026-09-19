@@ -48,6 +48,12 @@ from .plots_aoi_perturbation import (
 )
 
 
+class _AssignmentVector(list):
+    """List-compatible AOI assignment vector."""
+    def tolist(self) -> list[Any]:
+        return list(self)
+
+
 def _result(cls: str, **kwargs: Any) -> EyeResult:
     return EyeResult(kwargs, eyeprocess_class=cls)
 
@@ -146,6 +152,10 @@ def run_aoi_sensitivity_analysis(
         for pid, labels in assignments.items()
     ], ignore_index=True)
     assignment_probability = estimate_fixation_assignment_probability(assignment_long)
+    public_assignments = {
+        pid: _AssignmentVector(labels.tolist())
+        for pid, labels in assignments.items()
+    }
     models = pd.concat(model_rows, ignore_index=True) if model_rows else pd.DataFrame(columns=["perturbation_id", "term", "estimate", "SE", "CI_low", "CI_high", "p_value", "model_converged", "N", "direction"])
     provenance = {
         "source_data_hash": _stable_frame_hash(frame),
@@ -163,7 +173,7 @@ def run_aoi_sensitivity_analysis(
         nominal_aois=geometry,
         grid=grid,
         grid_result=grid_result,
-        assignments=assignments,
+        assignments=public_assignments,
         assignment_table=assignment_long,
         comparisons=comparisons,
         stability=stability,

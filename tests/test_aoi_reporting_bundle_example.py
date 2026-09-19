@@ -1,10 +1,12 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).parents[1] / "examples"))
 from aoi_reporting_bundle import write_reporting_bundle
 
 
@@ -123,3 +125,4 @@ def test_reporting_bundle(tmp_path: Path):
     )
     manifest2 = json.loads(paths2["manifest.json"].read_text(encoding="utf-8"))
     assert manifest == manifest2
+

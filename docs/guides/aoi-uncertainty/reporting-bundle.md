@@ -44,17 +44,17 @@ A compact reviewer/manuscript bundle usually needs three visuals:
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="../../assets/aoi-uncertainty/geometry-perturbation.svg" alt="AOI geometry perturbation figure">
+  <img src="../../../assets/aoi-uncertainty/geometry-perturbation.svg" alt="AOI geometry perturbation figure">
   <figcaption><strong>Geometry evidence.</strong> Show what changed spatially and which observations crossed boundaries.</figcaption>
 </figure>
 
 <figure>
-  <img src="../../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability figure">
+  <img src="../../../assets/aoi-uncertainty/assignment-stability.svg" alt="AOI assignment stability figure">
   <figcaption><strong>Measurement evidence.</strong> Show how much assignment changed across the declared perturbation set.</figcaption>
 </figure>
 
 <figure>
-  <img src="../../assets/aoi-uncertainty/coefficient-stability.svg" alt="AOI coefficient stability figure">
+  <img src="../../../assets/aoi-uncertainty/coefficient-stability.svg" alt="AOI coefficient stability figure">
   <figcaption><strong>Inference evidence.</strong> Show coefficient magnitude/interval stability across evaluable branches.</figcaption>
 </figure>
 

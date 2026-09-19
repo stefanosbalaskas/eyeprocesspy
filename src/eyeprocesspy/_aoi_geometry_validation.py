@@ -206,7 +206,7 @@ def _pairwise_overlap(geometry: pd.DataFrame) -> pd.DataFrame:
             if min(ax1, bx1) <= max(ax0, bx0) or min(ay1, by1) <= max(ay0, by0):
                 flag = False
             else:
-                flag = _polygons_overlap_area(pa, pb)
+                flag = True if a["shape_type"] == "rectangle" and b["shape_type"] == "rectangle" else _polygons_overlap_area(pa, pb)
             rows.append(
                 {"aoi_1": str(a["aoi_id"]), "aoi_2": str(b["aoi_id"]), "overlap": bool(flag)}
             )

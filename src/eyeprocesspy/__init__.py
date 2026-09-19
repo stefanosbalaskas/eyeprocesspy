@@ -240,5 +240,30 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .multilevel_mediation import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
+from .survival import (  # noqa: E402, I001
+    CANONICAL_GAZE_SURVIVAL_COLUMNS as CANONICAL_GAZE_SURVIVAL_COLUMNS,
+    GazeSurvivalFit as GazeSurvivalFit,
+    check_gaze_proportional_hazards as check_gaze_proportional_hazards,
+    compare_gaze_survival_models as compare_gaze_survival_models,
+    estimate_gaze_latency_quantiles as estimate_gaze_latency_quantiles,
+    estimate_gaze_survival as estimate_gaze_survival,
+    fit_gaze_aft_model as fit_gaze_aft_model,
+    fit_gaze_cox_model as fit_gaze_cox_model,
+    fit_gaze_mixed_cox_model as fit_gaze_mixed_cox_model,
+    plot_gaze_cox_diagnostics as plot_gaze_cox_diagnostics,
+    plot_gaze_cumulative_incidence as plot_gaze_cumulative_incidence,
+    plot_gaze_hazard as plot_gaze_hazard,
+    plot_gaze_survival_curve as plot_gaze_survival_curve,
+    predict_gaze_survival as predict_gaze_survival,
+    prepare_gaze_survival_data as prepare_gaze_survival_data,
+    report_gaze_survival_model as report_gaze_survival_model,
+    simulate_gaze_survival_example as simulate_gaze_survival_example,
+    simulate_gaze_survival_inputs as simulate_gaze_survival_inputs,
+    summarise_gaze_censoring as summarise_gaze_censoring,
+    tidy_gaze_survival_model as tidy_gaze_survival_model,
+    validate_gaze_survival_data as validate_gaze_survival_data,
+)
+
+__all__ = [n for n in globals() if not n.startswith("_")]
 from .spatial_quality import *
 __all__ = [n for n in globals() if not n.startswith("_")]

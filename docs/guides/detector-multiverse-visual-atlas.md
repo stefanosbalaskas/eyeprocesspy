@@ -25,28 +25,28 @@ This page turns the event-detector multiverse workflow into a visual diagnostic 
 
 <div class="ep-plot-showcase" markdown>
 
-<a class="ep-plot-tile" href="../assets/detector-multiverse/detector-agreement.svg">
-  <img src="../assets/detector-multiverse/detector-agreement.svg" alt="Pairwise fixation-event temporal agreement matrix across detector branches">
+<a class="ep-plot-tile" href="../../assets/detector-multiverse/detector-agreement.svg">
+  <img src="../../assets/detector-multiverse/detector-agreement.svg" alt="Pairwise fixation-event temporal agreement matrix across detector branches">
   <span><b>Temporal event agreement</b><small>Agreement is descriptive. Without an external reference catalogue it is not detector accuracy.</small></span>
 </a>
 
-<a class="ep-plot-tile" href="../assets/detector-multiverse/disclosure-dwell-by-detector.svg">
-  <img src="../assets/detector-multiverse/disclosure-dwell-by-detector.svg" alt="Disclosure AOI dwell means across detector branches and conditions">
+<a class="ep-plot-tile" href="../../assets/detector-multiverse/disclosure-dwell-by-detector.svg">
+  <img src="../../assets/detector-multiverse/disclosure-dwell-by-detector.svg" alt="Disclosure AOI dwell means across detector branches and conditions">
   <span><b>Feature sensitivity</b><small>The condition contrast is preserved while absolute dwell depends on event segmentation.</small></span>
 </a>
 
-<a class="ep-plot-tile" href="../assets/detector-multiverse/condition-coefficient-stability.svg">
-  <img src="../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient estimates and confidence intervals across detector branches">
+<a class="ep-plot-tile" href="../../assets/detector-multiverse/condition-coefficient-stability.svg">
+  <img src="../../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient estimates and confidence intervals across detector branches">
   <span><b>Coefficient stability</b><small>Inspect direction, uncertainty, and substantive magnitude—not a count of significant p-values.</small></span>
 </a>
 
-<a class="ep-plot-tile" href="../assets/detector-multiverse/robustness-denominator.svg">
-  <img src="../assets/detector-multiverse/robustness-denominator.svg" alt="Planned detector denominator showing six planned branches, five available coefficients and one failed branch">
+<a class="ep-plot-tile" href="../../assets/detector-multiverse/robustness-denominator.svg">
+  <img src="../../assets/detector-multiverse/robustness-denominator.svg" alt="Planned detector denominator showing six planned branches, five available coefficients and one failed branch">
   <span><b>Denominator accountability</b><small>Failed or unavailable branches remain in the planned-specification denominator.</small></span>
 </a>
 
-<a class="ep-plot-tile ep-plot-tile--wide" href="../assets/detector-multiverse/model-input-audit.svg">
-  <img src="../assets/detector-multiverse/model-input-audit.svg" alt="Model input audit funnel showing explicit AOI selection, quality exclusion, missing outcome and rows supplied to the estimator">
+<a class="ep-plot-tile ep-plot-tile--wide" href="../../assets/detector-multiverse/model-input-audit.svg">
+  <img src="../../assets/detector-multiverse/model-input-audit.svg" alt="Model input audit funnel showing explicit AOI selection, quality exclusion, missing outcome and rows supplied to the estimator">
   <span><b>Model-input audit</b><small>AOI selection, quality exclusion, non-finite outcomes and model rows are different scientific states and remain separately countable.</small></span>
 </a>
 
@@ -129,7 +129,7 @@ inference.input_audit[
 ]
 ```
 
-This audit exists to prevent several common reporting errors: treating outcome missingness as zero, hiding quality exclusions inside the final model N, or allowing failed detector branches to disappear from the analysis history.
+This audit exists to prevent several common reporting errors: missing outcomes are never recoded as zero, quality exclusions remain distinct from the final model N, and failed detector branches do not disappear from the analysis history.
 
 ## Publication-oriented figure sequence
 

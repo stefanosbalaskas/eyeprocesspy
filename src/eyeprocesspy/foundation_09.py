@@ -233,7 +233,7 @@ def _event_matches(patterns: Sequence[str], values: pd.Series) -> pd.Series:
         try:
             regex = text.str.contains(pattern, case=False, regex=True, na=False)
         except re.error as exc:
-            raise ValueError(f"Invalid event pattern {pattern!r}.") from exc
+            raise ValueError(f"Invalid event pattern {pattern!r}. Invalid regular expression.") from exc
         result |= exact | regex
     return result
 

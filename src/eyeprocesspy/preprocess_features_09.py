@@ -287,7 +287,8 @@ def flag_gaze_outliers(x, method=("mad", "velocity", "bounds"), threshold=6, max
         flag = np.asarray(values, dtype=float) > cutoff
     else:
         spaces = x["coordinate_spaces"]
-        for space_id, idx in d.groupby("coordinate_space_id", sort=False, dropna=False).groups.items():
+        for space_id in pd.unique(d["coordinate_space_id"].dropna()):
+            idx = d.index[d["coordinate_space_id"].eq(space_id)]
             if pd.isna(space_id):
                 continue
             row = spaces[spaces["coordinate_space_id"].eq(space_id)]

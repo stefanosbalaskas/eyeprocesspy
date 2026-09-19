@@ -111,7 +111,8 @@ Do not interpret a quality metric as attention, cognition, motivation, competenc
 
 - [Worked 9-point validation example](../examples/data-quality-validation.md)
 - [Data-quality reporting guideline](data-quality-reporting.md)
-- [Focused Data Quality API](../reference/data-quality.md)\n- [Complete API reference](../reference/api.md)
+- [Focused Data Quality API](../reference/data-quality.md)
+- [Complete API reference](../reference/api.md)
 
 
 ## More Data Quality resources

@@ -66,7 +66,7 @@ These diagnostics come from the synthetic AOI perturbation workflow. Read them t
 
 </div>
 
-[Open the AOI uncertainty workflow →](guides/aoi-uncertainty/)
+[Open the AOI uncertainty workflow →](guides/aoi-uncertainty/index.md)
 
 ## Time-to-event gaze workflows
 

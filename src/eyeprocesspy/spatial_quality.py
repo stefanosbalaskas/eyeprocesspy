@@ -151,7 +151,8 @@ def _prepare_coordinates(
 
 
 def _source_fingerprint(d: pd.DataFrame, columns: Sequence[str]) -> str:
-    payload = d.loc[:, list(dict.fromkeys(columns))].to_csv(index=False, na_rep="<NA>")
+    selected = [column for column in dict.fromkeys(columns) if column is not None]
+    payload = d.loc[:, selected].to_csv(index=False, na_rep="<NA>")
     return sha256(payload.encode("utf-8")).hexdigest()
 
 

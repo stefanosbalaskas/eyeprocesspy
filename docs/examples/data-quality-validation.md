@@ -69,7 +69,12 @@ RMS-S2S never joins the sample before a missing observation to the sample after 
 ## Sensitivity pattern
 
 A strong workflow reports results under the pre-specified quality rule and then repeats the key analysis under plausible alternative review/exclusion decisions. The quality subsystem preserves the metadata needed for that audit rather than performing deletion itself.
-\n\n## Continue with sensitivity analysis\n\nAfter inspecting the baseline quality report, use the [quality-rule sensitivity example](data-quality-sensitivity.md) to compare defensible review/exclusion specifications without deleting observations inside the quality subsystem.\n
+
+
+## Continue with sensitivity analysis
+
+After inspecting the baseline quality report, use the [quality-rule sensitivity example](data-quality-sensitivity.md) to compare defensible review/exclusion specifications without deleting observations inside the quality subsystem.
+
 
 ## Continue with visual diagnostics
 
