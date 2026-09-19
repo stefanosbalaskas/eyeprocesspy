@@ -96,28 +96,38 @@ These diagnostics come from the synthetic AOI perturbation workflow. Read them t
 
 [Open the survival-analysis method →](methods/gaze-survival/index.md)
 
-## Detector multiverse and data-quality robustness
+## Detector sensitivity and inference accountability
 
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="../assets/detector-multiverse/detector-agreement.svg" alt="Event detector agreement">
-  <figcaption><strong>Detector agreement.</strong> Compare plausible event definitions before downstream AOI and model inference.</figcaption>
+  <img src="../assets/detector-multiverse/detector-agreement.svg" alt="Pairwise detector event agreement matrix">
+  <figcaption><strong>Event agreement.</strong> Pairwise temporal overlap among successful fixation catalogues; descriptive agreement, not ground-truth accuracy.</figcaption>
 </figure>
 
 <figure>
-  <img src="../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient stability across event detectors">
-  <figcaption><strong>Detector-to-inference stability.</strong> Track whether condition effects change under another defensible detector.</figcaption>
+  <img src="../assets/detector-multiverse/disclosure-dwell-by-detector.svg" alt="Disclosure dwell across detector branches">
+  <figcaption><strong>Feature sensitivity.</strong> The same synthetic condition contrast propagated through alternative defensible detector specifications.</figcaption>
 </figure>
 
 <figure>
-  <img src="../assets/data-quality-accuracy-precision.svg" alt="Standardized eye-tracking accuracy and precision">
-  <figcaption><strong>Standardized data quality.</strong> Separate target-referenced accuracy from spatial and short-term precision.</figcaption>
+  <img src="../assets/detector-multiverse/condition-coefficient-stability.svg" alt="Condition coefficient stability across detector branches">
+  <figcaption><strong>Inference stability.</strong> Coefficient estimates and intervals under the identical downstream model.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/robustness-denominator.svg" alt="Planned detector denominator audit">
+  <figcaption><strong>Denominator accountability.</strong> Failed or unavailable branches remain in the planned robustness denominator.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/detector-multiverse/model-input-audit.svg" alt="Model input audit row accounting">
+  <figcaption><strong>Model-input audit.</strong> AOI selection, quality exclusion, missing outcome, and model rows remain separately visible.</figcaption>
 </figure>
 
 </div>
 
-[Open detector multiverse →](guides/event-detector-multiverse.md) · [Open standardized data quality →](guides/data-quality.md)
+[Open the detector visual atlas →](guides/detector-multiverse-visual-atlas.md)
 
 ## Pupil and data-quality workflows
 
@@ -131,6 +141,11 @@ These diagnostics come from the synthetic AOI perturbation workflow. Read them t
 <figure>
   <img src="../assets/gallery/sampling-irregularity.svg" alt="Sampling irregularity audit">
   <figcaption><strong>Sampling irregularity.</strong> Effective sampling diagnostics with an explicit review threshold.</figcaption>
+</figure>
+
+<figure>
+  <img src="../assets/data-quality-accuracy-precision.svg" alt="Standardized eye-tracking accuracy and precision">
+  <figcaption><strong>Standardized data quality.</strong> Separate target-referenced accuracy from spatial and short-term precision before review decisions.</figcaption>
 </figure>
 
 <figure>
