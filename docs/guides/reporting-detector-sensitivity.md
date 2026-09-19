@@ -19,6 +19,14 @@ Report:
 11. any predeclared substantive threshold used to interpret stability;
 12. source/preprocessing/detector/AOI/quality/model/software provenance identifiers.
 
+## Model-input accounting
+
+Report the per-detector model-input audit whenever observations can leave the model after feature propagation. At minimum, retain `input_rows`, `aoi_selected_rows`, `quality_excluded_rows`, `outcome_missing_rows`, and `model_rows_used`. This separates an explicit AOI restriction from quality exclusions and genuine outcome missingness.
+
+A compact manuscript statement can read:
+
+> Model-input attrition was audited separately for each detector branch. We report the number of propagated rows, rows selected for the target AOI, rows excluded by the prespecified gaze-quality threshold, rows with non-finite outcomes, and rows supplied to the estimator. No missing outcome was recoded as zero.
+
 ## Denominator discipline
 
 `assess_detector_inference_stability()` treats the declared detector multiverse as the denominator for convergence. The returned `specifications` field is therefore the number of planned detector specifications, `term_available_specifications` is the number that actually returned the requested coefficient, and `model_failure_specifications` is the number with recorded model-stage failures. A failed fit, missing requested term, or non-converged branch cannot disappear from the convergence rate.
