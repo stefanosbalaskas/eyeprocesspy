@@ -37,6 +37,26 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run pytest
 
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+      - run: uv sync --extra dev
+      - name: Enforce 100% statement and branch coverage
+        run: uv run pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=100
+      - name: Upload coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eyeprocesspy-coverage-${{ github.sha }}
+          path: coverage.json
+          if-no-files-found: warn
+          retention-days: 30
+
   build-wheel:
     runs-on: ubuntu-latest
     steps:
