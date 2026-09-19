@@ -4,6 +4,13 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+### Standardized spatial data quality
+
+- Added vendor-neutral target-referenced accuracy, RMS-S2S and population-SD precision, explicit-probability BCEA, empirical sampling interval/jitter/effective-Hz diagnostics, validity fractions, reason-aware data loss, and a canonical review-oriented quality report.
+- Added metric-specific units, explicit coordinate conversion, missing-gap-safe RMS-S2S, localized timestamp diagnostics, NA-group preservation, threshold validation, provenance fingerprints, insufficiency flags, and distinct long-interval versus estimated dropped-sample counts.
+- Added deterministic six-profile 9-point validation data, frozen R/Python parity fixtures, focused tests, dashboard/reporting helpers, a worked validation example, sensitivity example, methodological/reporting guides, conceptual figure, dedicated Data Quality API/site navigation, and homepage discovery.
+- Quality thresholds remain study-specific review rules; no function performs automatic exclusion.
+
 ### Censored gaze-latency survival analysis
 
 - Added a vendor-neutral survival-ready trial contract that retains valid never-inspected trials as right-censored observations while keeping incomplete/unusable gaze in explicit review states.

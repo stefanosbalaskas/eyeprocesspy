@@ -123,6 +123,12 @@ hide:
     <p>Retain never-inspected trials as right-censored observations and model first fixation, entry, revisit, transition, or disengagement latency.</p>
     <span class="ep-question-card__link">Open survival analysis →</span>
   </a>
+  <a class="ep-question-card" href="guides/data-quality/">
+    <span class="ep-question-card__index">08</span><div class="ep-question-card__icon">◇</div>
+    <h3>How good was the measurement?</h3>
+    <p>Separate target-referenced accuracy, short-term and spatial precision, BCEA, realized sampling behavior, jitter, and data loss before applying review rules.</p>
+    <span class="ep-question-card__link">Audit data quality →</span>
+  </a>
 </div>
 
 <div class="ep-method-cta">
