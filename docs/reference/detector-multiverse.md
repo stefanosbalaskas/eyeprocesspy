@@ -40,6 +40,21 @@
 
 ::: eyeprocesspy.summarise_detector_robustness
 
+## Inference result audit contract
+
+`run_detector_inference_multiverse()` returns a `DetectorInferenceResult`. In addition to coefficients, warnings, failures, the model specification, and feature fingerprint, `input_audit` provides one row per planned detector specification.
+
+| Field | Meaning |
+| --- | --- |
+| `input_rows` | Propagated feature rows available for the detector before AOI/model filtering |
+| `aoi_selected_rows` | Rows remaining after an explicit target-AOI restriction |
+| `quality_excluded_rows` | Rows removed by the declared `minimum_valid_fraction` |
+| `outcome_missing_rows` | Rows with a non-finite declared model outcome |
+| `model_rows_used` | Rows supplied to the estimator |
+| `status` | `modelled`, `failed`, or `no_model_data` |
+
+These fields are additive audit metadata; they do not select an estimator, impute missing outcomes, or alter units.
+
 ## Visualisation and reporting
 
 ::: eyeprocesspy.plot_detector_event_timeline
