@@ -134,6 +134,12 @@ The original rows remain present. Filtering or exclusion, if scientifically just
 
 Adapt the sentence to the metrics actually used; do not report measures that were not computed.
 
+The compact package-generated summary can be used as a reproducible starting point:
+
+```python
+print(ep.report_gaze_quality(center_target))
+```
+
 ## Limitations
 
 These plots characterize the **measurement process**. They do not establish psychological attention, engagement, cognitive load, motivation, competence, or clinical status. Synthetic profiles validate software behavior and illustrate interpretation; they do not establish universal device-performance expectations or universal exclusion thresholds.
