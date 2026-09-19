@@ -22,6 +22,12 @@
 
     [Open worked workflow](calibration-probabilistic-aoi.md)
 
+-   :material-chart-scatter-plot: **Standardized data quality**
+
+    Use a synthetic 9-point validation to separate accuracy from precision, inspect realized sampling and data loss, apply review-only thresholds, and carry quality decisions into sensitivity analysis.
+
+    [Open validation workflow](data-quality-validation.md) · [Open sensitivity workflow](data-quality-sensitivity.md)
+
 -   :material-chart-timeline-variant: **Process-measure reliability**
 
     Estimate repeated-measure ICC, Bland–Altman agreement and temporal stability without confusing reliability with construct validity.
@@ -45,6 +51,12 @@
     Fix the perturbation envelope, denominator rules, model specification, failure handling, and interpretation language before branch-specific results are inspected.
 
     [Open worked plan](aoi-analysis-plan-worked.md)
+
+-   :material-package-variant-closed-check: **AOI reporting bundle**
+
+    Package the declared plan, branch audit, assignment/model evidence, failures, provenance, report, figures, and deterministic hashes for manuscript or reviewer handoff.
+
+    [Open reporting bundle](aoi-reporting-bundle.md)
 
 -   :material-vector-polygon: **AOI perturbation sensitivity**
 
@@ -213,7 +225,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 
 | Script | Purpose | Output |
 | --- | --- | --- |
-| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
+| `examples/data_quality_validation.py` | Standardized 9-point quality report with review-only thresholds | console report |\n| `examples/complete_workflow.py` | Canonical dataset → validation → scanpath/transitions/entropy → plots → provenance | `workflow-output/*.svg` |
 | `examples/detector_multiverse_worked.py` | Detector specs → events → AOIs/features → identical model → robustness report | `detector-multiverse-output/*.svg` + Markdown |
 | `examples/detector_multiverse_failure_clinic.py` | Deliberate detector/model failures → retained status, warnings, input audit, callback validation | console audit tables |
 | `examples/calibration_probabilistic_aoi.py` | Calibration error → uncertainty ellipse → probabilistic AOI | `workflow-output/*.svg` |
@@ -224,6 +236,7 @@ For release-level verification, use the deterministic benchmark, validation evid
 | `examples/worked_gaze_survival_analysis.py` | Raw trial/event inputs → censoring → Kaplan–Meier → clustered Cox/AFT → diagnostics/reporting | console summaries + survival plots |
 | `examples/worked_gaze_verification_survival.py` | Source/evidence AOI entry → censoring → clustered Cox/AFT → diagnostics/reporting | CSV/JSON summaries + Kaplan–Meier SVG |
 | `examples/aoi_perturbation_sensitivity.py` | AOI geometry → reassignment → feature/model sensitivity → robustness plots | `workflow-output/aoi-*.svg` |
+| `examples/aoi_reporting_bundle.py` | AOI result → manuscript/reviewer evidence bundle → deterministic SHA-256 manifest | `workflow-output/aoi-reporting-bundle/*` |
 | `examples/aoi_perturbation_failure_clinic.py` | Deliberate AOI geometry/model failures → retained audits → troubleshooting report | `workflow-output/aoi-failure-clinic/*` |
 
 | `examples/multilevel_mediation_preparation.py` | Trial-level gaze-mediator preparation, within/between decomposition, zero/missing/quality audit | console audit tables |
@@ -233,6 +246,15 @@ All listed examples are deterministic and use no private participant data.
 ## AOI uncertainty
 
 - [AOI analysis plan](aoi-analysis-plan-worked.md): filled preregistration-style plan with API mapping and planned interpretation rules.
+- [AOI reporting bundle](aoi-reporting-bundle.md): deterministic evidence package for manuscript, reviewer, and replication handoff.
 - [AOI perturbation sensitivity](aoi-perturbation-sensitivity.md): fixation-level end-to-end geometry, assignment, feature, model, and plotting workflow.
 - [AOI perturbation failure clinic](aoi-perturbation-failure-clinic.md): deliberate geometry/model failure, ambiguity, non-convergence, and retained audit trails.
 - [Sample-level AOI sensitivity](sample-level-aoi-sensitivity.md): explicit sample semantics, zero-versus-missing cells, and when to separate geometry from detector uncertainty.
+
+
+## Standardized data quality
+
+- [Worked 9-point validation](data-quality-validation.md): six synthetic quality profiles separating target error, short-term precision, timing instability, and missingness.
+- [Quality-rule sensitivity](data-quality-sensitivity.md): compare defensible review/exclusion specifications while keeping the canonical quality report intact.
+- [Methodological guide](../guides/data-quality.md): equations, units, interpretation boundaries, and when not to use each metric.
+- [Reporting guideline](../guides/data-quality-reporting.md): manuscript items, suggested wording, limitations, and long-gap versus estimated dropped-sample reporting.

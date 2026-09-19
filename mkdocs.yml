@@ -42,6 +42,11 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Standardized Data Quality:
+          - Overview & equations: guides/data-quality.md
+          - Reporting guideline: guides/data-quality-reporting.md
+          - Worked 9-point validation: examples/data-quality-validation.md
+          - Threshold sensitivity: examples/data-quality-sensitivity.md
       - Censored gaze latency:
           - Method overview: methods/gaze-survival/index.md
           - Decision guide: methods/gaze-survival/decision-guide.md
@@ -49,6 +54,7 @@ nav:
           - Reporting & limitations: methods/gaze-survival/reporting.md
           - Reporting template: methods/gaze-survival/reporting-template.md
           - Troubleshooting: methods/gaze-survival/troubleshooting.md
+          - Reproducibility checklist: methods/gaze-survival/reproducibility-checklist.md
       - AOI perturbation & uncertainty:
           - Start here: guides/aoi-uncertainty/index.md
           - Geometry is an analytical assumption: guides/aoi-uncertainty/geometry-assumption.md
@@ -60,6 +66,7 @@ nav:
           - Analysis plan: guides/aoi-uncertainty/analysis-plan.md
           - Troubleshooting: guides/aoi-uncertainty/troubleshooting.md
           - Reporting robustness: guides/aoi-uncertainty/reporting.md
+          - Reporting bundle: guides/aoi-uncertainty/reporting-bundle.md
           - R/Python parity: guides/aoi-uncertainty/r-python-parity.md
       - Psychometrics & IRT: guides/psychometrics-irt.md
       - Reproducibility & release evidence: guides/reproducibility-release-evidence.md
@@ -69,12 +76,15 @@ nav:
           - Detector failure clinic: examples/detector-multiverse-failure-clinic.md
           - Core gaze, AOI & provenance: examples/core-workflow.md
           - Calibration uncertainty & probabilistic AOIs: examples/calibration-probabilistic-aoi.md
+          - Data-quality validation: examples/data-quality-validation.md
+          - Data-quality sensitivity: examples/data-quality-sensitivity.md
           - Process reliability: examples/process-reliability.md
           - Disclosure inspection: examples/gaze-survival-analysis.md
           - Evidence verification: examples/gaze-verification-survival.md
           - IRT diagnostics: examples/irt-diagnostics.md
           - AOI perturbation sensitivity: examples/aoi-perturbation-sensitivity.md
           - AOI analysis plan: examples/aoi-analysis-plan-worked.md
+          - AOI reporting bundle: examples/aoi-reporting-bundle.md
           - AOI failure clinic: examples/aoi-perturbation-failure-clinic.md
           - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
   - Plot gallery: gallery.md
@@ -89,6 +99,7 @@ nav:
       - Plotting reference: reference/plotting.md
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md
+      - Data Quality API: reference/data-quality.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md

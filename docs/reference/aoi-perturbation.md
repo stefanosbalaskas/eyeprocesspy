@@ -31,3 +31,7 @@ Use [AOI perturbation troubleshooting](../guides/aoi-uncertainty/troubleshooting
 ## Planning
 
 Use the [AOI sensitivity analysis plan](../guides/aoi-uncertainty/analysis-plan.md) before running branch-specific models. The [worked filled plan](../examples/aoi-analysis-plan-worked.md) maps each planning decision to the public API.
+
+## Evidence bundle
+
+Use the [AOI robustness reporting bundle](../guides/aoi-uncertainty/reporting-bundle.md) to package the analysis plan, branch audit, assignment/model summaries, failures, provenance, report, and figures. The [worked example](../examples/aoi-reporting-bundle.md) provides a deterministic helper and SHA-256 manifest without adding a new public API.

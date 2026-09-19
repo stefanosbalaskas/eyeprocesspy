@@ -51,3 +51,7 @@ The numerical values above are an **illustrative synthetic reporting example**, 
 Do not describe a 90% same-sign frequency as a 90% probability that a finding is true. Do not choose the branch with the smallest p-value, quietly reduce the perturbation set after failures, or reinterpret missing observations as zero exposure.
 
 Use `report_aoi_sensitivity()` for a compact starting draft, the [worked example](../../examples/aoi-perturbation-sensitivity.md) for end-to-end code, and the [AOI perturbation API](../../reference/aoi-perturbation.md) for function signatures.
+
+## Reporting bundle
+
+For manuscript supplements, reviewer responses, internal handoff, or replication packages, use the [AOI robustness reporting bundle](reporting-bundle.md) to keep the declared plan, branch audit, assignment summaries, model outputs, failures, provenance, narrative report, and diagnostic figures together. The [worked bundle](../../examples/aoi-reporting-bundle.md) also demonstrates a deterministic SHA-256 manifest without adding a public API.

@@ -240,4 +240,5 @@ __all__ = [n for n in globals() if not n.startswith("_")]
 from .multilevel_mediation import *
 __all__ = [n for n in globals() if not n.startswith("_")]
 
-
+from .spatial_quality import *
+__all__ = [n for n in globals() if not n.startswith("_")]

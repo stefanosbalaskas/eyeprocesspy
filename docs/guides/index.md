@@ -53,6 +53,14 @@ Reliability, Bland–Altman evidence, sampling irregularity, calibration error, 
 </div>
 <div class="ep-card" markdown>
 
+### Standardized data quality
+Separate accuracy, RMS-S2S, population-SD precision, BCEA, realized sampling behavior, jitter, and data loss; preserve metric-specific units and review-only quality rules.
+
+[Open guide](data-quality.md) · [Reporting](data-quality-reporting.md)
+
+</div>
+<div class="ep-card" markdown>
+
 ### Censored gaze latency
 Retain valid never-inspected trials as right-censored observations, choose Cox/AFT estimands explicitly, diagnose assumptions, and report sensitivity transparently.
 

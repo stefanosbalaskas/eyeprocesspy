@@ -4,6 +4,13 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+### Standardized spatial data quality
+
+- Added vendor-neutral target-referenced accuracy, RMS-S2S and population-SD precision, explicit-probability BCEA, empirical sampling interval/jitter/effective-Hz diagnostics, validity fractions, reason-aware data loss, and a canonical review-oriented quality report.
+- Added metric-specific units, explicit coordinate conversion, missing-gap-safe RMS-S2S, localized timestamp diagnostics, NA-group preservation, threshold validation, provenance fingerprints, insufficiency flags, and distinct long-interval versus estimated dropped-sample counts.
+- Added deterministic six-profile 9-point validation data, frozen R/Python parity fixtures, focused tests, dashboard/reporting helpers, a worked validation example, sensitivity example, methodological/reporting guides, conceptual figure, dedicated Data Quality API/site navigation, and homepage discovery.
+- Quality thresholds remain study-specific review rules; no function performs automatic exclusion.
+
 ### Censored gaze-latency survival analysis
 
 - Added a vendor-neutral survival-ready trial contract that retains valid never-inspected trials as right-censored observations while keeping incomplete/unusable gaze in explicit review states.
@@ -11,6 +18,7 @@ All notable changes to `eyeprocesspy` are documented here.
 - Added a first-class documentation pathway with method overview, when-to-use/not-use guidance, worked examples, visual output, reporting/limitations guidance, and dedicated API reference.
 - Added cross-language contract fixture coverage with the R `eyeprocess` implementation. Python explicitly rejects latent frailty requests rather than substituting clustered standard errors.
 - Added a standalone evidence-verification workflow for time to first source/evidence AOI entry plus a troubleshooting clinic covering incomplete windows, time-zero events, sparse events, PH flags, low-quality gaze, competing-event boundaries, and explicit failure reporting.
+- Added a survival reproducibility/preregistration checklist and a documentation-integrity regression test that fails if required survival pages, examples, API links, or navigation entries disappear from the repository.
 
 ## 0.1.0 — 2026-09-03
 
