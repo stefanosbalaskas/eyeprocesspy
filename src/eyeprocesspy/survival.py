@@ -422,7 +422,10 @@ def prepare_gaze_survival_data(
         if supplied_event_time_col in d:
             out["event_time"] = pd.to_numeric(d[supplied_event_time_col], errors="coerce") * scale
         out["event_observed"] = observed.astype(float)
-        out.loc[out["event_observed"].eq(1), "censor_reason"] = "event_observed"
+        out.loc[
+            out["event_observed"].eq(1) & complete_window,
+            "censor_reason",
+        ] = "event_observed"
         out.loc[~complete_window, "event_observed"] = np.nan
 
     out.loc[~complete_window, "analysis_eligible"] = False
