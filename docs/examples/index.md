@@ -26,7 +26,7 @@
 
     Use a synthetic 9-point validation to separate accuracy from precision, inspect realized sampling and data loss, apply review-only thresholds, and carry quality decisions into sensitivity analysis.
 
-    [Open validation workflow](data-quality-validation.md) · [Open sensitivity workflow](data-quality-sensitivity.md)
+    [Open validation workflow](data-quality-validation.md) · [Open plot gallery](data-quality-plot-gallery.md) · [Open sensitivity workflow](data-quality-sensitivity.md)
 
 -   :material-chart-timeline-variant: **Process-measure reliability**
 
@@ -255,6 +255,7 @@ All listed examples are deterministic and use no private participant data.
 ## Standardized data quality
 
 - [Worked 9-point validation](data-quality-validation.md): six synthetic quality profiles separating target error, short-term precision, timing instability, and missingness.
+- [Data Quality plot gallery](data-quality-plot-gallery.md): focused accuracy, RMS-S2S, BCEA, sampling-interval, and dashboard visuals with interpretation boundaries.
 - [Quality-rule sensitivity](data-quality-sensitivity.md): compare defensible review/exclusion specifications while keeping the canonical quality report intact.
 - [Methodological guide](../guides/data-quality.md): equations, units, interpretation boundaries, and when not to use each metric.
 - [Reporting guideline](../guides/data-quality-reporting.md): manuscript items, suggested wording, limitations, and long-gap versus estimated dropped-sample reporting.
