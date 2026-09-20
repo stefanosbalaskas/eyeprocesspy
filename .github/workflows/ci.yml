@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.14"
+          python-version: "3.11"
       - run: uv sync --frozen --extra dev
       - name: Ruff regression gate
         env:
