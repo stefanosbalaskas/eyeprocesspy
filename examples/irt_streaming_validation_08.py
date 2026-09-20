@@ -1,7 +1,10 @@
 """Operational streaming-score and validation-bundle example."""
-from pathlib import Path
+
 import tempfile
+from pathlib import Path
+
 import pandas as pd
+
 import eyeprocesspy as ep
 from eyeprocesspy.exceptions import EyeProcessBackendError
 
@@ -20,7 +23,10 @@ bundle = ep.collect_validation_evidence(
     model_name="demo_model",
 )
 assert "available" in ep.validation_bundle_manifest(bundle).status.values
-assert any("Convergence is not validation" in x for x in ep.validation_report(bundle, include_session=False))
+assert any(
+    "Convergence is not validation" in x
+    for x in ep.validation_report(bundle, include_session=False)
+)
 
 with tempfile.TemporaryDirectory() as td:
     exported = ep.export_validation_bundle(bundle, Path(td) / "validation")

@@ -1,6 +1,8 @@
 """Pre-action and decision-process feature example."""
+
 import numpy as np
 import pandas as pd
+
 import eyeprocesspy as ep
 
 rng = np.random.default_rng(12)
@@ -20,10 +22,12 @@ pre = ep.preaction_process_features(d, windows_ms=[500, 1000])
 proxy = ep.addm_glam_proxy_features(d)
 assert len(pre.data) > 0 and len(proxy.features) > 0
 
-stability_input = pd.DataFrame({
-    "feature": ["pupil_mean", "valid_gaze", "aoi_entropy"] * 3,
-    "split": np.repeat([1, 2, 3], 3),
-    "importance": rng.random(9),
-})
+stability_input = pd.DataFrame(
+    {
+        "feature": ["pupil_mean", "valid_gaze", "aoi_entropy"] * 3,
+        "split": np.repeat([1, 2, 3], 3),
+        "importance": rng.random(9),
+    }
+)
 stability = ep.process_feature_stability(stability_input, top_n=2)
 assert "feature_family" in stability

@@ -70,10 +70,10 @@ def _require_columns(frame: pd.DataFrame, columns: Sequence[str]) -> None:
 def _normalize_choice(value: Any) -> str:
     if isinstance(value, (tuple, list)):
         value = value[0] if value else "from"
-    value = str(value)
-    if value not in {"from", "all", "none"}:
+    selected = str(value)
+    if selected not in {"from", "all", "none"}:
         raise EyeProcessValidationError("`normalize` must be 'from', 'all', or 'none'.")
-    return value
+    return selected
 
 
 def _transition_table(

@@ -1,10 +1,16 @@
 """M3 four-channel pupil-aware measurement workflow."""
+
 import numpy as np
+
 import eyeprocesspy as ep
 
 sim = ep.simulate_multimodal_m3(
-    n_person=40, n_item=8, pupil_signal="informative",
-    pupil_missingness="none", dropout=(0, 0, 0, 0), seed=20260815,
+    n_person=40,
+    n_item=8,
+    pupil_signal="informative",
+    pupil_missingness="none",
+    dropout=(0, 0, 0, 0),
+    seed=20260815,
 )
 ident = ep.audit_multimodal_m3_identifiability(sim)
 assert ident.supported

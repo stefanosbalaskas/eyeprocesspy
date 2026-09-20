@@ -60,16 +60,22 @@ def test_contract_fixture_builds_same_semantic_specs():
     manifest = ep.create_detector_multiverse(built).manifest
     assert set(manifest.detector_id) == {"ivt30", "idtA"}
     assert manifest.set_index("detector_id").loc["ivt30", "velocity_threshold"] == 30
-    assert manifest.set_index("detector_id").loc["idtA", "dispersion_threshold"] == pytest.approx(1.2)
+    assert manifest.set_index("detector_id").loc["idtA", "dispersion_threshold"] == pytest.approx(
+        1.2
+    )
 
 
 def test_spec_validation_requires_scientific_inputs():
     with pytest.raises(ep.EyeProcessValidationError, match="sampling_rate"):
         ep.define_event_detector_spec("bad", "ivt", velocity_threshold=30, minimum_duration_ms=60)
     with pytest.raises(ep.EyeProcessValidationError, match="velocity_threshold"):
-        ep.define_event_detector_spec("bad", "ivt", velocity_threshold=-1, minimum_duration_ms=60, sampling_rate=60)
+        ep.define_event_detector_spec(
+            "bad", "ivt", velocity_threshold=-1, minimum_duration_ms=60, sampling_rate=60
+        )
     with pytest.raises(ep.EyeProcessValidationError, match="dispersion_threshold"):
-        ep.define_event_detector_spec("bad", "idt", dispersion_threshold=0, minimum_duration_ms=80, sampling_rate=60)
+        ep.define_event_detector_spec(
+            "bad", "idt", dispersion_threshold=0, minimum_duration_ms=80, sampling_rate=60
+        )
     with pytest.raises(ep.EyeProcessValidationError, match="callback"):
         ep.define_event_detector_spec("bad", "external")
 
@@ -78,7 +84,10 @@ def test_parameter_grid_is_explicit_and_deterministic():
     base = ivt("ivt")
     grid = ep.create_detector_multiverse(
         base_spec=base,
-        parameter_grid={"velocity_threshold": [20, 25, 30, 35, 40], "minimum_duration_ms": [60, 80]},
+        parameter_grid={
+            "velocity_threshold": [20, 25, 30, 35, 40],
+            "minimum_duration_ms": [60, 80],
+        },
     )
     assert len(grid.specs) == 10
     assert [s.detector_id for s in grid.specs] == sorted(s.detector_id for s in grid.specs)
@@ -90,8 +99,18 @@ def test_specification_order_does_not_change_results():
     specs = [ivt("b", 30), idt("a"), adaptive("c")]
     one = ep.run_detector_multiverse(data, ep.create_detector_multiverse(specs))
     two = ep.run_detector_multiverse(data, ep.create_detector_multiverse(list(reversed(specs))))
-    pd.testing.assert_frame_equal(one.status.reset_index(drop=True), two.status.reset_index(drop=True))
-    cols = ["detector_id", "episode_type", "recording_id", "trial_id", "start_time", "end_time", "duration_ms"]
+    pd.testing.assert_frame_equal(
+        one.status.reset_index(drop=True), two.status.reset_index(drop=True)
+    )
+    cols = [
+        "detector_id",
+        "episode_type",
+        "recording_id",
+        "trial_id",
+        "start_time",
+        "end_time",
+        "duration_ms",
+    ]
     pd.testing.assert_frame_equal(
         one.events[cols].sort_values(cols[:4] + ["start_time"]).reset_index(drop=True),
         two.events[cols].sort_values(cols[:4] + ["start_time"]).reset_index(drop=True),
@@ -103,7 +122,16 @@ def test_identical_detector_specs_give_identical_scientific_events():
     result = ep.run_detector_multiverse(data, [ivt("x", 30), ivt("y", 30)])
     x = result.events[result.events.detector_id.eq("x")]
     y = result.events[result.events.detector_id.eq("y")]
-    cols = ["recording_id", "trial_id", "episode_type", "start_time", "end_time", "duration_ms", "centroid_x", "centroid_y"]
+    cols = [
+        "recording_id",
+        "trial_id",
+        "episode_type",
+        "start_time",
+        "end_time",
+        "duration_ms",
+        "centroid_x",
+        "centroid_y",
+    ]
     pd.testing.assert_frame_equal(x[cols].reset_index(drop=True), y[cols].reset_index(drop=True))
 
 
@@ -111,7 +139,9 @@ def test_event_matching_fixture_uses_one_to_one_temporal_matching():
     payload = json.loads(FIXTURE.read_text())["event_matching_fixture"]
     reference = pd.DataFrame(payload["reference"])
     candidate = pd.DataFrame(payload["candidate"])
-    matches = ep.match_detected_events(reference, candidate, onset_tolerance_ms=75, minimum_overlap=.1)
+    matches = ep.match_detected_events(
+        reference, candidate, onset_tolerance_ms=75, minimum_overlap=0.1
+    )
     assert len(matches) == 2
     summary = ep.compare_event_catalogues(reference, candidate).iloc[0]
     for key, value in payload["expected"].items():
@@ -121,7 +151,7 @@ def test_event_matching_fixture_uses_one_to_one_temporal_matching():
 
 
 def test_short_and_zero_event_trials_are_retained_in_features():
-    data = ep.simulate_detector_multiverse_data(n_participants=4, trial_duration_s=.08, seed=13)
+    data = ep.simulate_detector_multiverse_data(n_participants=4, trial_duration_s=0.08, seed=13)
     result = ep.run_detector_multiverse(data, [ivt()])
     result = ep.propagate_detector_to_aoi(result)
     result = ep.propagate_detector_to_features(result)
@@ -174,19 +204,25 @@ def test_external_detector_import_and_callback_failure_are_explicit():
 
     def external(data, spec):
         trial = data["intervals"].iloc[0]
-        return pd.DataFrame([{
-            "recording_id": trial.recording_id,
-            "trial_id": trial.trial_id,
-            "episode_type": "fixation",
-            "start_time": trial.start_time + .1,
-            "end_time": trial.start_time + .2,
-            "centroid_x": 6.0,
-            "centroid_y": 2.4,
-            "coordinate_space_id": "deg_display",
-            "stimulus_id": "stim_01",
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "recording_id": trial.recording_id,
+                    "trial_id": trial.trial_id,
+                    "episode_type": "fixation",
+                    "start_time": trial.start_time + 0.1,
+                    "end_time": trial.start_time + 0.2,
+                    "centroid_x": 6.0,
+                    "centroid_y": 2.4,
+                    "coordinate_space_id": "deg_display",
+                    "stimulus_id": "stim_01",
+                }
+            ]
+        )
 
-    good = ep.define_event_detector_spec("external_good", "external", callback=external, implementation="test_callback")
+    good = ep.define_event_detector_spec(
+        "external_good", "external", callback=external, implementation="test_callback"
+    )
     result = ep.run_detector_multiverse(data, [good])
     assert result.failures.empty
     assert len(result.events) == 1
@@ -195,7 +231,9 @@ def test_external_detector_import_and_callback_failure_are_explicit():
     def broken(data, spec):
         raise RuntimeError("detector exploded")
 
-    bad = ep.define_event_detector_spec("external_bad", "external", callback=broken, implementation="test_callback")
+    bad = ep.define_event_detector_spec(
+        "external_bad", "external", callback=broken, implementation="test_callback"
+    )
     failed = ep.run_detector_multiverse(data, [bad])
     assert failed.status.iloc[0].status == "failed"
     assert "detector exploded" in failed.failures.iloc[0].error
@@ -204,8 +242,15 @@ def test_external_detector_import_and_callback_failure_are_explicit():
 def test_aoi_ambiguity_requires_explicit_resolution():
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=18)
     overlap = ep.new_aoi(
-        "overlap", "Overlap", "stim_01", "rectangle",
-        x=4.5, y=1.5, width=3.0, height=2.0, coordinate_space_id="deg_display",
+        "overlap",
+        "Overlap",
+        "stim_01",
+        "rectangle",
+        x=4.5,
+        y=1.5,
+        width=3.0,
+        height=2.0,
+        coordinate_space_id="deg_display",
     )
     data = ep.register_aois(data, overlap)
     result = ep.run_detector_multiverse(data, [ivt()])
@@ -218,7 +263,14 @@ def test_aoi_ambiguity_requires_explicit_resolution():
 def test_provenance_retained_through_events_and_features():
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=19)
     result = ep.run_detector_multiverse(data, [ivt()])
-    required = {"source_data_hash", "preprocessing_provenance_hash", "aoi_spec_hash", "detector_spec_hash", "software", "software_version"}
+    required = {
+        "source_data_hash",
+        "preprocessing_provenance_hash",
+        "aoi_spec_hash",
+        "detector_spec_hash",
+        "software",
+        "software_version",
+    }
     assert required.issubset(result.events.columns)
     assert result.events.detector_spec_hash.notna().all()
     result = ep.propagate_detector_to_aoi(result)
@@ -229,7 +281,9 @@ def test_provenance_retained_through_events_and_features():
 
 def test_synthetic_truth_propagates_known_disclosure_dwell_effect():
     data = ep.simulate_detector_multiverse_data(n_participants=8, seed=20)
-    result = ep.run_detector_multiverse(data, [ivt("ivt25", 25), ivt("ivt35", 35), idt(), adaptive()])
+    result = ep.run_detector_multiverse(
+        data, [ivt("ivt25", 25), ivt("ivt35", 35), idt(), adaptive()]
+    )
     result = ep.propagate_detector_to_aoi(result)
     result = ep.propagate_detector_to_features(result)
     target = result.features[result.features.aoi_id.eq("disclosure")]
@@ -249,18 +303,32 @@ def test_inference_multiverse_records_coefficients_and_nonconvergence():
         "aoi_id": "disclosure",
     }
     inference = ep.run_detector_inference_multiverse(result, model_spec)
-    term = inference.coefficients[inference.coefficients.term.str.contains("condition_id", na=False)].term.iloc[0]
-    stability = ep.assess_detector_inference_stability(inference, term=term, substantive_threshold=100)
+    term = inference.coefficients[
+        inference.coefficients.term.str.contains("condition_id", na=False)
+    ].term.iloc[0]
+    stability = ep.assess_detector_inference_stability(
+        inference, term=term, substantive_threshold=100
+    )
     assert stability.iloc[0].convergence_rate == 1
     assert stability.iloc[0].same_sign_proportion == 1
     assert stability.iloc[0].substantive_conclusion_stability == 1
     assert {"model_spec_hash", "feature_fingerprint"}.issubset(inference.coefficients.columns)
 
     def nonconverged(data, spec):
-        return pd.DataFrame([{
-            "term": "condition", "estimate": 1.0, "SE": 1.0, "CI_lower": -1.0, "CI_upper": 3.0,
-            "p": .5, "converged": False, "N": len(data),
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 1.0,
+                    "CI_lower": -1.0,
+                    "CI_upper": 3.0,
+                    "p": 0.5,
+                    "converged": False,
+                    "N": len(data),
+                }
+            ]
+        )
 
     callback_spec = dict(model_spec, engine="callback")
     bad = ep.run_detector_inference_multiverse(result, callback_spec, model_callback=nonconverged)
@@ -275,7 +343,12 @@ def test_statsmodels_missing_predictors_fail_instead_of_silent_row_drop():
     result = ep.propagate_detector_to_aoi(result)
     result = ep.propagate_detector_to_features(result)
     result.features.loc[result.features.index[0], "condition_id"] = pd.NA
-    model = {"engine":"statsmodels_ols","formula":"dwell_time_ms ~ C(condition_id)","outcome":"dwell_time_ms","aoi_id":"disclosure"}
+    model = {
+        "engine": "statsmodels_ols",
+        "formula": "dwell_time_ms ~ C(condition_id)",
+        "outcome": "dwell_time_ms",
+        "aoi_id": "disclosure",
+    }
     inference = ep.run_detector_inference_multiverse(result, model)
     assert not inference.failures.empty
     assert inference.coefficients.empty
@@ -298,8 +371,12 @@ def test_report_and_plot_surfaces_smoke(tmp_path):
 
 def test_remodnav_bridge_fails_explicitly_when_dependency_unavailable():
     spec = ep.define_event_detector_spec(
-        "remodnav", "remodnav", minimum_duration_ms=60, sampling_rate=60,
-        coordinate_unit="degrees", parameters={"noise_factor":5},
+        "remodnav",
+        "remodnav",
+        minimum_duration_ms=60,
+        sampling_rate=60,
+        coordinate_unit="degrees",
+        parameters={"noise_factor": 5},
     )
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=24)
     try:
@@ -315,17 +392,32 @@ def test_remodnav_bridge_fails_explicitly_when_dependency_unavailable():
 
 def test_public_api_exports_are_available():
     names = [
-        "define_event_detector_spec", "validate_event_detector_spec", "create_detector_multiverse",
-        "run_detector_multiverse", "detect_events_with_spec", "import_external_detector_events",
-        "compare_event_catalogues", "match_detected_events", "estimate_detector_agreement",
-        "summarise_detector_events", "summarise_detector_disagreement", "propagate_detector_to_aoi",
-        "propagate_detector_to_features", "run_detector_inference_multiverse",
-        "assess_detector_inference_stability", "summarise_detector_robustness",
-        "plot_detector_event_timeline", "plot_detector_agreement", "plot_detector_feature_distributions",
-        "plot_detector_coefficient_stability", "plot_detector_multiverse", "report_detector_multiverse",
+        "define_event_detector_spec",
+        "validate_event_detector_spec",
+        "create_detector_multiverse",
+        "run_detector_multiverse",
+        "detect_events_with_spec",
+        "import_external_detector_events",
+        "compare_event_catalogues",
+        "match_detected_events",
+        "estimate_detector_agreement",
+        "summarise_detector_events",
+        "summarise_detector_disagreement",
+        "propagate_detector_to_aoi",
+        "propagate_detector_to_features",
+        "run_detector_inference_multiverse",
+        "assess_detector_inference_stability",
+        "summarise_detector_robustness",
+        "plot_detector_event_timeline",
+        "plot_detector_agreement",
+        "plot_detector_feature_distributions",
+        "plot_detector_coefficient_stability",
+        "plot_detector_multiverse",
+        "report_detector_multiverse",
         "simulate_detector_multiverse_data",
     ]
     assert all(callable(getattr(ep, name, None)) for name in names)
+
 
 def test_inference_stability_keeps_failed_branches_in_denominator():
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=31)
@@ -337,16 +429,20 @@ def test_inference_stability_keeps_failed_branches_in_denominator():
         detector_id = str(data["detector_id"].iloc[0])
         if detector_id == "ivt35":
             raise RuntimeError("planned branch failure")
-        return pd.DataFrame([{
-            "term": "condition",
-            "estimate": 1.0,
-            "SE": 0.2,
-            "CI_lower": 0.6,
-            "CI_upper": 1.4,
-            "p": 0.01,
-            "converged": True,
-            "N": len(data),
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_lower": 0.6,
+                    "CI_upper": 1.4,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                }
+            ]
+        )
 
     fit = ep.run_detector_inference_multiverse(
         result,
@@ -369,28 +465,30 @@ def test_model_callback_rejects_duplicate_coefficient_terms():
     result = ep.propagate_detector_to_features(result)
 
     def duplicate_terms(data, spec):
-        return pd.DataFrame([
-            {
-                "term": "condition",
-                "estimate": 1.0,
-                "SE": 0.2,
-                "CI_lower": 0.6,
-                "CI_upper": 1.4,
-                "p": 0.01,
-                "converged": True,
-                "N": len(data),
-            },
-            {
-                "term": "condition",
-                "estimate": 1.1,
-                "SE": 0.2,
-                "CI_lower": 0.7,
-                "CI_upper": 1.5,
-                "p": 0.01,
-                "converged": True,
-                "N": len(data),
-            },
-        ])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_lower": 0.6,
+                    "CI_upper": 1.4,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                },
+                {
+                    "term": "condition",
+                    "estimate": 1.1,
+                    "SE": 0.2,
+                    "CI_lower": 0.7,
+                    "CI_upper": 1.5,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                },
+            ]
+        )
 
     fit = ep.run_detector_inference_multiverse(
         result,
@@ -400,6 +498,7 @@ def test_model_callback_rejects_duplicate_coefficient_terms():
     assert fit.coefficients.empty
     assert len(fit.failures) == 1
     assert "at most one row per coefficient term" in fit.failures.iloc[0].error
+
 
 def test_model_input_attrition_is_audited_and_warned():
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=41)
@@ -415,16 +514,20 @@ def test_model_input_attrition_is_audited_and_warned():
     result.features.loc[target[1], "dwell_time_ms"] = np.nan
 
     def callback(data, spec):
-        return pd.DataFrame([{
-            "term": "condition",
-            "estimate": 1.0,
-            "SE": 0.2,
-            "CI_lower": 0.6,
-            "CI_upper": 1.4,
-            "p": 0.01,
-            "converged": True,
-            "N": len(data),
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_lower": 0.6,
+                    "CI_upper": 1.4,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                }
+            ]
+        )
 
     fit = ep.run_detector_inference_multiverse(
         result,
@@ -439,8 +542,11 @@ def test_model_input_attrition_is_audited_and_warned():
     assert audit.model_rows_used == audit.aoi_selected_rows - 2
     assert audit.status == "modelled"
     assert {
-        "input_rows", "aoi_selected_rows", "quality_excluded_rows",
-        "outcome_missing_rows", "model_rows_used",
+        "input_rows",
+        "aoi_selected_rows",
+        "quality_excluded_rows",
+        "outcome_missing_rows",
+        "model_rows_used",
     }.issubset(fit.coefficients.columns)
     assert (fit.coefficients.quality_excluded_rows == 1).all()
     assert (fit.coefficients.outcome_missing_rows == 1).all()
@@ -461,16 +567,20 @@ def test_all_nonfinite_outcomes_fail_with_audit_instead_of_disappearing():
     result.features.loc[target, "dwell_time_ms"] = np.nan
 
     def callback(data, spec):
-        return pd.DataFrame([{
-            "term": "condition",
-            "estimate": 1.0,
-            "SE": 0.2,
-            "CI_lower": 0.6,
-            "CI_upper": 1.4,
-            "p": 0.01,
-            "converged": True,
-            "N": len(data),
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_lower": 0.6,
+                    "CI_upper": 1.4,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                }
+            ]
+        )
 
     fit = ep.run_detector_inference_multiverse(
         result,
@@ -485,6 +595,7 @@ def test_all_nonfinite_outcomes_fail_with_audit_instead_of_disappearing():
     assert audit.model_rows_used == 0
     assert fit.failures.iloc[0].outcome_missing_rows == audit.outcome_missing_rows
 
+
 def test_report_includes_model_input_audit_and_model_failures():
     data = ep.simulate_detector_multiverse_data(n_participants=4, seed=46)
     result = ep.run_detector_multiverse(data, [ivt("ivt25", 25), ivt("ivt35", 35)])
@@ -494,16 +605,20 @@ def test_report_includes_model_input_audit_and_model_failures():
     def selective(data, spec):
         if str(data["detector_id"].iloc[0]) == "ivt35":
             raise RuntimeError("deliberate model failure")
-        return pd.DataFrame([{
-            "term": "condition",
-            "estimate": 1.0,
-            "SE": 0.2,
-            "CI_lower": 0.6,
-            "CI_upper": 1.4,
-            "p": 0.01,
-            "converged": True,
-            "N": len(data),
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    "term": "condition",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_lower": 0.6,
+                    "CI_upper": 1.4,
+                    "p": 0.01,
+                    "converged": True,
+                    "N": len(data),
+                }
+            ]
+        )
 
     fit = ep.run_detector_inference_multiverse(
         result,
@@ -516,4 +631,3 @@ def test_report_includes_model_input_audit_and_model_failures():
     assert "outcome_missing_rows" in text
     assert "## Model failures" in text
     assert "deliberate model failure" in text
-

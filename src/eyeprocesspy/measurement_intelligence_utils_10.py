@@ -117,7 +117,10 @@ def _call_supported(function, x, **kwargs):
     except (TypeError, ValueError):
         return function(x, **kwargs)
 
-    accepts_kwargs = any(parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in signature.parameters.values())
+    accepts_kwargs = any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
     if accepts_kwargs:
         return function(x, **kwargs)
 
@@ -337,7 +340,9 @@ def _dispatch_plot(x, *, plot_type="default", ax=None, **kwargs):
         except TypeError:
             return method()
 
-    raise EyeProcessValidationError(f"No eyeprocess plotting method is available for class `{type(x).__name__}`.")
+    raise EyeProcessValidationError(
+        f"No eyeprocess plotting method is available for class `{type(x).__name__}`."
+    )
 
 
 def _plot_with_fallback(x, plot_type, *, ax=None, **kwargs):
@@ -354,7 +359,7 @@ def _plot_with_fallback(x, plot_type, *, ax=None, **kwargs):
         ValueError,
         KeyError,
         AttributeError,
-    ) as exc:
+    ):
         warnings.warn(
             "Plot type "
             f"`{plot_type}` is not specialized for class "

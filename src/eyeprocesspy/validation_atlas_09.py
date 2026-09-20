@@ -115,7 +115,9 @@ def _require_columns(
 ) -> None:
     missing = [column for column in columns if column not in frame.columns]
     if missing:
-        raise EyeProcessValidationError(f"{name} is missing required columns: " + ", ".join(missing))
+        raise EyeProcessValidationError(
+            f"{name} is missing required columns: " + ", ".join(missing)
+        )
 
 
 def _round_numeric(
@@ -408,7 +410,9 @@ def eyeprocess_validation_evidence_atlas(
 def eyeprocess_validation_atlas_gaps(atlas):
     """Summarize missing components and unresolved claims."""
     if not _class_is(atlas, _ATLAS_CLASS):
-        raise EyeProcessValidationError("atlas must be created by eyeprocess_validation_evidence_atlas().")
+        raise EyeProcessValidationError(
+            "atlas must be created by eyeprocess_validation_evidence_atlas()."
+        )
 
     component_status = _as_frame(
         atlas["component_status"],

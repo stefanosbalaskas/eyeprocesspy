@@ -12,8 +12,7 @@ promote plotting dependencies into the core runtime.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Callable
+from collections.abc import Callable, Iterable
 
 import numpy as np
 import pandas as pd
@@ -141,7 +140,9 @@ def plot_eye_overview(x, ax=None, **kwargs):
     _assert_eye_dataset(x)
     intervals = x["intervals"]
     trials = (
-        int(intervals["interval_type"].eq("trial").sum()) if not intervals.empty and "interval_type" in intervals else 0
+        int(intervals["interval_type"].eq("trial").sum())
+        if not intervals.empty and "interval_type" in intervals
+        else 0
     )
     counts = pd.Series(
         {
@@ -188,7 +189,11 @@ def plot_eye_trace(
         recording_id,
     )
     if valid_only and not data.empty:
-        valid = data["valid"].fillna(False).astype(bool) if "valid" in data else pd.Series(True, index=data.index)
+        valid = (
+            data["valid"].fillna(False).astype(bool)
+            if "valid" in data
+            else pd.Series(True, index=data.index)
+        )
         gx = _finite(data["gaze_x"])
         gy = _finite(data["gaze_y"])
         data = data[valid & gx.notna() & gy.notna()].copy()

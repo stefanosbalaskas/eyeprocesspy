@@ -116,7 +116,9 @@ def test_default_sensitivity_extract_all_contract_forms():
     pd.testing.assert_frame_equal(copied, frame)
     assert copied is not frame
 
-    mapped = bs._default_sensitivity_extract({"effect": np.float64(1.2), "label": "x", "drop": [1, 2]})
+    mapped = bs._default_sensitivity_extract(
+        {"effect": np.float64(1.2), "label": "x", "drop": [1, 2]}
+    )
     assert mapped.loc[0, "effect"] == pytest.approx(1.2)
     assert mapped.loc[0, "label"] == "x"
     assert "drop" not in mapped.columns
@@ -228,7 +230,9 @@ def test_apply_synthetic_corruption_exercises_every_optional_operator():
     out = ep.apply_synthetic_corruption(data, plan, aoi="aoi", device_column="device")
     assert len(out) < len(data)
     assert out.attrs["eyeprocess_corruption_plan"]["seed"] == 11
-    assert not np.array_equal(out["timestamp_ms"].to_numpy(), data.loc[out.index, "timestamp_ms"].to_numpy())
+    assert not np.array_equal(
+        out["timestamp_ms"].to_numpy(), data.loc[out.index, "timestamp_ms"].to_numpy()
+    )
     assert np.allclose(
         out["device"].to_numpy(),
         data.loc[out.index, "device"].to_numpy() + 3.0,

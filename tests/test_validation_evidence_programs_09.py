@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -329,7 +329,7 @@ def test_scenario_manifest_json_roundtrip_and_rds_gate(tmp_path):
             11,
             12,
             30,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         ),
     )
 

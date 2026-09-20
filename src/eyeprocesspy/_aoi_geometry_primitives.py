@@ -72,11 +72,18 @@ def _normalise_pair(value: Any, name: str, *, nonnegative: bool = False) -> tupl
 
 
 def _software_provenance() -> dict[str, Any]:
+    package_version: str | None
+
     try:
-        from . import __version__  # local import avoids import-cycle at module load
+        from . import __version__ as package_version
     except Exception:  # pragma: no cover - defensive when module is executed standalone
-        __version__ = None
-    return {"package": "eyeprocesspy", "version": __version__, "module": __name__}
+        package_version = None
+
+    return {
+        "package": "eyeprocesspy",
+        "version": package_version,
+        "module": __name__,
+    }
 
 
 def _stable_frame_hash(frame: pd.DataFrame) -> str:
@@ -96,7 +103,9 @@ def _stable_frame_hash(frame: pd.DataFrame) -> str:
     records = []
     for row in frame.to_dict(orient="records"):
         records.append({str(k): normalise(v) for k, v in sorted(row.items())})
-    blob = json.dumps(records, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    blob = json.dumps(records, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+        "utf-8"
+    )
     return hashlib.sha256(blob).hexdigest()
 
 
@@ -104,15 +113,21 @@ def _polygon_array(value: Any) -> np.ndarray:
     try:
         polygon = np.asarray(value, dtype=float)
     except Exception as exc:
-        raise EyeProcessValidationError("Polygon geometry must be coercible to an n x 2 numeric array.") from exc
+        raise EyeProcessValidationError(
+            "Polygon geometry must be coercible to an n x 2 numeric array."
+        ) from exc
     if polygon.ndim != 2 or polygon.shape[1] != 2 or polygon.shape[0] < 3:
-        raise EyeProcessValidationError("Polygon geometry must contain at least three x/y vertices.")
+        raise EyeProcessValidationError(
+            "Polygon geometry must contain at least three x/y vertices."
+        )
     if not np.all(np.isfinite(polygon)):
         raise EyeProcessValidationError("Polygon vertices must be finite.")
     if np.allclose(polygon[0], polygon[-1]):
         polygon = polygon[:-1]
     if polygon.shape[0] < 3:
-        raise EyeProcessValidationError("Polygon geometry must contain at least three unique vertices.")
+        raise EyeProcessValidationError(
+            "Polygon geometry must contain at least three unique vertices."
+        )
     return polygon
 
 
@@ -135,9 +150,16 @@ def _on_segment(a: np.ndarray, b: np.ndarray, p: np.ndarray, tol: float = 1e-12)
 
 
 def _segments_intersect(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray) -> bool:
-    o1, o2, o3, o4 = _orientation(a, b, c), _orientation(a, b, d), _orientation(c, d, a), _orientation(c, d, b)
+    o1, o2, o3, o4 = (
+        _orientation(a, b, c),
+        _orientation(a, b, d),
+        _orientation(c, d, a),
+        _orientation(c, d, b),
+    )
     tol = 1e-12
-    if (o1 > tol and o2 < -tol or o1 < -tol and o2 > tol) and (o3 > tol and o4 < -tol or o3 < -tol and o4 > tol):
+    if (o1 > tol and o2 < -tol or o1 < -tol and o2 > tol) and (
+        o3 > tol and o4 < -tol or o3 < -tol and o4 > tol
+    ):
         return True
     if abs(o1) <= tol and _on_segment(a, b, c):
         return True
@@ -157,8 +179,6 @@ def _polygon_self_intersects(poly: np.ndarray) -> bool:
         for j in range(i + 1, n):
             if j in {i, (i + 1) % n} or (j + 1) % n in {i, (i + 1) % n}:
                 continue
-            if i == 0 and (j + 1) % n == 0:
-                continue
             c, d = poly[j], poly[(j + 1) % n]
             if _segments_intersect(a, b, c, d):
                 return True
@@ -176,13 +196,20 @@ def _polygon_is_convex(poly: np.ndarray) -> bool:
     return bool(signs) and len(set(signs)) == 1
 
 
-def _line_intersection(p1: np.ndarray, d1: np.ndarray, p2: np.ndarray, d2: np.ndarray) -> np.ndarray:
+def _line_intersection(
+    p1: np.ndarray, d1: np.ndarray, p2: np.ndarray, d2: np.ndarray
+) -> np.ndarray:
     cross = d1[0] * d2[1] - d1[1] * d2[0]
     if abs(cross) <= 1e-12:
-        raise EyeProcessValidationError("Polygon offset produced parallel adjacent edges; simplify the polygon or use translation/anisotropic expansion instead.")
+        raise EyeProcessValidationError(
+            "Polygon offset produced parallel adjacent edges; simplify the polygon or use translation/anisotropic expansion instead."
+        )
     q = p2 - p1
     t = (q[0] * d2[1] - q[1] * d2[0]) / cross
-    return p1 + t * d1
+    return np.asarray(
+        p1 + t * d1,
+        dtype=float,
+    )
 
 
 def _offset_convex_polygon(poly: np.ndarray, distance: float) -> np.ndarray:
@@ -225,5 +252,7 @@ def _offset_convex_polygon(poly: np.ndarray, distance: float) -> np.ndarray:
     original_sign = math.copysign(1.0, area)
     new_sign = math.copysign(1.0, _signed_polygon_area(out))
     if original_sign != new_sign:
-        raise EyeProcessValidationError("Erosion crossed the polygon interior and inverted geometry.")
+        raise EyeProcessValidationError(
+            "Erosion crossed the polygon interior and inverted geometry."
+        )
     return out

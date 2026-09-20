@@ -1,27 +1,56 @@
 from __future__ import annotations
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-import matplotlib.pyplot as plt
 
 import eyeprocesspy as ep
 
 STAGED_EXPORTS = [
-    "prepare_multimodal_irt_data", "audit_multimodal_measurement", "multimodal_irt_spec",
-    "simulate_multimodal_irt", "process_information", "ablate_multimodal_channels",
-    "multimodal_backend_status", "multimodal_ppc", "validate_multimodal_irt",
-    "audit_multimodal_identifiability", "multimodal_m2_spec", "fit_multimodal_m2",
-    "audit_multimodal_m2_identifiability", "multimodal_m2_ppc", "validate_multimodal_m2",
-    "multimodal_m2_ablation", "multimodal_m2_process_information", "multimodal_m2_negative_controls",
-    "simulate_multimodal_m2", "multimodal_m2_recovery", "multimodal_m3_spec", "fit_multimodal_m3",
-    "audit_multimodal_m3_identifiability", "multimodal_m3_ppc", "multimodal_m3_ablation",
-    "multimodal_m3_process_information", "multimodal_m3_negative_controls", "multimodal_m3_functional_bridge",
-    "validate_multimodal_m3", "simulate_multimodal_m3", "multimodal_m3_recovery", "multimodal_m4_spec",
-    "fit_multimodal_m4", "audit_multimodal_m4_identifiability", "multimodal_m4_state_diagnostics",
-    "multimodal_m4_ppc", "multimodal_m4_ablation", "multimodal_m4_process_information",
-    "multimodal_m4_negative_controls", "multimodal_m4_sensitivity", "validate_multimodal_m4",
-    "simulate_multimodal_m4", "multimodal_m4_recovery",
+    "prepare_multimodal_irt_data",
+    "audit_multimodal_measurement",
+    "multimodal_irt_spec",
+    "simulate_multimodal_irt",
+    "process_information",
+    "ablate_multimodal_channels",
+    "multimodal_backend_status",
+    "multimodal_ppc",
+    "validate_multimodal_irt",
+    "audit_multimodal_identifiability",
+    "multimodal_m2_spec",
+    "fit_multimodal_m2",
+    "audit_multimodal_m2_identifiability",
+    "multimodal_m2_ppc",
+    "validate_multimodal_m2",
+    "multimodal_m2_ablation",
+    "multimodal_m2_process_information",
+    "multimodal_m2_negative_controls",
+    "simulate_multimodal_m2",
+    "multimodal_m2_recovery",
+    "multimodal_m3_spec",
+    "fit_multimodal_m3",
+    "audit_multimodal_m3_identifiability",
+    "multimodal_m3_ppc",
+    "multimodal_m3_ablation",
+    "multimodal_m3_process_information",
+    "multimodal_m3_negative_controls",
+    "multimodal_m3_functional_bridge",
+    "validate_multimodal_m3",
+    "simulate_multimodal_m3",
+    "multimodal_m3_recovery",
+    "multimodal_m4_spec",
+    "fit_multimodal_m4",
+    "audit_multimodal_m4_identifiability",
+    "multimodal_m4_state_diagnostics",
+    "multimodal_m4_ppc",
+    "multimodal_m4_ablation",
+    "multimodal_m4_process_information",
+    "multimodal_m4_negative_controls",
+    "multimodal_m4_sensitivity",
+    "validate_multimodal_m4",
+    "simulate_multimodal_m4",
+    "multimodal_m4_recovery",
 ]
 
 
@@ -73,23 +102,35 @@ def test_m2_spec_simulation_identifiability_and_controls():
     assert set(a.data.response.unique()) <= {0, 1}
     assert (a.data.rt > 0).all() and (a.data.gaze >= 0).all()
 
-    drop = ep.simulate_multimodal_m2(n_person=40, n_item=8, dropout=(.10, .20, .30), seed=91)
+    drop = ep.simulate_multimodal_m2(n_person=40, n_item=8, dropout=(0.10, 0.20, 0.30), seed=91)
     assert drop.data[["response", "rt", "gaze"]].isna().any().all()
     assert not drop.complete_data[["response", "rt", "gaze"]].isna().any().any()
 
     ident = ep.audit_multimodal_m2_identifiability(ep.simulate_multimodal_m2(40, 8, seed=12).data)
     assert ident.supported
-    assert ident.response_design["components"] == ident.rt_design["components"] == ident.gaze_design["components"] == 1
+    assert (
+        ident.response_design["components"]
+        == ident.rt_design["components"]
+        == ident.gaze_design["components"]
+        == 1
+    )
     assert ident.checks["pass"].all()
     dup = pd.concat([a.data, a.data.iloc[[0]]], ignore_index=True)
     with pytest.raises(ep.EyeProcessValidationError, match="at most one row"):
         ep.audit_multimodal_m2_identifiability(dup)
 
     nc = ep.multimodal_m2_negative_controls(ep.simulate_multimodal_m2(40, 8, seed=23), seed=99)
-    assert set(nc.datasets) == {"observed", "gaze_within_item", "rt_within_item", "response_within_item"}
+    assert set(nc.datasets) == {
+        "observed",
+        "gaze_within_item",
+        "rt_within_item",
+        "response_within_item",
+    }
     for item in nc.datasets["observed"].item_id.unique():
         x = np.sort(nc.datasets["observed"].loc[lambda z: z.item_id == item, "gaze"].to_numpy())
-        y = np.sort(nc.datasets["gaze_within_item"].loc[lambda z: z.item_id == item, "gaze"].to_numpy())
+        y = np.sort(
+            nc.datasets["gaze_within_item"].loc[lambda z: z.item_id == item, "gaze"].to_numpy()
+        )
         np.testing.assert_array_equal(x, y)
     assert len(nc.diagnostics) == 12
 
@@ -105,35 +146,67 @@ def test_m3_spec_simulation_identifiability_negative_controls_and_bridge():
     with pytest.raises(ep.EyeProcessValidationError, match="ignorable"):
         ep.multimodal_m3_spec(missingness="MNAR")
 
-    a = ep.simulate_multimodal_m3(30, 8, seed=20260815, pupil_missingness="none", dropout=(0, 0, 0, 0))
-    b = ep.simulate_multimodal_m3(30, 8, seed=20260815, pupil_missingness="none", dropout=(0, 0, 0, 0))
+    a = ep.simulate_multimodal_m3(
+        30, 8, seed=20260815, pupil_missingness="none", dropout=(0, 0, 0, 0)
+    )
+    b = ep.simulate_multimodal_m3(
+        30, 8, seed=20260815, pupil_missingness="none", dropout=(0, 0, 0, 0)
+    )
     pd.testing.assert_frame_equal(a.data, b.data)
     assert len(a.data) == 240
-    expected = {"pupil_baseline", "luminance", "gaze_x", "gaze_y", "pupil_quality", "pupil_blink", "pupil_interpolated", "time_on_task", "device", "session"}
+    expected = {
+        "pupil_baseline",
+        "luminance",
+        "gaze_x",
+        "gaze_y",
+        "pupil_quality",
+        "pupil_blink",
+        "pupil_interpolated",
+        "time_on_task",
+        "device",
+        "session",
+    }
     assert expected <= set(a.data.columns)
     assert {"theta", "tau", "omega", "rho", "b", "beta", "m", "kappa"} <= set(a.truth)
     assert a.data.pupil.isna().sum() == 0
 
-    null = ep.simulate_multimodal_m3(25, 6, pupil_signal="null", pupil_missingness="none", dropout=(0,0,0,0), seed=1)
-    conf = ep.simulate_multimodal_m3(25, 6, pupil_signal="confounded", pupil_missingness="none", dropout=(0,0,0,0), seed=2)
+    null = ep.simulate_multimodal_m3(
+        25, 6, pupil_signal="null", pupil_missingness="none", dropout=(0, 0, 0, 0), seed=1
+    )
+    conf = ep.simulate_multimodal_m3(
+        25, 6, pupil_signal="confounded", pupil_missingness="none", dropout=(0, 0, 0, 0), seed=2
+    )
     assert np.std(null.truth["rho"], ddof=1) > 0 and np.std(null.truth["kappa"], ddof=1) > 0
     assert np.all(np.abs(null.truth["cor_person"][3, :3]) < 1e-12)
     assert np.all(conf.truth["rho"] == 0) and np.all(conf.truth["kappa"] == 0)
     assert np.std(conf.complete_data.pupil_nuisance_effect, ddof=1) > 0
 
-    ident = ep.audit_multimodal_m3_identifiability(ep.simulate_multimodal_m3(40, 8, pupil_missingness="none", dropout=(0,0,0,0), seed=4))
+    ident = ep.audit_multimodal_m3_identifiability(
+        ep.simulate_multimodal_m3(40, 8, pupil_missingness="none", dropout=(0, 0, 0, 0), seed=4)
+    )
     assert ident.supported and ident.variation.all()
     assert list(ident.missing_fraction.index) == ["response", "rt", "gaze", "pupil"]
-    bad = ep.simulate_multimodal_m3(25, 6, pupil_missingness="none", dropout=(0,0,0,0), seed=5).data.copy()
+    bad = ep.simulate_multimodal_m3(
+        25, 6, pupil_missingness="none", dropout=(0, 0, 0, 0), seed=5
+    ).data.copy()
     bad.loc[0, "pupil_baseline"] = np.nan
     with pytest.raises(ep.EyeProcessValidationError, match="does not silently impute"):
         ep.audit_multimodal_m3_identifiability(bad)
 
-    sim = ep.simulate_multimodal_m3(30, 12, pupil_missingness="none", dropout=(0,0,0,0), seed=61)
+    sim = ep.simulate_multimodal_m3(30, 12, pupil_missingness="none", dropout=(0, 0, 0, 0), seed=61)
     nca = ep.multimodal_m3_negative_controls(sim, seed=62)
     ncb = ep.multimodal_m3_negative_controls(sim, seed=62)
-    assert set(nca.datasets) >= {"observed", "pupil_within_item", "pupil_within_person", "pupil_phase_randomized", "luminance_only_pupil", "irrelevant_pupil"}
-    pd.testing.assert_frame_equal(nca.datasets["pupil_phase_randomized"], ncb.datasets["pupil_phase_randomized"])
+    assert set(nca.datasets) >= {
+        "observed",
+        "pupil_within_item",
+        "pupil_within_person",
+        "pupil_phase_randomized",
+        "luminance_only_pupil",
+        "irrelevant_pupil",
+    }
+    pd.testing.assert_frame_equal(
+        nca.datasets["pupil_phase_randomized"], ncb.datasets["pupil_phase_randomized"]
+    )
     orig = nca.datasets["observed"].pupil.to_numpy()
     rnd = nca.datasets["pupil_phase_randomized"].pupil.to_numpy()
     np.testing.assert_allclose(np.mean(rnd), np.mean(orig), atol=1e-8)
@@ -141,8 +214,10 @@ def test_m3_spec_simulation_identifiability_negative_controls_and_bridge():
     assert not np.array_equal(rnd, orig)
 
     d = ep.simulate_multimodal_m3(25, 6, seed=7).data.copy()
-    d["trajectory_score"] = np.arange(1, len(d)+1) / len(d)
-    bridge = ep.multimodal_m3_functional_bridge(d, "trajectory_score", provenance="score from preregistered trajectory basis")
+    d["trajectory_score"] = np.arange(1, len(d) + 1) / len(d)
+    bridge = ep.multimodal_m3_functional_bridge(
+        d, "trajectory_score", provenance="score from preregistered trajectory basis"
+    )
     np.testing.assert_allclose(bridge.data.pupil, d.trajectory_score)
     assert bridge.representation == "functional_score" and "does not claim" in bridge.boundary
     with pytest.raises(ep.EyeProcessValidationError, match="one finite-or-NA value per trial"):
@@ -165,8 +240,21 @@ def test_m4_spec_simulation_sequences_evidence_and_gate():
     np.testing.assert_array_equal(a.truth["state"], b.truth["state"])
     assert ep.simulate_multimodal_m4(10, 6, scenario="null", seed=102).truth["n_states"] == 1
 
-    ident = ep.audit_multimodal_m4_identifiability(ep.simulate_multimodal_m4(12, 6, seed=104), include_posterior=False)
-    assert set(["domain", "criterion", "status", "severity", "value", "threshold", "message", "recommendation"]) <= set(ident.checks.columns)
+    ident = ep.audit_multimodal_m4_identifiability(
+        ep.simulate_multimodal_m4(12, 6, seed=104), include_posterior=False
+    )
+    assert set(
+        [
+            "domain",
+            "criterion",
+            "status",
+            "severity",
+            "value",
+            "threshold",
+            "message",
+            "recommendation",
+        ]
+    ) <= set(ident.checks.columns)
     assert ident.overall in {"PASS", "PASS_WITH_CAUTION", "REVIEW", "FAIL", "NOT_EVALUATED"}
     assert isinstance(ident.supported, (bool, np.bool_))
 
@@ -178,25 +266,56 @@ def test_m4_spec_simulation_sequences_evidence_and_gate():
     sim = ep.simulate_multimodal_m4(10, 6, seed=106)
     nca = ep.multimodal_m4_negative_controls(sim, seed=99, run=False)
     ncb = ep.multimodal_m4_negative_controls(sim, seed=99, run=False)
-    expected = ["order_shuffle", "process_shuffle", "state_independent", "nuisance_pseudostate", "device_session_pseudostate", "overfit_state_count"]
+    expected = [
+        "order_shuffle",
+        "process_shuffle",
+        "state_independent",
+        "nuisance_pseudostate",
+        "device_session_pseudostate",
+        "overfit_state_count",
+    ]
     assert not nca.executed and nca.controls == expected == ncb.controls
     pd.testing.assert_frame_equal(nca.data, ncb.data)
     rec = ep.multimodal_m4_recovery()
     assert not rec.executed and len(rec.design) == 5
 
-    review_spec = ep.multimodal_m4_spec(n_states=2, transition_structure="markov", trait_conditioning=("theta", "tau"), initial_trait_conditioning=True)
-    aud = ep.audit_multimodal_m4_identifiability(ep.simulate_multimodal_m4(30, 10, n_states=2, scenario="clear", seed=20260821), spec=review_spec, include_posterior=False)
+    review_spec = ep.multimodal_m4_spec(
+        n_states=2,
+        transition_structure="markov",
+        trait_conditioning=("theta", "tau"),
+        initial_trait_conditioning=True,
+    )
+    aud = ep.audit_multimodal_m4_identifiability(
+        ep.simulate_multimodal_m4(30, 10, n_states=2, scenario="clear", seed=20260821),
+        spec=review_spec,
+        include_posterior=False,
+    )
     z = aud.checks.loc[aud.checks.criterion == "trait_conditioned_markov"]
-    assert len(z) == 1 and z.iloc[0].status == "REVIEW" and aud.overall == "REVIEW" and aud.supported
-    unconditional = ep.multimodal_m4_spec(n_states=2, transition_structure="markov", trait_conditioning=(), initial_trait_conditioning=False)
-    aud2 = ep.audit_multimodal_m4_identifiability(ep.simulate_multimodal_m4(30, 10, n_states=2, scenario="clear", seed=20260822), spec=unconditional, include_posterior=False)
-    assert aud2.checks.loc[aud2.checks.criterion == "trait_conditioned_markov", "status"].iloc[0] == "PASS"
+    assert (
+        len(z) == 1 and z.iloc[0].status == "REVIEW" and aud.overall == "REVIEW" and aud.supported
+    )
+    unconditional = ep.multimodal_m4_spec(
+        n_states=2,
+        transition_structure="markov",
+        trait_conditioning=(),
+        initial_trait_conditioning=False,
+    )
+    aud2 = ep.audit_multimodal_m4_identifiability(
+        ep.simulate_multimodal_m4(30, 10, n_states=2, scenario="clear", seed=20260822),
+        spec=unconditional,
+        include_posterior=False,
+    )
+    assert (
+        aud2.checks.loc[aud2.checks.criterion == "trait_conditioned_markov", "status"].iloc[0]
+        == "PASS"
+    )
     with pytest.raises(ep.EyeProcessGovernanceError, match="gated for REVIEW"):
         ep.fit_multimodal_m4(sim, spec=review_spec)
 
 
 def test_staged_stan_contracts_and_m4_identification_metadata():
     from importlib.resources import files
+
     root = files("eyeprocesspy.resources.stan")
     m2 = root.joinpath("m2-man2022-response-rt-gaze-0-10.stan").read_text()
     assert "bernoulli_logit" in m2
@@ -242,7 +361,9 @@ def test_staged_plot_counterparts_return_data_bearing_axes():
             plt.close(ax.figure)
 
     generic_validation = ep.validate_multimodal_irt(sim0)
-    generic_information = ep.process_information(np.array([[0.0], [1.0], [2.0], [3.0]]), np.array([[0.4], [1.0], [1.6], [2.2]]))
+    generic_information = ep.process_information(
+        np.array([[0.0], [1.0], [2.0], [3.0]]), np.array([[0.4], [1.0], [1.6], [2.2]])
+    )
     for fn, obj in [
         (ep.plot_eye_multimodal_measurement, sim0.measurement),
         (ep.plot_eye_multimodal_simulation, sim0),
@@ -315,10 +436,20 @@ def test_m4_session_truth_and_state_diagnostic_structure():
     assert len(states.occupancy) == 2
     assert states.transition_matrix.shape == (2, 2)
     assert len(states.transition) == 4
-    assert {"mean_entropy", "median_entropy", "mean_run_length", "switching_rate"} <= set(states.summary)
+    assert {"mean_entropy", "median_entropy", "mean_run_length", "switching_rate"} <= set(
+        states.summary
+    )
 
-    assert ep.simulate_multimodal_m4(10, 6, scenario="nuisance_confounded", seed=1702).truth["n_states"] == 1
-    assert ep.simulate_multimodal_m4(10, 6, scenario="device_confounded", seed=1703).truth["n_states"] == 1
+    assert (
+        ep.simulate_multimodal_m4(10, 6, scenario="nuisance_confounded", seed=1702).truth[
+            "n_states"
+        ]
+        == 1
+    )
+    assert (
+        ep.simulate_multimodal_m4(10, 6, scenario="device_confounded", seed=1703).truth["n_states"]
+        == 1
+    )
     with pytest.raises(ep.EyeProcessValidationError, match="state_dependent"):
         ep.simulate_multimodal_m4(10, 6, scenario="null", missingness="state_dependent", seed=1704)
 
@@ -329,7 +460,9 @@ def test_m4_rejects_noncontiguous_sequence_blocks():
     # Move one row from the first sequence into the middle of another block.
     row = d.iloc[[0]]
     d = pd.concat([d.iloc[1:4], row, d.iloc[4:]], ignore_index=True)
-    with pytest.raises(ep.EyeProcessValidationError, match="contiguous|order|sorted|trial|sequence"):
+    with pytest.raises(
+        ep.EyeProcessValidationError, match="contiguous|order|sorted|trial|sequence"
+    ):
         ep.audit_multimodal_m4_identifiability(d, include_posterior=False)
 
 

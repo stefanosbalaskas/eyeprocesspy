@@ -15,10 +15,10 @@ import copy
 import hashlib
 import json
 import math
-from collections.abc import Mapping, Sequence
-from datetime import date, datetime, timezone
+from collections.abc import Callable, Mapping, Sequence
+from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -103,7 +103,7 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes, Path)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     if np.isscalar(value):
         return [value]
     try:
@@ -131,7 +131,7 @@ def _numeric_vector(value: Any, *, name: str) -> list[float]:
 
 
 def _now_utc_string() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _clean_scalar(value: Any) -> Any:
@@ -156,7 +156,8 @@ def _jsonify(value: Any) -> Any:
             "columns": [str(column) for column in value.columns],
             "index": [_clean_scalar(item) for item in value.index.tolist()],
             "records": [
-                {str(key): _jsonify(item) for key, item in row.items()} for row in value.to_dict(orient="records")
+                {str(key): _jsonify(item) for key, item in row.items()}
+                for row in value.to_dict(orient="records")
             ],
             "attrs": _jsonify(dict(value.attrs)),
         }
@@ -199,7 +200,10 @@ def _restore_json(value: Any) -> Any:
     marker = value.get("__eyeprocess_type__")
     if marker == "dataframe":
         frame = pd.DataFrame(
-            [{key: _restore_json(item) for key, item in row.items()} for row in value.get("records", [])],
+            [
+                {key: _restore_json(item) for key, item in row.items()}
+                for row in value.get("records", [])
+            ],
             columns=value.get("columns", []),
         )
         frame.index = value.get(
@@ -336,7 +340,9 @@ def eyeprocess_negative_control_evidence_plan(
         replications0 = int(replications)
         seed0 = int(seed)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError("replications/seed must be positive scalar integers.") from exc
+        raise EyeProcessValidationError(
+            "replications/seed must be positive scalar integers."
+        ) from exc
     if replications0 < 1 or seed0 < 1:
         raise EyeProcessValidationError("replications/seed must be positive scalar integers.")
     return _tag(
@@ -396,7 +402,9 @@ def eyeprocess_validation_claim_matrix(
 
     n = max(lengths.values())
     if any(length not in {1, n} for length in lengths.values()):
-        raise EyeProcessValidationError("claim/evidence fields must have length 1 or a common maximum length.")
+        raise EyeProcessValidationError(
+            "claim/evidence fields must have length 1 or a common maximum length."
+        )
 
     status0 = [str(value) for value in _recycle(status, n)]
     if any(value not in _CLAIM_STATUS for value in status0):
@@ -421,7 +429,9 @@ def eyeprocess_validation_claim_matrix(
     for name in ("claim", "evidence_id", "evidence_type"):
         values = output[name]
         if values.isna().any() or values.fillna("").str.len().eq(0).any():
-            raise EyeProcessValidationError("claim, evidence_id, and evidence_type must be non-missing and non-empty.")
+            raise EyeProcessValidationError(
+                "claim, evidence_id, and evidence_type must be non-missing and non-empty."
+            )
 
     return output
 
@@ -630,7 +640,9 @@ def eyeprocess_validation_release_gate(
 ):
     """Apply the frozen conservative software-release evidence gate."""
     if not _class_is(readiness, _READINESS_CLASS):
-        raise EyeProcessValidationError("readiness must come from eyeprocess_validation_readiness().")
+        raise EyeProcessValidationError(
+            "readiness must come from eyeprocess_validation_readiness()."
+        )
 
     acceptance_ok = True
     if acceptance is not None:
@@ -639,10 +651,16 @@ def eyeprocess_validation_release_gate(
         if "pass" not in acceptance.columns:
             raise EyeProcessValidationError("acceptance is missing required columns: pass")
         acceptance_ok = bool(
-            len(acceptance) > 0 and acceptance["pass"].notna().all() and acceptance["pass"].astype(bool).all()
+            len(acceptance) > 0
+            and acceptance["pass"].notna().all()
+            and acceptance["pass"].astype(bool).all()
         )
 
-    passed = bool(readiness["ready"] and acceptance_ok and (not bool(require_hash) or bool(readiness["hash_valid"])))
+    passed = bool(
+        readiness["ready"]
+        and acceptance_ok
+        and (not bool(require_hash) or bool(readiness["hash_valid"]))
+    )
     return _tag(
         {
             "pass": passed,
@@ -666,10 +684,16 @@ def _coerce_metric_output(value: Any) -> dict[str, float]:
         array = np.asarray(value)
         names = getattr(value, "name", None)
         if names is None:
-            raise EyeProcessValidationError("metric_fun must return a non-empty uniquely named vector.")
+            raise EyeProcessValidationError(
+                "metric_fun must return a non-empty uniquely named vector."
+            )
         items = [(str(names), array.item())]
 
-    if not items or any(not str(name) for name, _ in items) or len({str(name) for name, _ in items}) != len(items):
+    if (
+        not items
+        or any(not str(name) for name, _ in items)
+        or len({str(name) for name, _ in items}) != len(items)
+    ):
         raise EyeProcessValidationError("metric_fun must return a non-empty uniquely named vector.")
 
     output: dict[str, float] = {}
@@ -770,7 +794,9 @@ def run_eyeprocess_stress_evidence(
             finite_pair = np.isfinite(baseline_value) and np.isfinite(observed)
             delta = observed - baseline_value if finite_pair else np.nan
             relative_change = (
-                (observed - baseline_value) / abs(baseline_value) if finite_pair and baseline_value != 0 else np.nan
+                (observed - baseline_value) / abs(baseline_value)
+                if finite_pair and baseline_value != 0
+                else np.nan
             )
             result_rows.append(
                 {
@@ -855,7 +881,9 @@ def summarise_eyeprocess_stress_evidence(x):
                 "min_severity": float(frame["severity"].min()),
                 "max_severity": float(frame["severity"].max()),
                 "mean_delta": (float(np.mean(finite_delta)) if len(finite_delta) else np.nan),
-                "max_abs_delta": (float(np.max(np.abs(finite_delta))) if len(finite_delta) else np.nan),
+                "max_abs_delta": (
+                    float(np.max(np.abs(finite_delta))) if len(finite_delta) else np.nan
+                ),
             }
         )
     return pd.DataFrame(output)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -126,14 +127,10 @@ def test_point_process_guards_covariates_marked_prediction_and_diagnostics():
     with pytest.raises(ep.EyeProcessValidationError, match="eye_fixation_point_process"):
         ep.predict_fixation_intensity({})
 
-    p_default = ep.predict_fixation_intensity(
-        fit, pd.DataFrame({"x": [0.2, 0.8], "y": [0.8, 0.2]})
-    )
+    p_default = ep.predict_fixation_intensity(fit, pd.DataFrame({"x": [0.2, 0.8], "y": [0.8, 0.2]}))
     p_source = ep.predict_fixation_intensity(
         fit,
-        pd.DataFrame(
-            {"gaze_x": [0.2, 0.8], "gaze_y": [0.8, 0.2], "cov": [1.0, np.nan]}
-        ),
+        pd.DataFrame({"gaze_x": [0.2, 0.8], "gaze_y": [0.8, 0.2], "cov": [1.0, np.nan]}),
     )
     assert p_default["predicted_intensity"].notna().all()
     assert p_source["predicted_intensity"].notna().all()
@@ -258,7 +255,9 @@ def _episode_signal(n=30):
 
 def test_changepoint_guards_detection_segmentation_and_time_path():
     with pytest.raises(ep.EyeProcessValidationError, match="At least"):
-        ep.detect_process_changepoints(pd.DataFrame({"signal": [1.0] * 5}), channels=["signal"], window=2)
+        ep.detect_process_changepoints(
+            pd.DataFrame({"signal": [1.0] * 5}), channels=["signal"], window=2
+        )
 
     text = pd.DataFrame({"aoi": ["A"] * 25})
     with pytest.raises(ep.EyeProcessValidationError, match="numeric process channel"):
@@ -293,9 +292,7 @@ def test_episode_label_compare_and_plot_residual_paths():
 
     with pytest.raises(ep.EyeProcessValidationError, match="eye_process_episodes"):
         ep.label_process_episodes({})
-    modelled = ep.label_process_episodes(
-        seg, model=lambda summary, data: ["m1", "m2", "m3"]
-    )
+    modelled = ep.label_process_episodes(seg, model=lambda summary, data: ["m1", "m2", "m3"])
     ruled = ep.label_process_episodes(
         seg,
         rules={

@@ -104,7 +104,9 @@ def test_item_bank_selection_exposure_content_and_no_eligible_paths():
         irt.eyeprocess_irt_item_bank(items, content=["A"])
 
     exposure = pd.DataFrame({"item_id": ["I1", "I2", "I3"], "rate": [0.9, 0.0, 0.8]})
-    selected = irt.eyeprocess_irt_item_selection(bank, theta=0.0, exposure=exposure, content_required=["B"])
+    selected = irt.eyeprocess_irt_item_selection(
+        bank, theta=0.0, exposure=exposure, content_required=["B"]
+    )
     assert selected.selected == "I2"
     none = irt.eyeprocess_irt_item_selection(bank, theta=0.0, administered=["I1", "I2", "I3"])
     assert none.selected is None and none.reason == "no_eligible_item"
@@ -117,9 +119,18 @@ def test_item_bank_selection_exposure_content_and_no_eligible_paths():
 
 
 def test_stopping_rule_continue_precision_maximum_and_scalar_guards():
-    assert irt.eyeprocess_irt_stopping_rule(3, se=0.2, min_items=5, max_items=10)["reason"] == "continue"
-    assert irt.eyeprocess_irt_stopping_rule(5, se=0.2, min_items=5, max_items=10)["reason"] == "target_precision"
-    assert irt.eyeprocess_irt_stopping_rule(10, se=1.0, min_items=5, max_items=10)["reason"] == "maximum_items"
+    assert (
+        irt.eyeprocess_irt_stopping_rule(3, se=0.2, min_items=5, max_items=10)["reason"]
+        == "continue"
+    )
+    assert (
+        irt.eyeprocess_irt_stopping_rule(5, se=0.2, min_items=5, max_items=10)["reason"]
+        == "target_precision"
+    )
+    assert (
+        irt.eyeprocess_irt_stopping_rule(10, se=1.0, min_items=5, max_items=10)["reason"]
+        == "maximum_items"
+    )
     with pytest.raises(EyeProcessValidationError, match="invalid stopping-rule"):
         irt.eyeprocess_irt_stopping_rule([1, 2])
     with pytest.raises(EyeProcessValidationError, match="invalid stopping-rule"):
@@ -171,11 +182,14 @@ def test_link_optimizers_weight_start_and_stability_paths():
 
 def test_anchor_audit_and_purification_iteration_paths():
     dif = pd.DataFrame({"item_id": ["I1", "I2"], "effect": [0.3, 0.01]})
-    audit = irt.eyeprocess_irt_anchor_audit(_items(), dif=dif, max_abs_effect=0.1, min_information=0.05)
+    audit = irt.eyeprocess_irt_anchor_audit(
+        _items(), dif=dif, max_abs_effect=0.1, min_information=0.05
+    )
     assert not bool(audit.loc[audit.item_id.eq("I1"), "eligible"].iloc[0])
     assert "information_theta0" in audit
 
     calls = []
+
     def effects(anchors):
         calls.append(tuple(anchors))
         effect = [0.0 for _ in anchors]
@@ -198,8 +212,12 @@ def test_anchor_audit_and_purification_iteration_paths():
 
 
 def test_sbc_rank_generation_and_diagnostic_guards():
-    deterministic = irt.eyeprocess_irt_sbc_ranks([0.0], [[-1.0, 0.0, 0.0, 1.0]], randomize_ties=False)
-    randomized = irt.eyeprocess_irt_sbc_ranks([0.0], [[-1.0, 0.0, 0.0, 1.0]], randomize_ties=True, seed=2)
+    deterministic = irt.eyeprocess_irt_sbc_ranks(
+        [0.0], [[-1.0, 0.0, 0.0, 1.0]], randomize_ties=False
+    )
+    randomized = irt.eyeprocess_irt_sbc_ranks(
+        [0.0], [[-1.0, 0.0, 0.0, 1.0]], randomize_ties=True, seed=2
+    )
     assert deterministic.tolist() == [1]
     assert 1 <= randomized[0] <= 3
     with pytest.raises(EyeProcessValidationError, match="draws rows"):
@@ -281,7 +299,9 @@ def test_latent_regression_numeric_categorical_interaction_centering_and_guards(
     assert centered.complete.tolist() == [True, True, True, False]
     assert centered.matrix.loc[:2, "age"].mean() == pytest.approx(0.0)
 
-    raw = irt.eyeprocess_irt_latent_regression_design(data.fillna(16), "0 + age + group", center_numeric=False)
+    raw = irt.eyeprocess_irt_latent_regression_design(
+        data.fillna(16), "0 + age + group", center_numeric=False
+    )
     assert "(Intercept)" not in raw.matrix
     assert raw.centers["age"] == 0.0
     with pytest.raises(EyeProcessValidationError, match="missing column"):
@@ -292,7 +312,9 @@ def test_latent_regression_numeric_categorical_interaction_centering_and_guards(
 
 def test_cdm_qmatrix_profiles_probability_and_uncertainty_guards():
     q = np.array([[1, 0], [0, 1], [1, 1]])
-    qa = irt.eyeprocess_cdm_qmatrix_audit(q, item_ids=["I1", "I2", "I3"], attribute_names=["A", "B"])
+    qa = irt.eyeprocess_cdm_qmatrix_audit(
+        q, item_ids=["I1", "I2", "I3"], attribute_names=["A", "B"]
+    )
     assert qa.complete_identity_block
     with pytest.raises(EyeProcessValidationError, match="binary matrix"):
         irt.eyeprocess_cdm_qmatrix_audit([[1, 2]])
@@ -339,7 +361,9 @@ def test_classification_precision_zero_se_multiple_cuts_and_guards():
 def test_missing_by_design_declared_structural_unexpected_and_guards():
     responses = np.array([[1.0, np.nan, np.nan], [0.0, 1.0, np.nan]])
     design = np.array([[1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
-    declared = irt.eyeprocess_irt_missing_by_design_audit(responses, design=design, min_administered=2)
+    declared = irt.eyeprocess_irt_missing_by_design_audit(
+        responses, design=design, min_administered=2
+    )
     assert declared.structural_missing == 2
     assert declared.unexpected_missing == 1
     assert declared.has_declared_design
@@ -352,6 +376,7 @@ def test_missing_by_design_declared_structural_unexpected_and_guards():
         irt.eyeprocess_irt_missing_by_design_audit(responses, min_administered=0)
     with pytest.raises(EyeProcessValidationError, match="same dimensions"):
         irt.eyeprocess_irt_missing_by_design_audit(responses, design=[[1, 1]])
-    bad_design = design.copy(); bad_design[0, 0] = 2
+    bad_design = design.copy()
+    bad_design[0, 0] = 2
     with pytest.raises(EyeProcessValidationError, match="0/1/NA"):
         irt.eyeprocess_irt_missing_by_design_audit(responses, design=bad_design)

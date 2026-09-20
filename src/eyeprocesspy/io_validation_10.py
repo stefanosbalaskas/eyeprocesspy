@@ -8,10 +8,11 @@ import re
 import shutil
 import tempfile
 import zipfile
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -47,7 +48,7 @@ _RAW_JSON = "raw.json"
 
 
 def _now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _jsonable(value: Any) -> Any:
@@ -89,7 +90,9 @@ def _dtype_family(series: pd.Series) -> str:
         return "object"
     if nonmissing.map(lambda x: isinstance(x, (bool, np.bool_))).all():
         return "boolean"
-    if nonmissing.map(lambda x: isinstance(x, (int, float, np.number)) and not isinstance(x, bool)).all():
+    if nonmissing.map(
+        lambda x: isinstance(x, (int, float, np.number)) and not isinstance(x, bool)
+    ).all():
         return "numeric"
     return "object"
 
@@ -351,7 +354,11 @@ def report_eye_dataset(
     trials = audit_trial_coverage(x)
     warnings_table = interpretive_warnings()
     recordings = x["recordings"]
-    participants = recordings["participant_id"].dropna().astype(str).nunique() if "participant_id" in recordings else 0
+    participants = (
+        recordings["participant_id"].dropna().astype(str).nunique()
+        if "participant_id" in recordings
+        else 0
+    )
     lines = [
         f"# {title}",
         "",
@@ -396,7 +403,9 @@ def report_eye_dataset(
         "",
         "## Provenance",
         "",
-        _markdown_table(x["provenance"]) if len(x["provenance"]) else "No provenance records available.",
+        _markdown_table(x["provenance"])
+        if len(x["provenance"])
+        else "No provenance records available.",
     ]
     p = Path(path).expanduser()
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -406,7 +415,9 @@ def report_eye_dataset(
         import eyeprocesspy as ep
 
         plot_dir = (
-            Path(plot_directory) if plot_directory is not None else p.with_suffix("").with_name(p.stem + "-figures")
+            Path(plot_directory)
+            if plot_directory is not None
+            else p.with_suffix("").with_name(p.stem + "-figures")
         )
         plot_dir.mkdir(parents=True, exist_ok=True)
         for filename, name in [
@@ -825,7 +836,8 @@ def format_compatibility_matrix(validation=None):
             if "format_family" in summary and pd.notna(row.get("format_family")):
                 key = _normalize_key(row.get("format_family"))
                 hit = out[
-                    out["format_id"].map(_normalize_key).eq(key) | out["export_family"].map(_normalize_key).eq(key)
+                    out["format_id"].map(_normalize_key).eq(key)
+                    | out["export_family"].map(_normalize_key).eq(key)
                 ]
                 if not hit.empty:
                     target = hit.index[0]
@@ -870,7 +882,11 @@ def inspect_eye_source(path, recursive=True, inspect_rows=10, include_hash=True)
     if inspect_rows < 1:
         raise EyeProcessValidationError("`inspect_rows` must be a positive integer.")
     root = p if p.is_dir() else p.parent
-    files = [q for q in (p.rglob("*") if recursive else p.glob("*")) if q.is_file()] if p.is_dir() else [p]
+    files = (
+        [q for q in (p.rglob("*") if recursive else p.glob("*")) if q.is_file()]
+        if p.is_dir()
+        else [p]
+    )
     rows = []
     for f in files:
         ext = f.suffix.lower().lstrip(".")
@@ -889,11 +905,15 @@ def inspect_eye_source(path, recursive=True, inspect_rows=10, include_hash=True)
         rows.append(
             {
                 "source_path": str(f.resolve()),
-                "relative_path": str(f.resolve().relative_to(root.resolve())) if f != root else f.name,
+                "relative_path": str(f.resolve().relative_to(root.resolve()))
+                if f != root
+                else f.name,
                 "file_name": f.name,
                 "extension": ext,
                 "size_bytes": float(stat.st_size),
-                "modified": datetime.fromtimestamp(stat.st_mtime, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+                "modified": datetime.fromtimestamp(stat.st_mtime, UTC).strftime(
+                    "%Y-%m-%d %H:%M:%S UTC"
+                ),
                 "md5": hashlib.md5(f.read_bytes()).hexdigest() if include_hash else pd.NA,
                 "tabular": tabular,
                 "readable": sample is not None if tabular else True,
@@ -902,7 +922,9 @@ def inspect_eye_source(path, recursive=True, inspect_rows=10, include_hash=True)
                 "n_columns": pd.NA if sample is None else sample.shape[1],
                 "columns": pd.NA if sample is None else "|".join(map(str, sample.columns)),
                 "detected_format": pd.NA if detection.empty else detection.iloc[0]["format"],
-                "detection_confidence": np.nan if detection.empty else float(detection.iloc[0]["confidence"]),
+                "detection_confidence": np.nan
+                if detection.empty
+                else float(detection.iloc[0]["confidence"]),
             }
         )
     return pd.DataFrame(rows)
@@ -944,7 +966,9 @@ def _nonmissing(series: pd.Series) -> pd.Series:
     if pd.api.types.is_string_dtype(series) or series.dtype == object:
         return series.map(
             lambda v: (
-                False if v is None or v is pd.NA or (isinstance(v, float) and np.isnan(v)) else bool(str(v).strip())
+                False
+                if v is None or v is pd.NA or (isinstance(v, float) and np.isnan(v))
+                else bool(str(v).strip())
             )
         )
     return series.notna()
@@ -967,7 +991,8 @@ def schema_coverage(x, require_gaze=True):
             elif not len(d):
                 status = (
                     "fail"
-                    if critical and (table == "recordings" or (table == "gaze_samples" and require_gaze))
+                    if critical
+                    and (table == "recordings" or (table == "gaze_samples" and require_gaze))
                     else "not_applicable"
                 )
             elif critical and populated == 0:
@@ -1023,7 +1048,16 @@ def _usable_text(values: Any) -> pd.Series:
 
 
 def _safe_numeric(values: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float, copy=True)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(values),
+            errors="coerce",
+        ).to_numpy(
+            dtype=float,
+            copy=True,
+        ),
+        dtype=float,
+    )
 
 
 def source_preservation_audit(x, require_raw=False):
@@ -1116,7 +1150,12 @@ def source_preservation_audit(x, require_raw=False):
     ]
     return pd.DataFrame(
         [
-            {"check": name, "status": "pass" if ok else "fail", "value": float(value), "message": msg}
+            {
+                "check": name,
+                "status": "pass" if ok else "fail",
+                "value": float(value),
+                "message": msg,
+            }
             for name, ok, value, msg in checks
         ]
     )
@@ -1253,7 +1292,9 @@ def _compare_columns(a: pd.Series, b: pd.Series, tolerance: float):
         delta[finite] = np.abs(av[finite] - bv[finite])
         differences += int((delta > tolerance).sum())
         finite_delta = delta[np.isfinite(delta)]
-        max_delta = float(finite_delta.max()) if finite_delta.size else (math.inf if len(delta) else 0.0)
+        max_delta = (
+            float(finite_delta.max()) if finite_delta.size else (math.inf if len(delta) else 0.0)
+        )
     if nonnumeric_mask.any():
         av = a[keep][nonnumeric_mask].map(_stable_cell)
         bv = b[keep][nonnumeric_mask].map(_stable_cell)
@@ -1296,7 +1337,9 @@ def compare_eye_datasets(
             diffs += n
             if np.isfinite(delta):
                 numeric_deltas.append(delta)
-        status = "pass" if len(dx) == len(dy) and not missing and not added and diffs == 0 else "fail"
+        status = (
+            "pass" if len(dx) == len(dy) and not missing and not added and diffs == 0 else "fail"
+        )
         rows.append(
             {
                 "table": table,
@@ -1348,7 +1391,9 @@ def roundtrip_eye_dataset(
 
 
 def _validation_check(check, status, value=np.nan, message=pd.NA):
-    return pd.DataFrame([{"check": str(check), "status": str(status), "value": value, "message": message}])
+    return pd.DataFrame(
+        [{"check": str(check), "status": str(status), "value": value, "message": message}]
+    )
 
 
 def _safe_audit(fn, x):
@@ -1415,31 +1460,52 @@ def validate_tobii_export(path):
     """Validate basic Tobii Pro Lab delimited-export structure."""
     p = Path(path)
     if p.is_dir():
-        return _vendor_issue("error", "expected_file", p, "Tobii Pro Lab validation expects a delimited export file.")
+        return _vendor_issue(
+            "error", "expected_file", p, "Tobii Pro Lab validation expects a delimited export file."
+        )
     try:
         d = _read_delimited(p, nrows=5)
     except Exception:
         return _vendor_issue(
-            "error", "unreadable_export", p, "The Tobii export could not be read as a delimited table."
+            "error",
+            "unreadable_export",
+            p,
+            "The Tobii export could not be read as a delimited table.",
         )
     names = [str(c).lower() for c in d.columns]
-    has_time = any(re.search(r"recording timestamp|system_time_stamp|device_time_stamp|timestamp", n) for n in names)
+    has_time = any(
+        re.search(r"recording timestamp|system_time_stamp|device_time_stamp|timestamp", n)
+        for n in names
+    )
     has_x = any(re.search(r"gaze point.*x|gaze2d x|display_area_x", n) for n in names)
     has_y = any(re.search(r"gaze point.*y|gaze2d y|display_area_y", n) for n in names)
     frames = []
     if not has_time:
         frames.append(
-            _vendor_issue("error", "missing_timestamp", p, "No supported Tobii timestamp column was identified.")
+            _vendor_issue(
+                "error",
+                "missing_timestamp",
+                p,
+                "No supported Tobii timestamp column was identified.",
+            )
         )
     if not (has_x and has_y):
         frames.append(
             _vendor_issue(
-                "error", "missing_gaze_coordinates", p, "No supported Tobii gaze-coordinate pair was identified."
+                "error",
+                "missing_gaze_coordinates",
+                p,
+                "No supported Tobii gaze-coordinate pair was identified.",
             )
         )
     if not any(re.search(r"validity|valid", n) for n in names):
         frames.append(
-            _vendor_issue("warning", "missing_validity", p, "No explicit Tobii gaze-validity field was identified.")
+            _vendor_issue(
+                "warning",
+                "missing_validity",
+                p,
+                "No explicit Tobii gaze-validity field was identified.",
+            )
         )
     return pd.concat(frames, ignore_index=True) if frames else _empty_vendor_issues()
 
@@ -1450,7 +1516,10 @@ def validate_pupillabs_export(path):
     fmt = _pupil_labs_format(p)
     if fmt == "unknown":
         return _vendor_issue(
-            "error", "unknown_pupil_format", p, "The source is not recognizable as Pupil Labs Neon or Core."
+            "error",
+            "unknown_pupil_format",
+            p,
+            "The source is not recognizable as Pupil Labs Neon or Core.",
         )
     required = "gaze.csv" if fmt == "neon" else "gaze_positions.csv"
     if p.is_dir() and not (p / required).exists():
@@ -1463,7 +1532,10 @@ def validate_eyelink_export(path):
     p = Path(path)
     if p.is_dir():
         return _vendor_issue(
-            "error", "expected_file", p, "EyeLink validation expects EDF, ASC, or a Data Viewer report file."
+            "error",
+            "expected_file",
+            p,
+            "EyeLink validation expects EDF, ASC, or a Data Viewer report file.",
         )
     if p.suffix.lower() == ".edf":
         return _vendor_issue(
@@ -1477,7 +1549,9 @@ def validate_eyelink_export(path):
     except OSError:
         lines = []
     if not lines:
-        return _vendor_issue("error", "unreadable_export", p, "The EyeLink source could not be read.")
+        return _vendor_issue(
+            "error", "unreadable_export", p, "The EyeLink source could not be read."
+        )
     if p.suffix.lower() == ".asc":
         known_tokens = {
             "MSG",
@@ -1498,7 +1572,10 @@ def validate_eyelink_export(path):
         tokens = [line.strip().split()[0] if line.strip() else "" for line in lines]
         if not any(token in known_tokens or token.isdigit() for token in tokens):
             return _vendor_issue(
-                "error", "unknown_asc_records", p, "No recognized EyeLink ASC record types were found."
+                "error",
+                "unknown_asc_records",
+                p,
+                "No recognized EyeLink ASC record types were found.",
             )
     return _empty_vendor_issues()
 
@@ -1507,14 +1584,22 @@ def validate_smi_export(path):
     """Validate SMI/BeGaze textual exports; proprietary IDF remains unsupported."""
     p = Path(path)
     if p.is_dir():
-        return _vendor_issue("error", "expected_file", p, "SMI validation expects a textual BeGaze export file.")
+        return _vendor_issue(
+            "error", "expected_file", p, "SMI validation expects a textual BeGaze export file."
+        )
     if p.suffix.lower() == ".idf":
         return _vendor_issue(
-            "error", "proprietary_idf", p, "Direct IDF decoding is not supported; export text from BeGaze first."
+            "error",
+            "proprietary_idf",
+            p,
+            "Direct IDF decoding is not supported; export text from BeGaze first.",
         )
     if _smi_confidence(p) < 0.5:
         return _vendor_issue(
-            "warning", "low_smi_confidence", p, "The textual export weakly matches known SMI/BeGaze fields."
+            "warning",
+            "low_smi_confidence",
+            p,
+            "The textual export weakly matches known SMI/BeGaze fields.",
         )
     return _empty_vendor_issues()
 
@@ -1523,18 +1608,26 @@ def validate_generic_export(path):
     """Validate readability and inferability of a generic mapped delimited export."""
     p = Path(path)
     if p.is_dir():
-        return _vendor_issue("error", "expected_file", p, "Generic mapping expects one delimited file.")
+        return _vendor_issue(
+            "error", "expected_file", p, "Generic mapping expects one delimited file."
+        )
     try:
         d = _read_delimited(p, nrows=10)
     except Exception:
         return _vendor_issue(
-            "error", "unreadable_export", p, "The generic export could not be read as a delimited table."
+            "error",
+            "unreadable_export",
+            p,
+            "The generic export could not be read as a delimited table.",
         )
     mapping = infer_eye_mapping(d)
     missing = [name for name in ["timestamp", "x", "y"] if name not in mapping]
     if missing:
         return _vendor_issue(
-            "warning", "mapping_required", p, "Explicit mappings are required for: " + ", ".join(missing) + "."
+            "warning",
+            "mapping_required",
+            p,
+            "Explicit mappings are required for: " + ", ".join(missing) + ".",
         )
     return _empty_vendor_issues()
 
@@ -1548,8 +1641,12 @@ def _format_validation_summary(x: EyeFormatValidation):
                 "vendor": x.vendor,
                 "status": x.status,
                 "files": len(x.source),
-                "detection_confidence": 0.0 if x.detection.empty else float(x.detection.iloc[0]["confidence"]),
-                "imported": bool((x.checks["check"].eq("import") & x.checks["status"].eq("pass")).any()),
+                "detection_confidence": 0.0
+                if x.detection.empty
+                else float(x.detection.iloc[0]["confidence"]),
+                "imported": bool(
+                    (x.checks["check"].eq("import") & x.checks["status"].eq("pass")).any()
+                ),
                 "validation_errors": int(x.validation["severity"].eq("error").sum())
                 if "severity" in x.validation
                 else pd.NA,
@@ -1592,7 +1689,9 @@ def validate_eye_source(
     if selected_vendor == "auto" and not detection.empty:
         selected_vendor = str(detection.iloc[0]["format"])
     if not detection.empty and selected_vendor in set(detection["format"].astype(str)):
-        confidence = float(detection.loc[detection["format"].astype(str).eq(selected_vendor), "confidence"].iloc[0])
+        confidence = float(
+            detection.loc[detection["format"].astype(str).eq(selected_vendor), "confidence"].iloc[0]
+        )
     else:
         confidence = 0.0
 
@@ -1612,8 +1711,14 @@ def validate_eye_source(
         dataset = None
         import_error = str(exc)
 
-    validation = validate_eye_dataset(dataset, strict=spec.strict) if dataset is not None else pd.DataFrame()
-    coverage = schema_coverage(dataset, require_gaze=spec.require_gaze) if dataset is not None else pd.DataFrame()
+    validation = (
+        validate_eye_dataset(dataset, strict=spec.strict) if dataset is not None else pd.DataFrame()
+    )
+    coverage = (
+        schema_coverage(dataset, require_gaze=spec.require_gaze)
+        if dataset is not None
+        else pd.DataFrame()
+    )
     preservation = (
         source_preservation_audit(dataset, require_raw=spec.require_raw_retention)
         if dataset is not None
@@ -1640,7 +1745,9 @@ def validate_eye_source(
         except Exception:
             roundtrip = EyeRoundtripValidation(
                 status="fail",
-                comparison=pd.DataFrame([{"table": pd.NA, "status": "fail", "content_equal": False}]),
+                comparison=pd.DataFrame(
+                    [{"table": pd.NA, "status": "fail", "content_equal": False}]
+                ),
                 original_fingerprint=pd.DataFrame(),
                 restored_fingerprint=pd.DataFrame(),
                 path="",
@@ -1654,7 +1761,12 @@ def validate_eye_source(
         else ("warning" if str(vendor) != "auto" and known_explicit else "fail")
     )
     checks = [
-        _validation_check("format_detection", detection_status, confidence, f"Selected adapter: {selected_vendor}."),
+        _validation_check(
+            "format_detection",
+            detection_status,
+            confidence,
+            f"Selected adapter: {selected_vendor}.",
+        ),
         _validation_check(
             "import",
             "pass" if dataset is not None else "fail",
@@ -1689,12 +1801,27 @@ def validate_eye_source(
                 "gaze_samples",
                 "pass" if not spec.require_gaze or gaze_ok else "fail",
                 len(dataset["gaze_samples"]),
-                "Gaze observations are required." if spec.require_gaze else "Gaze observations are optional.",
+                "Gaze observations are required."
+                if spec.require_gaze
+                else "Gaze observations are optional.",
             )
         )
-        native_ok = bool(((preservation["check"].eq("native_timestamps")) & preservation["status"].eq("pass")).any())
-        coord_ok = bool(((preservation["check"].eq("coordinate_registry")) & preservation["status"].eq("pass")).any())
-        prov_ok = bool(((preservation["check"].eq("source_provenance")) & preservation["status"].eq("pass")).any())
+        native_ok = bool(
+            (
+                (preservation["check"].eq("native_timestamps")) & preservation["status"].eq("pass")
+            ).any()
+        )
+        coord_ok = bool(
+            (
+                (preservation["check"].eq("coordinate_registry"))
+                & preservation["status"].eq("pass")
+            ).any()
+        )
+        prov_ok = bool(
+            (
+                (preservation["check"].eq("source_provenance")) & preservation["status"].eq("pass")
+            ).any()
+        )
         raw_ok = bool(dataset.raw)
         checks += [
             _validation_check(
@@ -1741,7 +1868,9 @@ def validate_eye_source(
                 checks_df,
                 _validation_check(
                     "adapter_specific_validation",
-                    "fail" if severity.eq("error").any() else ("warning" if severity.eq("warning").any() else "pass"),
+                    "fail"
+                    if severity.eq("error").any()
+                    else ("warning" if severity.eq("warning").any() else "pass"),
                     len(adapter_issues),
                     "The selected adapter completed its source-format checks.",
                 ),
@@ -1832,7 +1961,9 @@ def _coerce_manifest_flag(series: pd.Series, field: str) -> pd.Series:
         elif z in {"false", "f", "no", "n", "0"}:
             out.loc[i] = False
         else:
-            raise EyeProcessValidationError(f"Manifest field `{field}` contains invalid logical value: {value!r}.")
+            raise EyeProcessValidationError(
+                f"Manifest field `{field}` contains invalid logical value: {value!r}."
+            )
     return out
 
 
@@ -1850,7 +1981,9 @@ def _validate_manifest_rows(x, name="validation manifest"):
             raise EyeProcessValidationError(f"Every validation case requires a non-empty `{col}`.")
     if out["case_id"].duplicated().any():
         duplicates = ", ".join(out.loc[out["case_id"].duplicated(False), "case_id"].unique())
-        raise EyeProcessValidationError(f"Validation `case_id` values must be unique: {duplicates}.")
+        raise EyeProcessValidationError(
+            f"Validation `case_id` values must be unique: {duplicates}."
+        )
     for col in [c for c in _FLAG_COLUMNS if c in out]:
         out[col] = _coerce_manifest_flag(out[col], col)
     return out
@@ -1897,7 +2030,9 @@ def validation_manifest(
         "expected_import": _recycle(expected_import, n, "expected_import"),
         "require_gaze": _recycle(require_gaze, n, "require_gaze"),
         "require_native_time": _recycle(require_native_time, n, "require_native_time"),
-        "require_coordinate_space": _recycle(require_coordinate_space, n, "require_coordinate_space"),
+        "require_coordinate_space": _recycle(
+            require_coordinate_space, n, "require_coordinate_space"
+        ),
         "require_provenance": _recycle(require_provenance, n, "require_provenance"),
         "require_raw_retention": _recycle(require_raw_retention, n, "require_raw_retention"),
         "run_roundtrip": _recycle(run_roundtrip, n, "run_roundtrip"),
@@ -1968,7 +2103,11 @@ def discover_validation_cases(path, recursive=False):
         raise EyeProcessValidationError(f"Validation corpus directory does not exist: {path}")
     recursive = _flag(recursive, "recursive")
     children = list(p.iterdir())
-    cases = [q for q in children if q.name.lower() not in {"manifest.csv", "validation-manifest.csv", "readme.txt"}]
+    cases = [
+        q
+        for q in children
+        if q.name.lower() not in {"manifest.csv", "validation-manifest.csv", "readme.txt"}
+    ]
     if not cases and recursive:
         cases = [q for q in p.rglob("*") if q.is_file()]
     if not cases:
@@ -2010,9 +2149,13 @@ def validate_eye_corpus(
     ]
     for _, row in manifest.iterrows():
         case_spec = copy.deepcopy(spec)
-        for field in override_fields:
-            if field in manifest and pd.notna(row[field]):
-                setattr(case_spec, field, bool(row[field]))
+        for override_field in override_fields:
+            if override_field in manifest and pd.notna(row[override_field]):
+                setattr(
+                    case_spec,
+                    override_field,
+                    bool(row[override_field]),
+                )
         if (
             isinstance(import_args, Mapping)
             and str(row["case_id"]) in import_args
@@ -2050,10 +2193,14 @@ def validate_eye_corpus(
         if c in manifest
     ]
     lookup = manifest.set_index("case_id")
-    for field in extras:
-        summary[field] = summary["case_id"].map(lookup[field])
+    for extra_field in extras:
+        summary[extra_field] = summary["case_id"].map(lookup[extra_field])
     summary["validation_status"] = summary["status"]
-    expected = summary.get("expected_import", pd.Series(True, index=summary.index)).fillna(True).astype(bool)
+    expected = (
+        summary.get("expected_import", pd.Series(True, index=summary.index))
+        .fillna(True)
+        .astype(bool)
+    )
     summary["expectation_met"] = np.where(expected, summary["imported"], ~summary["imported"])
     summary["status"] = np.where(
         ~summary["expectation_met"],
@@ -2119,16 +2266,25 @@ def anonymize_eye_dataset(
     out = x.copy()
     maps = {}
     maps["participants"] = _remap_field(
-        out, "participant_id", ["recordings", "intervals", "responses", "features"], participant_prefix
+        out,
+        "participant_id",
+        ["recordings", "intervals", "responses", "features"],
+        participant_prefix,
     )
-    maps["recordings"] = _remap_field(out, "recording_id", canonical_table_names(), recording_prefix)
+    maps["recordings"] = _remap_field(
+        out, "recording_id", canonical_table_names(), recording_prefix
+    )
     maps["sessions"] = _remap_field(out, "session_id", ["recordings"], session_prefix)
-    maps["streams"] = _remap_field(out, "stream_id", ["streams", "gaze_samples", "biometrics", "quality"], "ST")
+    maps["streams"] = _remap_field(
+        out, "stream_id", ["streams", "gaze_samples", "biometrics", "quality"], "ST"
+    )
     maps["gaze_samples"] = _remap_field(out, "sample_id", ["gaze_samples"], "GS")
     maps["eye_samples"] = _remap_field(out, "sample_id", ["eye_samples"], "ES")
     maps["episodes"] = _remap_field(out, "episode_id", ["episodes"], "EP")
     maps["events"] = _remap_field(out, "event_id", ["events"], "EV")
-    maps["intervals"] = _remap_field(out, "interval_id", ["intervals"], "IN", ["interval_id", "parent_interval_id"])
+    maps["intervals"] = _remap_field(
+        out, "interval_id", ["intervals"], "IN", ["interval_id", "parent_interval_id"]
+    )
     maps["responses"] = _remap_field(out, "response_id", ["responses"], "RS")
     maps["calibrations"] = _remap_field(out, "calibration_id", ["calibrations"], "CA")
     maps["features"] = _remap_field(out, "feature_id", ["features"], "FT")
@@ -2154,7 +2310,16 @@ def anonymize_eye_dataset(
     maps["stimuli"] = _remap_field(
         out,
         "stimulus_id",
-        ["gaze_samples", "eye_samples", "episodes", "events", "intervals", "aoi_definitions", "features", "biometrics"],
+        [
+            "gaze_samples",
+            "eye_samples",
+            "episodes",
+            "events",
+            "intervals",
+            "aoi_definitions",
+            "features",
+            "biometrics",
+        ],
         "SM",
     )
     if anonymize_aois:
@@ -2171,20 +2336,26 @@ def anonymize_eye_dataset(
             d = out["events"].copy()
             names = list(dict.fromkeys(d["event_name"].dropna().astype(str)))
             event_map = {v: f"event_{i:05d}" for i, v in enumerate(names, 1)}
-            d["event_name"] = d["event_name"].map(lambda v: event_map.get(str(v), v) if pd.notna(v) else v)
+            d["event_name"] = d["event_name"].map(
+                lambda v: event_map.get(str(v), v) if pd.notna(v) else v
+            )
             d["event_value"] = pd.NA
             d["native_record"] = pd.NA
             out["events"] = d
             maps["event_names"] = event_map
         if len(out["aoi_definitions"]):
             d = out["aoi_definitions"].copy()
-            d["aoi_name"] = [pd.NA if pd.isna(v) else f"aoi_{i:05d}" for i, v in enumerate(d["aoi_name"], 1)]
+            d["aoi_name"] = [
+                pd.NA if pd.isna(v) else f"aoi_{i:05d}" for i, v in enumerate(d["aoi_name"], 1)
+            ]
             out["aoi_definitions"] = d
         if len(out["responses"]):
             d = out["responses"].copy()
             values = list(dict.fromkeys(d["response"].dropna().astype(str)))
             response_map = {v: f"response_{i:05d}" for i, v in enumerate(values, 1)}
-            d["response"] = d["response"].map(lambda v: response_map.get(str(v), v) if pd.notna(v) else v)
+            d["response"] = d["response"].map(
+                lambda v: response_map.get(str(v), v) if pd.notna(v) else v
+            )
             out["responses"] = d
             maps["response_values"] = response_map
         if len(out["recordings"]):
@@ -2243,11 +2414,15 @@ def write_format_validation_report(x, path="eyeprocess-format-validation.md"):
             "",
             "## Adapter-specific findings",
             "",
-            _markdown_table(x.adapter_issues) if len(x.adapter_issues) else "No adapter-specific findings.",
+            _markdown_table(x.adapter_issues)
+            if len(x.adapter_issues)
+            else "No adapter-specific findings.",
             "",
             "## Canonical validation",
             "",
-            _markdown_table(x.validation) if len(x.validation) else "No canonical validation issues.",
+            _markdown_table(x.validation)
+            if len(x.validation)
+            else "No canonical validation issues.",
             "",
             "## Schema coverage",
             "",
@@ -2257,11 +2432,15 @@ def write_format_validation_report(x, path="eyeprocess-format-validation.md"):
             "",
             "## Source preservation",
             "",
-            _markdown_table(x.preservation) if len(x.preservation) else "No imported dataset was available.",
+            _markdown_table(x.preservation)
+            if len(x.preservation)
+            else "No imported dataset was available.",
             "",
             "## Canonical round-trip",
             "",
-            "Round-trip validation was not run." if x.roundtrip is None else _markdown_table(x.roundtrip.comparison),
+            "Round-trip validation was not run."
+            if x.roundtrip is None
+            else _markdown_table(x.roundtrip.comparison),
         ]
     elif isinstance(x, EyeCorpusValidation):
         lines = [
@@ -2280,9 +2459,18 @@ def write_format_validation_report(x, path="eyeprocess-format-validation.md"):
             _markdown_table(format_compatibility_matrix(x)),
         ]
         for name, result in x.results.items():
-            lines += ["", f"## {name}", "", f"Status: **{result.status.upper()}**", "", _markdown_table(result.checks)]
+            lines += [
+                "",
+                f"## {name}",
+                "",
+                f"Status: **{result.status.upper()}**",
+                "",
+                _markdown_table(result.checks),
+            ]
     else:
-        raise EyeProcessValidationError("`x` must be an EyeFormatValidation or EyeCorpusValidation object.")
+        raise EyeProcessValidationError(
+            "`x` must be an EyeFormatValidation or EyeCorpusValidation object."
+        )
     p = Path(path).expanduser()
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2333,7 +2521,9 @@ def create_validation_bundle(
     if p.exists() and not overwrite:
         raise EyeProcessValidationError("Output file exists; use `overwrite=True`.")
     if include_dataset and x.dataset is None:
-        raise EyeProcessValidationError("The validation did not retain its dataset. Re-run with `retain_dataset=True`.")
+        raise EyeProcessValidationError(
+            "The validation did not retain its dataset. Re-run with `retain_dataset=True`."
+        )
     temp = Path(tempfile.mkdtemp(prefix="eyeprocess-validation-bundle-"))
     try:
         evidence = _redact_validation_result(x) if anonymize else copy.deepcopy(x)
@@ -2354,7 +2544,9 @@ def create_validation_bundle(
             )
         if include_dataset:
             dataset = anonymize_eye_dataset(x.dataset) if anonymize else x.dataset
-            write_eye_dataset(dataset, temp / "canonical-dataset", include_raw=False, overwrite=True)
+            write_eye_dataset(
+                dataset, temp / "canonical-dataset", include_raw=False, overwrite=True
+            )
         (temp / "BUNDLE").write_text(
             "\n".join(
                 [

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -90,7 +89,9 @@ def test_vendor_edf_missing_converter_and_temp_cleanup(monkeypatch, tmp_path):
         return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(vi.subprocess, "run", fake_run)
-    monkeypatch.setattr(vi, "read_eyelink_asc", lambda path, **kwargs: ep.new_eye_dataset(validate=False))
+    monkeypatch.setattr(
+        vi, "read_eyelink_asc", lambda path, **kwargs: ep.new_eye_dataset(validate=False)
+    )
     out = vi.read_eyelink_edf(edf, keep_asc=False)
     assert ep.is_eye_dataset(out)
     assert not vi.Path(made["path"]).exists()
@@ -128,7 +129,9 @@ def test_io_schema_inspection_sort_smi_and_manifest(monkeypatch, tmp_path):
 
     p = tmp_path / "x.csv"
     p.write_text("a,b\n1,2\n", encoding="utf-8")
-    monkeypatch.setattr(io, "detect_eye_format", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("detect")))
+    monkeypatch.setattr(
+        io, "detect_eye_format", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("detect"))
+    )
     inspected = io.inspect_eye_source(p)
     assert len(inspected) == 1
 
@@ -149,9 +152,21 @@ def test_io_schema_inspection_sort_smi_and_manifest(monkeypatch, tmp_path):
 def test_validate_eye_source_auto_detection_selection(monkeypatch, tmp_path):
     p = tmp_path / "source.csv"
     p.write_text("x\n1\n", encoding="utf-8")
-    monkeypatch.setattr(io, "inspect_eye_source", lambda *a, **k: pd.DataFrame({"source_path": [str(p)]}))
-    monkeypatch.setattr(io, "detect_eye_format", lambda *a, **k: pd.DataFrame({"format": ["generic"], "confidence": [0.75], "priority": [1]}))
-    monkeypatch.setattr(io, "read_eye_export", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("intentional import boundary")))
+    monkeypatch.setattr(
+        io, "inspect_eye_source", lambda *a, **k: pd.DataFrame({"source_path": [str(p)]})
+    )
+    monkeypatch.setattr(
+        io,
+        "detect_eye_format",
+        lambda *a, **k: pd.DataFrame(
+            {"format": ["generic"], "confidence": [0.75], "priority": [1]}
+        ),
+    )
+    monkeypatch.setattr(
+        io,
+        "read_eye_export",
+        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("intentional import boundary")),
+    )
     result = io.validate_eye_source(p, vendor="auto")
     assert result.vendor == "generic"
     assert float(result.detection.iloc[0]["confidence"]) == pytest.approx(0.75)

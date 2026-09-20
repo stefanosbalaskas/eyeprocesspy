@@ -66,7 +66,6 @@ def test_survival_required_assets_exist() -> None:
         assert (ROOT / item).is_file(), f"required survival asset is missing: {item}"
 
 
-
 def test_recent_method_visual_discovery_contract() -> None:
     gallery = _read("docs/gallery.md")
     home = _read("docs/index.md")

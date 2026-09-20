@@ -73,9 +73,7 @@ def test_multimodal_private_coercion_key_and_graph_residuals():
     with pytest.raises(EyeProcessValidationError, match="Expected a data frame"):
         mm._extract_data(object())
 
-    bad = pd.DataFrame(
-        {"person": ["P1", None], "item": ["I1", "I2"], "trial": ["T1", "T2"]}
-    )
+    bad = pd.DataFrame({"person": ["P1", None], "item": ["I1", "I2"], "trial": ["T1", "T2"]})
     with pytest.raises(EyeProcessValidationError, match="non-missing"):
         mm._validate_key(bad, "person", "item", "trial")
 
@@ -104,7 +102,9 @@ def test_multimodal_audit_empty_channel_duplicate_nonnumeric_and_issue_paths():
         item="item",
         response="response",
     )
-    assert np.isnan(ep.audit_multimodal_measurement(text_response).channel_table.finite_fraction.iloc[0])
+    assert np.isnan(
+        ep.audit_multimodal_measurement(text_response).channel_table.finite_fraction.iloc[0]
+    )
 
     problematic = ep.prepare_multimodal_irt_data(
         pd.DataFrame(
@@ -127,9 +127,7 @@ def test_multimodal_audit_empty_channel_duplicate_nonnumeric_and_issue_paths():
     duplicated["data"] = pd.concat(
         [duplicated["data"], duplicated["data"].iloc[[0]]], ignore_index=True
     )
-    assert "duplicated_person_item_trial_keys" in ep.audit_multimodal_measurement(
-        duplicated
-    ).issues
+    assert "duplicated_person_item_trial_keys" in ep.audit_multimodal_measurement(duplicated).issues
 
 
 def test_multimodal_generic_spec_all_models_and_guards():
@@ -155,9 +153,7 @@ def test_multimodal_generic_spec_all_models_and_guards():
     with pytest.raises(EyeProcessValidationError, match="At least one"):
         ep.multimodal_irt_spec()
     with pytest.raises(EyeProcessValidationError, match="existing eyeprocess"):
-        ep.multimodal_irt_spec(
-            response={"superclass": "wrong", "latent": "theta"}, model="M0"
-        )
+        ep.multimodal_irt_spec(response={"superclass": "wrong", "latent": "theta"}, model="M0")
     with pytest.raises(EyeProcessValidationError, match="requires channels"):
         ep.multimodal_irt_spec(response=response, model="M2")
 
@@ -247,9 +243,10 @@ def test_multimodal_ablation_and_structural_identifiability_residuals():
 
 
 def test_m2_spec_backend_simulation_mapping_and_ablation_residuals():
-    assert ep.multimodal_m2_spec(
-        backend="cmdstanpy", prior_profile="paper_centered"
-    ).backend == "cmdstanpy"
+    assert (
+        ep.multimodal_m2_spec(backend="cmdstanpy", prior_profile="paper_centered").backend
+        == "cmdstanpy"
+    )
     with pytest.raises(EyeProcessValidationError, match="canonical CmdStan"):
         ep.multimodal_m2_spec(backend="brms")
     with pytest.raises(EyeProcessValidationError, match="prior_profile"):
@@ -324,9 +321,7 @@ def test_m3_spec_backend_missingness_modes_functional_bridge_and_ablation():
         ep.multimodal_m3_functional_bridge(d, 1.2)
     with pytest.raises(EyeProcessValidationError, match="one finite-or-NA"):
         ep.multimodal_m3_functional_bridge(d, "absent_score")
-    bridge = ep.multimodal_m3_functional_bridge(
-        d, np.linspace(0, 1, len(d)).tolist()
-    )
+    bridge = ep.multimodal_m3_functional_bridge(d, np.linspace(0, 1, len(d)).tolist())
     assert np.isfinite(bridge.data.pupil).all()
     assert set(ep.multimodal_m3_ablation(d).scenarios) == {"M0", "M1", "M2", "M3"}
 
@@ -371,17 +366,13 @@ def test_m4_spec_private_transition_missingness_and_backend_guards():
 
     frame = _m4_frame()
     state = np.array([1, 2, 1, 2, 1, 2])
-    none_by_rate = mm._m4_apply_missingness(
-        np.random.default_rng(1), frame, "mcar", 0, state, 2
-    )
+    none_by_rate = mm._m4_apply_missingness(np.random.default_rng(1), frame, "mcar", 0, state, 2)
     pd.testing.assert_frame_equal(none_by_rate, frame)
 
     for seed, mechanism in enumerate(
         ["mcar", "quality", "gaze", "pupil_quality", "device", "state_dependent"], 10
     ):
-        out = mm._m4_apply_missingness(
-            np.random.default_rng(seed), frame, mechanism, 0.4, state, 2
-        )
+        out = mm._m4_apply_missingness(np.random.default_rng(seed), frame, mechanism, 0.4, state, 2)
         assert len(out) == len(frame)
 
     with pytest.raises(EyeProcessValidationError, match="more than one true state"):
@@ -389,9 +380,7 @@ def test_m4_spec_private_transition_missingness_and_backend_guards():
             np.random.default_rng(1), frame, "state_dependent", 0.2, np.ones(6), 1
         )
     with pytest.raises(EyeProcessValidationError, match="Unknown M4 missingness mechanism"):
-        mm._m4_apply_missingness(
-            np.random.default_rng(1), frame, "unknown", 0.2, state, 2
-        )
+        mm._m4_apply_missingness(np.random.default_rng(1), frame, "unknown", 0.2, state, 2)
 
 
 def test_m4_simulation_guard_redundancy_and_missingness_paths():
@@ -411,12 +400,8 @@ def test_m4_simulation_guard_redundancy_and_missingness_paths():
             missingness="state_dependent",
         )
 
-    for seed, scenario in enumerate(
-        ["rt_redundant", "gaze_redundant", "pupil_redundant"], 30
-    ):
-        sim = ep.simulate_multimodal_m4(
-            n_person=2, n_item=3, scenario=scenario, seed=seed
-        )
+    for seed, scenario in enumerate(["rt_redundant", "gaze_redundant", "pupil_redundant"], 30):
+        sim = ep.simulate_multimodal_m4(n_person=2, n_item=3, scenario=scenario, seed=seed)
         assert sim.truth["n_states"] == 2
 
     for seed, mechanism in enumerate(
@@ -452,9 +437,7 @@ def test_m4_state_diagnostics_identifiability_and_execution_boundaries():
     )
     posterior = ep.multimodal_m4_state_diagnostics(fake_fit)
     assert posterior.source == "posterior"
-    assert ep.multimodal_m4_process_information(fake_fit).status == (
-        "posterior_state_information"
-    )
+    assert ep.multimodal_m4_process_information(fake_fit).status == ("posterior_state_information")
     with pytest.raises(EyeProcessValidationError, match="State diagnostics require"):
         ep.multimodal_m4_state_diagnostics(mm._result("wrong"))
 

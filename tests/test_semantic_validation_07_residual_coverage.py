@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -262,9 +263,7 @@ def test_compatibility_evidence_mapping_defaults_invalid_levels_and_guards():
     with pytest.raises(ep.EyeProcessValidationError, match="ecosystem and device"):
         ep.compatibility_evidence_matrix(
             pd.DataFrame({"other": [1]}),
-            pd.DataFrame(
-                {"ecosystem": ["A"], "device": ["one"], "evidence_level": ["declared"]}
-            ),
+            pd.DataFrame({"ecosystem": ["A"], "device": ["one"], "evidence_level": ["declared"]}),
         )
 
 
@@ -304,7 +303,9 @@ def test_semantic_plot_guards_supplied_axes_and_compatibility_numeric_labels():
     with pytest.raises(ep.EyeProcessValidationError, match="eye_semantic_roundtrip"):
         ep.plot_eye_semantic_roundtrip({})
 
-    d = pd.DataFrame({"id": [1, 2, 3], "timestamp": [0.0, 1.0, 2.0], "x": [1, 2, 3], "y": [2, 3, 4]})
+    d = pd.DataFrame(
+        {"id": [1, 2, 3], "timestamp": [0.0, 1.0, 2.0], "x": [1, 2, 3], "y": [2, 3, 4]}
+    )
     rt = ep.semantic_roundtrip_audit(d, d, key="id")
     fig, ax = plt.subplots()
     assert ep.plot_eye_semantic_roundtrip(rt, ax=ax) is ax

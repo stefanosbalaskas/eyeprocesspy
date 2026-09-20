@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -47,8 +45,8 @@ def test_restore_column_numeric_boolean_datetime_string_and_object():
     assert pd.isna(numeric.iloc[1])
 
     boolean = io._restore_column(pd.Series(["yes", "N", "unknown", None]), "boolean")
-    assert boolean.iloc[0] == True
-    assert boolean.iloc[1] == False
+    assert boolean.iloc[0]
+    assert not boolean.iloc[1]
     assert pd.isna(boolean.iloc[2])
     assert pd.isna(boolean.iloc[3])
 
@@ -179,7 +177,9 @@ def test_inspect_eye_source_nonrecursive_directory_and_unreadable_tabular(tmp_pa
 
     bad = tmp_path / "bad.csv"
     bad.write_text("not really csv", encoding="utf-8")
-    monkeypatch.setattr(io, "_read_delimited", lambda *a, **k: (_ for _ in ()).throw(ValueError("bad")))
+    monkeypatch.setattr(
+        io, "_read_delimited", lambda *a, **k: (_ for _ in ()).throw(ValueError("bad"))
+    )
     report = io.inspect_eye_source(bad)
     assert not bool(report.loc[0, "readable"])
     assert report.loc[0, "inspected_rows"] == 0
@@ -229,7 +229,9 @@ def test_validate_tobii_export_directory_missing_fields_and_valid_file(tmp_path)
     weak = tmp_path / "weak.csv"
     weak.write_text("a,b\n1,2\n", encoding="utf-8")
     issues = io.validate_tobii_export(weak)
-    assert {"missing_timestamp", "missing_gaze_coordinates", "missing_validity"}.issubset(set(issues["code"]))
+    assert {"missing_timestamp", "missing_gaze_coordinates", "missing_validity"}.issubset(
+        set(issues["code"])
+    )
 
     valid = tmp_path / "tobii.csv"
     valid.write_text(
@@ -279,7 +281,9 @@ def test_validate_smi_directory_idf_low_and_high_confidence(tmp_path):
     low.write_text("ordinary text", encoding="utf-8")
     assert io.validate_smi_export(low).loc[0, "code"] == "low_smi_confidence"
     high = tmp_path / "high_smi.txt"
-    high.write_text("BeGaze SMI POR X POR Y pupil diameter event info tracking ratio", encoding="utf-8")
+    high.write_text(
+        "BeGaze SMI POR X POR Y pupil diameter event info tracking ratio", encoding="utf-8"
+    )
     assert io.validate_smi_export(high).empty
 
 

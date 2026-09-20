@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import numpy as np
@@ -48,7 +48,7 @@ def test_utc_string_all_conversion_and_error_paths():
     nowish = ve._utc_string()
     assert nowish.endswith(" UTC")
     assert ve._utc_string(datetime(2026, 1, 2, 3, 4, 5)) == "2026-01-02 03:04:05 UTC"
-    assert ve._utc_string(datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)) == "2026-01-02 03:04:05 UTC"
+    assert ve._utc_string(datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)) == "2026-01-02 03:04:05 UTC"
     assert ve._utc_string("2026-01-02 03:04:05") == "2026-01-02 03:04:05 UTC"
     assert ve._utc_string("2026-01-02 05:04:05+02:00") == "2026-01-02 03:04:05 UTC"
     with pytest.raises(ep.EyeProcessValidationError, match="datetime-like"):
@@ -135,7 +135,9 @@ def test_acceptance_matrix_list_blank_name_between_and_validation_paths():
     with pytest.raises(ep.EyeProcessValidationError, match="rules"):
         ep.validation_acceptance_matrix(frame, [{}])
     with pytest.raises(ep.EyeProcessValidationError, match="missing required columns"):
-        ep.validation_acceptance_matrix(frame, [ep.validation_acceptance_rule("missing", threshold=1)])
+        ep.validation_acceptance_matrix(
+            frame, [ep.validation_acceptance_rule("missing", threshold=1)]
+        )
 
     listed = ep.validation_acceptance_matrix(frame, [rule], id_cols=["", "id"])
     assert listed.loc[0, "rule_id"] == "rule_1"

@@ -5,6 +5,7 @@ import types
 import warnings
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -175,9 +176,7 @@ def test_validation_default_fit_and_runner_failure_warning_progress_paths(capsys
     with pytest.raises(EyeProcessValidationError, match="Not enough"):
         gov._default_validation_fit(tiny)
 
-    mapped = {
-        "data": pd.DataFrame({"x": [0.0, 1.0, 2.0], "process_value": [0.0, 1.0, 2.0]})
-    }
+    mapped = {"data": pd.DataFrame({"x": [0.0, 1.0, 2.0], "process_value": [0.0, 1.0, 2.0]})}
     assert np.isfinite(gov._default_validation_fit(mapped).slope)
 
     grid = _one_condition()
@@ -259,7 +258,12 @@ def test_validation_summary_reference_and_evidence_edge_paths(tmp_path):
     with pytest.raises(EyeProcessValidationError):
         ep.validation_failure_profile({})
     failures = pd.DataFrame(
-        {"condition_id": ["C1", "C1"], "replication": [1, 2], "stage": ["fit", "extract"], "error": ["x", "y"]}
+        {
+            "condition_id": ["C1", "C1"],
+            "replication": [1, 2],
+            "stage": ["fit", "extract"],
+            "error": ["x", "y"],
+        }
     )
     xd = _validation_result(estimates=est, failures=failures)
     assert set(ep.validation_failure_profile(xd).stage) == {"fit", "extract"}
@@ -335,7 +339,9 @@ def test_pipeline_constructor_graph_and_execution_error_paths(tmp_path):
         ep.run_eye_pipeline(kwargs_pipe, context=[])
 
     opt = ep.eye_analysis_pipeline(
-        ep.eye_pipeline_step("bad", lambda: (_ for _ in ()).throw(RuntimeError("optional")), optional=True),
+        ep.eye_pipeline_step(
+            "bad", lambda: (_ for _ in ()).throw(RuntimeError("optional")), optional=True
+        ),
         ep.eye_pipeline_step("ok", lambda: 2),
     )
     opt_run = ep.run_eye_pipeline(opt)
@@ -420,7 +426,16 @@ def test_api_lifecycle_inventory_family_and_recommendation_edge_paths():
             "misc_x",
         ]
     )
-    assert set(fam.family) == {"plot", "validation", "model", "io", "workflow", "summary", "simulation", "utility"}
+    assert set(fam.family) == {
+        "plot",
+        "validation",
+        "model",
+        "io",
+        "workflow",
+        "summary",
+        "simulation",
+        "utility",
+    }
 
     supplied = pd.DataFrame({"name": ["plot_x"], "family": ["custom"]})
     assert ep.api_family_map(supplied).family.iloc[0] == "custom"
@@ -455,7 +470,10 @@ def test_api_lifecycle_inventory_family_and_recommendation_edge_paths():
 
     badreg = ep.register_eye_api_status(reg, "a", "deprecated", replacement="missing")
     bad = ep.audit_eye_api(pd.DataFrame({"name": ["a", "b"]}), badreg)
-    assert ep.eye_api_recommendation(bad).set_index("name").loc["a", "recommendation"] == "repair_replacement"
+    assert (
+        ep.eye_api_recommendation(bad).set_index("name").loc["a", "recommendation"]
+        == "repair_replacement"
+    )
 
     with pytest.raises(EyeProcessValidationError):
         ep.eye_api_recommendation({})
@@ -476,7 +494,10 @@ def test_sensitivity_grid_runner_and_stability_error_paths(capsys):
     assert gov._default_sensitivity_extract(1.5, None).effect.iloc[0] == 1.5
     frame = pd.DataFrame({"effect": [0.2]})
     assert gov._default_sensitivity_extract(frame, None).equals(frame)
-    assert gov._default_sensitivity_extract({"effect": 0.3, "array": [1, 2]}, None).effect.iloc[0] == 0.3
+    assert (
+        gov._default_sensitivity_extract({"effect": 0.3, "array": [1, 2]}, None).effect.iloc[0]
+        == 0.3
+    )
     with pytest.raises(EyeProcessValidationError):
         gov._default_sensitivity_extract(object(), None)
 
@@ -510,7 +531,9 @@ def test_sensitivity_grid_runner_and_stability_error_paths(capsys):
     assert not run.warnings.empty
     assert "sensitivity" in capsys.readouterr().out
 
-    no_effect = _sensitivity_result(results=pd.DataFrame({"specification_id": ["S1"], "effect": [np.nan], "p_value": [np.nan]}))
+    no_effect = _sensitivity_result(
+        results=pd.DataFrame({"specification_id": ["S1"], "effect": [np.nan], "p_value": [np.nan]})
+    )
     assert np.isnan(ep.sensitivity_sign_stability(no_effect))
     assert np.isnan(ep.sensitivity_significance_stability(no_effect))
     assert np.isnan(ep.sensitivity_threshold_stability(no_effect))
@@ -526,7 +549,9 @@ def test_sensitivity_grid_runner_and_stability_error_paths(capsys):
     empty = _sensitivity_result()
     stable = ep.decision_stability(empty)
     assert stable.stable_sign is None
-    assert np.isnan(ep.specification_coverage(_sensitivity_result(grid=pd.DataFrame({"specification_id": []}))))
+    assert np.isnan(
+        ep.specification_coverage(_sensitivity_result(grid=pd.DataFrame({"specification_id": []})))
+    )
     with pytest.raises(EyeProcessValidationError):
         ep.specification_coverage({})
 
@@ -554,7 +579,9 @@ def test_sensitivity_grid_runner_and_stability_error_paths(capsys):
             "spec": ["s1", "s1", "s2", "s2"],
         }
     )
-    assert np.isfinite(ep.sensitivity_rank_stability(rank_df, id="item", rank="rank", specification="spec"))
+    assert np.isfinite(
+        ep.sensitivity_rank_stability(rank_df, id="item", rank="rank", specification="spec")
+    )
     assert np.isnan(
         ep.sensitivity_rank_stability(
             pd.DataFrame({"item": ["a"], "rank": [1], "spec": ["s1"]}),
@@ -654,7 +681,9 @@ def test_decision_manifest_validation_flatten_io_blinding_and_entropy_paths(tmp_
         results=pd.DataFrame({"specification_id": ["S00001"], "effect": [0.1]}),
     )
     assert ep.decision_space_coverage(grid, sens).coverage.iloc[0] == 0.5
-    assert np.isnan(ep.decision_space_coverage(pd.DataFrame({"specification_id": []}), []).coverage.iloc[0])
+    assert np.isnan(
+        ep.decision_space_coverage(pd.DataFrame({"specification_id": []}), []).coverage.iloc[0]
+    )
 
 
 def test_governance_plot_empty_invalid_and_alternate_paths():

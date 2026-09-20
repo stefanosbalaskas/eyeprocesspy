@@ -18,7 +18,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -32,7 +32,6 @@ from .preprocess_features_09 import (
     detect_saccades,
 )
 from .schema import empty_eye_table, new_coordinate_space, standardize_eye_table
-
 
 _RAW_ALGORITHMS = {"ivt", "idt", "adaptive_velocity", "remodnav"}
 _SUPPORTED_ALGORITHMS = _RAW_ALGORITHMS | {"external", "vendor"}
@@ -57,10 +56,10 @@ _EVENT_LABELS = {
 
 
 def _scalar_string(value: Any, name: str) -> str:
-    value = str(value).strip()
-    if not value:
+    text = str(value).strip()
+    if not text:
         raise EyeProcessValidationError(f"`{name}` must be a non-empty scalar string.")
-    return value
+    return text
 
 
 def _finite_positive(value: Any, name: str, allow_none: bool = True) -> float | None:
@@ -75,6 +74,20 @@ def _finite_positive(value: Any, name: str, allow_none: bool = True) -> float | 
     if not np.isfinite(out) or out <= 0:
         raise EyeProcessValidationError(f"`{name}` must be finite and > 0.")
     return out
+
+
+def _required_positive(
+    value: Any,
+    name: str,
+) -> float:
+    return cast(
+        float,
+        _finite_positive(
+            value,
+            name,
+            allow_none=False,
+        ),
+    )
 
 
 def _normalise_parameters(parameters: Mapping[str, Any] | None) -> tuple[tuple[str, Any], ...]:
@@ -97,7 +110,9 @@ def _jsonable(value: Any) -> Any:
     if isinstance(value, np.generic):
         return _jsonable(value.item())
     if isinstance(value, Mapping):
-        return {str(k): _jsonable(v) for k, v in sorted(value.items(), key=lambda item: str(item[0]))}
+        return {
+            str(k): _jsonable(v) for k, v in sorted(value.items(), key=lambda item: str(item[0]))
+        }
     if isinstance(value, (list, tuple)):
         return [_jsonable(v) for v in value]
     return repr(value)
@@ -249,7 +264,9 @@ def define_event_detector_spec(
         filter=None if filter is None else str(filter),
         coordinate_unit=_scalar_string(coordinate_unit, "coordinate_unit").lower(),
         implementation=_scalar_string(implementation, "implementation"),
-        implementation_version=None if implementation_version is None else str(implementation_version),
+        implementation_version=None
+        if implementation_version is None
+        else str(implementation_version),
         parameters=_normalise_parameters(parameters),
         callback=callback,
     )
@@ -283,7 +300,9 @@ def validate_event_detector_spec(spec: EventDetectorSpec) -> bool:
             allow_none=False,
         )
     if spec.algorithm == "remodnav" and spec.coordinate_unit == "pixels":
-        _finite_positive(spec.parameter_dict.get("px2deg"), "parameters['px2deg']", allow_none=False)
+        _finite_positive(
+            spec.parameter_dict.get("px2deg"), "parameters['px2deg']", allow_none=False
+        )
     if spec.algorithm == "external" and not callable(spec.callback):
         raise EyeProcessValidationError("External detector specs require a callable `callback`.")
     if spec.algorithm == "vendor" and spec.callback is not None:
@@ -303,13 +322,17 @@ def create_detector_multiverse(
     assembled: list[EventDetectorSpec] = list(specs or [])
     if parameter_grid is not None:
         if base_spec is None:
-            raise EyeProcessValidationError("`base_spec` is required when `parameter_grid` is supplied.")
+            raise EyeProcessValidationError(
+                "`base_spec` is required when `parameter_grid` is supplied."
+            )
         if not isinstance(parameter_grid, Mapping) or not parameter_grid:
             raise EyeProcessValidationError("`parameter_grid` must be a non-empty mapping.")
         keys = list(parameter_grid)
         values = [list(parameter_grid[key]) for key in keys]
         if any(len(v) == 0 for v in values):
-            raise EyeProcessValidationError("Every detector-grid dimension must contain at least one value.")
+            raise EyeProcessValidationError(
+                "Every detector-grid dimension must contain at least one value."
+            )
         allowed = set(EventDetectorSpec.__dataclass_fields__) - {"callback", "parameters"}
         params_allowed = set(base_spec.parameter_dict)
         for index, combination in enumerate(itertools.product(*values), start=1):
@@ -324,7 +347,9 @@ def create_detector_multiverse(
                     parameter_changes[key] = value
                 else:
                     raise EyeProcessValidationError(f"Unknown detector-grid field: {key}")
-            changes["detector_id"] = id_template.format(base=base_spec.detector_id, index=index, **changes)
+            changes["detector_id"] = id_template.format(
+                base=base_spec.detector_id, index=index, **changes
+            )
             changes["parameters"] = tuple(sorted(parameter_changes.items()))
             candidate = replace(base_spec, **changes)
             validate_event_detector_spec(candidate)
@@ -342,7 +367,13 @@ def create_detector_multiverse(
 
 def _dataset_fingerprint(x: EyeDataset) -> str:
     pieces = []
-    for table_name in ("recordings", "gaze_samples", "intervals", "aoi_definitions", "aoi_geometry"):
+    for table_name in (
+        "recordings",
+        "gaze_samples",
+        "intervals",
+        "aoi_definitions",
+        "aoi_geometry",
+    ):
         table = x[table_name]
         if table.empty:
             pieces.append(f"{table_name}:empty")
@@ -350,7 +381,9 @@ def _dataset_fingerprint(x: EyeDataset) -> str:
             stable = table.copy()
             for column in stable.columns:
                 stable[column] = stable[column].map(_jsonable)
-            pieces.append(table_name + ":" + stable.to_json(orient="split", index=False, date_format="iso"))
+            pieces.append(
+                table_name + ":" + stable.to_json(orient="split", index=False, date_format="iso")
+            )
     return sha256("|".join(pieces).encode()).hexdigest()
 
 
@@ -368,19 +401,27 @@ def _lineage_fields(x: EyeDataset, spec: EventDetectorSpec | None = None) -> dic
     return {
         "source_data_hash": _dataset_fingerprint(x),
         "preprocessing_provenance_hash": _frame_hash(x["provenance"]),
-        "aoi_spec_hash": _frame_hash(pd.concat([x["aoi_definitions"], x["aoi_geometry"]], ignore_index=True, sort=False))
-        if (not x["aoi_definitions"].empty or not x["aoi_geometry"].empty) else None,
+        "aoi_spec_hash": _frame_hash(
+            pd.concat([x["aoi_definitions"], x["aoi_geometry"]], ignore_index=True, sort=False)
+        )
+        if (not x["aoi_definitions"].empty or not x["aoi_geometry"].empty)
+        else None,
         "quality_spec_hash": _frame_hash(x["quality"]),
         "detector_spec_hash": spec.fingerprint if spec is not None else None,
         "detector_implementation": spec.implementation if spec is not None else None,
-        "detector_implementation_version": spec.implementation_version if spec is not None else None,
+        "detector_implementation_version": spec.implementation_version
+        if spec is not None
+        else None,
         "software": "eyeprocesspy",
         "software_version": "0.1.0",
     }
 
 
 def _clean_branch_dataset(x: EyeDataset) -> EyeDataset:
-    out = x.copy()
+    out = cast(
+        EyeDataset,
+        x.copy(),
+    )
     episodes = out["episodes"].copy()
     if not episodes.empty:
         remove = episodes["episode_type"].isin(["fixation", "saccade", "pursuit", "pso"])
@@ -410,13 +451,20 @@ def _attach_detector_columns(events: pd.DataFrame, spec: EventDetectorSpec) -> p
     return events
 
 
-def _check_sampling_rate(x: EyeDataset, spec: EventDetectorSpec, tolerance_fraction: float = 0.10) -> list[str]:
+def _check_sampling_rate(
+    x: EyeDataset, spec: EventDetectorSpec, tolerance_fraction: float = 0.10
+) -> list[str]:
     data = x["gaze_samples"]
     if data.empty:
         return []
     rates = []
     for _, group in data.groupby(["recording_id", "trial_id"], dropna=False, sort=False):
-        t = pd.to_numeric(group["timestamp_seconds"], errors="coerce").dropna().sort_values().to_numpy(float)
+        t = (
+            pd.to_numeric(group["timestamp_seconds"], errors="coerce")
+            .dropna()
+            .sort_values()
+            .to_numpy(float)
+        )
         dt = np.diff(t)
         dt = dt[np.isfinite(dt) & (dt > 0)]
         if dt.size:
@@ -424,9 +472,14 @@ def _check_sampling_rate(x: EyeDataset, spec: EventDetectorSpec, tolerance_fract
     if not rates:
         return ["Sampling rate could not be verified from timestamps."]
     empirical = float(np.median(rates))
-    expected = float(spec.sampling_rate)
+    expected = _required_positive(
+        spec.sampling_rate,
+        "sampling_rate",
+    )
     if abs(empirical - expected) / expected > float(tolerance_fraction):
-        return [f"Empirical sampling rate ({empirical:.3f} Hz) differs from the detector specification ({expected:.3f} Hz)."]
+        return [
+            f"Empirical sampling rate ({empirical:.3f} Hz) differs from the detector specification ({expected:.3f} Hz)."
+        ]
     return []
 
 
@@ -437,12 +490,28 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
     of REMoDNaV, Nyström-Holmqvist, Engbert-Kliegl, or any other named detector.
     """
     params = spec.parameter_dict
-    noise_factor = float(params["noise_factor"])
-    min_threshold = float(params["minimum_velocity_threshold"])
+    noise_factor = _required_positive(
+        params["noise_factor"],
+        "parameters['noise_factor']",
+    )
+    min_threshold = _required_positive(
+        params["minimum_velocity_threshold"],
+        "parameters['minimum_velocity_threshold']",
+    )
+    sampling_rate = _required_positive(
+        spec.sampling_rate,
+        "sampling_rate",
+    )
+    minimum_duration_ms = _required_positive(
+        spec.minimum_duration_ms,
+        "minimum_duration_ms",
+    )
     out = _clean_branch_dataset(x)
     rows: list[dict[str, Any]] = []
     counter = 0
-    for _, group in out["gaze_samples"].groupby(["recording_id", "trial_id"], dropna=False, sort=False):
+    for _, group in out["gaze_samples"].groupby(
+        ["recording_id", "trial_id"], dropna=False, sort=False
+    ):
         z = group.sort_values("timestamp_seconds", kind="stable").reset_index(drop=True)
         t = pd.to_numeric(z["timestamp_seconds"], errors="coerce").to_numpy(float)
         gx = pd.to_numeric(z["gaze_x"], errors="coerce").to_numpy(float)
@@ -459,21 +528,27 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
         robust_sigma = 1.4826 * mad
         threshold = max(min_threshold, centre + noise_factor * robust_sigma)
         is_fix = np.isfinite(velocity) & valid & (velocity <= threshold)
-        if len(is_fix):
-            is_fix[0] = bool(is_fix[1]) if len(is_fix) > 1 else False
-        gap_limit = float(spec.maximum_gap_ms or (1000.0 / float(spec.sampling_rate) * 2.5))
+        # usable.size >= 3 guarantees at least four samples, so both
+        # indices exist here.
+        is_fix[0] = bool(is_fix[1])
+        gap_limit = float(spec.maximum_gap_ms or (1000.0 / sampling_rate * 2.5))
         run_ids = np.zeros(len(z), dtype=int)
         run = 0
         for i in range(len(z)):
-            if i == 0 or (not is_fix[i]) or (not is_fix[i - 1]) or (np.isfinite(dt[i]) and dt[i] * 1000 > gap_limit):
+            if (
+                i == 0
+                or (not is_fix[i])
+                or (not is_fix[i - 1])
+                or (np.isfinite(dt[i]) and dt[i] * 1000 > gap_limit)
+            ):
                 run += 1
             run_ids[i] = run
         for run_id in pd.unique(run_ids[is_fix]):
+            # Every run_id is obtained from run_ids[is_fix], so it has
+            # at least one corresponding fixation position.
             pos = np.flatnonzero((run_ids == run_id) & is_fix)
-            if not len(pos):
-                continue
             duration = (np.nanmax(t[pos]) - np.nanmin(t[pos])) * 1000
-            if duration < float(spec.minimum_duration_ms):
+            if duration < minimum_duration_ms:
                 continue
             counter += 1
             rows.append(
@@ -492,8 +567,13 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
                     "centroid_x": float(np.nanmean(gx[pos])),
                     "centroid_y": float(np.nanmean(gy[pos])),
                     "amplitude": np.nan,
-                    "peak_velocity": float(np.nanmax(velocity[pos])) if np.isfinite(velocity[pos]).any() else np.nan,
-                    "dispersion": float((np.nanmax(gx[pos]) - np.nanmin(gx[pos])) + (np.nanmax(gy[pos]) - np.nanmin(gy[pos]))),
+                    "peak_velocity": float(np.nanmax(velocity[pos]))
+                    if np.isfinite(velocity[pos]).any()
+                    else np.nan,
+                    "dispersion": float(
+                        (np.nanmax(gx[pos]) - np.nanmin(gx[pos]))
+                        + (np.nanmax(gy[pos]) - np.nanmin(gy[pos]))
+                    ),
                     "coordinate_space_id": z.iloc[0]["coordinate_space_id"],
                     "source_algorithm": "adaptive velocity (robust-MAD reference)",
                     "source_parameters": f"noise_factor={noise_factor:g};minimum_velocity_threshold={min_threshold:g};adaptive_threshold={threshold:g}",
@@ -503,14 +583,23 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
                     "aoi_id": pd.NA,
                 }
             )
-    detected = standardize_eye_table(pd.DataFrame(rows), "episodes") if rows else empty_eye_table("episodes")
+    detected = (
+        standardize_eye_table(pd.DataFrame(rows), "episodes")
+        if rows
+        else empty_eye_table("episodes")
+    )
     existing = out["episodes"]
-    out["episodes"] = standardize_eye_table(pd.concat([existing, detected], ignore_index=True, sort=False), "episodes")
-    return add_provenance(
-        out,
-        "detect_fixations_adaptive_velocity",
-        "episodes",
-        f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(detected)}",
+    out["episodes"] = standardize_eye_table(
+        pd.concat([existing, detected], ignore_index=True, sort=False), "episodes"
+    )
+    return cast(
+        EyeDataset,
+        add_provenance(
+            out,
+            "detect_fixations_adaptive_velocity",
+            "episodes",
+            f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(detected)}",
+        ),
     )
 
 
@@ -531,16 +620,34 @@ def _run_remodnav(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
     params = dict(spec.parameter_dict)
     px2deg = 1.0 if spec.coordinate_unit == "degrees" else params.pop("px2deg", None)
     if px2deg is None:
-        raise EyeProcessValidationError("REMoDNaV with pixel coordinates requires an explicit `px2deg` parameter.")
+        raise EyeProcessValidationError(
+            "REMoDNaV with pixel coordinates requires an explicit `px2deg` parameter."
+        )
     if spec.coordinate_unit == "normalized":
-        raise EyeProcessValidationError("REMoDNaV cannot consume normalized coordinates without an explicit coordinate conversion first.")
+        raise EyeProcessValidationError(
+            "REMoDNaV cannot consume normalized coordinates without an explicit coordinate conversion first."
+        )
 
-    classifier_keys = set(inspect.signature(remodnav.EyegazeClassifier.__init__).parameters) - {"self"}
-    preproc_keys = set(inspect.signature(remodnav.EyegazeClassifier.preproc).parameters) - {"self", "data"}
+    sampling_rate = _required_positive(
+        spec.sampling_rate,
+        "sampling_rate",
+    )
+    minimum_duration_ms = _required_positive(
+        spec.minimum_duration_ms,
+        "minimum_duration_ms",
+    )
+
+    classifier_keys = set(inspect.signature(remodnav.EyegazeClassifier.__init__).parameters) - {
+        "self"
+    }
+    preproc_keys = set(inspect.signature(remodnav.EyegazeClassifier.preproc).parameters) - {
+        "self",
+        "data",
+    }
     classifier_args = {
         "px2deg": float(px2deg),
-        "sampling_rate": float(spec.sampling_rate),
-        "min_fixation_duration": float(spec.minimum_duration_ms) / 1000.0,
+        "sampling_rate": sampling_rate,
+        "min_fixation_duration": minimum_duration_ms / 1000.0,
     }
     preproc_args: dict[str, Any] = {}
     unused: dict[str, Any] = {}
@@ -552,22 +659,52 @@ def _run_remodnav(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
         elif key not in {"include_labels"}:
             unused[key] = value
     if unused:
-        raise EyeProcessValidationError("Unknown REMoDNaV parameter(s): " + ", ".join(sorted(unused)))
-    include_labels = set(params.get("include_labels", ["FIXA", "SACC", "ISAC", "PURS", "HPSO", "IHPS", "LPSO", "ILPS"]))
+        raise EyeProcessValidationError(
+            "Unknown REMoDNaV parameter(s): " + ", ".join(sorted(unused))
+        )
+    include_labels = set(
+        params.get(
+            "include_labels", ["FIXA", "SACC", "ISAC", "PURS", "HPSO", "IHPS", "LPSO", "ILPS"]
+        )
+    )
 
     out = _clean_branch_dataset(x)
     rows = []
     counter = 0
-    for _, group in out["gaze_samples"].groupby(["recording_id", "trial_id"], dropna=False, sort=False):
+    for _, group in out["gaze_samples"].groupby(
+        ["recording_id", "trial_id"], dropna=False, sort=False
+    ):
         z = group.sort_values("timestamp_seconds", kind="stable").reset_index(drop=True)
         if len(z) < 3:
             continue
-        coords = np.recarray(len(z), dtype=[("x", "f8"), ("y", "f8")])
-        coords.x = pd.to_numeric(z["gaze_x"], errors="coerce").to_numpy(float)
-        coords.y = pd.to_numeric(z["gaze_y"], errors="coerce").to_numpy(float)
+        x_values = pd.to_numeric(
+            z["gaze_x"],
+            errors="coerce",
+        ).to_numpy(
+            dtype=float,
+            copy=True,
+        )
+        y_values = pd.to_numeric(
+            z["gaze_y"],
+            errors="coerce",
+        ).to_numpy(
+            dtype=float,
+            copy=True,
+        )
         invalid = ~z["valid"].astype("boolean").fillna(False).to_numpy(bool)
-        coords.x[invalid] = np.nan
-        coords.y[invalid] = np.nan
+
+        x_values[invalid] = np.nan
+        y_values[invalid] = np.nan
+
+        coords: np.recarray = np.recarray(
+            len(z),
+            dtype=[
+                ("x", "f8"),
+                ("y", "f8"),
+            ],
+        )
+        coords.x = x_values
+        coords.y = y_values
         clf = remodnav.EyegazeClassifier(**classifier_args)
         pp = clf.preproc(coords, **preproc_args)
         detected = clf(pp, classify_isp=True, sort_events=True)
@@ -595,27 +732,42 @@ def _run_remodnav(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset:
                     "start_y": event.get("start_y", np.nan),
                     "end_x": event.get("end_x", np.nan),
                     "end_y": event.get("end_y", np.nan),
-                    "centroid_x": np.nanmean([event.get("start_x", np.nan), event.get("end_x", np.nan)]),
-                    "centroid_y": np.nanmean([event.get("start_y", np.nan), event.get("end_y", np.nan)]),
+                    "centroid_x": np.nanmean(
+                        [event.get("start_x", np.nan), event.get("end_x", np.nan)]
+                    ),
+                    "centroid_y": np.nanmean(
+                        [event.get("start_y", np.nan), event.get("end_y", np.nan)]
+                    ),
                     "amplitude": event.get("amp", np.nan),
                     "peak_velocity": event.get("peak_vel", np.nan),
                     "dispersion": np.nan,
                     "coordinate_space_id": z.iloc[0]["coordinate_space_id"],
                     "source_algorithm": "REMoDNaV",
-                    "source_parameters": json.dumps(_jsonable({**classifier_args, **preproc_args}), sort_keys=True),
+                    "source_parameters": json.dumps(
+                        _jsonable({**classifier_args, **preproc_args}), sort_keys=True
+                    ),
                     "derived_by": "external",
                     "trial_id": z.iloc[0]["trial_id"],
                     "stimulus_id": z.iloc[0]["stimulus_id"],
                     "aoi_id": pd.NA,
                 }
             )
-    detected = standardize_eye_table(pd.DataFrame(rows), "episodes") if rows else empty_eye_table("episodes")
-    out["episodes"] = standardize_eye_table(pd.concat([out["episodes"], detected], ignore_index=True, sort=False), "episodes")
-    return add_provenance(
-        out,
-        "detect_events_remodnav",
-        "episodes",
-        f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};remodnav_version={_remodnav_version()};n={len(detected)}",
+    detected = (
+        standardize_eye_table(pd.DataFrame(rows), "episodes")
+        if rows
+        else empty_eye_table("episodes")
+    )
+    out["episodes"] = standardize_eye_table(
+        pd.concat([out["episodes"], detected], ignore_index=True, sort=False), "episodes"
+    )
+    return cast(
+        EyeDataset,
+        add_provenance(
+            out,
+            "detect_events_remodnav",
+            "episodes",
+            f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};remodnav_version={_remodnav_version()};n={len(detected)}",
+        ),
     )
 
 
@@ -637,20 +789,30 @@ def import_external_detector_events(
         rename["label"] = "episode_type"
     data = data.rename(columns=rename)
     if "end_time" not in data and {"start_time", "duration"}.issubset(data):
-        data["end_time"] = pd.to_numeric(data["start_time"], errors="coerce") + pd.to_numeric(data["duration"], errors="coerce")
+        data["end_time"] = pd.to_numeric(data["start_time"], errors="coerce") + pd.to_numeric(
+            data["duration"], errors="coerce"
+        )
     required = {"recording_id", "episode_type", "start_time", "end_time"}
     missing = sorted(required - set(data.columns))
     if missing:
-        raise EyeProcessValidationError("External detector events are missing: " + ", ".join(missing))
-    data["episode_type"] = data["episode_type"].map(lambda value: _EVENT_LABELS.get(str(value), str(value).lower()))
+        raise EyeProcessValidationError(
+            "External detector events are missing: " + ", ".join(missing)
+        )
+    data["episode_type"] = data["episode_type"].map(
+        lambda value: _EVENT_LABELS.get(str(value), str(value).lower())
+    )
     start = pd.to_numeric(data["start_time"], errors="coerce")
     end = pd.to_numeric(data["end_time"], errors="coerce")
     if start.isna().any() or end.isna().any() or (end < start).any():
-        raise EyeProcessValidationError("External detector event times must be finite with end_time >= start_time.")
+        raise EyeProcessValidationError(
+            "External detector event times must be finite with end_time >= start_time."
+        )
     if "duration_ms" not in data:
         data["duration_ms"] = (end - start) * 1000.0
     if "episode_id" not in data:
-        data["episode_id"] = [f"{spec.detector_id}_external_{i:07d}" for i in range(1, len(data) + 1)]
+        data["episode_id"] = [
+            f"{spec.detector_id}_external_{i:07d}" for i in range(1, len(data) + 1)
+        ]
     if "eye" not in data:
         data["eye"] = "combined"
     if "source_algorithm" not in data:
@@ -674,7 +836,9 @@ def import_external_detector_events(
             if len(hit) == 1:
                 data.at[idx, "trial_id"] = hit.iloc[0]["trial_id"]
             elif len(hit) > 1:
-                raise EyeProcessValidationError("An external event maps to multiple trial intervals; resolve the trial definition explicitly.")
+                raise EyeProcessValidationError(
+                    "An external event maps to multiple trial intervals; resolve the trial definition explicitly."
+                )
     return _attach_detector_columns(data, spec)
 
 
@@ -684,15 +848,26 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
         raise EyeProcessValidationError("`x` must be an EyeDataset.")
     validate_event_detector_spec(spec)
     branch = _clean_branch_dataset(x)
-    sampling_warnings = _check_sampling_rate(branch, spec) if spec.algorithm in _RAW_ALGORITHMS else []
+    sampling_warnings = (
+        _check_sampling_rate(branch, spec) if spec.algorithm in _RAW_ALGORITHMS else []
+    )
     for message in sampling_warnings:
         warnings.warn(message, RuntimeWarning, stacklevel=2)
 
     if spec.algorithm == "ivt":
+        velocity_threshold = _required_positive(
+            spec.velocity_threshold,
+            "velocity_threshold",
+        )
+        minimum_duration_ms = _required_positive(
+            spec.minimum_duration_ms,
+            "minimum_duration_ms",
+        )
+
         branch = detect_fixations_ivt(
             branch,
-            velocity_threshold=float(spec.velocity_threshold),
-            minimum_duration_ms=float(spec.minimum_duration_ms),
+            velocity_threshold=velocity_threshold,
+            minimum_duration_ms=minimum_duration_ms,
             maximum_gap_ms=float(spec.maximum_gap_ms or 75.0),
             coordinate_units=spec.coordinate_unit,
             overwrite=False,
@@ -700,15 +875,26 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
         if bool(spec.parameter_dict.get("include_saccades", False)):
             branch = detect_saccades(
                 branch,
-                velocity_threshold=float(spec.velocity_threshold),
-                minimum_duration_ms=float(spec.parameter_dict.get("minimum_saccade_duration_ms", 10.0)),
+                velocity_threshold=velocity_threshold,
+                minimum_duration_ms=float(
+                    spec.parameter_dict.get("minimum_saccade_duration_ms", 10.0)
+                ),
                 overwrite=False,
             )
     elif spec.algorithm == "idt":
+        dispersion_threshold = _required_positive(
+            spec.dispersion_threshold,
+            "dispersion_threshold",
+        )
+        minimum_duration_ms = _required_positive(
+            spec.minimum_duration_ms,
+            "minimum_duration_ms",
+        )
+
         branch = detect_fixations_idt(
             branch,
-            dispersion_threshold=float(spec.dispersion_threshold),
-            minimum_duration_ms=float(spec.minimum_duration_ms),
+            dispersion_threshold=dispersion_threshold,
+            minimum_duration_ms=minimum_duration_ms,
             coordinate_units=spec.coordinate_unit,
             overwrite=False,
         )
@@ -717,7 +903,14 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
     elif spec.algorithm == "remodnav":
         branch = _run_remodnav(branch, spec)
     elif spec.algorithm == "external":
-        output = spec.callback(data=branch.copy(), spec=spec)
+        callback = cast(
+            Callable[..., Any],
+            spec.callback,
+        )
+        output = callback(
+            data=branch.copy(),
+            spec=spec,
+        )
         if is_eye_dataset(output):
             external = output["episodes"].copy()
         else:
@@ -733,11 +926,10 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
             "episodes",
             f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(external)}",
         )
-    elif spec.algorithm == "vendor":
+    else:  # validated remaining supported algorithm: vendor
         vendor = x["episodes"].copy()
         params = spec.parameter_dict
-        if "derived_by" in vendor:
-            vendor = vendor[vendor["derived_by"].eq(params.get("derived_by", "vendor"))]
+        vendor = vendor[vendor["derived_by"].eq(params.get("derived_by", "vendor"))]
         vendor = _attach_detector_columns(vendor, spec)
         branch["episodes"] = standardize_eye_table(
             pd.concat([branch["episodes"], vendor], ignore_index=True, sort=False),
@@ -752,7 +944,9 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
 
     relevant = branch["episodes"].copy()
     if spec.algorithm != "vendor":
-        relevant = relevant[relevant["episode_type"].isin(["fixation", "saccade", "pursuit", "pso"])]
+        relevant = relevant[
+            relevant["episode_type"].isin(["fixation", "saccade", "pursuit", "pso"])
+        ]
     relevant = _attach_detector_columns(relevant, spec)
     lineage = _lineage_fields(x, spec)
     for column, value in lineage.items():
@@ -765,22 +959,32 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
     if keep_ids:
         mask = episodes["episode_id"].astype(str).isin(keep_ids)
         provenance_columns = [
-            c for c in relevant.columns
-            if c.startswith("detector_") or c in {
-                "source_data_hash", "preprocessing_provenance_hash", "aoi_spec_hash",
-                "quality_spec_hash", "software", "software_version"
+            c
+            for c in relevant.columns
+            if c.startswith("detector_")
+            or c
+            in {
+                "source_data_hash",
+                "preprocessing_provenance_hash",
+                "aoi_spec_hash",
+                "quality_spec_hash",
+                "software",
+                "software_version",
             }
         ]
         for column in provenance_columns:
             lookup = relevant.set_index(relevant["episode_id"].astype(str))[column]
             episodes.loc[mask, column] = episodes.loc[mask, "episode_id"].astype(str).map(lookup)
     branch["episodes"] = episodes
-    return add_provenance(
-        branch,
-        "detect_events_with_spec",
-        "episodes",
-        f"detector_id={spec.detector_id};algorithm={spec.algorithm};spec_hash={spec.fingerprint}",
-        warnings=" | ".join(sampling_warnings) if sampling_warnings else pd.NA,
+    return cast(
+        EyeDataset,
+        add_provenance(
+            branch,
+            "detect_events_with_spec",
+            "episodes",
+            f"detector_id={spec.detector_id};algorithm={spec.algorithm};spec_hash={spec.fingerprint}",
+            warnings=" | ".join(sampling_warnings) if sampling_warnings else pd.NA,
+        ),
     )
 
 
@@ -820,11 +1024,15 @@ def run_detector_multiverse(
                     "detector_spec_hash": spec.fingerprint,
                     "status": "ok",
                     "n_events": len(events),
-                    "n_fixations": int(events["episode_type"].eq("fixation").sum()) if not events.empty else 0,
+                    "n_fixations": int(events["episode_type"].eq("fixation").sum())
+                    if not events.empty
+                    else 0,
                 }
             )
             for message in captured:
-                warning_rows.append({"detector_id": spec.detector_id, "stage": "detection", "warning": message})
+                warning_rows.append(
+                    {"detector_id": spec.detector_id, "stage": "detection", "warning": message}
+                )
         except Exception as exc:  # branch failure is recorded, never treated as a valid result
             failures.append(
                 {
@@ -846,7 +1054,9 @@ def run_detector_multiverse(
             )
             if not continue_on_error:
                 raise
-    events = pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    events = (
+        pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    )
     return DetectorMultiverseResult(
         multiverse=multiverse,
         branches=branches,
@@ -887,8 +1097,14 @@ def match_detected_events(
     if ref.empty or cand.empty:
         return pd.DataFrame(
             columns=[
-                "reference_index", "candidate_index", "recording_id", "trial_id",
-                "event_type", "overlap_iou", "onset_difference_ms", "offset_difference_ms",
+                "reference_index",
+                "candidate_index",
+                "recording_id",
+                "trial_id",
+                "event_type",
+                "overlap_iou",
+                "onset_difference_ms",
+                "offset_difference_ms",
                 "duration_difference_ms",
             ]
         )
@@ -897,7 +1113,12 @@ def match_detected_events(
         for j, b in cand.iterrows():
             if str(a["recording_id"]) != str(b["recording_id"]):
                 continue
-            if "trial_id" in ref and "trial_id" in cand and pd.notna(a.get("trial_id")) and pd.notna(b.get("trial_id")):
+            if (
+                "trial_id" in ref
+                and "trial_id" in cand
+                and pd.notna(a.get("trial_id"))
+                and pd.notna(b.get("trial_id"))
+            ):
                 if str(a.get("trial_id")) != str(b.get("trial_id")):
                     continue
             a_start, a_end = float(a["start_time"]), float(a["end_time"])
@@ -928,7 +1149,10 @@ def match_detected_events(
                 "overlap_iou": float(iou),
                 "onset_difference_ms": float(-neg_onset),
                 "offset_difference_ms": abs(float(a["end_time"]) - float(b["end_time"])) * 1000.0,
-                "duration_difference_ms": float(b["end_time"] - b["start_time"] - (a["end_time"] - a["start_time"])) * 1000.0,
+                "duration_difference_ms": float(
+                    b["end_time"] - b["start_time"] - (a["end_time"] - a["start_time"])
+                )
+                * 1000.0,
             }
         )
     return pd.DataFrame(rows)
@@ -955,22 +1179,34 @@ def compare_event_catalogues(
     n_match = len(matches)
     precision = n_match / n_cand if n_cand else np.nan
     recall = n_match / n_ref if n_ref else np.nan
-    f1 = 2 * precision * recall / (precision + recall) if np.isfinite(precision) and np.isfinite(recall) and precision + recall else np.nan
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if np.isfinite(precision) and np.isfinite(recall) and precision + recall
+        else np.nan
+    )
     return pd.DataFrame(
-        [{
-            "event_type": event_type,
-            "reference_events": n_ref,
-            "candidate_events": n_cand,
-            "matched_events": n_match,
-            "matched_event_precision": precision,
-            "matched_event_recall": recall,
-            "f1": f1,
-            "mean_event_overlap": matches["overlap_iou"].mean() if n_match else np.nan,
-            "median_event_overlap": matches["overlap_iou"].median() if n_match else np.nan,
-            "mean_onset_difference_ms": matches["onset_difference_ms"].mean() if n_match else np.nan,
-            "mean_offset_difference_ms": matches["offset_difference_ms"].mean() if n_match else np.nan,
-            "mean_duration_difference_ms": matches["duration_difference_ms"].mean() if n_match else np.nan,
-        }]
+        [
+            {
+                "event_type": event_type,
+                "reference_events": n_ref,
+                "candidate_events": n_cand,
+                "matched_events": n_match,
+                "matched_event_precision": precision,
+                "matched_event_recall": recall,
+                "f1": f1,
+                "mean_event_overlap": matches["overlap_iou"].mean() if n_match else np.nan,
+                "median_event_overlap": matches["overlap_iou"].median() if n_match else np.nan,
+                "mean_onset_difference_ms": matches["onset_difference_ms"].mean()
+                if n_match
+                else np.nan,
+                "mean_offset_difference_ms": matches["offset_difference_ms"].mean()
+                if n_match
+                else np.nan,
+                "mean_duration_difference_ms": matches["duration_difference_ms"].mean()
+                if n_match
+                else np.nan,
+            }
+        ]
     )
 
 
@@ -991,7 +1227,11 @@ def estimate_detector_agreement(
         a = events[events["detector_id"].astype(str).eq(left)]
         b = events[events["detector_id"].astype(str).eq(right)]
         comp = compare_event_catalogues(
-            a, b, event_type=event_type, onset_tolerance_ms=onset_tolerance_ms, minimum_overlap=minimum_overlap
+            a,
+            b,
+            event_type=event_type,
+            onset_tolerance_ms=onset_tolerance_ms,
+            minimum_overlap=minimum_overlap,
         )
         row = comp.iloc[0].to_dict()
         row.update({"detector_a": left, "detector_b": right})
@@ -1024,7 +1264,9 @@ def summarise_detector_events(x: DetectorMultiverseResult | pd.DataFrame) -> pd.
     return pd.DataFrame(rows)
 
 
-def summarise_detector_disagreement(x: DetectorMultiverseResult, *, event_type: str = "fixation") -> pd.DataFrame:
+def summarise_detector_disagreement(
+    x: DetectorMultiverseResult, *, event_type: str = "fixation"
+) -> pd.DataFrame:
     """Pairwise detector disagreement expressed without assuming a gold standard."""
     agreement = estimate_detector_agreement(x, event_type=event_type)
     if agreement.empty:
@@ -1040,8 +1282,13 @@ def _assign_episode_aois_explicit(branch: EyeDataset, overlap: str) -> EyeDatase
     if overlap not in {"error", "first", "smallest", "all"}:
         raise EyeProcessValidationError("`overlap` must be error, first, smallest, or all.")
     if branch["aoi_definitions"].empty or branch["aoi_geometry"].empty:
-        raise EyeProcessValidationError("No AOIs are registered; detector-to-AOI propagation cannot continue.")
-    out = branch.copy()
+        raise EyeProcessValidationError(
+            "No AOIs are registered; detector-to-AOI propagation cannot continue."
+        )
+    out = cast(
+        EyeDataset,
+        branch.copy(),
+    )
     episodes = out["episodes"].copy()
     if episodes.empty:
         return out
@@ -1049,7 +1296,9 @@ def _assign_episode_aois_explicit(branch: EyeDataset, overlap: str) -> EyeDatase
     geometries = out["aoi_geometry"]
     assignments: list[Any] = []
     for _, event in episodes.iterrows():
-        if event["episode_type"] not in {"fixation", "pursuit"} or not np.isfinite(pd.to_numeric(pd.Series([event["centroid_x"]]), errors="coerce").iloc[0]):
+        if event["episode_type"] not in {"fixation", "pursuit"} or not np.isfinite(
+            pd.to_numeric(pd.Series([event["centroid_x"]]), errors="coerce").iloc[0]
+        ):
             assignments.append(event.get("aoi_id", pd.NA))
             continue
         hits: list[tuple[str, float, int]] = []
@@ -1062,12 +1311,20 @@ def _assign_episode_aois_explicit(branch: EyeDataset, overlap: str) -> EyeDatase
                 if str(event.get("coordinate_space_id")) != str(geometry["coordinate_space_id"]):
                     continue
                 hit = _aoi_contains(
-                    [event["centroid_x"]], [event["centroid_y"]], [event["start_time"]], definition, geometry
+                    [event["centroid_x"]],
+                    [event["centroid_y"]],
+                    [event["start_time"]],
+                    definition,
+                    geometry,
                 )[0]
                 if hit:
                     width = pd.to_numeric(pd.Series([geometry["width"]]), errors="coerce").iloc[0]
                     height = pd.to_numeric(pd.Series([geometry["height"]]), errors="coerce").iloc[0]
-                    area = float(width * height) if np.isfinite(width) and np.isfinite(height) else np.inf
+                    area = (
+                        float(width * height)
+                        if np.isfinite(width) and np.isfinite(height)
+                        else np.inf
+                    )
                     hits.append((str(definition["aoi_id"]), area, order))
         unique = []
         seen = set()
@@ -1091,7 +1348,15 @@ def _assign_episode_aois_explicit(branch: EyeDataset, overlap: str) -> EyeDatase
             assignments.append(unique[0][0])
     episodes["aoi_id"] = assignments
     out["episodes"] = episodes
-    return add_provenance(out, "propagate_detector_to_aoi", "episodes", f"overlap={overlap}")
+    return cast(
+        EyeDataset,
+        add_provenance(
+            out,
+            "propagate_detector_to_aoi",
+            "episodes",
+            f"overlap={overlap}",
+        ),
+    )
 
 
 def propagate_detector_to_aoi(
@@ -1118,16 +1383,20 @@ def propagate_detector_to_aoi(
                 events = events[events["detector_id"].eq(spec.detector_id)]
             event_frames.append(events)
         except Exception as exc:
-            failures.append({
-                "detector_id": spec.detector_id,
-                "detector_spec_hash": spec.fingerprint,
-                "stage": "aoi_assignment",
-                "error_type": type(exc).__name__,
-                "error": str(exc),
-            })
+            failures.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "detector_spec_hash": spec.fingerprint,
+                    "stage": "aoi_assignment",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
             if not continue_on_error:
                 raise
-    events = pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    events = (
+        pd.concat(event_frames, ignore_index=True, sort=False) if event_frames else pd.DataFrame()
+    )
     status = x.status.copy()
     failed_ids = {row["detector_id"] for row in failures if row.get("stage") == "aoi_assignment"}
     if not status.empty and failed_ids:
@@ -1146,26 +1415,36 @@ def _trial_rows(branch: EyeDataset) -> pd.DataFrame:
     intervals = branch["intervals"].copy()
     trials = intervals[intervals["interval_type"].eq("trial")].copy()
     if trials.empty:
-        raise EyeProcessValidationError("Explicit trial intervals are required for detector-to-feature propagation.")
+        raise EyeProcessValidationError(
+            "Explicit trial intervals are required for detector-to-feature propagation."
+        )
     if trials["trial_id"].isna().any():
         raise EyeProcessValidationError("Trial intervals must have non-missing trial_id values.")
     if trials.duplicated(["recording_id", "trial_id"]).any():
-        raise EyeProcessValidationError("Trial intervals must be unique by recording_id and trial_id.")
+        raise EyeProcessValidationError(
+            "Trial intervals must be unique by recording_id and trial_id."
+        )
     return trials
 
 
-def _trial_valid_fraction(branch: EyeDataset, recording_id: Any, trial_id: Any) -> tuple[int, float]:
+def _trial_valid_fraction(
+    branch: EyeDataset, recording_id: Any, trial_id: Any
+) -> tuple[int, float]:
     gaze = branch["gaze_samples"]
     subset = gaze[gaze["recording_id"].eq(recording_id) & gaze["trial_id"].eq(trial_id)]
     if subset.empty:
         return 0, np.nan
     valid = subset["valid"].astype("boolean").fillna(False).to_numpy(bool)
-    finite = np.isfinite(pd.to_numeric(subset["gaze_x"], errors="coerce")) & np.isfinite(pd.to_numeric(subset["gaze_y"], errors="coerce"))
+    finite = np.isfinite(pd.to_numeric(subset["gaze_x"], errors="coerce")) & np.isfinite(
+        pd.to_numeric(subset["gaze_y"], errors="coerce")
+    )
     observed = valid & finite
     return len(subset), float(observed.mean())
 
 
-def _pupil_within_fixations(branch: EyeDataset, fixations: pd.DataFrame, recording_id: Any, trial_id: Any) -> float:
+def _pupil_within_fixations(
+    branch: EyeDataset, fixations: pd.DataFrame, recording_id: Any, trial_id: Any
+) -> float:
     eye = branch["eye_samples"]
     if eye.empty or fixations.empty:
         return np.nan
@@ -1199,7 +1478,9 @@ def _derive_branch_features(branch: EyeDataset, spec: EventDetectorSpec) -> pd.D
         end = float(trial["end_time"])
         duration_ms = (end - start) * 1000.0
         n_samples, valid_fraction = _trial_valid_fraction(branch, rec, trial_id)
-        trial_fix = fixations[fixations["recording_id"].eq(rec) & fixations["trial_id"].eq(trial_id)].sort_values("start_time")
+        trial_fix = fixations[
+            fixations["recording_id"].eq(rec) & fixations["trial_id"].eq(trial_id)
+        ].sort_values("start_time")
         seq = [str(value) for value in trial_fix["aoi_id"].dropna().tolist()]
         collapsed = [value for i, value in enumerate(seq) if i == 0 or value != seq[i - 1]]
         for _, aoi in aois.iterrows():
@@ -1207,13 +1488,35 @@ def _derive_branch_features(branch: EyeDataset, spec: EventDetectorSpec) -> pd.D
             target = trial_fix[trial_fix["aoi_id"].astype("string").eq(aoi_id)].copy()
             observed_trial = n_samples > 0 and np.isfinite(valid_fraction) and valid_fraction > 0
             count = float(len(target)) if observed_trial else np.nan
-            dwell = float(pd.to_numeric(target["duration_ms"], errors="coerce").sum()) if observed_trial and len(target) else (0.0 if observed_trial else np.nan)
-            mean_duration = float(pd.to_numeric(target["duration_ms"], errors="coerce").mean()) if len(target) else np.nan
-            first_latency = (float(target["start_time"].min()) - start) * 1000.0 if len(target) else np.nan
-            entries = sum(1 for i, state in enumerate(collapsed) if state == aoi_id and (i == 0 or collapsed[i - 1] != aoi_id))
+            dwell = (
+                float(pd.to_numeric(target["duration_ms"], errors="coerce").sum())
+                if observed_trial and len(target)
+                else (0.0 if observed_trial else np.nan)
+            )
+            mean_duration = (
+                float(pd.to_numeric(target["duration_ms"], errors="coerce").mean())
+                if len(target)
+                else np.nan
+            )
+            first_latency = (
+                (float(target["start_time"].min()) - start) * 1000.0 if len(target) else np.nan
+            )
+            entries = sum(
+                1
+                for i, state in enumerate(collapsed)
+                if state == aoi_id and (i == 0 or collapsed[i - 1] != aoi_id)
+            )
             revisits = max(entries - 1, 0) if observed_trial else np.nan
-            transitions_from = sum(1 for left, right in zip(collapsed[:-1], collapsed[1:]) if left == aoi_id and right != aoi_id)
-            transitions_to = sum(1 for left, right in zip(collapsed[:-1], collapsed[1:]) if right == aoi_id and left != aoi_id)
+            transitions_from = sum(
+                1
+                for left, right in zip(collapsed[:-1], collapsed[1:])
+                if left == aoi_id and right != aoi_id
+            )
+            transitions_to = sum(
+                1
+                for left, right in zip(collapsed[:-1], collapsed[1:])
+                if right == aoi_id and left != aoi_id
+            )
             row = {
                 "detector_id": spec.detector_id,
                 "detector_algorithm": spec.algorithm,
@@ -1239,8 +1542,12 @@ def _derive_branch_features(branch: EyeDataset, spec: EventDetectorSpec) -> pd.D
                 "transition_count_from_aoi": float(transitions_from) if observed_trial else np.nan,
                 "transition_count_to_aoi": float(transitions_to) if observed_trial else np.nan,
                 "scanpath_sequence": " > ".join(collapsed),
-                "pupil_within_fixation_mean": _pupil_within_fixations(branch, target, rec, trial_id),
-                "feature_review_required": bool(np.isfinite(valid_fraction) and valid_fraction < 0.5),
+                "pupil_within_fixation_mean": _pupil_within_fixations(
+                    branch, target, rec, trial_id
+                ),
+                "feature_review_required": bool(
+                    np.isfinite(valid_fraction) and valid_fraction < 0.5
+                ),
             }
             row.update(_lineage_fields(branch, spec))
             rows.append(row)
@@ -1264,13 +1571,15 @@ def propagate_detector_to_features(
         try:
             frames.append(_derive_branch_features(branch, spec))
         except Exception as exc:
-            failures.append({
-                "detector_id": spec.detector_id,
-                "detector_spec_hash": spec.fingerprint,
-                "stage": "feature_propagation",
-                "error_type": type(exc).__name__,
-                "error": str(exc),
-            })
+            failures.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "detector_spec_hash": spec.fingerprint,
+                    "stage": "feature_propagation",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
             if not continue_on_error:
                 raise
     features = pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame()
@@ -1281,10 +1590,14 @@ def _fit_statsmodels(data: pd.DataFrame, model_spec: Mapping[str, Any]) -> tuple
     try:
         import statsmodels.formula.api as smf
     except ImportError as exc:
-        raise EyeProcessBackendError("This model engine requires statsmodels; no replacement estimator is selected automatically.") from exc
+        raise EyeProcessBackendError(
+            "This model engine requires statsmodels; no replacement estimator is selected automatically."
+        ) from exc
     formula = model_spec.get("formula")
     if not isinstance(formula, str) or "~" not in formula:
-        raise EyeProcessValidationError("`model_spec['formula']` must be an explicit formula string.")
+        raise EyeProcessValidationError(
+            "`model_spec['formula']` must be an explicit formula string."
+        )
     engine = model_spec.get("engine")
     captured = []
     with warnings.catch_warnings(record=True) as caught:
@@ -1295,9 +1608,13 @@ def _fit_statsmodels(data: pd.DataFrame, model_spec: Mapping[str, Any]) -> tuple
         elif engine == "statsmodels_mixedlm":
             groups = model_spec.get("groups")
             if not groups or groups not in data.columns:
-                raise EyeProcessValidationError("MixedLM requires an explicit existing `groups` column.")
+                raise EyeProcessValidationError(
+                    "MixedLM requires an explicit existing `groups` column."
+                )
             re_formula = model_spec.get("re_formula")
-            model = smf.mixedlm(formula, data=data, groups=data[groups], re_formula=re_formula, missing="raise")
+            model = smf.mixedlm(
+                formula, data=data, groups=data[groups], re_formula=re_formula, missing="raise"
+            )
             fit = model.fit(
                 reml=bool(model_spec.get("reml", False)),
                 method=model_spec.get("method", "lbfgs"),
@@ -1308,7 +1625,15 @@ def _fit_statsmodels(data: pd.DataFrame, model_spec: Mapping[str, Any]) -> tuple
         else:
             raise EyeProcessValidationError("Unknown statsmodels engine.")
         captured = [str(item.message) for item in caught]
-    return (fit, captured if converged else captured + ["Model did not converge; estimates are retained for diagnosis but excluded from stability summaries."])
+    return (
+        fit,
+        captured
+        if converged
+        else captured
+        + [
+            "Model did not converge; estimates are retained for diagnosis but excluded from stability summaries."
+        ],
+    )
 
 
 def _tidy_statsmodels(fit: Any, converged: bool, n: int) -> pd.DataFrame:
@@ -1322,16 +1647,18 @@ def _tidy_statsmodels(fit: Any, converged: bool, n: int) -> pd.DataFrame:
     except Exception:
         lower = pd.Series(np.nan, index=params.index)
         upper = pd.Series(np.nan, index=params.index)
-    return pd.DataFrame({
-        "term": params.index.astype(str),
-        "estimate": params.to_numpy(float),
-        "SE": pd.to_numeric(se, errors="coerce").to_numpy(float),
-        "CI_lower": pd.to_numeric(lower, errors="coerce").to_numpy(float),
-        "CI_upper": pd.to_numeric(upper, errors="coerce").to_numpy(float),
-        "p": pd.to_numeric(p, errors="coerce").to_numpy(float),
-        "converged": bool(converged),
-        "N": int(n),
-    })
+    return pd.DataFrame(
+        {
+            "term": params.index.astype(str),
+            "estimate": params.to_numpy(float),
+            "SE": pd.to_numeric(se, errors="coerce").to_numpy(float),
+            "CI_lower": pd.to_numeric(lower, errors="coerce").to_numpy(float),
+            "CI_upper": pd.to_numeric(upper, errors="coerce").to_numpy(float),
+            "p": pd.to_numeric(p, errors="coerce").to_numpy(float),
+            "converged": bool(converged),
+            "N": int(n),
+        }
+    )
 
 
 def run_detector_inference_multiverse(
@@ -1350,12 +1677,16 @@ def run_detector_inference_multiverse(
     if not isinstance(x, DetectorMultiverseResult):
         raise EyeProcessValidationError("`x` must be a DetectorMultiverseResult.")
     if x.features.empty:
-        raise EyeProcessValidationError("Run `propagate_detector_to_features()` before inference propagation.")
+        raise EyeProcessValidationError(
+            "Run `propagate_detector_to_features()` before inference propagation."
+        )
     if not isinstance(model_spec, Mapping):
         raise EyeProcessValidationError("`model_spec` must be a mapping.")
     engine = model_spec.get("engine")
     if engine not in {"statsmodels_ols", "statsmodels_mixedlm", "callback"}:
-        raise EyeProcessValidationError("Choose an explicit model engine: statsmodels_ols, statsmodels_mixedlm, or callback.")
+        raise EyeProcessValidationError(
+            "Choose an explicit model engine: statsmodels_ols, statsmodels_mixedlm, or callback."
+        )
     if engine == "callback" and not callable(model_callback):
         raise EyeProcessValidationError("`engine='callback'` requires a callable `model_callback`.")
     outcome = str(model_spec.get("outcome", "")).strip()
@@ -1363,7 +1694,9 @@ def run_detector_inference_multiverse(
         formula = str(model_spec.get("formula", ""))
         outcome = formula.split("~", 1)[0].strip() if "~" in formula else ""
     if not outcome or outcome not in x.features.columns:
-        raise EyeProcessValidationError("The model outcome must be named explicitly and exist in propagated features.")
+        raise EyeProcessValidationError(
+            "The model outcome must be named explicitly and exist in propagated features."
+        )
     if minimum_valid_fraction is not None and not 0 <= float(minimum_valid_fraction) <= 1:
         raise EyeProcessValidationError("`minimum_valid_fraction` must lie in [0, 1].")
 
@@ -1387,26 +1720,30 @@ def run_detector_inference_multiverse(
             quality_excluded_rows = int((~quality_keep).sum())
             data = data[quality_keep].copy()
             if quality_excluded_rows:
-                warning_rows.append({
-                    "detector_id": spec.detector_id,
-                    "stage": "model_input",
-                    "warning": (
-                        f"Excluded {quality_excluded_rows} row(s) below minimum_valid_fraction="
-                        f"{float(minimum_valid_fraction):g}; exclusion count is retained in input_audit."
-                    ),
-                })
+                warning_rows.append(
+                    {
+                        "detector_id": spec.detector_id,
+                        "stage": "model_input",
+                        "warning": (
+                            f"Excluded {quality_excluded_rows} row(s) below minimum_valid_fraction="
+                            f"{float(minimum_valid_fraction):g}; exclusion count is retained in input_audit."
+                        ),
+                    }
+                )
 
         finite_outcome = np.isfinite(pd.to_numeric(data[outcome], errors="coerce"))
         outcome_missing_rows = int((~finite_outcome).sum())
         if outcome_missing_rows:
-            warning_rows.append({
-                "detector_id": spec.detector_id,
-                "stage": "model_input",
-                "warning": (
-                    f"Excluded {outcome_missing_rows} row(s) with non-finite outcome `{outcome}`; "
-                    "exclusion count is retained in input_audit."
-                ),
-            })
+            warning_rows.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "stage": "model_input",
+                    "warning": (
+                        f"Excluded {outcome_missing_rows} row(s) with non-finite outcome `{outcome}`; "
+                        "exclusion count is retained in input_audit."
+                    ),
+                }
+            )
         data = data[finite_outcome].copy()
         model_rows_used = len(data)
         audit = {
@@ -1426,27 +1763,38 @@ def run_detector_inference_multiverse(
         if data.empty:
             audit["status"] = "no_model_data"
             audit_rows.append(audit)
-            failures.append({
-                "detector_id": spec.detector_id,
-                "stage": "model",
-                "error_type": "NoModelData",
-                "error": "No finite model rows remained for this detector. See input_audit for row attrition.",
-                "input_rows": int(input_rows),
-                "aoi_selected_rows": int(aoi_selected_rows),
-                "quality_excluded_rows": int(quality_excluded_rows),
-                "outcome_missing_rows": int(outcome_missing_rows),
-                "model_rows_used": 0,
-            })
+            failures.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "stage": "model",
+                    "error_type": "NoModelData",
+                    "error": "No finite model rows remained for this detector. See input_audit for row attrition.",
+                    "input_rows": int(input_rows),
+                    "aoi_selected_rows": int(aoi_selected_rows),
+                    "quality_excluded_rows": int(quality_excluded_rows),
+                    "outcome_missing_rows": int(outcome_missing_rows),
+                    "model_rows_used": 0,
+                }
+            )
             continue
         try:
             if engine == "callback":
-                tidy = model_callback(data.copy(), dict(model_spec))
+                callback = cast(
+                    Callable[..., Any],
+                    model_callback,
+                )
+                tidy = callback(
+                    data.copy(),
+                    dict(model_spec),
+                )
                 if not isinstance(tidy, pd.DataFrame):
                     raise EyeProcessValidationError("`model_callback` must return a DataFrame.")
                 required = {"term", "estimate", "SE", "CI_lower", "CI_upper", "p", "converged", "N"}
                 missing = required - set(tidy.columns)
                 if missing:
-                    raise EyeProcessValidationError("Model callback output is missing: " + ", ".join(sorted(missing)))
+                    raise EyeProcessValidationError(
+                        "Model callback output is missing: " + ", ".join(sorted(missing))
+                    )
                 if tidy["term"].astype(str).duplicated().any():
                     raise EyeProcessValidationError(
                         "Model callback output must contain at most one row per coefficient term."
@@ -1454,7 +1802,11 @@ def run_detector_inference_multiverse(
                 model_warnings: list[str] = []
             else:
                 fit, model_warnings = _fit_statsmodels(data, model_spec)
-                converged = bool(getattr(fit, "converged", True)) if engine == "statsmodels_mixedlm" else True
+                converged = (
+                    bool(getattr(fit, "converged", True))
+                    if engine == "statsmodels_mixedlm"
+                    else True
+                )
                 tidy = _tidy_statsmodels(fit, converged, len(data))
             tidy = tidy.copy()
             tidy["detector_id"] = spec.detector_id
@@ -1463,9 +1815,13 @@ def run_detector_inference_multiverse(
             tidy["parameter_spec"] = json.dumps(_jsonable(spec.as_dict()), sort_keys=True)
             tidy["model_engine"] = engine
             tidy["model_formula"] = model_spec.get("formula", pd.NA)
-            model_spec_blob = json.dumps(_jsonable(dict(model_spec)), sort_keys=True, separators=(",", ":"))
+            model_spec_blob = json.dumps(
+                _jsonable(dict(model_spec)), sort_keys=True, separators=(",", ":")
+            )
             tidy["model_spec_hash"] = sha256(model_spec_blob.encode()).hexdigest()
-            tidy["feature_fingerprint"] = sha256(data.to_json(orient="split", index=False, default_handler=str).encode()).hexdigest()
+            tidy["feature_fingerprint"] = sha256(
+                data.to_json(orient="split", index=False, default_handler=str).encode()
+            ).hexdigest()
             tidy["software"] = "eyeprocesspy"
             tidy["software_version"] = "0.1.0"
             tidy["input_rows"] = int(input_rows)
@@ -1478,21 +1834,25 @@ def run_detector_inference_multiverse(
             audit["status"] = "modelled"
             audit_rows.append(audit)
             for message in model_warnings:
-                warning_rows.append({"detector_id": spec.detector_id, "stage": "model", "warning": message})
+                warning_rows.append(
+                    {"detector_id": spec.detector_id, "stage": "model", "warning": message}
+                )
         except Exception as exc:
             audit["status"] = "failed"
             audit_rows.append(audit)
-            failures.append({
-                "detector_id": spec.detector_id,
-                "stage": "model",
-                "error_type": type(exc).__name__,
-                "error": str(exc),
-                "input_rows": int(input_rows),
-                "aoi_selected_rows": int(aoi_selected_rows),
-                "quality_excluded_rows": int(quality_excluded_rows),
-                "outcome_missing_rows": int(outcome_missing_rows),
-                "model_rows_used": int(model_rows_used),
-            })
+            failures.append(
+                {
+                    "detector_id": spec.detector_id,
+                    "stage": "model",
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                    "input_rows": int(input_rows),
+                    "aoi_selected_rows": int(aoi_selected_rows),
+                    "quality_excluded_rows": int(quality_excluded_rows),
+                    "outcome_missing_rows": int(outcome_missing_rows),
+                    "model_rows_used": int(model_rows_used),
+                }
+            )
     coefficients = pd.concat(rows, ignore_index=True, sort=False) if rows else pd.DataFrame()
     feature_blob = x.features.to_json(orient="split", index=False, default_handler=str)
     return DetectorInferenceResult(
@@ -1541,44 +1901,54 @@ def assess_detector_inference_stability(
         "model_failure_specifications": len(failure_ids),
     }
     if data.empty:
-        return pd.DataFrame([{
-            **base,
-            "converged_specifications": 0,
-            "convergence_rate": 0.0 if planned_n else np.nan,
-            "median_estimate": np.nan,
-            "estimate_min": np.nan,
-            "estimate_max": np.nan,
-            "estimate_range": np.nan,
-            "same_sign_proportion": np.nan,
-            "ci_overlap": pd.NA,
-            "ci_overlap_lower": np.nan,
-            "ci_overlap_upper": np.nan,
-            "substantive_conclusion_stability": np.nan,
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    **base,
+                    "converged_specifications": 0,
+                    "convergence_rate": 0.0 if planned_n else np.nan,
+                    "median_estimate": np.nan,
+                    "estimate_min": np.nan,
+                    "estimate_max": np.nan,
+                    "estimate_range": np.nan,
+                    "same_sign_proportion": np.nan,
+                    "ci_overlap": pd.NA,
+                    "ci_overlap_lower": np.nan,
+                    "ci_overlap_upper": np.nan,
+                    "substantive_conclusion_stability": np.nan,
+                }
+            ]
+        )
 
     converged_mask = data["converged"].astype("boolean").fillna(False)
     valid = data[converged_mask].copy()
     estimates = pd.to_numeric(valid["estimate"], errors="coerce")
     valid = valid[np.isfinite(estimates)]
     estimates = pd.to_numeric(valid["estimate"], errors="coerce")
-    converged_ids = set(valid["detector_id"].dropna().astype(str)) if "detector_id" in valid else set()
+    converged_ids = (
+        set(valid["detector_id"].dropna().astype(str)) if "detector_id" in valid else set()
+    )
     converged_n = len(converged_ids)
 
     if valid.empty:
-        return pd.DataFrame([{
-            **base,
-            "converged_specifications": 0,
-            "convergence_rate": 0.0 if planned_n else np.nan,
-            "median_estimate": np.nan,
-            "estimate_min": np.nan,
-            "estimate_max": np.nan,
-            "estimate_range": np.nan,
-            "same_sign_proportion": np.nan,
-            "ci_overlap": pd.NA,
-            "ci_overlap_lower": np.nan,
-            "ci_overlap_upper": np.nan,
-            "substantive_conclusion_stability": np.nan,
-        }])
+        return pd.DataFrame(
+            [
+                {
+                    **base,
+                    "converged_specifications": 0,
+                    "convergence_rate": 0.0 if planned_n else np.nan,
+                    "median_estimate": np.nan,
+                    "estimate_min": np.nan,
+                    "estimate_max": np.nan,
+                    "estimate_range": np.nan,
+                    "same_sign_proportion": np.nan,
+                    "ci_overlap": pd.NA,
+                    "ci_overlap_lower": np.nan,
+                    "ci_overlap_upper": np.nan,
+                    "substantive_conclusion_stability": np.nan,
+                }
+            ]
+        )
 
     nonzero = estimates[estimates != 0]
     if len(nonzero):
@@ -1609,27 +1979,38 @@ def assess_detector_inference_stability(
             decisions = estimates.abs() >= abs(threshold)
         threshold_stability = float(max(decisions.mean(), (~decisions).mean()))
 
-    return pd.DataFrame([{
-        **base,
-        "converged_specifications": converged_n,
-        "convergence_rate": converged_n / planned_n if planned_n else np.nan,
-        "median_estimate": float(estimates.median()),
-        "estimate_min": float(estimates.min()),
-        "estimate_max": float(estimates.max()),
-        "estimate_range": float(estimates.max() - estimates.min()),
-        "same_sign_proportion": same_sign,
-        "ci_overlap": ci_overlap,
-        "ci_overlap_lower": overlap_lower,
-        "ci_overlap_upper": overlap_upper,
-        "substantive_conclusion_stability": threshold_stability,
-    }])
+    return pd.DataFrame(
+        [
+            {
+                **base,
+                "converged_specifications": converged_n,
+                "convergence_rate": converged_n / planned_n if planned_n else np.nan,
+                "median_estimate": float(estimates.median()),
+                "estimate_min": float(estimates.min()),
+                "estimate_max": float(estimates.max()),
+                "estimate_range": float(estimates.max() - estimates.min()),
+                "same_sign_proportion": same_sign,
+                "ci_overlap": ci_overlap,
+                "ci_overlap_lower": overlap_lower,
+                "ci_overlap_upper": overlap_upper,
+                "substantive_conclusion_stability": threshold_stability,
+            }
+        ]
+    )
+
 
 def _feature_sensitivity(features: pd.DataFrame) -> pd.DataFrame:
     if features.empty:
         return pd.DataFrame()
     metrics = [
-        "dwell_time_ms", "fixation_count", "mean_fixation_duration_ms", "ttff_ms", "revisits",
-        "transition_count_from_aoi", "transition_count_to_aoi", "pupil_within_fixation_mean",
+        "dwell_time_ms",
+        "fixation_count",
+        "mean_fixation_duration_ms",
+        "ttff_ms",
+        "revisits",
+        "transition_count_from_aoi",
+        "transition_count_to_aoi",
+        "pupil_within_fixation_mean",
     ]
     keys = ["recording_id", "trial_id", "aoi_id"]
     rows = []
@@ -1642,12 +2023,14 @@ def _feature_sensitivity(features: pd.DataFrame) -> pd.DataFrame:
             values = values[np.isfinite(values)]
             if len(values) >= 2:
                 spreads.append(float(values.max() - values.min()))
-        rows.append({
-            "feature": metric,
-            "units_with_multiple_detectors": len(spreads),
-            "median_detector_range": float(np.median(spreads)) if spreads else np.nan,
-            "max_detector_range": float(np.max(spreads)) if spreads else np.nan,
-        })
+        rows.append(
+            {
+                "feature": metric,
+                "units_with_multiple_detectors": len(spreads),
+                "median_detector_range": float(np.median(spreads)) if spreads else np.nan,
+                "max_detector_range": float(np.max(spreads)) if spreads else np.nan,
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -1668,7 +2051,9 @@ def summarise_detector_robustness(
     }
     if inference is not None:
         if term is None:
-            raise EyeProcessValidationError("`term` is required when inference results are supplied.")
+            raise EyeProcessValidationError(
+                "`term` is required when inference results are supplied."
+            )
         out["inference_stability"] = assess_detector_inference_stability(
             inference, term=term, substantive_threshold=substantive_threshold, direction=direction
         )
@@ -1707,7 +2092,9 @@ def plot_detector_event_timeline(
     return ax
 
 
-def plot_detector_agreement(x: DetectorMultiverseResult, *, metric: str = "mean_event_overlap", ax: Any = None):
+def plot_detector_agreement(
+    x: DetectorMultiverseResult, *, metric: str = "mean_event_overlap", ax: Any = None
+):
     """Plot pairwise detector agreement as a matrix."""
     import matplotlib.pyplot as plt
 
@@ -1747,7 +2134,12 @@ def plot_detector_feature_distributions(
     if aoi_id is not None:
         data = data[data["aoi_id"].astype(str).eq(str(aoi_id))]
     ids = sorted(data["detector_id"].dropna().astype(str).unique())
-    values = [pd.to_numeric(data.loc[data["detector_id"].astype(str).eq(detector_id), feature], errors="coerce").dropna() for detector_id in ids]
+    values = [
+        pd.to_numeric(
+            data.loc[data["detector_id"].astype(str).eq(detector_id), feature], errors="coerce"
+        ).dropna()
+        for detector_id in ids
+    ]
     if ax is None:
         _, ax = plt.subplots()
     ax.boxplot(values, tick_labels=ids)
@@ -1808,14 +2200,18 @@ def _markdown_table(frame: pd.DataFrame) -> str:
     if frame.empty:
         return ""
     cols = [str(c) for c in frame.columns]
+
     def cell(value: Any) -> str:
         if pd.isna(value):
             return ""
         text = str(value).replace("|", "\\|").replace("\n", " ")
         return text
+
     header = "| " + " | ".join(cols) + " |"
     rule = "| " + " | ".join(["---"] * len(cols)) + " |"
-    rows = ["| " + " | ".join(cell(row[c]) for c in frame.columns) + " |" for _, row in frame.iterrows()]
+    rows = [
+        "| " + " | ".join(cell(row[c]) for c in frame.columns) + " |" for _, row in frame.iterrows()
+    ]
     return "\n".join([header, rule, *rows])
 
 
@@ -1848,44 +2244,56 @@ def report_detector_multiverse(
         "",
         "## Event-level sensitivity",
         "",
-        _markdown_table(summary["event_summary"]) if not summary["event_summary"].empty else "No successful event catalogues were available.",
+        _markdown_table(summary["event_summary"])
+        if not summary["event_summary"].empty
+        else "No successful event catalogues were available.",
         "",
         "## AOI-feature sensitivity",
         "",
-        _markdown_table(summary["feature_sensitivity"]) if not summary["feature_sensitivity"].empty else "AOI features were not propagated or no cross-detector comparison was estimable.",
+        _markdown_table(summary["feature_sensitivity"])
+        if not summary["feature_sensitivity"].empty
+        else "AOI features were not propagated or no cross-detector comparison was estimable.",
         "",
     ]
     if inference is not None:
-        lines.extend([
-            "## Model-input audit",
-            "",
-            _markdown_table(inference.input_audit) if not inference.input_audit.empty else "No model-input audit rows were available.",
-            "",
-            "AOI selection, declared quality exclusions, non-finite outcomes, and model rows used are reported separately; missing outcomes are never converted to zero.",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Model-input audit",
+                "",
+                _markdown_table(inference.input_audit)
+                if not inference.input_audit.empty
+                else "No model-input audit rows were available.",
+                "",
+                "AOI selection, declared quality exclusions, non-finite outcomes, and model rows used are reported separately; missing outcomes are never converted to zero.",
+                "",
+            ]
+        )
     if inference is not None and term is not None:
-        lines.extend([
-            "## Inference stability",
-            "",
-            _markdown_table(summary["inference_stability"]),
-            "",
-            "The convergence-rate denominator is every planned detector specification. Model failures, missing requested terms, and non-converged branches therefore remain visible rather than disappearing from robustness accounting.",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Inference stability",
+                "",
+                _markdown_table(summary["inference_stability"]),
+                "",
+                "The convergence-rate denominator is every planned detector specification. Model failures, missing requested terms, and non-converged branches therefore remain visible rather than disappearing from robustness accounting.",
+                "",
+            ]
+        )
     if inference is not None and not inference.failures.empty:
         lines.extend(["## Model failures", "", _markdown_table(inference.failures), ""])
     if not x.failures.empty:
         lines.extend(["## Branch failures", "", _markdown_table(x.failures), ""])
-    lines.extend([
-        "## Reporting guidance",
-        "",
-        "Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, successful/failed specifications, model-input audit counts, event-level agreement, feature ranges, coefficient distributions with uncertainty, convergence failures, and any substantive threshold. Do not summarize robustness by counting p-values alone.",
-        "",
-        "## Limitations",
-        "",
-        "Detector sensitivity is conditional on the supplied preprocessing, AOIs, quality rules, model specification, and detector set. Agreement between detectors does not establish event validity, and disagreement does not identify which detector is correct without external evidence.",
-    ])
+    lines.extend(
+        [
+            "## Reporting guidance",
+            "",
+            "Report the detector family and parameters, sampling rate and coordinate units, AOI assignment rule, successful/failed specifications, model-input audit counts, event-level agreement, feature ranges, coefficient distributions with uncertainty, convergence failures, and any substantive threshold. Do not summarize robustness by counting p-values alone.",
+            "",
+            "## Limitations",
+            "",
+            "Detector sensitivity is conditional on the supplied preprocessing, AOIs, quality rules, model specification, and detector set. Agreement between detectors does not establish event validity, and disagreement does not identify which detector is correct without external evidence.",
+        ]
+    )
     text = "\n".join(lines)
     if path is not None:
         Path(path).write_text(text, encoding="utf-8")
@@ -1901,7 +2309,9 @@ def simulate_detector_multiverse_data(
 ) -> EyeDataset:
     """Create a small synthetic 60-Hz dataset with a known disclosure-dwell effect."""
     if int(n_participants) < 4:
-        raise EyeProcessValidationError("Use at least four participants for the worked multiverse example.")
+        raise EyeProcessValidationError(
+            "Use at least four participants for the worked multiverse example."
+        )
     _finite_positive(sampling_rate, "sampling_rate", allow_none=False)
     _finite_positive(trial_duration_s, "trial_duration_s", allow_none=False)
     rng = np.random.default_rng(int(seed))
@@ -1912,17 +2322,33 @@ def simulate_detector_multiverse_data(
     n_samples = int(round(float(sampling_rate) * float(trial_duration_s)))
     for participant in range(1, int(n_participants) + 1):
         rec = f"R{participant:03d}"
-        recordings.append({"recording_id": rec, "participant_id": f"P{participant:03d}", "vendor": "synthetic", "nominal_sampling_rate": sampling_rate})
+        recordings.append(
+            {
+                "recording_id": rec,
+                "participant_id": f"P{participant:03d}",
+                "vendor": "synthetic",
+                "nominal_sampling_rate": sampling_rate,
+            }
+        )
         for condition_index, condition in enumerate(("control", "disclosure")):
             trial_id = f"{rec}_T{condition_index + 1}"
             start = condition_index * (trial_duration_s + 0.25)
             end = start + trial_duration_s
-            intervals.append({
-                "interval_id": f"I_{trial_id}", "recording_id": rec, "interval_type": "trial",
-                "start_time": start, "end_time": end, "trial_id": trial_id,
-                "participant_id": f"P{participant:03d}", "item_id": "ad_01", "stimulus_id": "stim_01",
-                "condition_id": condition, "valid_interval": True,
-            })
+            intervals.append(
+                {
+                    "interval_id": f"I_{trial_id}",
+                    "recording_id": rec,
+                    "interval_type": "trial",
+                    "start_time": start,
+                    "end_time": end,
+                    "trial_id": trial_id,
+                    "participant_id": f"P{participant:03d}",
+                    "item_id": "ad_01",
+                    "stimulus_id": "stim_01",
+                    "condition_id": condition,
+                    "valid_interval": True,
+                }
+            )
             local_t = np.arange(n_samples) / sampling_rate
             # Piecewise fixation centres; disclosure condition has a longer target-AOI segment.
             target_start = 0.55 + rng.normal(0, 0.03)
@@ -1939,12 +2365,19 @@ def simulate_detector_multiverse_data(
             valid = rng.random(n_samples) > 0.015
             for k in range(n_samples):
                 sample_counter += 1
-                gaze_rows.append({
-                    "recording_id": rec, "sample_id": f"S{sample_counter:08d}",
-                    "timestamp_seconds": start + local_t[k], "gaze_x": x[k], "gaze_y": y[k],
-                    "valid": bool(valid[k]), "trial_id": trial_id, "stimulus_id": "stim_01",
-                    "coordinate_space_id": "deg_display",
-                })
+                gaze_rows.append(
+                    {
+                        "recording_id": rec,
+                        "sample_id": f"S{sample_counter:08d}",
+                        "timestamp_seconds": start + local_t[k],
+                        "gaze_x": x[k],
+                        "gaze_y": y[k],
+                        "valid": bool(valid[k]),
+                        "trial_id": trial_id,
+                        "stimulus_id": "stim_01",
+                        "coordinate_space_id": "deg_display",
+                    }
+                )
     spaces = new_coordinate_space(
         coordinate_space_id="deg_display",
         space_type="custom",
@@ -1964,19 +2397,36 @@ def simulate_detector_multiverse_data(
     dataset = register_aois(
         dataset,
         new_aoi(
-            "disclosure", "Disclosure", "stim_01", "rectangle",
-            x=4.0, y=1.0, width=4.0, height=3.0, coordinate_space_id="deg_display",
+            "disclosure",
+            "Disclosure",
+            "stim_01",
+            "rectangle",
+            x=4.0,
+            y=1.0,
+            width=4.0,
+            height=3.0,
+            coordinate_space_id="deg_display",
         ),
         new_aoi(
-            "main_content", "Main content", "stim_01", "rectangle",
-            x=0.5, y=4.5, width=3.5, height=2.5, coordinate_space_id="deg_display",
+            "main_content",
+            "Main content",
+            "stim_01",
+            "rectangle",
+            x=0.5,
+            y=4.5,
+            width=3.5,
+            height=2.5,
+            coordinate_space_id="deg_display",
         ),
     )
-    return add_provenance(
-        dataset,
-        "simulate_detector_multiverse_data",
-        "dataset",
-        f"n_participants={n_participants};sampling_rate={sampling_rate};seed={seed}",
+    return cast(
+        EyeDataset,
+        add_provenance(
+            dataset,
+            "simulate_detector_multiverse_data",
+            "dataset",
+            f"n_participants={n_participants};sampling_rate={sampling_rate};seed={seed}",
+        ),
     )
 
 

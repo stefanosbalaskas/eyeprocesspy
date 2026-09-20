@@ -1,4 +1,5 @@
 """Reproducible standardized gaze-quality example with synthetic validation data."""
+
 from __future__ import annotations
 
 import eyeprocesspy as ep
@@ -22,8 +23,16 @@ def main() -> None:
     )
 
     columns = [
-        "profile", "target_id", "accuracy_mean", "precision_rms_s2s", "precision_sd",
-        "bcea", "effective_sampling_hz", "data_loss_fraction", "quality_flags", "review_required",
+        "profile",
+        "target_id",
+        "accuracy_mean",
+        "precision_rms_s2s",
+        "precision_sd",
+        "bcea",
+        "effective_sampling_hz",
+        "data_loss_fraction",
+        "quality_flags",
+        "review_required",
     ]
     print(report[columns].to_string(index=False))
     print()

@@ -15,7 +15,7 @@ import itertools
 import json
 import math
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -73,7 +73,7 @@ def _sequence(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     if np.isscalar(value):
         return [value]
     try:
@@ -104,7 +104,9 @@ def _require_columns(
 ) -> None:
     missing = [column for column in columns if column not in frame.columns]
     if missing:
-        raise EyeProcessValidationError(f"{name} is missing required columns: " + ", ".join(missing))
+        raise EyeProcessValidationError(
+            f"{name} is missing required columns: " + ", ".join(missing)
+        )
 
 
 def _finite_numbers(
@@ -123,13 +125,13 @@ def _finite_numbers(
 
 def _utc_string(value: Any | None = None) -> str:
     if value is None:
-        moment = datetime.now(timezone.utc)
+        moment = datetime.now(UTC)
     elif isinstance(value, datetime):
         moment = value
         if moment.tzinfo is None:
-            moment = moment.replace(tzinfo=timezone.utc)
+            moment = moment.replace(tzinfo=UTC)
         else:
-            moment = moment.astimezone(timezone.utc)
+            moment = moment.astimezone(UTC)
     else:
         try:
             moment = pd.Timestamp(value)
@@ -149,7 +151,8 @@ def _json_safe(value: Any) -> Any:
             "__eyeprocess_type__": "dataframe",
             "columns": [str(column) for column in value.columns],
             "records": [
-                {str(key): _json_safe(item) for key, item in row.items()} for row in value.to_dict(orient="records")
+                {str(key): _json_safe(item) for key, item in row.items()}
+                for row in value.to_dict(orient="records")
             ],
             "attrs": _json_safe(dict(value.attrs)),
         }
@@ -177,7 +180,10 @@ def _json_restore(value: Any) -> Any:
         return value
     if value.get("__eyeprocess_type__") == "dataframe":
         frame = pd.DataFrame(
-            [{key: _json_restore(item) for key, item in row.items()} for row in value.get("records", [])],
+            [
+                {key: _json_restore(item) for key, item in row.items()}
+                for row in value.get("records", [])
+            ],
             columns=value.get("columns", []),
         )
         frame.attrs.update(_json_restore(value.get("attrs", {})))
@@ -199,7 +205,9 @@ def eyeprocess_validation_plan(
     """Declare the frozen deterministic validation-evidence plan."""
     families0 = _unique([str(value) for value in _sequence(families)])
     if not families0 or any(value not in _ALLOWED_FAMILIES for value in families0):
-        raise EyeProcessValidationError("families must be drawn from: " + ", ".join(_ALLOWED_FAMILIES))
+        raise EyeProcessValidationError(
+            "families must be drawn from: " + ", ".join(_ALLOWED_FAMILIES)
+        )
 
     sample0 = _unique(_finite_numbers(sample_size, integer=True))
     if not sample0 or any(value < 20 for value in sample0):
@@ -321,7 +329,9 @@ def expand_eyeprocess_validation_plan(x):
     grid["scenario_id"] = [f"M2S{index:04d}" for index in range(1, len(grid) + 1)]
     grid["replications"] = int(x["replications"])
     grid["master_seed"] = int(x["seed"])
-    grid["scenario_seed"] = [eyeprocess_validation_seed(x["seed"], index) for index in range(1, len(grid) + 1)]
+    grid["scenario_seed"] = [
+        eyeprocess_validation_seed(x["seed"], index) for index in range(1, len(grid) + 1)
+    ]
 
     grid = grid[
         [
@@ -364,9 +374,13 @@ def validation_acceptance_rule(
         try:
             upper0 = float(upper)
         except (TypeError, ValueError) as exc:
-            raise EyeProcessValidationError("between rules require finite lower threshold <= finite upper.") from exc
+            raise EyeProcessValidationError(
+                "between rules require finite lower threshold <= finite upper."
+            ) from exc
         if not np.isfinite(threshold0) or not np.isfinite(upper0) or threshold0 > upper0:
-            raise EyeProcessValidationError("between rules require finite lower threshold <= finite upper.")
+            raise EyeProcessValidationError(
+                "between rules require finite lower threshold <= finite upper."
+            )
     else:
         upper0 = upper
         if not np.isfinite(threshold0):
@@ -426,7 +440,9 @@ def validation_acceptance_matrix(
     """Evaluate a validation summary table against named rules."""
     frame = _as_frame(summary, name="summary")
     if not isinstance(rules, Mapping) and not isinstance(rules, (list, tuple)):
-        raise EyeProcessValidationError("rules must be a non-empty list of validation_acceptance_rule objects.")
+        raise EyeProcessValidationError(
+            "rules must be a non-empty list of validation_acceptance_rule objects."
+        )
 
     if isinstance(rules, Mapping):
         entries = list(rules.items())
@@ -434,7 +450,9 @@ def validation_acceptance_matrix(
         entries = [(f"rule_{index}", rule) for index, rule in enumerate(rules, start=1)]
 
     if not entries or any(not _class_is(rule, _RULE_CLASS) for _, rule in entries):
-        raise EyeProcessValidationError("rules must be a non-empty list of validation_acceptance_rule objects.")
+        raise EyeProcessValidationError(
+            "rules must be a non-empty list of validation_acceptance_rule objects."
+        )
 
     ids = [str(value) for value in _sequence(id_cols) if str(value)]
     metrics = [str(rule["metric"]) for _, rule in entries]
@@ -601,7 +619,9 @@ def validation_replication_budget(
         minimum0 = int(minimum)
         maximum0 = int(maximum)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError("replication-budget inputs must be scalar numeric values.") from exc
+        raise EyeProcessValidationError(
+            "replication-budget inputs must be scalar numeric values."
+        ) from exc
 
     if not np.isfinite(pilot) or pilot < 0:
         raise EyeProcessValidationError("pilot_sd must be finite and non-negative.")

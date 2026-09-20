@@ -8,10 +8,11 @@ silently re-labelled as empirical or scientific validation.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, NoReturn
 
 import numpy as np
 import pandas as pd
@@ -77,7 +78,7 @@ class _EmpiricalReproduction(dict):
     eyeprocess_class = "eye_empirical_reproduction"
 
 
-def _raise(message: str) -> None:
+def _raise(message: str) -> NoReturn:
     raise EyeProcessValidationError(message)
 
 
@@ -143,7 +144,11 @@ def advanced_model_evidence_spec(
 
 
 def _is_model_validation(value: Any) -> bool:
-    return isinstance(value, Mapping) and isinstance(value.get("runs"), pd.DataFrame) and value.get("spec") is not None
+    return (
+        isinstance(value, Mapping)
+        and isinstance(value.get("runs"), pd.DataFrame)
+        and value.get("spec") is not None
+    )
 
 
 def _recovery_pass(value: Any) -> bool:
@@ -326,12 +331,15 @@ def audit_advanced_model_evidence(evidence, spec=None):
 
 def write_advanced_model_evidence_report(x, path):
     """Write the frozen advanced-model scientific-evidence Markdown report."""
-    if not isinstance(x, pd.DataFrame) or x.attrs.get("eyeprocess_class") != "eye_advanced_evidence_audit":
+    if (
+        not isinstance(x, pd.DataFrame)
+        or x.attrs.get("eyeprocess_class") != "eye_advanced_evidence_audit"
+    ):
         _raise("Expected an advanced-model evidence audit.")
 
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
-    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    generated = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines = [
         "# Advanced-model scientific-evidence audit",
         "",
@@ -494,7 +502,9 @@ def simulation_based_calibration(
                 rank = pd.NA
 
             n_draws = int(len(values))
-            normalized_rank = (float(rank) + 0.5) / (n_draws + 1) if n_draws and not pd.isna(rank) else np.nan
+            normalized_rank = (
+                (float(rank) + 0.5) / (n_draws + 1) if n_draws and not pd.isna(rank) else np.nan
+            )
             parameter_rows.append(
                 {
                     "replication": replication,
@@ -536,7 +546,9 @@ def sbc_summary(x):
         normalized = pd.to_numeric(subset["normalized_rank"], errors="coerce").to_numpy(dtype=float)
         usable = np.isfinite(normalized)
 
-        posterior_mean = pd.to_numeric(subset["posterior_mean"], errors="coerce").to_numpy(dtype=float)
+        posterior_mean = pd.to_numeric(subset["posterior_mean"], errors="coerce").to_numpy(
+            dtype=float
+        )
         truth = pd.to_numeric(subset["truth"], errors="coerce").to_numpy(dtype=float)
         posterior_sd = pd.to_numeric(subset["posterior_sd"], errors="coerce").to_numpy(dtype=float)
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -568,10 +580,14 @@ def sbc_summary(x):
                 "replications": int(len(subset)),
                 "successful": successful,
                 "mean_rank": mean_rank,
-                "rank_variance": (float(np.var(normalized[usable], ddof=1)) if successful > 1 else np.nan),
+                "rank_variance": (
+                    float(np.var(normalized[usable], ddof=1)) if successful > 1 else np.nan
+                ),
                 "uniformity_p_value": uniformity_p,
                 "mean_standardized_bias": (
-                    float(np.mean(standardized[finite_standardized])) if finite_standardized.any() else np.nan
+                    float(np.mean(standardized[finite_standardized]))
+                    if finite_standardized.any()
+                    else np.nan
                 ),
                 "status": status,
             }
@@ -659,7 +675,9 @@ def run_raven_reproduction(
         _raise("`tolerance` must be a finite non-negative value.")
 
     if not spec.licence_reviewed:
-        _raise("Set `licence_reviewed = True` only after reviewing the exact public data/code terms.")
+        _raise(
+            "Set `licence_reviewed = True` only after reviewing the exact public data/code terms."
+        )
 
     path = Path(spec.data_path)
     if not path.exists():

@@ -1,4 +1,5 @@
 """Plotting helpers for AOI perturbation sensitivity analysis."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -16,24 +17,47 @@ def _mpl():
         from matplotlib.patches import Polygon as PolygonPatch
         from matplotlib.patches import Rectangle
     except ImportError as exc:  # pragma: no cover - optional plotting backend
-        raise EyeProcessValidationError("Plotting requires the optional `matplotlib` dependency.") from exc
+        raise EyeProcessValidationError(
+            "Plotting requires the optional `matplotlib` dependency."
+        ) from exc
     return plt, Rectangle, PolygonPatch
 
 
-def _draw_geometry(ax: Any, geometry: pd.DataFrame, *, alpha: float = 1.0, linestyle: str = "-") -> None:
+def _draw_geometry(
+    ax: Any, geometry: pd.DataFrame, *, alpha: float = 1.0, linestyle: str = "-"
+) -> None:
     _, Rectangle, PolygonPatch = _mpl()
     for _, row in geometry.iterrows():
         if row["shape_type"] == "rectangle":
-            ax.add_patch(Rectangle((row["xmin"], row["ymin"]), row["xmax"] - row["xmin"], row["ymax"] - row["ymin"], fill=False, alpha=alpha, linestyle=linestyle))
+            ax.add_patch(
+                Rectangle(
+                    (row["xmin"], row["ymin"]),
+                    row["xmax"] - row["xmin"],
+                    row["ymax"] - row["ymin"],
+                    fill=False,
+                    alpha=alpha,
+                    linestyle=linestyle,
+                )
+            )
             cx, cy = (row["xmin"] + row["xmax"]) / 2, (row["ymin"] + row["ymax"]) / 2
         else:
             poly = _polygon_array(row["polygon"])
-            ax.add_patch(PolygonPatch(poly, fill=False, closed=True, alpha=alpha, linestyle=linestyle))
+            ax.add_patch(
+                PolygonPatch(poly, fill=False, closed=True, alpha=alpha, linestyle=linestyle)
+            )
             cx, cy = np.mean(poly[:, 0]), np.mean(poly[:, 1])
         ax.text(cx, cy, str(row["aoi_id"]), ha="center", va="center", alpha=alpha)
 
 
-def plot_aoi_perturbations(x: Any, *, perturbation_id: str | None = None, data: pd.DataFrame | None = None, x_col: str | None = None, y_col: str | None = None, ax: Any = None):
+def plot_aoi_perturbations(
+    x: Any,
+    *,
+    perturbation_id: str | None = None,
+    data: pd.DataFrame | None = None,
+    x_col: str | None = None,
+    y_col: str | None = None,
+    ax: Any = None,
+):
     plt, _, _ = _mpl()
     axis = ax or plt.subplots()[1]
     nominal = x["nominal_aois"] if "nominal_aois" in x else x["nominal_geometry"]
@@ -49,14 +73,19 @@ def plot_aoi_perturbations(x: Any, *, perturbation_id: str | None = None, data: 
     _draw_geometry(axis, geom, alpha=1.0, linestyle="-")
     if data is not None:
         if not x_col or not y_col:
-            raise EyeProcessValidationError("`x_col` and `y_col` are required when plotting reassigned observations.")
+            raise EyeProcessValidationError(
+                "`x_col` and `y_col` are required when plotting reassigned observations."
+            )
         frame = _frame(data, "data")
         bx = pd.to_numeric(frame[x_col], errors="coerce").to_numpy(dtype=float)
         by = pd.to_numeric(frame[y_col], errors="coerce").to_numpy(dtype=float)
         if "assignments" in x and perturbation_id in x["assignments"]:
-            changed = ~pd.Series(x["assignments"]["baseline"]).reset_index(drop=True).eq(
-                pd.Series(x["assignments"][perturbation_id]).reset_index(drop=True)
-            ).to_numpy()
+            changed = (
+                ~pd.Series(x["assignments"]["baseline"])
+                .reset_index(drop=True)
+                .eq(pd.Series(x["assignments"][perturbation_id]).reset_index(drop=True))
+                .to_numpy()
+            )
             axis.scatter(bx[~changed], by[~changed], s=12, alpha=0.35)
             axis.scatter(bx[changed], by[changed], s=32, marker="x", label="reassigned")
             axis.legend()
@@ -74,7 +103,12 @@ def plot_aoi_assignment_stability(x: Any, *, ax: Any = None):
     axis = ax or plt.subplots()[1]
     data = x["stability"]["overall"].copy() if "stability" in x else x["overall"].copy()
     axis.plot(np.arange(len(data)), data["proportion_unchanged"].to_numpy(dtype=float), marker="o")
-    axis.set_xticks(np.arange(len(data)), labels=data["perturbation_id"].astype(str).tolist(), rotation=45, ha="right")
+    axis.set_xticks(
+        np.arange(len(data)),
+        labels=data["perturbation_id"].astype(str).tolist(),
+        rotation=45,
+        ha="right",
+    )
     axis.set_ylim(0, 1.02)
     axis.set_ylabel("Proportion unchanged")
     axis.set_title("AOI assignment stability")
@@ -97,7 +131,12 @@ def plot_aoi_coefficient_stability(x: Any, *, term: str, ax: Any = None):
         axis.scatter(np.where(failed)[0], y[failed], marker="x", s=80, label="not converged")
         axis.legend()
     axis.axhline(0, linewidth=1)
-    axis.set_xticks(np.arange(len(data)), labels=data["perturbation_id"].astype(str).tolist(), rotation=45, ha="right")
+    axis.set_xticks(
+        np.arange(len(data)),
+        labels=data["perturbation_id"].astype(str).tolist(),
+        rotation=45,
+        ha="right",
+    )
     axis.set_ylabel("Coefficient estimate")
     axis.set_title(f"Coefficient stability: {term}")
     return axis
@@ -120,8 +159,15 @@ def plot_aoi_robustness_surface(
         raise EyeProcessValidationError("Requested robustness-surface columns are unavailable.")
     pivot = data.pivot_table(index=y_col, columns=x_col, values=value_col, aggfunc="mean")
     if pivot.empty:
-        raise EyeProcessValidationError("Robustness surface requires at least one finite x/y/value combination.")
-    im = axis.imshow(pivot.to_numpy(dtype=float), origin="lower", aspect="auto", extent=[pivot.columns.min(), pivot.columns.max(), pivot.index.min(), pivot.index.max()])
+        raise EyeProcessValidationError(
+            "Robustness surface requires at least one finite x/y/value combination."
+        )
+    im = axis.imshow(
+        pivot.to_numpy(dtype=float),
+        origin="lower",
+        aspect="auto",
+        extent=[pivot.columns.min(), pivot.columns.max(), pivot.index.min(), pivot.index.max()],
+    )
     axis.set_xlabel(x_col)
     axis.set_ylabel(y_col)
     axis.set_title("AOI robustness surface")
@@ -130,6 +176,8 @@ def plot_aoi_robustness_surface(
 
 
 __all__ = [
-    "plot_aoi_perturbations", "plot_aoi_assignment_stability",
-    "plot_aoi_coefficient_stability", "plot_aoi_robustness_surface",
+    "plot_aoi_perturbations",
+    "plot_aoi_assignment_stability",
+    "plot_aoi_coefficient_stability",
+    "plot_aoi_robustness_surface",
 ]

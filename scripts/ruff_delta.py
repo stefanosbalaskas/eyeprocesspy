@@ -117,9 +117,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo = Path(
-        _run(["git", "rev-parse", "--show-toplevel"], Path.cwd()).stdout.strip()
-    ).resolve()
+    repo = Path(_run(["git", "rev-parse", "--show-toplevel"], Path.cwd()).stdout.strip()).resolve()
     config = repo / "pyproject.toml"
     base_sha = _resolve_base(repo, args.base)
     head_diagnostics = _ruff(repo, config)
@@ -151,8 +149,7 @@ def main() -> int:
 
     if new_counts:
         print(
-            f"Ruff regression: {sum(new_counts.values())} new diagnostic(s) "
-            f"relative to {base_sha}."
+            f"Ruff regression: {sum(new_counts.values())} new diagnostic(s) relative to {base_sha}."
         )
         _print_new(head_diagnostics, repo, new_counts)
         return 1

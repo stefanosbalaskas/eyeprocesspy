@@ -138,9 +138,7 @@ def test_identify_fixations_by_content_and_aoi_statistics(tmp_path):
     )
     assert gp.gp_identify_export_type(all_gaze) == "gaze"
 
-    current = _write_csv(
-        tmp_path / "CurrentAOIStatistics.csv", pd.DataFrame({"foo": [1]})
-    )
+    current = _write_csv(tmp_path / "CurrentAOIStatistics.csv", pd.DataFrame({"foo": [1]}))
     assert gp.gp_identify_export_type(current) == "aoi_statistics"
 
 
@@ -148,7 +146,7 @@ def test_profile_list_fields_and_validation_failure_paths(tmp_path, monkeypatch)
     d = tmp_path / "files"
     d.mkdir()
     low = _write_csv(d / "plain.csv", pd.DataFrame({"foo": [1], "bar": [2]}))
-    good = _write_csv(
+    _write_csv(
         d / "sample.csv",
         pd.DataFrame({"TIME": [0], "BPOGX": [0.2], "BPOGY": [0.3]}),
     )
@@ -258,9 +256,7 @@ def test_user_event_parser_guards_nan_time_and_duplicate_filter():
     assert gp.gp_parse_user_events(missing_cols) is missing_cols
 
     blank = x.copy()
-    blank.raw = {
-        "gazepoint": pd.DataFrame({"TIME": [0.0], "USER_DATA": [""]})
-    }
+    blank.raw = {"gazepoint": pd.DataFrame({"TIME": [0.0], "USER_DATA": [""]})}
     assert gp.gp_parse_user_events(blank) is blank
 
     multi = x.copy()
@@ -268,25 +264,19 @@ def test_user_event_parser_guards_nan_time_and_duplicate_filter():
         [multi["recordings"], multi["recordings"].assign(recording_id="R-events-2")],
         ignore_index=True,
     )
-    multi.raw = {
-        "gazepoint": pd.DataFrame({"TIME": [0.0], "USER_DATA": ["marker"]})
-    }
+    multi.raw = {"gazepoint": pd.DataFrame({"TIME": [0.0], "USER_DATA": ["marker"]})}
     assert gp.gp_parse_user_events(multi) is multi
 
     nan_time = x.copy()
     nan_time["events"] = gp.empty_eye_table("events")
-    nan_time.raw = {
-        "gazepoint": pd.DataFrame({"TIME": [np.nan], "USER_DATA": ["marker"]})
-    }
+    nan_time.raw = {"gazepoint": pd.DataFrame({"TIME": [np.nan], "USER_DATA": ["marker"]})}
     parsed = gp.gp_parse_user_events(nan_time)
     assert parsed["events"]["event_name"].tolist() == ["marker"]
     assert np.isnan(parsed["events"]["timestamp_seconds"].iloc[0])
 
     duplicated = parsed.copy()
     n_before = len(duplicated["events"])
-    duplicated.raw = {
-        "gazepoint": pd.DataFrame({"TIME": [np.nan], "USER_DATA": ["marker"]})
-    }
+    duplicated.raw = {"gazepoint": pd.DataFrame({"TIME": [np.nan], "USER_DATA": ["marker"]})}
     again = gp.gp_parse_user_events(duplicated)
     assert len(again["events"]) >= n_before
 
@@ -317,17 +307,13 @@ def test_read_gazepoint_dispatch_missing_mapping_and_gaze_alias(tmp_path):
     with pytest.raises(ValueError, match="missing identifiable"):
         gp.read_gazepoint(bad, quiet=True)
 
-    via_alias = gp.read_gazepoint_gaze(
-        FIX / "demo-user.csv", recording_id="R-alias", quiet=True
-    )
+    via_alias = gp.read_gazepoint_gaze(FIX / "demo-user.csv", recording_id="R-alias", quiet=True)
     assert len(via_alias["gaze_samples"]) == 12
 
     folder = gp.read_gazepoint(FIX, recording_id="R-folder", quiet=True)
     assert ep.is_eye_dataset(folder)
 
-    fix = gp.read_gazepoint(
-        FIX / "demo-user-fix.csv", recording_id="R-fix-dispatch", quiet=True
-    )
+    fix = gp.read_gazepoint(FIX / "demo-user-fix.csv", recording_id="R-fix-dispatch", quiet=True)
     assert not fix["episodes"].empty
 
 
@@ -348,9 +334,7 @@ def test_aoi_ids_and_fixation_alternate_clock_missing_ids_and_duplicates(tmp_pat
         }
     )
     path = _write_csv(tmp_path / "subject_fixations.csv", frame)
-    out = gp.read_gazepoint_fixations(
-        path, recording_id="R-alt", keep_raw=False, quiet=True
-    )
+    out = gp.read_gazepoint_fixations(path, recording_id="R-alt", keep_raw=False, quiet=True)
     assert len(out["episodes"]) == 3
     assert out["episodes"]["episode_id"].is_unique
     assert out["episodes"]["duration_ms"].iloc[0] == pytest.approx(200.0)
@@ -476,9 +460,7 @@ def test_biometrics_only_import_missing_channel_and_missing_time_paths(tmp_path)
             }
         ),
     )
-    out = gp.read_gazepoint_biometrics(
-        pure, recording_id="R-pure-bio", keep_raw=False, quiet=True
-    )
+    out = gp.read_gazepoint_biometrics(pure, recording_id="R-pure-bio", keep_raw=False, quiet=True)
     assert out["gaze_samples"].empty
     assert {"heart_rate", "gsr_raw"} <= set(out["biometrics"]["channel"])
     assert "gaze_combined" not in set(out["streams"]["stream_type"])

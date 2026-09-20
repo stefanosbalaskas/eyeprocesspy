@@ -1,12 +1,15 @@
 """Requested 0.7 IRT API-completion example."""
+
 import numpy as np
 import pandas as pd
+
 import eyeprocesspy as ep
 
 rng = np.random.default_rng(7)
-data = pd.DataFrame([
-    (f"P{p}", f"I{i}") for p in range(1, 13) for i in range(1, 6)
-], columns=["participant_id", "item_id"])
+data = pd.DataFrame(
+    [(f"P{p}", f"I{i}") for p in range(1, 13) for i in range(1, 6)],
+    columns=["participant_id", "item_id"],
+)
 data["gaze_exposure"] = rng.exponential(size=len(data))
 data["response"] = rng.binomial(1, 0.65, size=len(data)).astype(float)
 data.loc[np.arange(2, len(data), 11), "response"] = np.nan

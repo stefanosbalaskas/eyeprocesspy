@@ -197,7 +197,9 @@ def test_workflow_analysis_aoi_merge_readiness_and_report(monkeypatch, tmp_path)
         "responses",
     )
     x["responses"] = responses
-    process = trials[["recording_id", "participant_id", "trial_id", "item_id", "stimulus_id"]].copy()
+    process = trials[
+        ["recording_id", "participant_id", "trial_id", "item_id", "stimulus_id"]
+    ].copy()
     process["process_metric"] = 1.0
     readiness = gw.gazepoint_irt_tables(x, process_table=process)
     assert readiness["status"] == "model_ready_subject_to_diagnostics"

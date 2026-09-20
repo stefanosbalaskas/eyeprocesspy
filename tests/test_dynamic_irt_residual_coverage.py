@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import builtins
-import math
 from types import SimpleNamespace
 
 import numpy as np
@@ -59,7 +58,9 @@ def _strategy_spec(**kwargs):
 
 class _FakeFit:
     def __init__(self, summary=None, draws=None):
-        self._summary = pd.DataFrame({"Mean": [0.0]}, index=["beta[1]"]) if summary is None else summary
+        self._summary = (
+            pd.DataFrame({"Mean": [0.0]}, index=["beta[1]"]) if summary is None else summary
+        )
         self._draws = draws
 
     def summary(self):
@@ -125,9 +126,7 @@ def test_low_level_import_long_and_direct_transition_residuals(monkeypatch):
             "state": ["a", "b", "a"],
         }
     )
-    auto = dm._long_to_transitions(
-        long, "participant_id", "item_id", "trial_id", "state", None
-    )
+    auto = dm._long_to_transitions(long, "participant_id", "item_id", "trial_id", "state", None)
     assert auto["trial_id"].iloc[0] == "P1::I1"
     assert auto["time_gap"].iloc[0] == 1.0
 
@@ -140,13 +139,9 @@ def test_low_level_import_long_and_direct_transition_residuals(monkeypatch):
         }
     )
     with pytest.raises(EyeProcessValidationError, match="Trial identifiers"):
-        dm._long_to_transitions(
-            bad_trial, "participant_id", "item_id", "trial_id", "state", None
-        )
+        dm._long_to_transitions(bad_trial, "participant_id", "item_id", "trial_id", "state", None)
 
-    direct = pd.DataFrame(
-        {"from_state": ["a", "b"], "to_state": ["b", "a"]}
-    )
+    direct = pd.DataFrame({"from_state": ["a", "b"], "to_state": ["b", "a"]})
     prepared = ep.prepare_dynamic_irtree_data(direct)
     assert prepared["participant_id"].eq("P1").all()
     assert prepared["item_id"].eq("I1").all()
@@ -154,9 +149,7 @@ def test_low_level_import_long_and_direct_transition_residuals(monkeypatch):
     assert prepared["step"].tolist() == [1, 2]
     assert prepared["time_gap"].eq(1.0).all()
 
-    blank = direct.assign(
-        participant_id=["", ""], item_id=["I1", "I1"], trial_id=["T", "T"]
-    )
+    blank = direct.assign(participant_id=["", ""], item_id=["I1", "I1"], trial_id=["T", "T"])
     with pytest.raises(EyeProcessValidationError, match="non-missing and non-empty"):
         ep.prepare_dynamic_irtree_data(blank)
 
@@ -172,24 +165,18 @@ def test_missing_unknown_marginalize_gap_and_transition_aliases():
             "time_gap": [np.nan, -2.0, np.inf],
         }
     )
-    unknown = ep.prepare_dynamic_irtree_data(
-        data, ep.dynamic_irtree_spec(missing_state="unknown")
-    )
+    unknown = ep.prepare_dynamic_irtree_data(data, ep.dynamic_irtree_spec(missing_state="unknown"))
     assert "<UNKNOWN>" in unknown.attrs["states"]
     assert unknown["time_gap"].eq(1.0).all()
     assert unknown["state_probability"].eq(1.0).all()
 
     marginal = ep.prepare_dynamic_irtree_data(
         data,
-        ep.dynamic_irtree_spec(
-            engine="stan", hidden_states=2, missing_state="marginalize"
-        ),
+        ep.dynamic_irtree_spec(engine="stan", hidden_states=2, missing_state="marginalize"),
     )
     unknown_rows = marginal["to_state"].astype(str).eq("<UNKNOWN>")
     assert unknown_rows.any()
-    assert np.all(
-        marginal.loc[unknown_rows, "state_probability"].to_numpy(float) < 1.0
-    )
+    assert np.all(marginal.loc[unknown_rows, "state_probability"].to_numpy(float) < 1.0)
 
     aliases = ep.structural_transition_mask(
         ["a", "b"],
@@ -199,9 +186,7 @@ def test_missing_unknown_marginalize_gap_and_transition_aliases():
 
     allowed = ep.structural_transition_mask(
         ["a", "b"],
-        allowed_transitions=pd.DataFrame(
-            {"from": ["a", "b"], "to": ["b", "a"]}
-        ),
+        allowed_transitions=pd.DataFrame({"from": ["a", "b"], "to": ["b", "a"]}),
     )
     assert bool(allowed.loc["a", "b"])
     assert not bool(allowed.loc["a", "a"])
@@ -263,9 +248,7 @@ def test_multinomial_structural_control_nonfinite_and_hessian_fallback(monkeypat
         )
 
     monkeypatch.setattr(dm, "minimize", fake_minimize)
-    fit = ep.fit_multinomial_transition(
-        nan_design, control={"maxit": 7, "reltol": 1e-5}
-    )
+    fit = ep.fit_multinomial_transition(nan_design, control={"maxit": 7, "reltol": 1e-5})
     assert fit.convergence == 1
     assert fit.standard_error_matrix.isna().to_numpy().any()
 
@@ -277,16 +260,12 @@ def test_dynamic_stan_observed_hidden_invalid_and_backend_failure(monkeypatch):
     observed_design = ep.dynamic_transition_design(
         _transitions().dropna(subset=["score"]), observed_spec
     )
-    observed = ep.fit_dynamic_irtree_stan(
-        observed_design, observed_spec, seed=9, refresh=1
-    )
+    observed = ep.fit_dynamic_irtree_stan(observed_design, observed_spec, seed=9, refresh=1)
     assert observed.hidden is False
     assert holder["data"]["N"] == len(observed_design.data)
     assert holder["sample_kwargs"]["seed"] == 9
 
-    hidden_spec = ep.dynamic_irtree_spec(
-        engine="stan", hidden_states=2, missing_state="unknown"
-    )
+    hidden_spec = ep.dynamic_irtree_spec(engine="stan", hidden_states=2, missing_state="unknown")
     hidden_design = ep.dynamic_transition_design(
         _transitions().dropna(subset=["score"]), hidden_spec
     )
@@ -306,9 +285,7 @@ def test_dynamic_stan_observed_hidden_invalid_and_backend_failure(monkeypatch):
     with pytest.raises(EyeProcessValidationError, match="Misclassification matrix"):
         ep.fit_dynamic_irtree_stan(hidden_design, bad_spec)
 
-    monkeypatch.setattr(
-        dm, "_cmdstanpy", lambda: _fake_cmdstan({}, fail="sample")
-    )
+    monkeypatch.setattr(dm, "_cmdstanpy", lambda: _fake_cmdstan({}, fail="sample"))
     with pytest.raises(EyeProcessBackendError, match="dynamic IRTree fitting failed"):
         ep.fit_dynamic_irtree_stan(observed_design, observed_spec)
 
@@ -321,9 +298,7 @@ def test_dynamic_ppc_success_subsample_hidden_and_failure():
             "y_rep[3]": [1, 2, 1, 1],
         }
     )
-    stan_model = dm._result(
-        "eye_dynamic_irtree_stan", hidden=False, fit=_FakeFit(draws=frame)
-    )
+    stan_model = dm._result("eye_dynamic_irtree_stan", hidden=False, fit=_FakeFit(draws=frame))
     obj = dm._result(
         "eye_dynamic_irtree",
         model=stan_model,
@@ -389,9 +364,7 @@ def test_dynamic_stan_residual_guard_comparison_recovery_and_stan_dispatch(monke
 
     custom_spec = ep.dynamic_irtree_spec(engine="stan")
     recovery = ep.dynamic_irtree_recovery(
-        pd.DataFrame(
-            {"state_misclassification": [0.1], "missing_state": [0.2]}
-        ),
+        pd.DataFrame({"state_misclassification": [0.1], "missing_state": [0.2]}),
         replications=2,
         spec=custom_spec,
         base_seed=10,
@@ -428,8 +401,7 @@ def test_dynamic_simulation_misclassification_missing_and_structural_zero():
     assert len(sim.transitions) == 12
     assert sim.transitions["to_state"].isna().any()
     assert (
-        sim.transitions["true_to_state"].astype(str)
-        != sim.transitions["to_state"].astype(str)
+        sim.transitions["true_to_state"].astype(str) != sim.transitions["to_state"].astype(str)
     ).any()
 
 
@@ -467,13 +439,9 @@ def test_strategy_spec_legacy_alias_sequence_and_zero_anchor_guards():
     with pytest.raises(EyeProcessValidationError, match="named numeric vector"):
         ep.theory_strategy_spec({"a": [1.0], "b": [-1.0]}, multiple_starts=1)
     with pytest.raises(EyeProcessValidationError, match="unique and non-empty"):
-        ep.theory_strategy_spec(
-            {"": {"f": 1.0}, "b": {"f": -1.0}}, multiple_starts=1
-        )
+        ep.theory_strategy_spec({"": {"f": 1.0}, "b": {"f": -1.0}}, multiple_starts=1)
     with pytest.raises(EyeProcessValidationError, match="non-zero anchor"):
-        ep.theory_strategy_spec(
-            {"a": {"f": 0.0}, "b": {"f": 1.0}}, multiple_starts=1
-        )
+        ep.theory_strategy_spec({"a": {"f": 0.0}, "b": {"f": 1.0}}, multiple_starts=1)
 
 
 def test_strategy_prepare_condition_nonstandard_empty_and_availability_skip():
@@ -561,20 +529,14 @@ def test_strategy_stan_posterior_nonem_diagnostics_sequence_and_single_condition
             "p8": [0.6, 0.7],
         }
     )
-    model = dm._result(
-        "eye_strategy_mixture_stan", fit=_FakeFit(draws=draws)
-    )
-    obj = dm._result(
-        "eye_theory_strategy_irt", model=model, prepared=prepared, spec=spec
-    )
+    model = dm._result("eye_strategy_mixture_stan", fit=_FakeFit(draws=draws))
+    obj = dm._result("eye_theory_strategy_irt", model=model, prepared=prepared, spec=spec)
     posterior = ep.strategy_posterior_probabilities(obj)
     assert len(posterior) == 4
     diag = ep.strategy_label_switching_diagnostics(obj)
-    assert diag.assessed.iloc[0] == False
+    assert not diag.assessed.iloc[0]
 
-    validation = ep.validate_strategy_manipulation(
-        obj, "condition", "analytic", minimum_contrast=0
-    )
+    validation = ep.validate_strategy_manipulation(obj, "condition", "analytic", minimum_contrast=0)
     assert validation.contrast == 0.0
 
     broken = dm._result(
@@ -653,26 +615,16 @@ def test_gaze_spec_matrix_prepare_guards_and_censor_paths():
     assert np.isfinite(const).all()
 
     with pytest.raises(EyeProcessValidationError, match="only one diffusion"):
-        ep.gaze_diffusion_spec(
-            drift_features=["gaze"], boundary_features=["gaze"]
-        )
+        ep.gaze_diffusion_spec(drift_features=["gaze"], boundary_features=["gaze"])
 
     with pytest.raises(EyeProcessValidationError, match="Response times"):
-        ep.prepare_gaze_diffusion_data(
-            _diffusion_data().assign(response_time=[0.01] * 4), spec
-        )
+        ep.prepare_gaze_diffusion_data(_diffusion_data().assign(response_time=[0.01] * 4), spec)
     with pytest.raises(EyeProcessValidationError, match="milliseconds"):
-        ep.prepare_gaze_diffusion_data(
-            _diffusion_data().assign(response_time=[500.0] * 4), spec
-        )
+        ep.prepare_gaze_diffusion_data(_diffusion_data().assign(response_time=[500.0] * 4), spec)
     with pytest.raises(EyeProcessValidationError, match="coded 0/1"):
-        ep.prepare_gaze_diffusion_data(
-            _diffusion_data().assign(score=[0, 1, 2, 0]), spec
-        )
+        ep.prepare_gaze_diffusion_data(_diffusion_data().assign(score=[0, 1, 2, 0]), spec)
 
-    censor_spec = ep.gaze_diffusion_spec(
-        gaze_features=["gaze"], censor_column="censor"
-    )
+    censor_spec = ep.gaze_diffusion_spec(gaze_features=["gaze"], censor_column="censor")
     prepared = ep.prepare_gaze_diffusion_data(_diffusion_data(), censor_spec)
     assert prepared.censor.tolist() == [0, 1, 2, 0]
 
@@ -791,13 +743,9 @@ def test_wiener_boundaries_timeout_simulation_contaminant_and_identification():
         def normal(self):
             return self.value
 
-    y, _ = dm._wiener_trial(
-        FixedRng(100.0), drift=0, boundary=1, nondecision=0.1, dt=0.1
-    )
+    y, _ = dm._wiener_trial(FixedRng(100.0), drift=0, boundary=1, nondecision=0.1, dt=0.1)
     assert y == 1
-    y, _ = dm._wiener_trial(
-        FixedRng(-100.0), drift=0, boundary=1, nondecision=0.1, dt=0.1
-    )
+    y, _ = dm._wiener_trial(FixedRng(-100.0), drift=0, boundary=1, nondecision=0.1, dt=0.1)
     assert y == 0
     y, rt = dm._wiener_trial(
         FixedRng(0.0),
@@ -811,9 +759,7 @@ def test_wiener_boundaries_timeout_simulation_contaminant_and_identification():
     assert rt == pytest.approx(0.11)
 
     with pytest.raises(EyeProcessValidationError, match="contaminant_fraction"):
-        ep.simulate_gaze_diffusion_data(
-            n_person=2, n_item=2, contaminant_fraction=1
-        )
+        ep.simulate_gaze_diffusion_data(n_person=2, n_item=2, contaminant_fraction=1)
     simulated = ep.simulate_gaze_diffusion_data(
         n_person=2,
         n_item=2,

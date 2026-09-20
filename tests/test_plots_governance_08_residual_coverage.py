@@ -107,7 +107,9 @@ def test_process_drift_all_modes_and_guards():
 
     with pytest.raises(ep.EyeProcessValidationError, match="Unknown metric"):
         plots.plot_eye_process_drift_audit(obj, metric="missing")
-    with pytest.raises(ep.EyeProcessValidationError, match="trajectory, delta, heatmap, or control"):
+    with pytest.raises(
+        ep.EyeProcessValidationError, match="trajectory, delta, heatmap, or control"
+    ):
         plots.plot_eye_process_drift_audit(obj, type="bad")
 
 

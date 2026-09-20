@@ -6,12 +6,14 @@ port preserves that contract.  R-only engines therefore return explicit
 ``not_available`` adapter results (or raise for the older strict wrappers)
 rather than being replaced by superficially similar Python packages.
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import copy
 import pickle
-from typing import Any, Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from datetime import UTC, datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -19,7 +21,7 @@ import pandas as pd
 from .dataset import EyeDataset, is_eye_dataset
 from .exceptions import EyeProcessBackendError, EyeProcessValidationError
 from .irt import EyeResult, _result, _stable_hash
-from .legacy_models import model_data, response_matrix
+from .legacy_models import response_matrix
 
 __all__ = [
     "eyeprocess_api_version",
@@ -82,16 +84,22 @@ _ENGINE_REGISTRY = pd.DataFrame(
 # project is not treated as the same estimator.  An rpy2 bridge may be added as
 # an explicit optional backend in a later parity tranche, but core availability
 # remains False until exact-engine execution is validated.
-_EXACT_ENGINE_AVAILABLE: dict[str, bool] = {name.lower(): False for name in _ENGINE_REGISTRY["engine"]}
+_EXACT_ENGINE_AVAILABLE: dict[str, bool] = {
+    name.lower(): False for name in _ENGINE_REGISTRY["engine"]
+}
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _text(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value.strip():
-        raise EyeProcessValidationError(f"{name} must be one non-empty name." if name == "engine" else f"A non-empty declared scientific `{name}` is required.")
+        raise EyeProcessValidationError(
+            f"{name} must be one non-empty name."
+            if name == "engine"
+            else f"A non-empty declared scientific `{name}` is required."
+        )
     return value.strip()
 
 
@@ -112,51 +120,91 @@ def object_schema(object: Any = "eye_dataset") -> dict[str, Any]:
         if isinstance(object, EyeDataset):
             object = "eye_dataset"
         elif isinstance(object, Mapping) and (
-            getattr(object, "eyeprocess_class", None) in {
-                "eyeprocess_model", "eye_dynamic_irtree", "eye_theory_strategy_irt",
-                "eye_gaze_diffusion_irt", "eye_functional_pupil_irt"
+            getattr(object, "eyeprocess_class", None)
+            in {
+                "eyeprocess_model",
+                "eye_dynamic_irtree",
+                "eye_theory_strategy_irt",
+                "eye_gaze_diffusion_irt",
+                "eye_functional_pupil_irt",
             }
-            or "fit" in object or "model" in object
+            or "fit" in object
+            or "model" in object
         ):
             object = "eyeprocess_model"
         else:
             raise EyeProcessValidationError("Could not infer an object schema.")
     choices = {
         "eye_dataset": {
-            "version": "2.0.0", "class": "eye_dataset",
+            "version": "2.0.0",
+            "class": "eye_dataset",
             "required_components": ["recordings", "provenance"],
             "canonical_tables": [
-                "recordings", "streams", "gaze_samples", "eye_samples", "episodes", "events",
-                "intervals", "responses", "coordinate_spaces", "aoi_definitions", "aoi_geometry",
-                "biometrics", "calibrations", "features", "quality", "provenance",
+                "recordings",
+                "streams",
+                "gaze_samples",
+                "eye_samples",
+                "episodes",
+                "events",
+                "intervals",
+                "responses",
+                "coordinate_spaces",
+                "aoi_definitions",
+                "aoi_geometry",
+                "biometrics",
+                "calibrations",
+                "features",
+                "quality",
+                "provenance",
             ],
-            "identifiers": ["participant_id", "recording_id", "trial_id", "item_id", "sample_id", "event_id"],
+            "identifiers": [
+                "participant_id",
+                "recording_id",
+                "trial_id",
+                "item_id",
+                "sample_id",
+                "event_id",
+            ],
             "invariant": "Native fields and time/coordinate transformations remain traceable through provenance.",
         },
         "eyeprocess_model": {
-            "version": "1.0.0", "class": "eyeprocess_model",
+            "version": "1.0.0",
+            "class": "eyeprocess_model",
             "required_components": ["engine", "specification", "fit", "diagnostics", "provenance"],
-            "optional_components": ["parameters", "predictions", "data_signature", "evidence_status"],
+            "optional_components": [
+                "parameters",
+                "predictions",
+                "data_signature",
+                "evidence_status",
+            ],
             "invariant": "Availability of a fit is not evidence of scientific validity.",
         },
         "validation_plan": {
-            "version": "1.0.0", "class": "eye_validation_job_plan",
+            "version": "1.0.0",
+            "class": "eye_validation_job_plan",
             "required_columns": ["job_id", "scenario_id", "replication", "seed", "status"],
             "invariant": "Every job identity and seed are deterministic functions of the plan.",
         },
         "validation_collection": {
-            "version": "1.0.0", "class": "eye_validation_collection",
+            "version": "1.0.0",
+            "class": "eye_validation_collection",
             "required_components": ["jobs", "results", "estimates", "diagnostics", "paths"],
             "invariant": "Replications are aggregated without silently dropping failures.",
         },
         "vendor_corpus": {
-            "version": "1.0.0", "class": "eye_vendor_corpus",
+            "version": "1.0.0",
+            "class": "eye_vendor_corpus",
             "support_levels": ["declared", "fixture-tested", "empirically-validated"],
             "invariant": "Production claims require independent, version-specific empirical exports.",
         },
         "eye_storage": {
-            "version": "2.0.0", "class": "eye_partitioned_storage",
-            "required_files": ["_partitions.csv", "_transactions.csv", "_eyeprocess_storage.json or _eyeprocess_storage.dput"],
+            "version": "2.0.0",
+            "class": "eye_partitioned_storage",
+            "required_files": [
+                "_partitions.csv",
+                "_transactions.csv",
+                "_eyeprocess_storage.json or _eyeprocess_storage.dput",
+            ],
             "invariant": "Writes are atomic and each partition is fingerprinted.",
         },
     }
@@ -170,12 +218,24 @@ def validate_model_object(object: Any, strict: bool = False) -> EyeResult:
     list_like = isinstance(object, Mapping)
     fingerprint = _stable_hash(object)
     if not list_like:
-        findings = pd.DataFrame([{
-            "check": "list_like", "passed": False, "severity": "error",
-            "message": "Model objects must be list-like."
-        }])
-        out = _result("eye_model_contract_validation", valid=False, findings=findings,
-                      model_family=None, schema_version="1.0.0", object_fingerprint=fingerprint)
+        findings = pd.DataFrame(
+            [
+                {
+                    "check": "list_like",
+                    "passed": False,
+                    "severity": "error",
+                    "message": "Model objects must be list-like.",
+                }
+            ]
+        )
+        out = _result(
+            "eye_model_contract_validation",
+            valid=False,
+            findings=findings,
+            model_family=None,
+            schema_version="1.0.0",
+            object_fingerprint=fingerprint,
+        )
         if strict:
             raise EyeProcessValidationError("Model objects must be list-like.")
         return out
@@ -188,7 +248,7 @@ def validate_model_object(object: Any, strict: bool = False) -> EyeResult:
         "eye_functional_pupil_irt": "functional_pupil",
         "eyeprocess_model": "generic",
     }
-    family = family_map.get(cls)
+    family = family_map.get(cls) if isinstance(cls, str) else None
     spec = object.get("specification", object.get("spec"))
     fit = object.get("fit", object.get("model"))
     interpretation = object.get("interpretation")
@@ -204,17 +264,40 @@ def validate_model_object(object: Any, strict: bool = False) -> EyeResult:
         serializable = False
     rows = [
         ("recognized_class", family is not None, "error", cls or "Unrecognized model class."),
-        ("has_specification", spec is not None, "error", "Model should retain its full specification."),
+        (
+            "has_specification",
+            spec is not None,
+            "error",
+            "Model should retain its full specification.",
+        ),
         ("has_fit", fit is not None, "error", "Model fit component is absent."),
-        ("has_interpretation", interpretation is not None, "warning", "Interpretive safeguard is absent."),
-        ("has_diagnostics", diagnostics is not None, "warning", "Convergence or diagnostic evidence is absent."),
+        (
+            "has_interpretation",
+            interpretation is not None,
+            "warning",
+            "Interpretive safeguard is absent.",
+        ),
+        (
+            "has_diagnostics",
+            diagnostics is not None,
+            "warning",
+            "Convergence or diagnostic evidence is absent.",
+        ),
         ("serializable", serializable, "error", "Object cannot be serialized."),
     ]
     findings = pd.DataFrame(rows, columns=["check", "passed", "severity", "message"])
-    failed = findings.loc[(~findings["passed"]) & ((findings["severity"] == "error") | bool(strict))]
+    failed = findings.loc[
+        (~findings["passed"]) & ((findings["severity"] == "error") | bool(strict))
+    ]
     valid = failed.empty
-    out = _result("eye_model_contract_validation", valid=bool(valid), findings=findings,
-                  model_family=family, schema_version="1.0.0", object_fingerprint=fingerprint)
+    out = _result(
+        "eye_model_contract_validation",
+        valid=bool(valid),
+        findings=findings,
+        model_family=family,
+        schema_version="1.0.0",
+        object_fingerprint=fingerprint,
+    )
     if strict and not valid:
         raise EyeProcessValidationError(" ".join(failed["message"].astype(str)))
     return out
@@ -225,7 +308,9 @@ def upgrade_eyeprocess_model(x: Any, target_version: str = "1.0.0") -> EyeResult
     if not isinstance(x, Mapping):
         raise EyeProcessValidationError("Model objects must be list-like.")
     if str(target_version) != "1.0.0":
-        raise EyeProcessValidationError("This release can upgrade models only to contract version 1.0.0.")
+        raise EyeProcessValidationError(
+            "This release can upgrade models only to contract version 1.0.0."
+        )
     out = EyeResult(copy.deepcopy(dict(x)), eyeprocess_class="eyeprocess_model")
     if out.get("specification") is None and out.get("spec") is not None:
         out["specification"] = out["spec"]
@@ -237,14 +322,29 @@ def upgrade_eyeprocess_model(x: Any, target_version: str = "1.0.0") -> EyeResult
     if out.get("diagnostics") is None and isinstance(out.get("model"), Mapping):
         out["diagnostics"] = out["model"].get("diagnostics")
     if out.get("provenance") is None:
-        out["provenance"] = {"upgraded_utc": _now(), "source_class": getattr(x, "eyeprocess_class", type(x).__name__)}
+        out["provenance"] = {
+            "upgraded_utc": _now(),
+            "source_class": getattr(x, "eyeprocess_class", type(x).__name__),
+        }
     out["model_contract_version"] = str(target_version)
     return out
 
 
-def eyeprocess_deprecation(old: Any, replacement: Any, since: Any, remove_after: Any, reason: str = "") -> pd.DataFrame:
+def eyeprocess_deprecation(
+    old: Any, replacement: Any, since: Any, remove_after: Any, reason: str = ""
+) -> pd.DataFrame:
     """Return a structured deprecation record."""
-    return pd.DataFrame([{"old": old, "replacement": replacement, "since": since, "remove_after": remove_after, "reason": reason}])
+    return pd.DataFrame(
+        [
+            {
+                "old": old,
+                "replacement": replacement,
+                "since": since,
+                "remove_after": remove_after,
+                "reason": reason,
+            }
+        ]
+    )
 
 
 def external_model_engines() -> pd.DataFrame:
@@ -278,7 +378,9 @@ def _not_available(engine: str, purpose: str, message: str | None = None) -> Eye
     )
 
 
-def fit_external_engine(engine: str, data: Any, specification: Any = None, purpose: str | None = None, **kwargs: Any) -> EyeResult:
+def fit_external_engine(
+    engine: str, data: Any, specification: Any = None, purpose: str | None = None, **kwargs: Any
+) -> EyeResult:
     """Fit an exact external R engine through the frozen stable adapter contract.
 
     In the pure-Python parity core these R engines are deliberately unavailable;
@@ -292,49 +394,73 @@ def fit_external_engine(engine: str, data: Any, specification: Any = None, purpo
     canonical = str(status.loc[0, "engine"])
     if not bool(status.loc[0, "available"]):
         out = _not_available(canonical, purpose)
-        out["data_signature"] = _stable_hash({
-            "shape": getattr(data, "shape", None),
-            "names": list(data.columns) if isinstance(data, pd.DataFrame) else None,
-            "specification": specification,
-        })
+        out["data_signature"] = _stable_hash(
+            {
+                "shape": getattr(data, "shape", None),
+                "names": list(data.columns) if isinstance(data, pd.DataFrame) else None,
+                "specification": specification,
+            }
+        )
         out["specification"] = specification
         out["arguments"] = dict(kwargs)
         return out
     # Kept defensive: availability cannot become True without an explicitly
     # validated exact-engine runner being added to this module.
     return _result(
-        "eye_engine_adapter_result", status="failed", engine=canonical, purpose=purpose,
+        "eye_engine_adapter_result",
+        status="failed",
+        engine=canonical,
+        purpose=purpose,
         error=f"Adapter implementation is unavailable for `{canonical}`.",
-        data_signature=_stable_hash({"specification": specification}), timestamp_utc=_now(),
-        result_class="eye_engine_adapter_failure", fit=None,
+        data_signature=_stable_hash({"specification": specification}),
+        timestamp_utc=_now(),
+        result_class="eye_engine_adapter_failure",
+        fit=None,
     )
 
 
 def validate_engine_adapter(result: Any, require_fit: bool = False) -> EyeResult:
     """Validate the stable external-engine adapter result contract."""
-    if not isinstance(result, Mapping) or getattr(result, "eyeprocess_class", None) != "eye_engine_adapter_result":
+    if (
+        not isinstance(result, Mapping)
+        or getattr(result, "eyeprocess_class", None) != "eye_engine_adapter_result"
+    ):
         raise EyeProcessValidationError("Expected an engine-adapter result.")
+
     def scalar_text(v: Any) -> bool:
         return isinstance(v, str) and bool(v.strip())
-    findings = pd.DataFrame({
-        "check": ["status", "engine", "purpose", "timestamp", "fit_when_required"],
-        "passed": [
-            result.get("status") in {"fitted", "not_available", "failed"},
-            scalar_text(result.get("engine")),
-            scalar_text(result.get("purpose")),
-            scalar_text(result.get("timestamp_utc")),
-            (not bool(require_fit)) or result.get("status") == "fitted",
-        ],
-    })
-    return _result("eye_engine_adapter_validation", valid=bool(findings["passed"].all()), findings=findings,
-                   engine=result.get("engine"), status=result.get("status"))
+
+    findings = pd.DataFrame(
+        {
+            "check": ["status", "engine", "purpose", "timestamp", "fit_when_required"],
+            "passed": [
+                result.get("status") in {"fitted", "not_available", "failed"},
+                scalar_text(result.get("engine")),
+                scalar_text(result.get("purpose")),
+                scalar_text(result.get("timestamp_utc")),
+                (not bool(require_fit)) or result.get("status") == "fitted",
+            ],
+        }
+    )
+    return _result(
+        "eye_engine_adapter_validation",
+        valid=bool(findings["passed"].all()),
+        findings=findings,
+        engine=result.get("engine"),
+        status=result.get("status"),
+    )
 
 
 def compare_engine_adapters(*args: Any) -> pd.DataFrame:
     """Compare multiple external-engine adapter results."""
     results: Sequence[Any]
-    if len(args) == 1 and isinstance(args[0], (list, tuple)) and not (
-        isinstance(args[0], Mapping) and getattr(args[0], "eyeprocess_class", None) == "eye_engine_adapter_result"
+    if (
+        len(args) == 1
+        and isinstance(args[0], (list, tuple))
+        and not (
+            isinstance(args[0], Mapping)
+            and getattr(args[0], "eyeprocess_class", None) == "eye_engine_adapter_result"
+        )
     ):
         results = list(args[0])
     else:
@@ -343,17 +469,26 @@ def compare_engine_adapters(*args: Any) -> pd.DataFrame:
         raise EyeProcessValidationError("At least one adapter result is required.")
     rows = []
     for x in results:
-        if not isinstance(x, Mapping) or getattr(x, "eyeprocess_class", None) != "eye_engine_adapter_result":
+        if (
+            not isinstance(x, Mapping)
+            or getattr(x, "eyeprocess_class", None) != "eye_engine_adapter_result"
+        ):
             raise EyeProcessValidationError("All results must be engine-adapter objects.")
-        rows.append({
-            "engine": x.get("engine"), "status": x.get("status"), "purpose": x.get("purpose"),
-            "data_signature": x.get("data_signature", pd.NA),
-            "error": x.get("error", x.get("message", "")),
-        })
+        rows.append(
+            {
+                "engine": x.get("engine"),
+                "status": x.get("status"),
+                "purpose": x.get("purpose"),
+                "data_signature": x.get("data_signature", pd.NA),
+                "error": x.get("error", x.get("message", "")),
+            }
+        )
     return _tag(pd.DataFrame(rows), "eye_engine_adapter_comparison")
 
 
-def fit_mirt_adapter(data: Any, model: Any = 1, purpose: str | None = None, **kwargs: Any) -> EyeResult:
+def fit_mirt_adapter(
+    data: Any, model: Any = 1, purpose: str | None = None, **kwargs: Any
+) -> EyeResult:
     return fit_external_engine("mirt", data, model, purpose, **kwargs)
 
 
@@ -361,7 +496,9 @@ def fit_tam_adapter(data: Any, purpose: str | None = None, **kwargs: Any) -> Eye
     return fit_external_engine("TAM", data, None, purpose, **kwargs)
 
 
-def fit_brms_adapter(formula: Any, data: Any, purpose: str | None = None, **kwargs: Any) -> EyeResult:
+def fit_brms_adapter(
+    formula: Any, data: Any, purpose: str | None = None, **kwargs: Any
+) -> EyeResult:
     return fit_external_engine("brms", data, formula, purpose, **kwargs)
 
 
@@ -393,7 +530,9 @@ def fit_pupillometryr_adapter(data: Any, purpose: str | None = None, **kwargs: A
     return fit_external_engine("PupillometryR", data, None, purpose, **kwargs)
 
 
-def fit_gdina_adapter(data: Any, Q: Any, model: str = "GDINA", purpose: str = "cognitive diagnosis", **kwargs: Any) -> EyeResult:
+def fit_gdina_adapter(
+    data: Any, Q: Any, model: str = "GDINA", purpose: str = "cognitive diagnosis", **kwargs: Any
+) -> EyeResult:
     """Final 0.11.1 GDINA adapter (the R/028 override of the older R/020 form)."""
     q = np.asarray(Q)
     if q.ndim != 2:
@@ -401,21 +540,31 @@ def fit_gdina_adapter(data: Any, Q: Any, model: str = "GDINA", purpose: str = "c
     if is_eye_dataset(data):
         responses = response_matrix(data)
         if q.shape[0] != responses.shape[1]:
-            raise EyeProcessValidationError("The Q-matrix must contain one row per response-matrix item.")
-        raise EyeProcessBackendError("Exact GDINA parity requires the R `GDINA` engine; no silent Python substitute is used.")
+            raise EyeProcessValidationError(
+                "The Q-matrix must contain one row per response-matrix item."
+            )
+        raise EyeProcessBackendError(
+            "Exact GDINA parity requires the R `GDINA` engine; no silent Python substitute is used."
+        )
     return fit_external_engine("GDINA", data, q, purpose, model=model, **kwargs)
 
 
-def _scanpath_sequence(x: Any, source: str = "visits", collapse_consecutive: bool = True) -> pd.DataFrame:
+def _scanpath_sequence(
+    x: Any, source: str = "visits", collapse_consecutive: bool = True
+) -> pd.DataFrame:
     if not is_eye_dataset(x):
         raise EyeProcessValidationError("Expected an eye_dataset.")
     if source not in {"visits", "fixations", "samples"}:
-        raise EyeProcessValidationError("source must be one of 'visits', 'fixations', or 'samples'.")
+        raise EyeProcessValidationError(
+            "source must be one of 'visits', 'fixations', or 'samples'."
+        )
     if source == "samples":
         d = x["gaze_samples"].copy()
         if "aoi_id" not in d.columns:
             raise EyeProcessValidationError("AOIs have not been assigned to gaze samples.")
-        d = d[["recording_id", "trial_id", "timestamp_seconds", "aoi_id"]].rename(columns={"timestamp_seconds": "time"})
+        d = d[["recording_id", "trial_id", "timestamp_seconds", "aoi_id"]].rename(
+            columns={"timestamp_seconds": "time"}
+        )
     else:
         d = x["episodes"].copy()
         kind = "aoi_visit" if source == "visits" else "fixation"
@@ -430,47 +579,88 @@ def _scanpath_sequence(x: Any, source: str = "visits", collapse_consecutive: boo
         return pd.DataFrame(columns=["recording_id", "trial_id", "sequence", "length"])
     d = d.loc[d["aoi_id"].notna()].sort_values(["recording_id", "trial_id", "time"], kind="stable")
     rows = []
-    for (recording_id, trial_id), z in d.groupby(["recording_id", "trial_id"], sort=False, dropna=False):
+    for (recording_id, trial_id), z in d.groupby(
+        ["recording_id", "trial_id"], sort=False, dropna=False
+    ):
         states = z["aoi_id"].astype(str).tolist()
         if collapse_consecutive and states:
             states = [s for i, s in enumerate(states) if i == 0 or s != states[i - 1]]
-        rows.append({"recording_id": recording_id, "trial_id": trial_id, "sequence": " > ".join(states), "length": len(states)})
+        rows.append(
+            {
+                "recording_id": recording_id,
+                "trial_id": trial_id,
+                "sequence": " > ".join(states),
+                "length": len(states),
+            }
+        )
     return pd.DataFrame(rows)
 
 
-def as_procdata_sequence(x: Any, source: str = "visits", collapse_consecutive: bool = True) -> pd.DataFrame:
+def as_procdata_sequence(
+    x: Any, source: str = "visits", collapse_consecutive: bool = True
+) -> pd.DataFrame:
     seqs = _scanpath_sequence(x, source=source, collapse_consecutive=collapse_consecutive)
     rows = []
     for _, row in seqs.iterrows():
         states = [] if not row["sequence"] else str(row["sequence"]).split(" > ")
         for i, state in enumerate(states, start=1):
-            rows.append({"recording_id": row["recording_id"], "trial_id": row["trial_id"],
-                         "action_index": i, "action": state, "timestamp_order": i})
-    return _tag(pd.DataFrame(rows, columns=["recording_id", "trial_id", "action_index", "action", "timestamp_order"]), "eye_procdata_sequence")
+            rows.append(
+                {
+                    "recording_id": row["recording_id"],
+                    "trial_id": row["trial_id"],
+                    "action_index": i,
+                    "action": state,
+                    "timestamp_order": i,
+                }
+            )
+    return _tag(
+        pd.DataFrame(
+            rows, columns=["recording_id", "trial_id", "action_index", "action", "timestamp_order"]
+        ),
+        "eye_procdata_sequence",
+    )
 
 
-def as_traminer_sequence(x: Any, source: str = "visits", collapse_consecutive: bool = True, create_object: bool = False) -> pd.DataFrame:
+def as_traminer_sequence(
+    x: Any, source: str = "visits", collapse_consecutive: bool = True, create_object: bool = False
+) -> pd.DataFrame:
     seqs = _scanpath_sequence(x, source=source, collapse_consecutive=collapse_consecutive)
-    states = [([] if not s else str(s).split(" > ")) for s in seqs.get("sequence", pd.Series(dtype=str))]
+    states = [
+        ([] if not s else str(s).split(" > ")) for s in seqs.get("sequence", pd.Series(dtype=str))
+    ]
     width = max((len(s) for s in states), default=0)
     rows = []
     for (_, r), s in zip(seqs.iterrows(), states):
         row = {"recording_id": r["recording_id"], "trial_id": r["trial_id"]}
-        row.update({f"state_{i+1}": s[i] if i < len(s) else pd.NA for i in range(width)})
+        row.update({f"state_{i + 1}": s[i] if i < len(s) else pd.NA for i in range(width)})
         rows.append(row)
-    cols = ["recording_id", "trial_id", *[f"state_{i+1}" for i in range(width)]]
+    cols = ["recording_id", "trial_id", *[f"state_{i + 1}" for i in range(width)]]
     wide = _tag(pd.DataFrame(rows, columns=cols), "eye_traminer_sequence")
     if create_object:
-        raise EyeProcessBackendError("Creating a native TraMineR sequence object requires the exact R `TraMineR` engine.")
+        raise EyeProcessBackendError(
+            "Creating a native TraMineR sequence object requires the exact R `TraMineR` engine."
+        )
     return wide
 
 
 def as_seqhmm_data(x: Any, source: str = "visits", collapse_consecutive: bool = True) -> EyeResult:
     seqs = _scanpath_sequence(x, source=source, collapse_consecutive=collapse_consecutive)
-    states = [([] if not s else str(s).split(" > ")) for s in seqs.get("sequence", pd.Series(dtype=str))]
+    states = [
+        ([] if not s else str(s).split(" > ")) for s in seqs.get("sequence", pd.Series(dtype=str))
+    ]
     alphabet = sorted({state for seq in states for state in seq})
-    index = seqs[["recording_id", "trial_id"]].copy() if not seqs.empty else pd.DataFrame(columns=["recording_id", "trial_id"])
-    return _result("eye_seqhmm_data", sequences=states, lengths=[len(s) for s in states], alphabet=alphabet, index=index)
+    index = (
+        seqs[["recording_id", "trial_id"]].copy()
+        if not seqs.empty
+        else pd.DataFrame(columns=["recording_id", "trial_id"])
+    )
+    return _result(
+        "eye_seqhmm_data",
+        sequences=states,
+        lengths=[len(s) for s in states],
+        alphabet=alphabet,
+        index=index,
+    )
 
 
 def fit_diffirt_adapter(x: Any, model: str = "D", **kwargs: Any) -> EyeResult:
@@ -482,7 +672,9 @@ def fit_diffirt_adapter(x: Any, model: str = "D", **kwargs: Any) -> EyeResult:
     raise EyeProcessBackendError("Exact diffusion-IRT parity requires the R `diffIRT` engine.")
 
 
-def fit_openmx_process_model(x: Any, model_builder: Callable, include_features: bool = True, **kwargs: Any) -> EyeResult:
+def fit_openmx_process_model(
+    x: Any, model_builder: Callable, include_features: bool = True, **kwargs: Any
+) -> EyeResult:
     """Strict legacy OpenMx process-model adapter from R/020."""
     if not is_eye_dataset(x):
         raise EyeProcessValidationError("Expected an eye_dataset.")
@@ -500,15 +692,23 @@ def compare_model_engines(
     tolerance: float = 0.05,
 ) -> EyeResult:
     """Compare estimates from named fitting functions against a reference engine."""
-    if not isinstance(engines, Mapping) or not engines or not all(isinstance(k, str) and callable(v) for k, v in engines.items()):
+    if (
+        not isinstance(engines, Mapping)
+        or not engines
+        or not all(isinstance(k, str) and callable(v) for k, v in engines.items())
+    ):
         raise EyeProcessValidationError("`engines` must be a named mapping of fitting functions.")
     names = list(engines)
     if callable(extractors):
         extractor_map = {name: extractors for name in names}
-    elif isinstance(extractors, Mapping) and all(name in extractors and callable(extractors[name]) for name in names):
+    elif isinstance(extractors, Mapping) and all(
+        name in extractors and callable(extractors[name]) for name in names
+    ):
         extractor_map = dict(extractors)
     else:
-        raise EyeProcessValidationError("Supply one extractor function per engine or one shared extractor.")
+        raise EyeProcessValidationError(
+            "Supply one extractor function per engine or one shared extractor."
+        )
     if reference is None:
         reference = names[0]
     if reference not in names:
@@ -525,7 +725,11 @@ def compare_model_engines(
             fits[name] = fit
         except Exception as exc:  # parity: preserve heterogeneous failures
             fits[name] = exc
-            frames.append(pd.DataFrame([{"engine": name, "parameter": pd.NA, "estimate": np.nan, "error": str(exc)}]))
+            frames.append(
+                pd.DataFrame(
+                    [{"engine": name, "parameter": pd.NA, "estimate": np.nan, "error": str(exc)}]
+                )
+            )
             continue
         try:
             z = extractor_map[name](fit)
@@ -537,31 +741,65 @@ def compare_model_engines(
                 frame = z.copy()
             else:
                 arr = np.asarray(z)
-                raise EyeProcessValidationError(f"extractor result for {name} must provide named estimates, not shape {arr.shape}.")
+                raise EyeProcessValidationError(
+                    f"extractor result for {name} must provide named estimates, not shape {arr.shape}."
+                )
             if not {"parameter", "estimate"}.issubset(frame.columns):
-                raise EyeProcessValidationError(f"extractor result for {name} must contain parameter and estimate.")
+                raise EyeProcessValidationError(
+                    f"extractor result for {name} must contain parameter and estimate."
+                )
             frame = frame[["parameter", "estimate"]].copy()
             frame["engine"] = name
             frame["error"] = pd.NA
             frames.append(frame)
         except Exception as exc:
-            frames.append(pd.DataFrame([{"engine": name, "parameter": pd.NA, "estimate": np.nan, "error": str(exc)}]))
+            frames.append(
+                pd.DataFrame(
+                    [{"engine": name, "parameter": pd.NA, "estimate": np.nan, "error": str(exc)}]
+                )
+            )
 
-    estimates = pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame(columns=["engine", "parameter", "estimate", "error"])
-    ref = estimates.loc[(estimates["engine"] == reference) & estimates["parameter"].notna(), ["parameter", "estimate"]].copy()
+    estimates = (
+        pd.concat(frames, ignore_index=True, sort=False)
+        if frames
+        else pd.DataFrame(columns=["engine", "parameter", "estimate", "error"])
+    )
+    ref = estimates.loc[
+        (estimates["engine"] == reference) & estimates["parameter"].notna(),
+        ["parameter", "estimate"],
+    ].copy()
     ref = ref.rename(columns={"estimate": "reference_estimate"})
     estimates = estimates.merge(ref, on="parameter", how="left")
     estimates["estimate"] = pd.to_numeric(estimates["estimate"], errors="coerce")
-    estimates["reference_estimate"] = pd.to_numeric(estimates["reference_estimate"], errors="coerce")
-    estimates["absolute_difference"] = (estimates["estimate"] - estimates["reference_estimate"]).abs()
+    estimates["reference_estimate"] = pd.to_numeric(
+        estimates["reference_estimate"], errors="coerce"
+    )
+    estimates["absolute_difference"] = (
+        estimates["estimate"] - estimates["reference_estimate"]
+    ).abs()
     finite = np.isfinite(estimates["absolute_difference"].to_numpy(float, na_value=np.nan))
-    estimates["equivalent"] = pd.array([bool(v <= tolerance) if ok else pd.NA for v, ok in zip(estimates["absolute_difference"], finite)], dtype="boolean")
-    return _result("eye_engine_comparison", fits=fits, estimates=estimates, reference=reference, tolerance=tolerance)
+    estimates["equivalent"] = pd.array(
+        [
+            bool(v <= tolerance) if ok else pd.NA
+            for v, ok in zip(estimates["absolute_difference"], finite)
+        ],
+        dtype="boolean",
+    )
+    return _result(
+        "eye_engine_comparison",
+        fits=fits,
+        estimates=estimates,
+        reference=reference,
+        tolerance=tolerance,
+    )
 
 
 def plot_eye_engine_comparison(x: Any, parameter: str | None = None, ax: Any = None) -> Any:
     """Python counterpart of ``plot.eye_engine_comparison`` with plot-data attached."""
-    if not isinstance(x, Mapping) or getattr(x, "eyeprocess_class", None) != "eye_engine_comparison":
+    if (
+        not isinstance(x, Mapping)
+        or getattr(x, "eyeprocess_class", None) != "eye_engine_comparison"
+    ):
         raise EyeProcessValidationError("x must be an eye_engine_comparison result.")
     d = x["estimates"].copy()
     available = d.loc[d["parameter"].notna(), "parameter"].astype(str).unique().tolist()
@@ -573,6 +811,7 @@ def plot_eye_engine_comparison(x: Any, parameter: str | None = None, ax: Any = N
     if z.empty:
         raise EyeProcessValidationError(f"Parameter `{parameter}` was not found.")
     import matplotlib.pyplot as plt
+
     if ax is None:
         _, ax = plt.subplots()
     y = np.arange(len(z))

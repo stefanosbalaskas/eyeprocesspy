@@ -51,11 +51,7 @@ def convex_polygon():
         {
             "aoi_id": ["diamond"],
             "shape_type": ["polygon"],
-            "polygon": [
-                np.array(
-                    [[500.0, 200.0], [560.0, 260.0], [500.0, 320.0], [440.0, 260.0]]
-                )
-            ],
+            "polygon": [np.array([[500.0, 200.0], [560.0, 260.0], [500.0, 320.0], [440.0, 260.0]])],
         }
     )
 
@@ -75,9 +71,8 @@ def test_polygon_dilation_is_true_convex_offset():
     p1 = d.iloc[0]["polygon"]
     assert abs(np.ptp(p1[:, 0]) - np.ptp(p0[:, 0])) > 10
     assert abs(np.ptp(p1[:, 1]) - np.ptp(p0[:, 1])) > 10
-    cross = (
-        (p1[1, 0] - p1[0, 0]) * (p1[2, 1] - p1[1, 1])
-        - (p1[1, 1] - p1[0, 1]) * (p1[2, 0] - p1[1, 0])
+    cross = (p1[1, 0] - p1[0, 0]) * (p1[2, 1] - p1[1, 1]) - (p1[1, 1] - p1[0, 1]) * (
+        p1[2, 0] - p1[1, 0]
     )
     assert abs(cross) > 0
 
@@ -87,11 +82,7 @@ def test_polygon_degree_dilation_uses_both_axis_scales():
         {
             "aoi_id": ["square"],
             "shape_type": ["polygon"],
-            "polygon": [
-                np.array(
-                    [[100.0, 100.0], [200.0, 100.0], [200.0, 200.0], [100.0, 200.0]]
-                )
-            ],
+            "polygon": [np.array([[100.0, 100.0], [200.0, 100.0], [200.0, 200.0], [100.0, 200.0]])],
         }
     )
     out = dilate_aoi(
@@ -110,9 +101,7 @@ def test_concave_polygon_dilation_is_not_silently_approximated():
         {
             "aoi_id": ["concave"],
             "shape_type": ["polygon"],
-            "polygon": [
-                np.array([[0, 0], [4, 0], [2, 1], [4, 4], [0, 4]], dtype=float)
-            ],
+            "polygon": [np.array([[0, 0], [4, 0], [2, 1], [4, 4], [0, 4]], dtype=float)],
         }
     )
     with pytest.raises(EyeProcessValidationError, match="convex polygons only"):
@@ -204,18 +193,14 @@ def test_polygon_overlap_and_boundary_membership_are_deterministic():
 
 
 def test_zero_area_and_invalid_polygon_fail():
-    zero = pd.DataFrame(
-        {"aoi_id": ["a"], "xmin": [0], "xmax": [0], "ymin": [0], "ymax": [1]}
-    )
+    zero = pd.DataFrame({"aoi_id": ["a"], "xmin": [0], "xmax": [0], "ymin": [0], "ymax": [1]})
     with pytest.raises(EyeProcessValidationError, match="zero or negative"):
         validate_aoi_geometry(zero)
     bow = pd.DataFrame(
         {
             "aoi_id": ["bow"],
             "shape_type": ["polygon"],
-            "polygon": [
-                np.array([[0, 0], [2, 2], [0, 2], [2, 0]], dtype=float)
-            ],
+            "polygon": [np.array([[0, 0], [2, 2], [0, 2], [2, 0]], dtype=float)],
         }
     )
     with pytest.raises(EyeProcessValidationError, match="self-intersects"):
@@ -283,15 +268,11 @@ def test_jitter_is_reproducible():
 def test_exact_baseline_is_unchanged():
     spec = aoi_perturbation_spec("baseline", "baseline")
     out = perturb_aoi_geometry(rects(), spec)
-    pd.testing.assert_frame_equal(
-        out["nominal_geometry"], out["perturbed_geometry"]
-    )
+    pd.testing.assert_frame_equal(out["nominal_geometry"], out["perturbed_geometry"])
 
 
 def test_assignment_comparison_matrix_and_missingness():
-    cmp = compare_aoi_assignments(
-        ["a", OUTSIDE, "b", None], ["a", "a", OUTSIDE, "b"]
-    )
+    cmp = compare_aoi_assignments(["a", OUTSIDE, "b", None], ["a", "a", OUTSIDE, "b"])
     s = cmp["summary"].iloc[0]
     assert s["n_comparable"] == 3
     assert math.isclose(s["proportion_unchanged"], 1 / 3)
@@ -455,13 +436,9 @@ def model_callback(features, assigned, spec):
     if target.empty:
         raise RuntimeError("no disclosure observations")
     condition_map = assigned[["participant", "condition"]].drop_duplicates()
-    target = target.merge(
-        condition_map, on="participant", how="left", validate="many_to_one"
-    )
+    target = target.merge(condition_map, on="participant", how="left", validate="many_to_one")
     y = target["dwell"].to_numpy(float)
-    X = np.column_stack(
-        [np.ones(len(target)), target["condition"].to_numpy(float)]
-    )
+    X = np.column_stack([np.ones(len(target)), target["condition"].to_numpy(float)])
     beta = np.linalg.lstsq(X, y, rcond=None)[0]
     resid = y - X @ beta
     df = len(y) - X.shape[1]
@@ -665,9 +642,7 @@ def test_model_callback_failures_and_partial_nonconvergence_are_preserved():
         (result["failures"].stage == "model")
         & result["failures"].message.str.contains("planned failure")
     ).any()
-    row = result["models"].loc[
-        result["models"].perturbation_id.eq("shift_x_5_px")
-    ].iloc[0]
+    row = result["models"].loc[result["models"].perturbation_id.eq("shift_x_5_px")].iloc[0]
     assert not bool(row.model_converged)
     inf = assess_aoi_inference_stability(result, term="x")
     assert inf.iloc[0].n_converged == 1
@@ -681,16 +656,18 @@ def test_invalid_model_callback_rows_are_recorded_as_failures():
 
     def bad_flag(features, assigned, spec):
         return pd.DataFrame(
-            [{
-                "term": "x",
-                "estimate": 1.0,
-                "SE": 0.2,
-                "CI_low": 0.6,
-                "CI_high": 1.4,
-                "p_value": 0.03,
-                "model_converged": "yes",
-                "N": 10,
-            }]
+            [
+                {
+                    "term": "x",
+                    "estimate": 1.0,
+                    "SE": 0.2,
+                    "CI_low": 0.6,
+                    "CI_high": 1.4,
+                    "p_value": 0.03,
+                    "model_converged": "yes",
+                    "N": 10,
+                }
+            ]
         )
 
     result = run_aoi_sensitivity_analysis(
@@ -708,16 +685,18 @@ def test_invalid_model_callback_rows_are_recorded_as_failures():
 
     def bad_converged(features, assigned, spec):
         return pd.DataFrame(
-            [{
-                "term": "x",
-                "estimate": np.nan,
-                "SE": 0.2,
-                "CI_low": 0.6,
-                "CI_high": 1.4,
-                "p_value": np.nan,
-                "model_converged": True,
-                "N": 10,
-            }]
+            [
+                {
+                    "term": "x",
+                    "estimate": np.nan,
+                    "SE": 0.2,
+                    "CI_low": 0.6,
+                    "CI_high": 1.4,
+                    "p_value": np.nan,
+                    "model_converged": True,
+                    "N": 10,
+                }
+            ]
         )
 
     result = run_aoi_sensitivity_analysis(
@@ -789,9 +768,7 @@ def test_cross_language_parity_fixture_contract():
     )
     for branch in ("baseline", "dilate_1_px"):
         observed = result["assignments"][branch].tolist()
-        expected = [
-            None if pd.isna(value) else str(value).strip() for value in fixture[branch]
-        ]
+        expected = [None if pd.isna(value) else str(value).strip() for value in fixture[branch]]
         assert observed == expected
     comparison = result["comparisons"]["dilate_1_px"]["summary"].iloc[0]
     assert comparison["n_comparable"] == 4

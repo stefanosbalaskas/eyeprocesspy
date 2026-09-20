@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import math
 import warnings
-from collections.abc import Mapping, Sequence
-from typing import Any, Callable
+from collections.abc import Callable, Mapping, Sequence
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -64,10 +64,13 @@ def _numeric_vector(value: Any) -> np.ndarray:
         except Exception:
             raw = np.asarray([value], dtype=object)
 
-    return pd.to_numeric(
-        pd.Series(np.ravel(raw)),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(np.ravel(raw)),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _first_numeric(value: Any) -> float:
@@ -81,7 +84,7 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     try:
         return list(value)
     except TypeError:
@@ -146,14 +149,36 @@ def _default_control_extract(value: Any) -> pd.DataFrame:
     )
 
 
-def _quantile(values: np.ndarray, probability: float) -> float:
+def _quantile(
+    values: np.ndarray,
+    probability: float,
+) -> float:
     finite = values[np.isfinite(values)]
+
     if finite.size == 0:
         return math.nan
+
+    quantile = cast(
+        Callable[..., Any],
+        np.quantile,
+    )
+
     try:
-        return float(np.quantile(finite, probability, method="linear"))
+        return float(
+            quantile(
+                finite,
+                probability,
+                method="linear",
+            )
+        )
     except TypeError:
-        return float(np.quantile(finite, probability, interpolation="linear"))
+        return float(
+            quantile(
+                finite,
+                probability,
+                interpolation="linear",
+            )
+        )
 
 
 def process_feature_time_provenance(
@@ -183,7 +208,9 @@ def process_feature_time_provenance(
     unit_values = _as_list(unit)
     unit_value = str(unit_values[0]) if unit_values else "None"
 
-    feature_strings = [None if value is None or pd.isna(value) else str(value) for value in features]
+    feature_strings = [
+        None if value is None or pd.isna(value) else str(value) for value in features
+    ]
     if any(value is None or value == "" for value in feature_strings):
         raise EyeProcessValidationError("feature names cannot be missing or empty.")
     if np.any(~np.isfinite(available)) or np.any(~np.isfinite(outcome)):
@@ -281,7 +308,11 @@ def validate_feature_availability(
     if len(cutoff_items) == 1:
         limit = np.repeat(_first_numeric(cutoff_items[0]), len(frame))
     else:
-        if not cutoff_names or len(cutoff_names) != len(cutoff_items) or any(name == "" for name in cutoff_names):
+        if (
+            not cutoff_names
+            or len(cutoff_names) != len(cutoff_items)
+            or any(name == "" for name in cutoff_names)
+        ):
             raise EyeProcessValidationError("A multi-value cutoff must be named by feature.")
         mapping = dict(zip(cutoff_names, cutoff_items))
         features = frame["feature"].astype(str).tolist()
@@ -439,7 +470,9 @@ def _placebo_summary(
         "mean": mean_value,
         "sd": sd_value,
         "se": se_value,
-        "difference_from_expected": (mean_value - expected if np.isfinite(mean_value) else math.nan),
+        "difference_from_expected": (
+            mean_value - expected if np.isfinite(mean_value) else math.nan
+        ),
     }
 
 
@@ -514,7 +547,9 @@ def run_process_negative_controls(
 
     lags = _numeric_vector(shift_lags)
     if "shift" in controls_value and len(lags) == 0:
-        raise EyeProcessValidationError("shift_lags cannot be empty when shift controls are requested.")
+        raise EyeProcessValidationError(
+            "shift_lags cannot be empty when shift controls are requested."
+        )
     if "shift" in controls_value and (
         np.any(~np.isfinite(lags)) or np.any(lags != np.round(lags)) or np.any(lags == 0)
     ):
@@ -640,7 +675,11 @@ def summarise_process_negative_controls(
                 "median": (float(np.median(finite)) if len(finite) else math.nan),
                 "q025": _quantile(values, 0.025),
                 "q975": _quantile(values, 0.975),
-                "exceedance_rate": (float(np.mean(np.abs(finite) > abs(threshold_value))) if len(finite) else math.nan),
+                "exceedance_rate": (
+                    float(np.mean(np.abs(finite) > abs(threshold_value)))
+                    if len(finite)
+                    else math.nan
+                ),
             }
         )
     return pd.DataFrame(rows)
@@ -698,7 +737,9 @@ def negative_control_concordance(
 
     within = np.empty(len(summary), dtype=object)
     for index, mean_value in enumerate(means):
-        within[index] = bool(abs(mean_value) <= tolerance_value) if np.isfinite(mean_value) else None
+        within[index] = (
+            bool(abs(mean_value) <= tolerance_value) if np.isfinite(mean_value) else None
+        )
 
     summary = summary.copy()
     summary["within_tolerance"] = within

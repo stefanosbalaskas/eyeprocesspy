@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 
 import matplotlib
+
 matplotlib.use("Agg")
 import numpy as np
 import pandas as pd
@@ -12,13 +13,33 @@ import eyeprocesspy as ep
 from eyeprocesspy.exceptions import EyeProcessBackendError, EyeProcessValidationError
 from eyeprocesspy.irt import EyeResult
 
-
 FROZEN_ADAPTER_EXPORTS = [
-    "eyeprocess_api_version", "object_schema", "validate_model_object", "upgrade_eyeprocess_model", "eyeprocess_deprecation",
-    "external_model_engines", "engine_adapter_status", "fit_external_engine", "validate_engine_adapter", "compare_engine_adapters",
-    "fit_mirt_adapter", "fit_tam_adapter", "fit_brms_adapter", "fit_lnirt_adapter", "fit_traminer_adapter", "fit_seqhmm_adapter",
-    "fit_gdina_adapter", "fit_openmx_adapter", "fit_diffirt_engine_adapter", "fit_eyetrackingr_adapter", "fit_pupillometryr_adapter",
-    "as_procdata_sequence", "as_traminer_sequence", "as_seqhmm_data", "fit_diffirt_adapter", "fit_openmx_process_model",
+    "eyeprocess_api_version",
+    "object_schema",
+    "validate_model_object",
+    "upgrade_eyeprocess_model",
+    "eyeprocess_deprecation",
+    "external_model_engines",
+    "engine_adapter_status",
+    "fit_external_engine",
+    "validate_engine_adapter",
+    "compare_engine_adapters",
+    "fit_mirt_adapter",
+    "fit_tam_adapter",
+    "fit_brms_adapter",
+    "fit_lnirt_adapter",
+    "fit_traminer_adapter",
+    "fit_seqhmm_adapter",
+    "fit_gdina_adapter",
+    "fit_openmx_adapter",
+    "fit_diffirt_engine_adapter",
+    "fit_eyetrackingr_adapter",
+    "fit_pupillometryr_adapter",
+    "as_procdata_sequence",
+    "as_traminer_sequence",
+    "as_seqhmm_data",
+    "fit_diffirt_adapter",
+    "fit_openmx_process_model",
     "compare_model_engines",
 ]
 
@@ -26,10 +47,24 @@ FROZEN_ADAPTER_EXPORTS = [
 def test_adapter_exports_resolve_and_public_signatures_are_stable():
     for name in FROZEN_ADAPTER_EXPORTS:
         assert callable(getattr(ep, name))
-    assert list(inspect.signature(ep.fit_mirt_adapter).parameters)[:3] == ["data", "model", "purpose"]
-    assert list(inspect.signature(ep.fit_external_engine).parameters)[:4] == ["engine", "data", "specification", "purpose"]
+    assert list(inspect.signature(ep.fit_mirt_adapter).parameters)[:3] == [
+        "data",
+        "model",
+        "purpose",
+    ]
+    assert list(inspect.signature(ep.fit_external_engine).parameters)[:4] == [
+        "engine",
+        "data",
+        "specification",
+        "purpose",
+    ]
     # The final R/028 definition overrides the earlier R/020 fit_gdina_adapter.
-    assert list(inspect.signature(ep.fit_gdina_adapter).parameters)[:4] == ["data", "Q", "model", "purpose"]
+    assert list(inspect.signature(ep.fit_gdina_adapter).parameters)[:4] == [
+        "data",
+        "Q",
+        "model",
+        "purpose",
+    ]
 
 
 def test_api_and_model_contract_helpers():
@@ -40,7 +75,10 @@ def test_api_and_model_contract_helpers():
     assert schema["version"] == "1.0.0"
     assert "scientific validity" in schema["invariant"]
 
-    legacy = EyeResult({"spec": {"engine": "reference"}, "model": {"coef": [1.0]}}, eyeprocess_class="eyeprocess_model")
+    legacy = EyeResult(
+        {"spec": {"engine": "reference"}, "model": {"coef": [1.0]}},
+        eyeprocess_class="eyeprocess_model",
+    )
     upgraded = ep.upgrade_eyeprocess_model(legacy)
     assert upgraded["specification"] == legacy["spec"]
     assert upgraded["fit"] == legacy["model"]
@@ -52,7 +90,9 @@ def test_api_and_model_contract_helpers():
 def test_external_engine_registry_and_explicit_not_available_contracts():
     registry = ep.external_model_engines()
     assert list(registry.columns) == ["engine", "package", "domain", "available"]
-    assert set(["mirt", "TAM", "brms", "LNIRT", "GDINA", "OpenMx", "diffIRT", "TraMineR", "seqHMM"]).issubset(set(registry.engine))
+    assert set(
+        ["mirt", "TAM", "brms", "LNIRT", "GDINA", "OpenMx", "diffIRT", "TraMineR", "seqHMM"]
+    ).issubset(set(registry.engine))
     assert registry.available.eq(False).all()
 
     status = ep.engine_adapter_status("MIRT")
@@ -75,7 +115,9 @@ def test_convenience_adapters_preserve_engine_and_declared_purpose():
     results = [
         ep.fit_mirt_adapter(data, purpose="IRT comparison"),
         ep.fit_tam_adapter(data, purpose="Rasch comparison"),
-        ep.fit_brms_adapter("y ~ x", pd.DataFrame({"y": [0, 1], "x": [1, 2]}), purpose="Bayesian comparison"),
+        ep.fit_brms_adapter(
+            "y ~ x", pd.DataFrame({"y": [0, 1], "x": [1, 2]}), purpose="Bayesian comparison"
+        ),
         ep.fit_lnirt_adapter(data, purpose="joint response time"),
         ep.fit_traminer_adapter(data, purpose="sequence comparison"),
         ep.fit_seqhmm_adapter(data, purpose="state comparison"),
@@ -93,7 +135,9 @@ def test_convenience_adapters_preserve_engine_and_declared_purpose():
 
 
 def test_final_gdina_adapter_validates_eye_dataset_q_matrix_before_backend_gate():
-    x = ep.simulate_eye_dataset(n_person=4, n_item=3, sampling_rate=10, trial_duration=.3, seed=108)
+    x = ep.simulate_eye_dataset(
+        n_person=4, n_item=3, sampling_rate=10, trial_duration=0.3, seed=108
+    )
     with pytest.raises(EyeProcessValidationError, match="one row per"):
         ep.fit_gdina_adapter(x, np.ones((1, 1)))
     with pytest.raises(EyeProcessBackendError, match="GDINA"):
@@ -104,7 +148,9 @@ def test_final_gdina_adapter_validates_eye_dataset_q_matrix_before_backend_gate(
 
 
 def test_strict_legacy_diffirt_and_openmx_adapters_validate_before_gate():
-    x = ep.simulate_eye_dataset(n_person=3, n_item=2, sampling_rate=10, trial_duration=.3, seed=109)
+    x = ep.simulate_eye_dataset(
+        n_person=3, n_item=2, sampling_rate=10, trial_duration=0.3, seed=109
+    )
     with pytest.raises(EyeProcessValidationError, match="model"):
         ep.fit_diffirt_adapter(x, model="unsupported")
     with pytest.raises(EyeProcessBackendError, match="diffIRT"):
@@ -116,7 +162,9 @@ def test_strict_legacy_diffirt_and_openmx_adapters_validate_before_gate():
 
 
 def test_sequence_interoperability_matches_frozen_contract_shape():
-    x = ep.simulate_eye_dataset(n_person=2, n_item=2, sampling_rate=10, trial_duration=.3, seed=110)
+    x = ep.simulate_eye_dataset(
+        n_person=2, n_item=2, sampling_rate=10, trial_duration=0.3, seed=110
+    )
     x = x.copy()
     x["gaze_samples"] = x["gaze_samples"].copy()
     x["gaze_samples"]["aoi_id"] = x["gaze_samples"]["true_aoi"]
@@ -138,7 +186,9 @@ def test_sequence_interoperability_matches_frozen_contract_shape():
 
 
 def test_compare_model_engines_matches_reference_tolerance_and_preserves_failures():
-    data = pd.DataFrame({"x": np.arange(8, dtype=float), "y": 1.0 + 2.0 * np.arange(8, dtype=float)})
+    data = pd.DataFrame(
+        {"x": np.arange(8, dtype=float), "y": 1.0 + 2.0 * np.arange(8, dtype=float)}
+    )
 
     def fit_a(z):
         return np.polyfit(z.x, z.y, 1)
@@ -149,7 +199,9 @@ def test_compare_model_engines_matches_reference_tolerance_and_preserves_failure
     def extract(fit):
         return {"beta": float(fit[0])}
 
-    cmp = ep.compare_model_engines(data, {"a": fit_a, "b": fit_b}, extract, reference="a", tolerance=1e-8)
+    cmp = ep.compare_model_engines(
+        data, {"a": fit_a, "b": fit_b}, extract, reference="a", tolerance=1e-8
+    )
     assert cmp.eyeprocess_class == "eye_engine_comparison"
     assert cmp.estimates.equivalent.dropna().all()
     assert cmp.reference == "a"
@@ -158,5 +210,7 @@ def test_compare_model_engines_matches_reference_tolerance_and_preserves_failure
     assert len(ax.eyeprocess_plot_data) == 2
     assert ax.get_xlabel() == "Estimate"
 
-    cmp2 = ep.compare_model_engines(data, {"a": fit_a, "bad": lambda z: (_ for _ in ()).throw(RuntimeError("boom"))}, extract)
+    cmp2 = ep.compare_model_engines(
+        data, {"a": fit_a, "bad": lambda z: (_ for _ in ()).throw(RuntimeError("boom"))}, extract
+    )
     assert "boom" in cmp2.estimates.error.fillna("").str.cat(sep=" ")

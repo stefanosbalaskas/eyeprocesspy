@@ -1,12 +1,16 @@
 """Plots for legacy/core model parity."""
+
 from __future__ import annotations
+
 from typing import Any
+
 import numpy as np
 import pandas as pd
 
 
 def plot_eye_parameter_recovery(x: Any, ax=None):
     import matplotlib.pyplot as plt
+
     d = pd.DataFrame(x).copy()
     if ax is None:
         _, ax = plt.subplots()

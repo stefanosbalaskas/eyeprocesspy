@@ -1,7 +1,9 @@
 """Grouped validation and leakage audits from frozen ``R/021-validation-program.R``."""
+
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -66,6 +68,7 @@ def _require_frame(data: Any) -> pd.DataFrame:
 
 
 def _names(value: Any, name: str, minimum: int = 1) -> tuple[str, ...]:
+    values: tuple[str, ...]
     if isinstance(value, str):
         values = (value,)
     else:
@@ -77,10 +80,7 @@ def _names(value: Any, name: str, minimum: int = 1) -> tuple[str, ...]:
             ) from exc
     if len(values) < minimum or any(not item or item.lower() == "nan" for item in values):
         if minimum > 1:
-            _stop(
-                f"`{name}` must contain at least {minimum} non-empty crossed "
-                "grouping columns."
-            )
+            _stop(f"`{name}` must contain at least {minimum} non-empty crossed grouping columns.")
         _stop(f"`{name}` must contain non-empty column names.")
     return values
 
@@ -95,9 +95,7 @@ def _fold_count(v: Any) -> int:
     try:
         number = int(v)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError(
-            "`v` must be an integer of at least two."
-        ) from exc
+        raise EyeProcessValidationError("`v` must be an integer of at least two.") from exc
     try:
         exact = float(v) == float(number)
     except (TypeError, ValueError):
@@ -193,12 +191,16 @@ def _response_values(formula: Any, data: pd.DataFrame) -> np.ndarray:
             NA_action="drop",
         )
     except Exception as exc:
-        raise EyeProcessValidationError(
-            f"Could not evaluate model formula: {exc}"
-        ) from exc
+        raise EyeProcessValidationError(f"Could not evaluate model formula: {exc}") from exc
     if response.shape[1] != 1:
         _stop("Grouped validation currently requires a scalar response.")
-    values = pd.to_numeric(response.iloc[:, 0], errors="coerce").to_numpy(dtype=float)
+    values = np.asarray(
+        pd.to_numeric(
+            response.iloc[:, 0],
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
     if len(values) != len(data):
         _stop("Formula evaluation removed rows; grouped validation requires complete model fields.")
     return values
@@ -315,9 +317,7 @@ def crossed_grouped_folds(
             _stop("Crossed grouping columns cannot contain missing or empty values.")
         levels = as_text.astype(str).drop_duplicates().tolist()
         if len(levels) < v:
-            _stop(
-                f"Grouping column `{group}` has fewer levels than requested folds."
-            )
+            _stop(f"Grouping column `{group}` has fewer levels than requested folds.")
 
         fold_values = np.resize(np.arange(1, v + 1, dtype=int), len(levels))
         fold_values = rng.permutation(fold_values)
@@ -333,9 +333,7 @@ def crossed_grouped_folds(
 
     folds = []
     for fold in range(1, v + 1):
-        held = np.column_stack(
-            [row_assignments[group] == fold for group in groups]
-        )
+        held = np.column_stack([row_assignments[group] == fold for group in groups])
         assessment_mask = held.all(axis=1)
         analysis_mask = (~held).all(axis=1)
         buffer_mask = ~(assessment_mask | analysis_mask)
@@ -454,15 +452,13 @@ def quantify_process_leakage(
         ),
     }
     for name in groups:
-        jobs[f"held_{name}"] = (
-            lambda group_name=name: grouped_cv(
-                data,
-                formula,
-                group=group_name,
-                v=v,
-                metric="log_loss",
-                seed=seed,
-            )
+        jobs[f"held_{name}"] = lambda group_name=name: grouped_cv(
+            data,
+            formula,
+            group=group_name,
+            v=v,
+            metric="log_loss",
+            seed=seed,
         )
     if len(groups) >= 2:
         jobs["cross_classified"] = lambda: crossed_grouped_cv(
@@ -488,9 +484,7 @@ def quantify_process_leakage(
                     "scheme": scheme,
                     "folds": int(len(scores)),
                     "successful_folds": int(finite.sum()),
-                    "mean_log_loss": (
-                        float(np.mean(scores[finite])) if finite.any() else np.nan
-                    ),
+                    "mean_log_loss": (float(np.mean(scores[finite])) if finite.any() else np.nan),
                     "error": pd.NA,
                 }
             )

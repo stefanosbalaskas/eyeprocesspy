@@ -12,7 +12,6 @@ def _process_data() -> pd.DataFrame:
     for p in range(12):
         for j in range(5):
             ability = (p - 5.5) / 3.0
-            item_shift = (j - 2) * 0.25
             response = int((p + 2 * j) % 5 not in {0, 1})
             rows.append(
                 {
@@ -194,7 +193,10 @@ def test_advanced_process_irt_external_gates_and_reference_diagnostics():
         response_matrix,
         q_matrix,
         engine="external",
-        external_engine=lambda response_matrix, q_matrix: {"shape": response_matrix.shape, "q": q_matrix.shape},
+        external_engine=lambda response_matrix, q_matrix: {
+            "shape": response_matrix.shape,
+            "q": q_matrix.shape,
+        },
     )
     assert cognitive.eyeprocess_class == "eye_cognitive_diagnosis_process"
     assert cognitive.response_model["shape"] == (4, 3)
@@ -244,7 +246,9 @@ def test_process_dif_surrogate_and_adjusted_audit_are_explicit():
         process_features=["process_a", "process_b"],
     )
     assert audit.eyeprocess_class == "eye_process_adjusted_dif"
-    assert {"term", "unadjusted", "adjusted", "absolute_reduction"}.issubset(audit.coefficients.columns)
+    assert {"term", "unadjusted", "adjusted", "absolute_reduction"}.issubset(
+        audit.coefficients.columns
+    )
 
 
 def test_recovery_audits_and_engine_comparison_are_numerical():
@@ -296,11 +300,20 @@ def test_posterior_sbc_contract_executes_self_consistency_replications():
 
 def test_external_and_leave_group_validations_execute_all_folds():
     data = _process_data().copy()
-    fitter = lambda train: {"mean": float(train.response.mean())}
-    predictor = lambda fit, test: np.repeat(fit["mean"], len(test))
-    scorer = lambda test, pred: pd.DataFrame(
-        {"brier": [float(np.mean((test.response.to_numpy(float) - np.asarray(pred, float)) ** 2))]}
-    )
+
+    def fitter(train):
+        return {"mean": float(train.response.mean())}
+
+    def predictor(fit, test):
+        return np.repeat(
+            fit["mean"],
+            len(test),
+        )
+
+    def scorer(test, pred):
+        error = test.response.to_numpy(float) - np.asarray(pred, float)
+
+        return pd.DataFrame({"brier": [float(np.mean(error**2))]})
 
     external = ep.external_validate_irt(data.iloc[:40], data.iloc[40:], fitter, predictor, scorer)
     session = ep.leave_session_out_validation(data, "session", fitter, predictor, scorer)
@@ -314,12 +327,14 @@ def test_external_and_leave_group_validations_execute_all_folds():
 
 
 def test_validation_stress_families_preserve_scenarios_and_replications():
-    runner = lambda scenario, replicate: pd.DataFrame(
-        {
-            "metric": [float(replicate)],
-            "scenario_echo": [str(scenario["scenario"].iloc[0])],
-        }
-    )
+    def runner(scenario, replicate):
+        return pd.DataFrame(
+            {
+                "metric": [float(replicate)],
+                "scenario_echo": [str(scenario["scenario"].iloc[0])],
+            }
+        )
+
     generic = ep.stress_test_misspecification(
         pd.DataFrame({"scenario": ["baseline", "misspecified"], "strength": [0.0, 0.5]}),
         runner,
@@ -335,7 +350,9 @@ def test_validation_stress_families_preserve_scenarios_and_replications():
         replications=1,
         seed=4,
     )
-    preprocessing = ep.stress_test_preprocessing(runner, ["raw", "filtered"], replications=1, seed=5)
+    preprocessing = ep.stress_test_preprocessing(
+        runner, ["raw", "filtered"], replications=1, seed=5
+    )
 
     assert len(generic) == 4 and not generic.failed.any()
     assert len(latent) == 6 and not latent.failed.any()

@@ -16,6 +16,7 @@ import eyeprocesspy.sensitivity_08 as se
 
 def _close(ax):
     import matplotlib.pyplot as plt
+
     plt.close(ax.figure)
 
 
@@ -23,6 +24,7 @@ def test_frontier_invalid_engines_fold_builder_and_contract_guards():
     class BadFrame:
         def __iter__(self):
             raise RuntimeError("cannot coerce")
+
     with pytest.raises(ep.EyeProcessValidationError, match="coercible"):
         fr._df(BadFrame())
 
@@ -35,7 +37,9 @@ def test_frontier_invalid_engines_fold_builder_and_contract_guards():
         with pytest.raises(ep.EyeProcessValidationError, match="engine"):
             fn([[1]], engine=3)
 
-    structured = pd.DataFrame({"person_id": [1, 2, 3, 4], "fold": ["a", "a", "b", "b"], "x": [1, 2, 3, 4]})
+    structured = pd.DataFrame(
+        {"person_id": [1, 2, 3, 4], "fold": ["a", "a", "b", "b"], "x": [1, 2, 3, 4]}
+    )
     with pytest.raises(ep.EyeProcessValidationError, match="missing required"):
         fr.prepare_structured_unstructured_process_features(structured, fold="missing")
     reg = fr.prepare_structured_unstructured_process_features(structured, fold="fold")
@@ -52,7 +56,9 @@ def test_frontier_invalid_engines_fold_builder_and_contract_guards():
         unstructured=unstructured,
         fold="fold",
         builder=lambda train_s, train_u, test_s, test_u, v: {
-            "fold": v, "n_train": len(train_s), "n_test_u": len(test_u)
+            "fold": v,
+            "n_train": len(train_s),
+            "n_test_u": len(test_u),
         },
     )
     assert set(out.folds) == {"a", "b"}
@@ -68,6 +74,7 @@ def test_sensitivity_guard_and_backend_boundaries():
     class BadFrame:
         def __iter__(self):
             raise RuntimeError("bad")
+
     with pytest.raises(ep.EyeProcessValidationError, match="coercible"):
         se._df(BadFrame())
     assert np.isnan(se._mean(["bad", np.nan]))
@@ -82,7 +89,9 @@ def test_sensitivity_guard_and_backend_boundaries():
     with pytest.raises(ep.EyeProcessValidationError, match="one assignment"):
         se.map_latent_classes_to_process_profiles(cm, proc, process_features=["x"])
     with pytest.raises(ep.EyeProcessValidationError, match="at least one process feature"):
-        se.map_latent_classes_to_process_profiles(pd.DataFrame({"person_id": ["P1"], "class": [1]}), proc)
+        se.map_latent_classes_to_process_profiles(
+            pd.DataFrame({"person_id": ["P1"], "class": [1]}), proc
+        )
 
     with pytest.raises(ep.EyeProcessValidationError, match="NPtest"):
         se.audit_nonparametric_rasch([[1]], methods=[])
@@ -132,8 +141,12 @@ def test_importer_private_mapping_residuals(tmp_path):
     with pytest.raises(TypeError, match="DataFrame"):
         imp.validate_eye_mapping({"timestamp": "a", "x": "a", "y": "a"}, data=[])
     mapping = {
-        "timestamp": "a", "x": "b", "y": "b",
-        "nested": {"p": "a"}, "seq": ["a", "b"], "none": None,
+        "timestamp": "a",
+        "x": "b",
+        "y": "b",
+        "nested": {"p": "a"},
+        "seq": ["a", "b"],
+        "none": None,
     }
     assert imp.validate_eye_mapping(mapping, data=d) is mapping
     with pytest.raises(TypeError, match="DataFrame"):
@@ -141,17 +154,32 @@ def test_importer_private_mapping_residuals(tmp_path):
 
 
 def test_functional_pupil_plot_legacy_trajectory_and_posterior_paths():
-    legacy_features = pd.DataFrame({
-        "participant_id": ["P1", "P1"], "trial_id": ["T1", "T1"], "item_id": ["I1", "I1"],
-        "feature_name": ["b1", "b2"], "value": [1.0, 2.0]
-    })
-    legacy = SimpleNamespace(legacy=True, data={"features": legacy_features}, feature_names=["b1", "b2"])
+    legacy_features = pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1"],
+            "trial_id": ["T1", "T1"],
+            "item_id": ["I1", "I1"],
+            "feature_name": ["b1", "b2"],
+            "value": [1.0, 2.0],
+        }
+    )
+    legacy = SimpleNamespace(
+        legacy=True, data={"features": legacy_features}, feature_names=["b1", "b2"]
+    )
     ax = pf.plot_eye_functional_pupil_irt(legacy)
     assert len(ax.lines) == 1
     _close(ax)
 
-    traj = pd.DataFrame({"trial_index": [1, 1, 2], ".time": [0, 1, 0], "pupil_adjusted": [1.0, 1.2, 0.9]})
-    modern = SimpleNamespace(legacy=False, data=SimpleNamespace(data=traj), trial_coefficients=pd.DataFrame({"b1": [1.0]}), feature_names=["b1"], model=None)
+    traj = pd.DataFrame(
+        {"trial_index": [1, 1, 2], ".time": [0, 1, 0], "pupil_adjusted": [1.0, 1.2, 0.9]}
+    )
+    modern = SimpleNamespace(
+        legacy=False,
+        data=SimpleNamespace(data=traj),
+        trial_coefficients=pd.DataFrame({"b1": [1.0]}),
+        feature_names=["b1"],
+        model=None,
+    )
     ax = pf.plot_eye_functional_pupil_irt(modern, type="trajectories")
     assert len(ax.lines) == 2
     _close(ax)
@@ -165,7 +193,11 @@ def test_functional_pupil_plot_legacy_trajectory_and_posterior_paths():
     assert len(ax.lines) == 1
     _close(ax)
 
-    sens = SimpleNamespace(results=pd.DataFrame({"parameter": ["p1", "p2"], "specification": ["a", "b"], "estimate": [1.0, 2.0]}))
+    sens = SimpleNamespace(
+        results=pd.DataFrame(
+            {"parameter": ["p1", "p2"], "specification": ["a", "b"], "estimate": [1.0, 2.0]}
+        )
+    )
     ax = pf.plot_eye_functional_pupil_sensitivity(sens, parameter=["p2"])
     assert len(ax.gp3_data) == 1
     _close(ax)
@@ -173,6 +205,7 @@ def test_functional_pupil_plot_legacy_trajectory_and_posterior_paths():
 
 def test_irt_plot_empty_and_validation_branches():
     import matplotlib.pyplot as plt
+
     base_ax = plt.subplots()[1]
     assert pi._ax(base_ax) is base_ax
     assert pi._df([[1]]).shape == (1, 1)

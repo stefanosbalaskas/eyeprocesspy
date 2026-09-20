@@ -27,6 +27,7 @@ def _recovery(with_intervals: bool = False):
 
 def _close(ax):
     import matplotlib.pyplot as plt
+
     plt.close(ax.figure)
 
 
@@ -51,7 +52,12 @@ def test_irt_validation_summary_identifiability_and_mcse_residuals():
 
     with pytest.raises(ep.EyeProcessValidationError, match="coverage or mean"):
         iv.recommended_validation_replications(metric="bad")
-    assert iv.recommended_validation_replications(metric="mean", target_mcse=0.5, anticipated_sd=1, minimum=1) == 4
+    assert (
+        iv.recommended_validation_replications(
+            metric="mean", target_mcse=0.5, anticipated_sd=1, minimum=1
+        )
+        == 4
+    )
 
 
 def test_irt_sbc_failure_paths_and_ppc_stress_guards():
@@ -71,7 +77,9 @@ def test_irt_sbc_failure_paths_and_ppc_stress_guards():
     with pytest.raises(ep.EyeProcessValidationError, match="posterior_sbc_contract"):
         iv.run_posterior_sbc({}, {})
 
-    contract = iv.posterior_sbc_contract(lambda r, observed: {"truth": {"b": 0.0}, "draws": {"x": [0.1]}})
+    contract = iv.posterior_sbc_contract(
+        lambda r, observed: {"truth": {"b": 0.0}, "draws": {"x": [0.1]}}
+    )
     psbc = iv.run_posterior_sbc({}, contract, replications=1)
     assert len(psbc.failures) == 1
 
@@ -91,7 +99,8 @@ def test_irt_sbc_failure_paths_and_ppc_stress_guards():
 def test_irt_external_group_incremental_calibration_and_grade_residuals():
     # External validation exception path.
     ext = iv.external_validate_irt(
-        [1, 2], [3],
+        [1, 2],
+        [3],
         fitter=lambda train: (_ for _ in ()).throw(RuntimeError("fit failed")),
         predictor=lambda model, test: model,
         scorer=lambda test, pred: pd.DataFrame({"score": [1]}),
@@ -101,7 +110,8 @@ def test_irt_external_group_incremental_calibration_and_grade_residuals():
     # Group-out exception branch in every fold.
     data = pd.DataFrame({"site": ["a", "a", "b", "b"], "x": [1, 2, 3, 4]})
     group = iv.leave_site_out_validation(
-        data, "site",
+        data,
+        "site",
         fitter=lambda train: (_ for _ in ()).throw(RuntimeError("fit failed")),
         predictor=lambda model, test: model,
         scorer=lambda test, pred: pd.DataFrame({"score": [1]}),
@@ -110,7 +120,8 @@ def test_irt_external_group_incremental_calibration_and_grade_residuals():
 
     # Incremental-information exception branch.
     inc = iv.audit_channel_incremental_information(
-        data.rename(columns={"site": "fold"}), "fold",
+        data.rename(columns={"site": "fold"}),
+        "fold",
         baseline_fitter=lambda train: (_ for _ in ()).throw(RuntimeError("fail")),
         process_fitter=lambda train: None,
         predictor=lambda model, test: model,
@@ -145,13 +156,16 @@ def test_irt_external_group_incremental_calibration_and_grade_residuals():
         ppc=ppc,
         semantic_roundtrip=semantic,
     )
-    assert set(["sbc_screen", "ppc_extremes", "external_folds", "semantic_roundtrip"]).issubset(set(grade.checks.criterion))
+    assert set(["sbc_screen", "ppc_extremes", "external_folds", "semantic_roundtrip"]).issubset(
+        set(grade.checks.criterion)
+    )
 
 
 def test_pupil_missingness_alignment_plot_and_pattern_mixture_residuals():
     class BadFrame:
         def __iter__(self):
             raise RuntimeError("bad")
+
     with pytest.raises(ep.EyeProcessValidationError, match="coercible"):
         pm._df(BadFrame())
 
@@ -182,8 +196,10 @@ def test_pupil_missingness_alignment_plot_and_pattern_mixture_residuals():
 
     # DataFrame metric inference plus estimand TypeError fallback.
     frame = pd.DataFrame({"value": [1.0, np.nan, 3.0]})
+
     def axis_only(x, axis):
         return np.mean(x, axis=axis)
+
     sens = pm.process_pattern_mixture(frame, delta=[0], metric=None, estimand=axis_only)
     assert sens.metric == "value"
     assert len(sens.table) == 1

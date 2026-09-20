@@ -93,9 +93,7 @@ def test_measurement_simulation_information_and_validation_dispatch(monkeypatch)
     with pytest.raises(EyeProcessValidationError):
         pm.plot_eye_multimodal_simulation({"data": _frame()}, type="bad")
 
-    nonempty = pd.DataFrame(
-        {"value": [0.2], "target": ["gaze"], "metric": ["precision_gain"]}
-    )
+    nonempty = pd.DataFrame({"value": [0.2], "target": ["gaze"], "metric": ["precision_gain"]})
     ax = pm.plot_eye_process_information(nonempty)
     assert ax.get_xlabel() == "precision_gain"
     _close(ax)
@@ -146,30 +144,20 @@ def test_m2_plot_family_all_dispatch_and_fit_branches():
     _close(ax)
 
     ppc = SimpleNamespace(
-        summary=pd.DataFrame(
-            {"channel": ["rt", "gaze"], "observed_mean": [0.6, 2.0]}
-        )
+        summary=pd.DataFrame({"channel": ["rt", "gaze"], "observed_mean": [0.6, 2.0]})
     )
     _close(pm.plot_eye_multimodal_m2_ppc(ppc))
 
     info_observed = SimpleNamespace(
-        summary=pd.DataFrame(
-            {"channel": ["rt"], "observed_fraction": [0.9], "other": [1.0]}
-        )
+        summary=pd.DataFrame({"channel": ["rt"], "observed_fraction": [0.9], "other": [1.0]})
     )
     _close(pm.plot_eye_multimodal_m2_information(info_observed))
-    info_fallback = SimpleNamespace(
-        summary=pd.DataFrame({"channel": ["rt"], "score": [0.7]})
-    )
+    info_fallback = SimpleNamespace(summary=pd.DataFrame({"channel": ["rt"], "score": [0.7]}))
     _close(pm.plot_eye_multimodal_m2_information(info_fallback))
 
-    validation = SimpleNamespace(
-        checks=pd.DataFrame({"criterion": ["c"], "pass": [True]})
-    )
+    validation = SimpleNamespace(checks=pd.DataFrame({"criterion": ["c"], "pass": [True]}))
     _close(pm.plot_eye_multimodal_m2_validation(validation))
-    recovery = SimpleNamespace(
-        design=pd.DataFrame({"replicate": [1, 2], "seed": [10, 11]})
-    )
+    recovery = SimpleNamespace(design=pd.DataFrame({"replicate": [1, 2], "seed": [10, 11]}))
     _close(pm.plot_eye_multimodal_m2_recovery(recovery))
     negative = SimpleNamespace(
         diagnostics=pd.DataFrame(
@@ -255,9 +243,7 @@ def _m4_sim():
 
 def test_m4_simulation_dispatch_filter_and_invalid_type():
     sim = _m4_sim()
-    ax = pm.plot_eye_multimodal_m4_simulation(
-        sim, type="state_sequence", person="P1"
-    )
+    ax = pm.plot_eye_multimodal_m4_simulation(sim, type="state_sequence", person="P1")
     assert set(ax.gp3_data["person_id"]) == {"P1"}
     _close(ax)
     for kind in ("channel_profile", "missingness"):
@@ -274,9 +260,7 @@ def test_m4_fit_and_state_diagnostic_dispatch(monkeypatch):
             "posterior_entropy": [0.5, 0.6, 0.7],
         }
     )
-    occupancy_mean = pd.DataFrame(
-        {"state": [1, 2], "mean_probability": [0.5, 0.5]}
-    )
+    occupancy_mean = pd.DataFrame({"state": [1, 2], "mean_probability": [0.5, 0.5]})
     states = SimpleNamespace(probability=probability, occupancy=occupancy_mean)
 
     monkeypatch.setattr(pm, "multimodal_m4_state_diagnostics", lambda x: states)
@@ -319,9 +303,7 @@ def test_m4_remaining_plot_surfaces_and_information_empty_branch():
     measurement = pd.DataFrame({"channel": ["rt", "gaze"], "mean": [0.6, 2.0]})
     _close(pm.plot_eye_multimodal_m4_ppc(SimpleNamespace(measurement=measurement)))
 
-    occ_mean = pd.DataFrame(
-        {"state": [1, 2], "mean_probability": [0.45, 0.55]}
-    )
+    occ_mean = pd.DataFrame({"state": [1, 2], "mean_probability": [0.45, 0.55]})
     _close(pm.plot_eye_multimodal_m4_information(SimpleNamespace(occupancy=occ_mean)))
     occ_raw = pd.DataFrame({"state": [1, 2], "occupancy": [0.4, 0.6]})
     _close(pm.plot_eye_multimodal_m4_information(SimpleNamespace(occupancy=occ_raw)))
@@ -331,9 +313,7 @@ def test_m4_remaining_plot_surfaces_and_information_empty_branch():
     _close(ax)
 
     _close(
-        pm.plot_eye_multimodal_m4_negative_controls(
-            SimpleNamespace(controls=["shuffle", "null"])
-        )
+        pm.plot_eye_multimodal_m4_negative_controls(SimpleNamespace(controls=["shuffle", "null"]))
     )
     _close(
         pm.plot_eye_multimodal_m4_sensitivity(

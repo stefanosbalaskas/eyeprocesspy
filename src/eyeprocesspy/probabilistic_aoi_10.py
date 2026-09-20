@@ -100,11 +100,19 @@ def _aoi_columns(aois: pd.DataFrame) -> dict[str, str]:
 
 def _numeric(value: Any) -> np.ndarray:
     if isinstance(value, pd.Series):
-        return pd.to_numeric(value, errors="coerce").to_numpy(dtype=float)
-    return pd.to_numeric(
-        pd.Series(value),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+        raw = pd.to_numeric(
+            value,
+            errors="coerce",
+        ).to_numpy(dtype=float)
+    else:
+        raw = pd.to_numeric(
+            pd.Series(value),
+            errors="coerce",
+        ).to_numpy(dtype=float)
+    return np.asarray(
+        raw,
+        dtype=float,
+    )
 
 
 def _safe_mean(value: Any) -> float:
@@ -169,7 +177,10 @@ def _softmax(logits: Any) -> np.ndarray:
     totals[invalid_total] = 1.0
 
     with np.errstate(divide="ignore", invalid="ignore"):
-        return values / totals[:, None]
+        return np.asarray(
+            values / totals[:, None],
+            dtype=float,
+        )
 
 
 def _signed_rectangle_margin(
@@ -196,7 +207,14 @@ def _signed_rectangle_margin(
             ymax - y,
         ]
     )
-    return np.where(inside, inside_margin, -outside_distance)
+    return np.asarray(
+        np.where(
+            inside,
+            inside_margin,
+            -outside_distance,
+        ),
+        dtype=float,
+    )
 
 
 def _resolve_two_scale(value: Any, fallback: float) -> np.ndarray:
@@ -209,7 +227,10 @@ def _resolve_two_scale(value: Any, fallback: float) -> np.ndarray:
         return np.repeat(float(fallback), 2)
     if values.size == 1:
         return np.repeat(float(values[0]), 2)
-    return values[:2].astype(float)
+    return np.asarray(
+        values[:2],
+        dtype=float,
+    )
 
 
 def _resolve_bias(value: Any) -> np.ndarray:
@@ -222,7 +243,10 @@ def _resolve_bias(value: Any) -> np.ndarray:
         return np.zeros(2, dtype=float)
     if values.size == 1:
         return np.repeat(float(values[0]), 2)
-    return values[:2].astype(float)
+    return np.asarray(
+        values[:2],
+        dtype=float,
+    )
 
 
 def assign_aois_probabilistic(
@@ -243,7 +267,9 @@ def assign_aois_probabilistic(
         error_model = error_model[0] if error_model else "empirical"
     error_model = str(error_model)
     if error_model not in {"empirical", "gaussian", "ellipse"}:
-        raise EyeProcessValidationError("`error_model` must be 'empirical', 'gaussian', or 'ellipse'.")
+        raise EyeProcessValidationError(
+            "`error_model` must be 'empirical', 'gaussian', or 'ellipse'."
+        )
 
     x_col = x_col or _first_column(
         x,
@@ -257,7 +283,9 @@ def assign_aois_probabilistic(
     )
     missing = [column for column in (x_col, y_col) if column not in x.columns]
     if missing:
-        raise EyeProcessValidationError("`x` is missing required column(s): " + ", ".join(missing) + ".")
+        raise EyeProcessValidationError(
+            "`x` is missing required column(s): " + ", ".join(missing) + "."
+        )
 
     columns = _aoi_columns(aois)
     gx = _numeric(x[x_col])
@@ -343,7 +371,9 @@ def assign_aois_probabilistic(
 
     valid_id_cols = [column for column in requested_ids if column in x.columns]
     if valid_id_cols:
-        repeated_ids = x.loc[:, valid_id_cols].iloc[np.repeat(np.arange(len(x)), k)].reset_index(drop=True)
+        repeated_ids = (
+            x.loc[:, valid_id_cols].iloc[np.repeat(np.arange(len(x)), k)].reset_index(drop=True)
+        )
         membership = pd.concat([repeated_ids, membership], axis=1)
 
     max_index = np.argmax(probability_values, axis=1)
@@ -534,7 +564,9 @@ def _uncertain_aoi_metrics(
 
         hit_times = time[mask & np.isfinite(time)]
         values[f"ttff__{aoi}"] = (
-            float(hit_times.min() - overall_start) if hit_times.size and np.isfinite(overall_start) else np.nan
+            float(hit_times.min() - overall_start)
+            if hit_times.size and np.isfinite(overall_start)
+            else np.nan
         )
 
     values["transitions"] = float(np.sum(labels[1:] != labels[:-1]) if len(labels) > 1 else 0)
@@ -583,7 +615,10 @@ def propagate_aoi_uncertainty(
 
     for draw in range(1, draws + 1):
         sampled = np.asarray(
-            [rng.choice(labels, p=probability_values[row]) for row in range(len(probability_values))],
+            [
+                rng.choice(labels, p=probability_values[row])
+                for row in range(len(probability_values))
+            ],
             dtype=object,
         )
         values = _uncertain_aoi_metrics(
@@ -765,7 +800,9 @@ def plot_aoi_boundary_risk(x, ax=None, **kwargs):
             title="AOI separation audit",
         )
     else:
-        raise EyeProcessValidationError("`x` must be an `eye_probabilistic_aoi` or `eye_aoi_separation_audit` object.")
+        raise EyeProcessValidationError(
+            "`x` must be an `eye_probabilistic_aoi` or `eye_aoi_separation_audit` object."
+        )
 
     axis.eyeprocess_plot_data = data
     return axis
@@ -843,7 +880,10 @@ def plot_aoi_metric_uncertainty(x, ax=None, **kwargs):
             ax,
         )
 
-    values = [pd.to_numeric(draws[metric], errors="coerce").dropna().to_numpy(dtype=float) for metric in metrics]
+    values = [
+        pd.to_numeric(draws[metric], errors="coerce").dropna().to_numpy(dtype=float)
+        for metric in metrics
+    ]
     axis = _axis(ax)
     axis.boxplot(values, tick_labels=metrics)
     axis.tick_params(axis="x", rotation=90)

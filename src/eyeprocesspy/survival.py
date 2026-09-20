@@ -7,6 +7,7 @@ as a right-censored observation. A trial whose event status is unknown because
 the observation window is incomplete or gaze quality is unusable is retained as
 a review row and is never silently converted to censoring.
 """
+
 from __future__ import annotations
 
 import json
@@ -212,8 +213,7 @@ def prepare_gaze_survival_data(
             [participant_col, trial_col],
         ].head()
         raise ValueError(
-            "Duplicated participant/trial rows are not allowed: "
-            f"{dup.to_dict('records')}"
+            f"Duplicated participant/trial rows are not allowed: {dup.to_dict('records')}"
         )
     if time_unit not in {"seconds", "milliseconds"}:
         raise ValueError("time_unit must be 'seconds' or 'milliseconds'.")
@@ -307,9 +307,7 @@ def prepare_gaze_survival_data(
         else np.nan
     )
     out["valid_data_fraction"] = (
-        pd.to_numeric(d[valid_fraction_col], errors="coerce")
-        if valid_fraction_col in d
-        else np.nan
+        pd.to_numeric(d[valid_fraction_col], errors="coerce") if valid_fraction_col in d else np.nan
     )
     out["trial_duration"] = trial_duration.astype(float)
     out["censor_reason"] = "target_event_not_observed"
@@ -392,9 +390,7 @@ def prepare_gaze_survival_data(
         for _, trial in d.iterrows():
             mask = ev[event_trial_col].astype(str).eq(str(trial[trial_col]))
             if event_key_mode == "participant_trial":
-                mask &= ev[event_participant_col].astype(str).eq(
-                    str(trial[participant_col])
-                )
+                mask &= ev[event_participant_col].astype(str).eq(str(trial[participant_col]))
             elif event_key_mode == "recording_trial":
                 mask &= ev[event_recording_col].astype(str).eq(str(trial[recording_col]))
             q = ev[mask].copy()
@@ -409,9 +405,7 @@ def prepare_gaze_survival_data(
             if absolute_event_time is None:
                 event_times.append(None)
             else:
-                event_times.append(
-                    absolute_event_time * scale - float(origins.loc[trial.name])
-                )
+                event_times.append(absolute_event_time * scale - float(origins.loc[trial.name]))
         out["event_time"] = pd.Series(event_times, index=d.index, dtype=float)
         observed = out["event_time"].notna() & complete_window
         out.loc[complete_window, "event_observed"] = observed[complete_window].astype(int)
@@ -426,18 +420,17 @@ def prepare_gaze_survival_data(
         if not observed.dropna().isin([0, 1]).all():
             raise ValueError("event_observed must contain only 0/1 (plus NA).")
         if supplied_event_time_col in d:
-            out["event_time"] = (
-                pd.to_numeric(d[supplied_event_time_col], errors="coerce") * scale
-            )
+            out["event_time"] = pd.to_numeric(d[supplied_event_time_col], errors="coerce") * scale
         out["event_observed"] = observed.astype(float)
-        out.loc[out["event_observed"].eq(1), "censor_reason"] = "event_observed"
+        out.loc[
+            out["event_observed"].eq(1) & complete_window,
+            "censor_reason",
+        ] = "event_observed"
         out.loc[~complete_window, "event_observed"] = np.nan
 
     out.loc[~complete_window, "analysis_eligible"] = False
     out.loc[~complete_window, "review_required"] = True
-    incomplete_reason = ~complete_window & out["censor_reason"].eq(
-        "target_event_not_observed"
-    )
+    incomplete_reason = ~complete_window & out["censor_reason"].eq("target_event_not_observed")
     out.loc[incomplete_reason, "censor_reason"] = "incomplete_observation_window"
     out["analysis_time"] = np.where(
         out["event_observed"].eq(1),
@@ -472,25 +465,19 @@ def prepare_gaze_survival_data(
     issues = validate_gaze_survival_data(out, raise_on_error=False)
     errors = issues[issues["severity"].eq("error")]
     if not errors.empty:
-        raise ValueError(
-            "Invalid gaze survival data: " + "; ".join(errors["message"].tolist())
-        )
+        raise ValueError("Invalid gaze survival data: " + "; ".join(errors["message"].tolist()))
     for message in issues.loc[issues["severity"].eq("warning"), "message"]:
         warnings.warn(message, RuntimeWarning, stacklevel=2)
     return out.reset_index(drop=True)
 
 
-def validate_gaze_survival_data(
-    data: pd.DataFrame, *, raise_on_error: bool = True
-) -> pd.DataFrame:
+def validate_gaze_survival_data(data: pd.DataFrame, *, raise_on_error: bool = True) -> pd.DataFrame:
     """Validate canonical gaze-survival rows without modifying them."""
     d = _as_dataframe(data, "data")
     issues: list[dict[str, Any]] = []
 
     def add(severity: str, code: str, message: str, n: int = 0) -> None:
-        issues.append(
-            {"severity": severity, "code": code, "n": int(n), "message": message}
-        )
+        issues.append({"severity": severity, "code": code, "n": int(n), "message": message})
 
     missing = [column for column in CANONICAL_GAZE_SURVIVAL_COLUMNS if column not in d]
     if missing:
@@ -522,12 +509,7 @@ def validate_gaze_survival_data(
         censor_time = pd.to_numeric(d["censor_time"], errors="coerce")
         event_time = pd.to_numeric(d["event_time"], errors="coerce")
         trial_duration = pd.to_numeric(d["trial_duration"], errors="coerce")
-        negative = (
-            analysis_time.lt(0)
-            | censor_time.lt(0)
-            | event_time.lt(0)
-            | trial_duration.lt(0)
-        )
+        negative = analysis_time.lt(0) | censor_time.lt(0) | event_time.lt(0) | trial_duration.lt(0)
         if negative.fillna(False).any():
             add(
                 "error",
@@ -641,9 +623,7 @@ def validate_gaze_survival_data(
 
     out = pd.DataFrame(issues, columns=["severity", "code", "n", "message"])
     if raise_on_error and not out.empty and out["severity"].eq("error").any():
-        raise ValueError(
-            "; ".join(out.loc[out["severity"].eq("error"), "message"].tolist())
-        )
+        raise ValueError("; ".join(out.loc[out["severity"].eq("error"), "message"].tolist()))
     return out
 
 
@@ -673,7 +653,8 @@ def summarise_gaze_censoring(
     for group in groups:
         if group not in d:
             raise ValueError(f"Grouping column {group!r} is absent.")
-    iterator = [((), d)] if not groups else d.groupby(groups, dropna=False, sort=True)
+    grouper = groups[0] if len(groups) == 1 else groups
+    iterator = [((), d)] if not groups else d.groupby(grouper, dropna=False, sort=True)
     rows: list[dict[str, Any]] = []
     for key, z in iterator:
         if groups and not isinstance(key, tuple):
@@ -689,9 +670,7 @@ def summarise_gaze_censoring(
                 "n_censored": int(observed.eq(0).sum()),
                 "n_review_required": int(observed.isna().sum()),
                 "censoring_fraction": (
-                    float(observed.eq(0).sum() / analyzable.sum())
-                    if analyzable.sum()
-                    else np.nan
+                    float(observed.eq(0).sum() / analyzable.sum()) if analyzable.sum() else np.nan
                 ),
             }
         )
@@ -771,14 +750,10 @@ def _base_provenance(
         "quality_rules",
         "time_origin",
     ]
-    provenance = {
-        field: sorted(set(data[field].dropna().astype(str)))
-        for field in fields
-        if field in data
+    provenance: dict[str, Any] = {
+        field: sorted(set(data[field].dropna().astype(str))) for field in fields if field in data
     }
-    provenance.update(
-        {"model_specification": model_specification, "estimator": estimator}
-    )
+    provenance.update({"model_specification": model_specification, "estimator": estimator})
     return _provenance(**provenance)
 
 
@@ -822,9 +797,7 @@ def fit_gaze_cox_model(
     if convergence_messages:
         raise RuntimeError("Cox convergence failure: " + " | ".join(convergence_messages))
     for caught_warning in caught:
-        warnings.warn(
-            str(caught_warning.message), caught_warning.category, stacklevel=2
-        )
+        warnings.warn(str(caught_warning.message), caught_warning.category, stacklevel=2)
     return GazeSurvivalFit(
         model_family="cox",
         backend="statsmodels.PHReg",
@@ -853,9 +826,7 @@ def fit_gaze_mixed_cox_model(
     fails explicitly; R eyeprocess provides the frailty implementation.
     """
     if structure is None:
-        raise ValueError(
-            "structure must be specified explicitly as 'cluster_robust' or 'frailty'."
-        )
+        raise ValueError("structure must be specified explicitly as 'cluster_robust' or 'frailty'.")
     if structure == "frailty":
         raise NotImplementedError(
             "A participant-level latent frailty Cox estimator is not available "
@@ -864,9 +835,7 @@ def fit_gaze_mixed_cox_model(
         )
     if structure != "cluster_robust":
         raise ValueError("structure must be 'cluster_robust' or 'frailty'.")
-    fit = fit_gaze_cox_model(
-        data, formula, ties=ties, cluster=participant_col
-    )
+    fit = fit_gaze_cox_model(data, formula, ties=ties, cluster=participant_col)
     fit.model_family = "cox_repeated"
     fit.participant_col = participant_col
     return fit
@@ -888,9 +857,7 @@ def fit_gaze_aft_model(
     d = _analysis_rows(data)
     _require_optional("lifelines", "for parametric AFT regression")
     if distribution is None:
-        raise ValueError(
-            "distribution must be specified explicitly as 'weibull' or 'lognormal'."
-        )
+        raise ValueError("distribution must be specified explicitly as 'weibull' or 'lognormal'.")
     distribution = distribution.lower().replace("-", "")
     if distribution not in {"weibull", "lognormal"}:
         raise ValueError("distribution must be 'weibull' or 'lognormal'.")
@@ -934,9 +901,7 @@ def fit_gaze_aft_model(
     if convergence_messages:
         raise RuntimeError("AFT convergence failure: " + " | ".join(convergence_messages))
     for caught_warning in caught:
-        warnings.warn(
-            str(caught_warning.message), caught_warning.category, stacklevel=2
-        )
+        warnings.warn(str(caught_warning.message), caught_warning.category, stacklevel=2)
 
     if not np.isfinite(float(result.log_likelihood_)):
         raise RuntimeError("AFT convergence failure: non-finite log-likelihood.")
@@ -964,9 +929,7 @@ def fit_gaze_aft_model(
     )
 
 
-def tidy_gaze_survival_model(
-    fit: GazeSurvivalFit, *, conf_level: float = 0.95
-) -> pd.DataFrame:
+def tidy_gaze_survival_model(fit: GazeSurvivalFit, *, conf_level: float = 0.95) -> pd.DataFrame:
     """Return exponentiated Cox hazard ratios or AFT time ratios."""
     if not 0 < conf_level < 1:
         raise ValueError("conf_level must be between 0 and 1.")
@@ -1007,9 +970,7 @@ def tidy_gaze_survival_model(
     )
 
 
-def check_gaze_proportional_hazards(
-    fit: GazeSurvivalFit, *, alpha: float = 0.05
-) -> pd.DataFrame:
+def check_gaze_proportional_hazards(fit: GazeSurvivalFit, *, alpha: float = 0.05) -> pd.DataFrame:
     """Evaluate Cox PH using Schoenfeld-residual time trends.
 
     This is a scientific-contract analogue to ``survival::cox.zph``; exact
@@ -1140,9 +1101,7 @@ def predict_gaze_survival(
         _require_optional("patsy", "to build survival-model design matrices")
         import patsy
 
-        design = patsy.build_design_matrices(
-            [fit.design_info], new, return_type="dataframe"
-        )[0]
+        design = patsy.build_design_matrices([fit.design_info], new, return_type="dataframe")[0]
         if "Intercept" in design:
             design = design.drop(columns="Intercept")
         linear_predictor = design.to_numpy(float) @ np.asarray(fit.result.params)
@@ -1215,9 +1174,7 @@ def estimate_gaze_latency_quantiles(
         _require_optional("patsy", "to build survival-model design matrices")
         import patsy
 
-        design = patsy.build_design_matrices(
-            [fit.design_info], new, return_type="dataframe"
-        )[0]
+        design = patsy.build_design_matrices([fit.design_info], new, return_type="dataframe")[0]
         if "Intercept" in design:
             design = design.drop(columns="Intercept")
         baseline = _cox_baseline(fit)
@@ -1235,9 +1192,7 @@ def estimate_gaze_latency_quantiles(
                 )
     elif fit.model_family.startswith("aft"):
         for probability in probabilities:
-            predicted = fit.result.predict_percentile(
-                new, p=1 - float(probability)
-            )
+            predicted = fit.result.predict_percentile(new, p=1 - float(probability))
             values = np.asarray(predicted, dtype=float).reshape(-1)
             if len(values) != len(new):
                 raise RuntimeError("Unexpected lifelines AFT quantile contract.")
@@ -1258,9 +1213,7 @@ def _require_plotting() -> None:
     _require_optional("matplotlib", "to plot gaze-survival results")
 
 
-def plot_gaze_survival_curve(
-    data: pd.DataFrame, *, group: str | None = None, ax=None
-):
+def plot_gaze_survival_curve(data: pd.DataFrame, *, group: str | None = None, ax=None):
     """Plot Kaplan-Meier gaze-survival curves."""
     _require_plotting()
     import matplotlib.pyplot as plt
@@ -1281,9 +1234,7 @@ def plot_gaze_survival_curve(
     return ax
 
 
-def plot_gaze_cumulative_incidence(
-    data: pd.DataFrame, *, group: str | None = None, ax=None
-):
+def plot_gaze_cumulative_incidence(data: pd.DataFrame, *, group: str | None = None, ax=None):
     """Plot 1-KM for one target-event definition.
 
     This is not a competing-risks cumulative-incidence estimator.
@@ -1323,8 +1274,7 @@ def plot_gaze_hazard(data: pd.DataFrame, *, group: str | None = None, ax=None):
         event = z["event_observed"].to_numpy(int)
         points = np.sort(np.unique(time[event == 1]))
         increments = [
-            np.sum((time == point) & (event == 1)) / np.sum(time >= point)
-            for point in points
+            np.sum((time == point) & (event == 1)) / np.sum(time >= point) for point in points
         ]
         ax.step(points, increments, where="mid", label=str(label))
     ax.set(xlabel="Latency", ylabel="Nelson-Aalen hazard increment")
@@ -1374,9 +1324,7 @@ def compare_gaze_survival_specifications(
     thresholds, or quality rules. No estimator is selected implicitly.
     """
     if not isinstance(specifications, Mapping) or not specifications:
-        raise ValueError(
-            "specifications must be a non-empty mapping of name -> survival table."
-        )
+        raise ValueError("specifications must be a non-empty mapping of name -> survival table.")
     families = list(model_families)
     allowed = {"cox", "cox_cluster_robust", "aft_weibull", "aft_lognormal"}
     if not families or any(family not in allowed for family in families):
@@ -1410,23 +1358,24 @@ def compare_gaze_survival_specifications(
             tidy["n_observed_events"] = int(censoring["n_observed_events"])
             tidy["n_censored"] = int(censoring["n_censored"])
             tidy["censoring_fraction"] = float(censoring["censoring_fraction"])
-            for field_name in (
-                "event_detector",
-                "aoi_specification",
-                "quality_rules",
-                "preprocessing_specification",
-                "time_origin",
-            ):
-                if field_name in d:
-                    values = sorted(set(d[field_name].dropna().astype(str)))
-                    tidy[field_name] = " | ".join(values)
+            provenance_fields = d.columns.intersection(
+                [
+                    "event_detector",
+                    "aoi_specification",
+                    "quality_rules",
+                    "preprocessing_specification",
+                    "time_origin",
+                ],
+                sort=False,
+            )
+            for field_name in provenance_fields:
+                values = sorted(set(d[field_name].dropna().astype(str)))
+                tidy[field_name] = " | ".join(values)
             rows.append(tidy)
     return pd.concat(rows, ignore_index=True)
 
 
-def report_gaze_survival_model(
-    fit: GazeSurvivalFit, *, conf_level: float = 0.95
-) -> dict[str, Any]:
+def report_gaze_survival_model(fit: GazeSurvivalFit, *, conf_level: float = 0.95) -> dict[str, Any]:
     """Create a concise manuscript-ready reporting bundle."""
     d = fit.data
     censoring = summarise_gaze_censoring(d).iloc[0].to_dict()
@@ -1435,9 +1384,7 @@ def report_gaze_survival_model(
     if fit.model_family.startswith("cox"):
         ph = check_gaze_proportional_hazards(fit)
         diagnostic = (
-            "flagged PH time trend"
-            if ph["ph_flag"].any()
-            else "no PH time-trend flag at alpha=.05"
+            "flagged PH time trend" if ph["ph_flag"].any() else "no PH time-trend flag at alpha=.05"
         )
     return {
         "N_participants": int(d[fit.participant_col].nunique()),
@@ -1452,9 +1399,7 @@ def report_gaze_survival_model(
         "model_formula": fit.formula,
         "model_family": fit.model_family,
         "backend": fit.backend,
-        "effect_measure": (
-            "hazard ratio" if fit.model_family.startswith("cox") else "time ratio"
-        ),
+        "effect_measure": ("hazard ratio" if fit.model_family.startswith("cox") else "time ratio"),
         "effects": effects,
         "random_or_frailty_structure": fit.repeated_structure,
         "diagnostic_result": diagnostic,
@@ -1473,9 +1418,7 @@ def simulate_gaze_survival_inputs(
     if kind not in {"disclosure", "verification"}:
         raise ValueError("kind must be 'disclosure' or 'verification'.")
     if n_participants < 1 or trials_per_participant < 1:
-        raise ValueError(
-            "n_participants and trials_per_participant must be positive integers."
-        )
+        raise ValueError("n_participants and trials_per_participant must be positive integers.")
     rng = np.random.default_rng(seed)
     conditions = (
         ["control", "minimal_disclosure", "detailed_disclosure"]
@@ -1499,17 +1442,10 @@ def simulate_gaze_survival_inputs(
         participant_shift = rng.normal(0, 0.25)
         for trial_index in range(trials_per_participant):
             trial = f"{participant}_T{trial_index + 1:02d}"
-            condition = conditions[
-                (participant_index + trial_index) % len(conditions)
-            ]
+            condition = conditions[(participant_index + trial_index) % len(conditions)]
             trial_duration = 4.0
             latent = float(
-                np.exp(
-                    0.8
-                    + shifts[condition]
-                    + participant_shift
-                    + rng.normal(0, 0.45)
-                )
+                np.exp(0.8 + shifts[condition] + participant_shift + rng.normal(0, 0.45))
             )
             target_observed = latent <= trial_duration
             trial_rows.append(

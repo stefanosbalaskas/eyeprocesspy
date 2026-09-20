@@ -15,8 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
       - name: Sync release environment
-        run: uv sync --extra dev --extra arrow
+        run: uv sync --frozen --extra dev
       - name: Verify tag matches package version
         if: github.ref_type == 'tag'
         run: |
@@ -37,29 +39,64 @@ jobs:
           print('release version:', version)
           PY
       - name: Ruff
-        run: uv run ruff check src tests
+        run: uv run --frozen ruff check .
+      - name: Mypy
+        run: uv run --frozen mypy src/eyeprocesspy
       - name: Full tests and 100% branch coverage
-        run: uv run pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100
+        run: uv run --frozen pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100
       - name: Deep parity release gate
-        run: uv run python tools/deep_parity_audit.py --release-gate
+        run: uv run --frozen python tools/deep_parity_audit.py --release-gate
       - name: Public API documentation gate
-        run: uv run python tools/api_documentation_audit.py
+        run: uv run --frozen python tools/api_documentation_audit.py
       - name: Build documentation strictly
-        run: uv run mkdocs build --strict
+        run: uv run --frozen mkdocs build --strict
+      - name: Audit published dependencies
+        run: uvx pip-audit --strict .
       - name: Build distributions
-        run: uv build
+        run: uv build --no-sources
       - name: Validate distributions
-        run: uv run python -m twine check dist/*
+        run: uv run --frozen python -m twine check --strict dist/*
       - name: Clean wheel install smoke
         run: |
           python -m venv wheelcheck
           wheelcheck/bin/pip install dist/*.whl
+          wheelcheck/bin/pip check
           wheelcheck/bin/python - <<'PY'
           import eyeprocesspy as ep
-          assert ep.__version__ == '0.1.0'
+          import tomllib
+          from pathlib import Path
+          expected_version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          assert ep.__version__ == expected_version
           assert ep.__r_reference_version__ == '0.11.1'
           print(ep.__version__, ep.__r_reference_version__)
           PY
+      - name: Clean sdist install smoke
+        run: |
+          python -m venv sdistcheck
+          sdistcheck/bin/pip install dist/*.tar.gz
+          sdistcheck/bin/pip check
+          sdistcheck/bin/python - <<'PY'
+          import eyeprocesspy as ep
+          import tomllib
+          from pathlib import Path
+          expected_version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          assert ep.__version__ == expected_version
+          assert ep.__r_reference_version__ == '0.11.1'
+          print(ep.__version__, ep.__r_reference_version__)
+          PY
+      - name: Generate SHA-256 release evidence
+        shell: bash
+        run: |
+          mkdir -p release-evidence
+          sha256sum dist/* > release-evidence/SHA256SUMS.txt
+          cat release-evidence/SHA256SUMS.txt
+      - name: Upload release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence
+          path: release-evidence/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
@@ -119,11 +156,16 @@ jobs:
         with:
           name: python-distributions
           path: dist
+      - name: Download release evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: release-evidence
+          path: release-evidence
       - name: Create GitHub release after all publication gates pass
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" dist/* \
+          gh release create "${GITHUB_REF_NAME}" dist/* release-evidence/SHA256SUMS.txt \
             --repo "${GITHUB_REPOSITORY}" \
             --verify-tag \
             --generate-notes \

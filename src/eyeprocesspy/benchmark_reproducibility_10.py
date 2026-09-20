@@ -4,9 +4,9 @@ import hashlib
 import platform
 import shutil
 import sys
-from datetime import datetime, timezone
+from collections.abc import Iterable, Mapping
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable, Mapping
 
 import numpy as np
 import pandas as pd
@@ -100,13 +100,19 @@ def _normalise_csv_types(frame: pd.DataFrame) -> pd.DataFrame:
     out = frame.copy()
     for column in out.columns:
         series = out[column]
-        if not (pd.api.types.is_object_dtype(series.dtype) or pd.api.types.is_string_dtype(series.dtype)):
+        if not (
+            pd.api.types.is_object_dtype(series.dtype) or pd.api.types.is_string_dtype(series.dtype)
+        ):
             continue
         observed = series.dropna().astype(str).str.strip().str.lower()
         if observed.empty or not bool(observed.isin(["true", "false"]).all()):
             continue
         mapped = series.map(
-            lambda value: pd.NA if pd.isna(value) or not str(value).strip() else str(value).strip().lower() == "true"
+            lambda value: (
+                pd.NA
+                if pd.isna(value) or not str(value).strip()
+                else str(value).strip().lower() == "true"
+            )
         )
         if not bool(mapped.isna().any()):
             out[column] = mapped.astype(bool)
@@ -174,7 +180,8 @@ def import_benchmark_study(
     """Import benchmark tables, preferring the canonical EyeDataset constructor when compatible."""
     benchmark = _coerce_study(study)
     tables = {
-        str(name): read_benchmark_table(benchmark, str(name)) for name in benchmark["manifest"]["table"].astype(str)
+        str(name): read_benchmark_table(benchmark, str(name))
+        for name in benchmark["manifest"]["table"].astype(str)
     }
     try:
         from .dataset import new_eye_dataset
@@ -219,7 +226,8 @@ def validate_benchmark_study(
     relations: list[dict[str, object]] = []
     if not files.empty and bool(files["exists"].all()):
         data = {
-            str(name): read_benchmark_table(benchmark, str(name)) for name in benchmark["manifest"]["table"].astype(str)
+            str(name): read_benchmark_table(benchmark, str(name))
+            for name in benchmark["manifest"]["table"].astype(str)
         }
         participants = set(data["participants"]["participant_id"].astype(str))
         items = set(data["items"]["item_id"].astype(str))
@@ -309,13 +317,17 @@ def run_benchmark_reproduction(
     quality = read_benchmark_table(benchmark, "quality")
     aoi = read_benchmark_table(benchmark, "aoi_definitions")
     if not pd.api.types.is_bool_dtype(gaze["valid"].dtype) or bool(gaze["valid"].isna().any()):
-        raise EyeProcessValidationError("Benchmark `gaze_samples.valid` must be complete logical data.")
+        raise EyeProcessValidationError(
+            "Benchmark `gaze_samples.valid` must be complete logical data."
+        )
     outputs = {
         "participants": float(responses["participant_id"].nunique()),
         "items": float(responses["item_id"].nunique()),
         "trials": float(len(responses)),
         "accuracy": float(pd.to_numeric(responses["score"], errors="coerce").mean()),
-        "mean_response_time": float(pd.to_numeric(responses["response_time"], errors="coerce").mean()),
+        "mean_response_time": float(
+            pd.to_numeric(responses["response_time"], errors="coerce").mean()
+        ),
         "gaze_samples": float(len(gaze)),
         "pupil_samples": float(len(pupil)),
         "valid_gaze_fraction": float(gaze["valid"].mean()),
@@ -327,7 +339,9 @@ def run_benchmark_reproduction(
     expected = benchmark_expected_outputs(benchmark).copy()
     comparison = observed.merge(expected, on="metric", how="left", validate="one_to_one")
     if bool(comparison[["expected", "tolerance"]].isna().any().any()):
-        raise EyeProcessValidationError("Benchmark expected-output metrics and observations must match completely.")
+        raise EyeProcessValidationError(
+            "Benchmark expected-output metrics and observations must match completely."
+        )
     comparison["absolute_error"] = (comparison["observed"] - comparison["expected"]).abs()
     comparison["passed"] = comparison["absolute_error"] <= comparison["tolerance"]
     return EyeBenchmarkReproduction(
@@ -368,7 +382,9 @@ def write_benchmark_data_dictionary(
             ]
         )
         for column in frame.columns:
-            lines.append(f"| `{column}` | {frame[column].dtype} | {int(frame[column].isna().sum())} |")
+            lines.append(
+                f"| `{column}` | {frame[column].dtype} | {int(frame[column].isna().sum())} |"
+            )
         lines.append("")
     output.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     return str(output)
@@ -427,14 +443,16 @@ def package_reproducibility_manifest(
             pass
     return EyeReproducibilityManifest(
         files=frame,
-        created_utc=datetime.now(timezone.utc).isoformat(),
+        created_utc=datetime.now(UTC).isoformat(),
         python=sys.version.replace("\n", " "),
         platform=platform.platform(),
         session=session,
     )
 
 
-def verify_reproducibility_manifest(manifest: EyeReproducibilityManifest | Mapping[str, object]) -> pd.DataFrame:
+def verify_reproducibility_manifest(
+    manifest: EyeReproducibilityManifest | Mapping[str, object],
+) -> pd.DataFrame:
     """Verify that every file recorded in a reproducibility manifest is unchanged."""
     if not isinstance(manifest, Mapping) or "files" not in manifest:
         raise TypeError("`manifest` must be an eye reproducibility manifest.")
@@ -455,7 +473,9 @@ def verify_reproducibility_manifest(manifest: EyeReproducibilityManifest | Mappi
                 "unchanged": bool(exists and current_md5 == str(row.md5)),
             }
         )
-    return pd.DataFrame(rows, columns=["path", "exists", "expected_md5", "current_md5", "unchanged"])
+    return pd.DataFrame(
+        rows, columns=["path", "exists", "expected_md5", "current_md5", "unchanged"]
+    )
 
 
 def write_software_paper_reproduction(
@@ -467,7 +487,9 @@ def write_software_paper_reproduction(
     benchmark = _coerce_study(study)
     output = Path(directory).expanduser().resolve()
     if output.exists() and any(output.iterdir()) and not overwrite:
-        raise EyeProcessValidationError("`directory` is non-empty; use `overwrite=True` to replace generated files.")
+        raise EyeProcessValidationError(
+            "`directory` is non-empty; use `overwrite=True` to replace generated files."
+        )
     data_dir = output / "data"
     results_dir = output / "results"
     scripts_dir = output / "scripts"

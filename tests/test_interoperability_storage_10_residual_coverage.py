@@ -242,9 +242,7 @@ def test_arrow_table_conversion_guard(monkeypatch):
         def from_pandas(*args, **kwargs):
             raise TypeError("cannot convert")
 
-    monkeypatch.setattr(
-        mod, "_require_pyarrow", lambda: (SimpleNamespace(Table=Table), None, None)
-    )
+    monkeypatch.setattr(mod, "_require_pyarrow", lambda: (SimpleNamespace(Table=Table), None, None))
     with pytest.raises(ep.EyeProcessBackendError, match="could not be converted"):
         mod._arrow_table(pd.DataFrame({"x": [object()]}))
 
@@ -333,9 +331,7 @@ def test_collect_storage_from_path_and_subset(tmp_path):
         tables=["recordings", "gaze_samples"],
         overwrite=True,
     )
-    out = mod.collect_eye_storage(
-        root, tables=["recordings", "gaze_samples", "absent"]
-    )
+    out = mod.collect_eye_storage(root, tables=["recordings", "gaze_samples", "absent"])
     assert len(out["recordings"]) == 1
     assert len(out["gaze_samples"]) == 3
 
@@ -399,9 +395,7 @@ def test_export_bids_output_guards_and_collision(tmp_path):
     rec2 = x["recordings"].iloc[0].copy()
     rec2["recording_id"] = "R2"
     rec2["participant_id"] = "P01"
-    x["recordings"] = pd.concat(
-        [x["recordings"], pd.DataFrame([rec2])], ignore_index=True
-    )
+    x["recordings"] = pd.concat([x["recordings"], pd.DataFrame([rec2])], ignore_index=True)
     with pytest.raises(ValueError, match="collide"):
         mod.export_eye_bids(x, tmp_path / "collision", overwrite=True)
 
@@ -523,9 +517,7 @@ def test_import_bids_without_pupil_and_event_validation(tmp_path):
     root = tmp_path / "events_bad"
     physio = _write_physio(root)
     event = physio.parent / "sub-P01_task-read_run-01_events.tsv"
-    pd.DataFrame({"onset": [0.0], "trial_type": ["start"]}).to_csv(
-        event, sep="\t", index=False
-    )
+    pd.DataFrame({"onset": [0.0], "trial_type": ["start"]}).to_csv(event, sep="\t", index=False)
     with pytest.raises(ValueError, match="lacks onset/duration/trial_type"):
         mod.import_eye_bids(root)
 
@@ -534,14 +526,14 @@ def test_import_bids_skips_unmatched_events_and_accepts_no_value(tmp_path):
     root = tmp_path / "events"
     physio = _write_physio(root)
     unmatched = physio.parent / "sub-P01_task-other_run-99_events.tsv"
-    pd.DataFrame(
-        {"onset": [0.0], "duration": [0.0], "trial_type": ["ignored"]}
-    ).to_csv(unmatched, sep="\t", index=False)
+    pd.DataFrame({"onset": [0.0], "duration": [0.0], "trial_type": ["ignored"]}).to_csv(
+        unmatched, sep="\t", index=False
+    )
 
     matching = physio.parent / "sub-P01_task-read_run-01_events.tsv"
-    pd.DataFrame(
-        {"onset": [0.0], "duration": [0.0], "trial_type": ["start"]}
-    ).to_csv(matching, sep="\t", index=False)
+    pd.DataFrame({"onset": [0.0], "duration": [0.0], "trial_type": ["start"]}).to_csv(
+        matching, sep="\t", index=False
+    )
 
     out = mod.import_eye_bids(root)
     assert len(out["eye_samples"]) == 0

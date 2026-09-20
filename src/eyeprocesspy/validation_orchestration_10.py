@@ -16,10 +16,11 @@ import sys
 import tempfile
 import time
 import warnings
-from datetime import datetime, timezone
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from statistics import NormalDist
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -85,7 +86,7 @@ def _stop(message: str) -> None:
 
 
 def _now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 def _scalar_int(value: Any, name: str, minimum: int = 0) -> int:
@@ -116,7 +117,12 @@ def _scalar_num(
         numeric = float(value)
     except (TypeError, ValueError, OverflowError) as exc:
         raise EyeProcessValidationError(f"`{name}` is outside its allowed range.") from exc
-    if math.isnan(numeric) or (finite and not math.isfinite(numeric)) or numeric < minimum or numeric > maximum:
+    if (
+        math.isnan(numeric)
+        or (finite and not math.isfinite(numeric))
+        or numeric < minimum
+        or numeric > maximum
+    ):
         _stop(f"`{name}` is outside its allowed range.")
     return numeric
 
@@ -208,9 +214,9 @@ def _as_levels(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     if isinstance(value, np.ndarray):
-        return value.tolist()
+        return list(value.tolist())
     if isinstance(value, Sequence):
         return list(value)
     return [value]
@@ -257,7 +263,10 @@ def _serialize(value: Any) -> Any:
         return {
             "__eye_type__": "dataframe",
             "columns": [str(column) for column in value.columns],
-            "data": [[_serialize(item) for item in row] for row in value.itertuples(index=False, name=None)],
+            "data": [
+                [_serialize(item) for item in row]
+                for row in value.itertuples(index=False, name=None)
+            ],
         }
     if isinstance(value, pd.Series):
         return {
@@ -353,7 +362,9 @@ def _plan_fingerprint(
     model_family: str,
     base_seed: int,
 ) -> str:
-    stable = jobs.drop(columns=[column for column in ("status", "attempt") if column in jobs.columns])
+    stable = jobs.drop(
+        columns=[column for column in ("status", "attempt") if column in jobs.columns]
+    )
     return _object_fingerprint(
         {
             "model_family": model_family,
@@ -594,7 +605,9 @@ def split_validation_plan(plan, chunks=None):
                 if key != "manifest_path"
             }
         )
-        copy["jobs"] = plan["jobs"].loc[plan["jobs"]["chunk_id"].astype(str).eq(chunk)].reset_index(drop=True)
+        copy["jobs"] = (
+            plan["jobs"].loc[plan["jobs"]["chunk_id"].astype(str).eq(chunk)].reset_index(drop=True)
+        )
         copy["metadata"] = dict(plan["metadata"])
         copy["metadata"]["parent_plan_id"] = plan["plan_id"]
         copy["metadata"]["selected_chunk"] = chunk
@@ -629,7 +642,10 @@ def _call_supported(function, positional=(), named=None):
         signature = inspect.signature(function)
     except (TypeError, ValueError):
         return function(*positional, **named)
-    if any(parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in signature.parameters.values()):
+    if any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    ):
         return function(*positional, **named)
     allowed = {
         name
@@ -742,9 +758,17 @@ def _standardize_estimates(
     )
     z_value = NormalDist().inv_cdf(1 - (1 - confidence) / 2)
     if "lower" not in output:
-        output["lower"] = output[lower_alias] if lower_alias else output["estimate"] - z_value * output["std_error"]
+        output["lower"] = (
+            output[lower_alias]
+            if lower_alias
+            else output["estimate"] - z_value * output["std_error"]
+        )
     if "upper" not in output:
-        output["upper"] = output[upper_alias] if upper_alias else output["estimate"] + z_value * output["std_error"]
+        output["upper"] = (
+            output[upper_alias]
+            if upper_alias
+            else output["estimate"] + z_value * output["std_error"]
+        )
     output["lower"] = pd.to_numeric(output["lower"], errors="coerce")
     output["upper"] = pd.to_numeric(output["upper"], errors="coerce")
 
@@ -762,7 +786,9 @@ def _standardize_estimates(
         output["bias"] / output["truth"],
         np.nan,
     )
-    finite_interval = np.isfinite(output["lower"]) & np.isfinite(output["upper"]) & np.isfinite(output["truth"])
+    finite_interval = (
+        np.isfinite(output["lower"]) & np.isfinite(output["upper"]) & np.isfinite(output["truth"])
+    )
     output["covered"] = pd.Series(pd.NA, index=output.index, dtype="boolean")
     output.loc[finite_interval, "covered"] = (
         output.loc[finite_interval, "lower"] <= output.loc[finite_interval, "truth"]
@@ -841,11 +867,11 @@ def _job_result(
         "stage": stage,
         "started_utc": datetime.fromtimestamp(
             started,
-            tz=timezone.utc,
+            tz=UTC,
         ).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "ended_utc": datetime.fromtimestamp(
             ended,
-            tz=timezone.utc,
+            tz=UTC,
         ).strftime("%Y-%m-%d %H:%M:%S UTC"),
         "elapsed_seconds": float(ended - started),
         "warnings": list(dict.fromkeys(warning_messages or [])),
@@ -962,7 +988,9 @@ def _run_job_core(
                 started,
                 warning_messages=warning_messages,
                 messages=messages,
-                error=(f"Fit object size {fit_mb:.2f} MB exceeds the configured {memory_limit_mb:.2f} MB limit."),
+                error=(
+                    f"Fit object size {fit_mb:.2f} MB exceeds the configured {memory_limit_mb:.2f} MB limit."
+                ),
             )
 
     try:
@@ -1196,25 +1224,25 @@ def _run_and_checkpoint(
 def _backend(backend: Any, workers: int) -> str:
     if isinstance(backend, (list, tuple)):
         backend = backend[0]
-    backend = str(backend)
-    if backend not in {"auto", "sequential", "future"}:
+    selected = str(backend)
+    if selected not in {"auto", "sequential", "future"}:
         _stop("`backend` must be auto, sequential, or future.")
-    if backend == "auto":
+    if selected == "auto":
         return "future" if workers > 1 else "sequential"
-    return backend
+    return selected
 
 
 def _isolation(isolation: Any, timeout_seconds: float) -> str:
     if isinstance(isolation, (list, tuple)):
         isolation = isolation[0]
-    isolation = str(isolation)
-    if isolation not in {"auto", "in_process", "callr"}:
+    selected = str(isolation)
+    if selected not in {"auto", "in_process", "callr"}:
         _stop("`isolation` must be auto, in_process, or callr.")
-    if isolation == "auto":
+    if selected == "auto":
         if math.isfinite(timeout_seconds):
             return "callr"
         return "in_process"
-    return isolation
+    return selected
 
 
 def _status_table(output_dir: Path, plan: EyeValidationJobPlan) -> None:
@@ -1232,7 +1260,12 @@ def _status_table(output_dir: Path, plan: EyeValidationJobPlan) -> None:
     status = pd.concat(frames, ignore_index=True, sort=False)
     order = {str(job_id): index for index, job_id in enumerate(plan["jobs"]["job_id"])}
     status["_order"] = status["job_id"].astype(str).map(order)
-    status = status.dropna(subset=["_order"]).sort_values("_order").drop(columns="_order").reset_index(drop=True)
+    status = (
+        status.dropna(subset=["_order"])
+        .sort_values("_order")
+        .drop(columns="_order")
+        .reset_index(drop=True)
+    )
     _atomic_csv(output_dir / "job-status.csv", status)
 
 
@@ -1367,7 +1400,10 @@ def run_validation_jobs(
         write_validation_job_manifest(plan, output, overwrite=True)
     else:
         existing_plan = read_validation_job_manifest(output)
-        if existing_plan["plan_id"] != plan["plan_id"] or existing_plan["plan_fingerprint"] != plan["plan_fingerprint"]:
+        if (
+            existing_plan["plan_id"] != plan["plan_id"]
+            or existing_plan["plan_fingerprint"] != plan["plan_fingerprint"]
+        ):
             _stop("The output directory belongs to a different validation plan or plan revision.")
 
     jobs = plan["jobs"].copy()
@@ -1402,7 +1438,9 @@ def run_validation_jobs(
             not isinstance(existing_runner, Mapping)
             or existing_runner.get("fingerprint") != runner_manifest["fingerprint"]
         ):
-            _stop("Runner functions or declared run metadata differ from the existing validation execution.")
+            _stop(
+                "Runner functions or declared run metadata differ from the existing validation execution."
+            )
     else:
         _atomic_json(runner_path, runner_manifest)
 
@@ -1464,7 +1502,7 @@ def run_validation_jobs(
         workers=workers,
         started_utc=datetime.fromtimestamp(
             started,
-            tz=timezone.utc,
+            tz=UTC,
         ).strftime("%Y-%m-%d %H:%M:%S UTC"),
         elapsed_seconds=float(elapsed),
         function_fingerprints=runner_manifest["function_fingerprints"],
@@ -1621,8 +1659,12 @@ def collect_validation_jobs(path, plan=None, strict=True):
             plan = read_validation_job_manifest(paths[0])
 
     estimates = _bind_rows([_annotate_frame(result.get("estimates"), result) for result in results])
-    diagnostics = _bind_rows([_annotate_frame(result.get("diagnostics"), result) for result in results])
-    predictions = _bind_rows([_annotate_frame(result.get("predictions"), result) for result in results])
+    diagnostics = _bind_rows(
+        [_annotate_frame(result.get("diagnostics"), result) for result in results]
+    )
+    predictions = _bind_rows(
+        [_annotate_frame(result.get("predictions"), result) for result in results]
+    )
     draws = _bind_rows([_annotate_frame(result.get("draws"), result) for result in results])
 
     job_rows = []

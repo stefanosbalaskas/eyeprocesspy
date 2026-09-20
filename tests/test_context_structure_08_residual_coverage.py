@@ -393,9 +393,9 @@ def test_external_validity_validation_constant_correlation_and_accessors():
         ["x1", "flat"],
         baseline_predictors=["x3"],
     )
-    flat_corr = fit["associations"].loc[
-        fit["associations"]["predictor"].eq("flat"), "correlation"
-    ].iloc[0]
+    flat_corr = (
+        fit["associations"].loc[fit["associations"]["predictor"].eq("flat"), "correlation"].iloc[0]
+    )
     assert np.isnan(flat_corr)
 
     for accessor in (

@@ -98,7 +98,9 @@ def _parse_csv_block(lines: list[str], title: str) -> pd.DataFrame:
         out = pd.DataFrame(rows, columns=reader[0])
 
     for column in out.select_dtypes(include="object").columns:
-        out[column] = out[column].map(lambda value: value.strip() if isinstance(value, str) else value)
+        out[column] = out[column].map(
+            lambda value: value.strip() if isinstance(value, str) else value
+        )
     return out
 
 
@@ -252,9 +254,13 @@ def _summary_features(
     user_id = _character_column(data, "User ID")
     missing_participant = participant.isna() | participant.str.strip().eq("")
     participant = participant.copy()
-    participant.loc[missing_participant] = "User " + user_id.loc[missing_participant].fillna("unknown")
+    participant.loc[missing_participant] = "User " + user_id.loc[missing_participant].fillna(
+        "unknown"
+    )
 
-    recording = participant.map(lambda value: f"rec_{_gp_id_token(value)}_{_gp_id_token(session_id)}")
+    recording = participant.map(
+        lambda value: f"rec_{_gp_id_token(value)}_{_gp_id_token(session_id)}"
+    )
     window_start = _numeric_column(data, "AOI Start", "AOI Start (sec)")
     duration = _numeric_column(data, "AOI Duration (sec - U=UserControlled)")
     window_end = window_start + duration
@@ -289,7 +295,9 @@ def _summary_features(
             )
         ]
         if len(set(feature_id)) != len(feature_id):
-            feature_id = [f"{value}_row{index:05d}" for index, value in enumerate(feature_id, start=1)]
+            feature_id = [
+                f"{value}_row{index:05d}" for index, value in enumerate(feature_id, start=1)
+            ]
         frames.append(
             pd.DataFrame(
                 {
@@ -339,7 +347,9 @@ def _summary_features(
             )
         ]
         if len(set(feature_id)) != len(feature_id):
-            feature_id = [f"{value}_row{index:05d}" for index, value in enumerate(feature_id, start=1)]
+            feature_id = [
+                f"{value}_row{index:05d}" for index, value in enumerate(feature_id, start=1)
+            ]
         frames.append(
             pd.DataFrame(
                 {
@@ -418,9 +428,9 @@ def read_gazepoint_aoi_statistics(
                 "source": "Gazepoint AOI statistics",
             }
         )
-        definitions = definitions.loc[definitions["aoi_id"].notna() & ~definitions["aoi_id"].duplicated()].reset_index(
-            drop=True
-        )
+        definitions = definitions.loc[
+            definitions["aoi_id"].notna() & ~definitions["aoi_id"].duplicated()
+        ].reset_index(drop=True)
         recordings = _recording_frame(
             [identity["participant_id"]],
             [identity["recording_id"]],
@@ -435,7 +445,9 @@ def read_gazepoint_aoi_statistics(
                 "display_normalized_top_left",
             ),
             raw={"gazepoint_aoi_statistics": data.copy()} if keep_raw else {},
-            vendor_metadata={"gazepoint_aoi_statistics": {"source_columns": list(map(str, data.columns))}},
+            vendor_metadata={
+                "gazepoint_aoi_statistics": {"source_columns": list(map(str, data.columns))}
+            },
             validate=False,
         )
         out = add_provenance(
@@ -478,9 +490,9 @@ def read_gazepoint_aoi_statistics(
                 "source": (f"Gazepoint Analysis {summary.software_version} Data Summary"),
             }
         )
-        definitions = definitions.loc[definitions["aoi_id"].notna() & ~definitions["aoi_id"].duplicated()].reset_index(
-            drop=True
-        )
+        definitions = definitions.loc[
+            definitions["aoi_id"].notna() & ~definitions["aoi_id"].duplicated()
+        ].reset_index(drop=True)
 
     if not data.empty:
         user_name = _character_column(data, "User Name", "User ID")

@@ -65,7 +65,9 @@ def test_cognitive_diagnosis_guards_external_and_process_surrogates():
     X = np.asarray([[0, 1], [1, 0], [1, 1]], dtype=float)
     Q = np.eye(2)
     with pytest.raises(ep.EyeProcessValidationError, match="Q-matrix"):
-        ep.fit_cognitive_diagnosis_process(X, np.eye(3), engine="external", external_engine=lambda **_: {})
+        ep.fit_cognitive_diagnosis_process(
+            X, np.eye(3), engine="external", external_engine=lambda **_: {}
+        )
     with pytest.raises(ep.EyeProcessBackendError, match="GDINA"):
         ep.fit_cognitive_diagnosis_process(X, Q)
     with pytest.raises(ep.EyeProcessBackendError, match="external_engine"):
@@ -156,11 +158,18 @@ def test_crossclassified_validation_context_fixed_string_and_all_family_paths(mo
     monkeypatch.setattr(ap, "_ols_fit", fake_ols)
     monkeypatch.setattr(ap, "_logistic_fit", fake_logit)
 
-    g = ep.fit_crossclassified_process_irt(d, "gauss", context="context", fixed="x", family="gaussian")
+    g = ep.fit_crossclassified_process_irt(
+        d, "gauss", context="context", fixed="x", family="gaussian"
+    )
     b = ep.fit_crossclassified_process_irt(d, "binary", fixed=["x", "cat"], family="binomial")
     p = ep.fit_crossclassified_process_irt(d, "count", family="poisson")
     nb = ep.fit_crossclassified_process_irt(d, "count", family="negative_binomial")
-    assert [g.family, b.family, p.family, nb.family] == ["gaussian", "binomial", "poisson", "negative_binomial"]
+    assert [g.family, b.family, p.family, nb.family] == [
+        "gaussian",
+        "binomial",
+        "poisson",
+        "negative_binomial",
+    ]
     assert [kind for kind, _ in calls].count("logit") == 1
     assert [kind for kind, _ in calls].count("ols") == 3
 
@@ -193,7 +202,9 @@ def test_latent_space_map_and_similarity_all_guards_entities_and_empty_distance(
         ep.validate_latent_space_process_similarity(SimpleNamespace(), [[1]])
     with pytest.raises(ep.EyeProcessValidationError, match="rows"):
         ep.validate_latent_space_process_similarity(obj, [[1], [2]], entity="person")
-    person = ep.validate_latent_space_process_similarity(obj, [[0, 0], [1, 1], [2, 3]], entity="person")
+    person = ep.validate_latent_space_process_similarity(
+        obj, [[0, 0], [1, 1], [2, 3]], entity="person"
+    )
     item = ep.validate_latent_space_process_similarity(obj, [[0, 1], [1, 2]], entity="item")
     assert np.isfinite(person.spearman_distance_correlation)
     assert np.isnan(item.spearman_distance_correlation)
@@ -262,7 +273,9 @@ def test_gpirt_validation_external_comparison_and_custom_grid_paths():
     R = np.asarray([[0, 1], [1, 0], [1, 1], [0, 0]], dtype=float)
     with pytest.raises(ep.EyeProcessBackendError, match="external_engine"):
         ep.fit_gpirt(R, engine="external")
-    ext = ep.fit_gpirt(R, engine="external", external_engine=lambda **kw: {"n": len(kw["response_matrix"])})
+    ext = ep.fit_gpirt(
+        R, engine="external", external_engine=lambda **kw: {"n": len(kw["response_matrix"])}
+    )
     assert ext.exact_gpirt is True
     with pytest.raises(ep.EyeProcessValidationError, match="engine"):
         ep.fit_gpirt(R, engine="bad")
@@ -275,7 +288,12 @@ def test_gpirt_validation_external_comparison_and_custom_grid_paths():
 
 
 def test_external_engine_success_gates_and_variational_failure():
-    engine = lambda **kw: {"keys": sorted(kw), "value": next(iter(kw.values()))}
+    def engine(**kw):
+        return {
+            "keys": sorted(kw),
+            "value": next(iter(kw.values())),
+        }
+
     d = pd.DataFrame({"x": [1, 2]})
     R = np.asarray([[0, 1], [1, 0]])
     assert ep.fit_dynamic_gpirt(d, external_engine=engine, alpha=1).engine == "external"

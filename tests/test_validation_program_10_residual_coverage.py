@@ -149,9 +149,7 @@ def test_vendor_audit_required_optional_extra_and_failure_paths(tmp_path):
     assert failed["independent_cases"] == 0
     assert failed["licence_reviewed_cases"] == 0
 
-    summary = pd.DataFrame(
-        {"case_id": ["a"], "vendor": ["x"], "status": ["pass"]}
-    )
+    summary = pd.DataFrame({"case_id": ["a"], "vendor": ["x"], "status": ["pass"]})
     manifest = pd.DataFrame(
         {
             "case_id": ["a"],
@@ -336,9 +334,7 @@ def test_run_model_validation_truth_invalid_and_reraise_paths():
         spec=_spec(),
     )
     assert recorded["runs"]["parameter"].iloc[0] == ".truth"
-    assert "Truth extractor must return named values" in str(
-        recorded["runs"]["error"].iloc[0]
-    )
+    assert "Truth extractor must return named values" in str(recorded["runs"]["error"].iloc[0])
 
     with pytest.raises(EyeProcessValidationError, match="named values"):
         vp.run_model_validation(
@@ -427,14 +423,10 @@ def test_model_validation_summary_input_empty_and_single_key_paths():
     with pytest.raises(EyeProcessValidationError, match="eye_model_validation"):
         vp.model_validation_summary({"spec": _spec(), "runs": "bad"})
 
-    empty = vp.model_validation_summary(
-        {"spec": _spec(), "runs": pd.DataFrame()}
-    )
+    empty = vp.model_validation_summary({"spec": _spec(), "runs": pd.DataFrame()})
     assert empty.empty
 
-    summary = vp.model_validation_summary(
-        {"spec": _spec(), "runs": _summary_frame()}
-    )
+    summary = vp.model_validation_summary({"spec": _spec(), "runs": _summary_frame()})
     assert summary["successful"].iloc[0] == 1
     assert pd.isna(summary["coverage"].iloc[0])
     assert summary["status"].iloc[0] == "pass"
@@ -454,16 +446,12 @@ def test_model_validation_summary_input_empty_and_single_key_paths():
     ],
 )
 def test_model_validation_summary_failure_gate_branches(frame, spec_kwargs):
-    summary = vp.model_validation_summary(
-        {"spec": _spec(**spec_kwargs), "runs": frame}
-    )
+    summary = vp.model_validation_summary({"spec": _spec(**spec_kwargs), "runs": frame})
     assert summary["status"].iloc[0] == "fail"
 
 
 def test_model_validation_summary_coverage_pass_branch():
     frame = _summary_frame(lower=0.5, upper=1.5, covered=True)
-    summary = vp.model_validation_summary(
-        {"spec": _spec(min_coverage=0.9), "runs": frame}
-    )
+    summary = vp.model_validation_summary({"spec": _spec(min_coverage=0.9), "runs": frame})
     assert summary["coverage"].iloc[0] == 1.0
     assert summary["status"].iloc[0] == "pass"

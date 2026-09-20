@@ -136,7 +136,11 @@ def test_model_spec_validation_and_identification_audit_branches():
 
     strong = irt.eyeprocess_irt_identification_audit(
         spec,
-        constraints={"theta_mean_fixed": True, "theta_sd_fixed": True, "anchor_items": ["I1", "I2"]},
+        constraints={
+            "theta_mean_fixed": True,
+            "theta_sd_fixed": True,
+            "anchor_items": ["I1", "I2"],
+        },
         n_items=10,
         n_persons=20,
     )

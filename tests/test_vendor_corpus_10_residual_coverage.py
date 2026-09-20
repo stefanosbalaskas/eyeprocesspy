@@ -33,9 +33,7 @@ def _register_basic(corpus: Path, source: Path, case_id: str = "case-1", **kwarg
 
 def _eye_dataset():
     return ep.new_eye_dataset(
-        recordings=pd.DataFrame(
-            {"recording_id": ["r1"], "participant_id": ["p1"], "label": ["A"]}
-        ),
+        recordings=pd.DataFrame({"recording_id": ["r1"], "participant_id": ["p1"], "label": ["A"]}),
         gaze_samples=pd.DataFrame(
             {
                 "recording_id": ["r1", "r1"],
@@ -75,8 +73,8 @@ def test_vendor_private_mapping_argument_and_character_guards():
     boolean = vc._coerce_bool_series(pd.Series([True, False], dtype=bool))
     assert boolean.tolist() == [True, False]
     mapped = vc._coerce_bool_series(pd.Series(["yes", "0", "unknown", None]))
-    assert mapped.iloc[0] == True
-    assert mapped.iloc[1] == False
+    assert mapped.iloc[0]
+    assert not mapped.iloc[1]
     assert pd.isna(mapped.iloc[2])
     assert pd.isna(mapped.iloc[3])
 
@@ -107,8 +105,7 @@ def test_corpus_init_overwrite_registry_read_and_write_guards(tmp_path):
     assert registry.empty
 
     (empty_corpus / "vendor-cases.csv").write_text(
-        "case_id,independent_source,licence_reviewed,redistribution_allowed\n"
-        "x,yes,no,1\n",
+        "case_id,independent_source,licence_reviewed,redistribution_allowed\nx,yes,no,1\n",
         encoding="utf-8",
     )
     registry = ep.read_vendor_registry(empty_corpus)
@@ -356,9 +353,7 @@ def test_roundtrip_private_comparison_and_validation_guards():
 def test_roundtrip_detects_column_and_row_loss_and_no_shared_columns():
     source = _eye_dataset()
     changed = source.copy()
-    changed["gaze_samples"] = changed["gaze_samples"].iloc[[0]].drop(
-        columns=["label"]
-    )
+    changed["gaze_samples"] = changed["gaze_samples"].iloc[[0]].drop(columns=["label"])
     audit = ep.audit_roundtrip_loss(source, changed, tables=["gaze_samples"])
     row = audit.summary.iloc[0]
     assert row.status == "review"
@@ -384,12 +379,8 @@ def test_vendor_field_coverage_input_and_required_field_guards(tmp_path):
         )
 
     corpus = Path(ep.init_vendor_corpus(tmp_path / "corpus"))
-    ep.register_vendor_semantics(
-        corpus, "Tobii", "x", "x", "gaze_samples", "x", loss_risk="none"
-    )
-    required = pd.DataFrame(
-        {"canonical_table": ["gaze_samples"], "canonical_field": ["x"]}
-    )
+    ep.register_vendor_semantics(corpus, "Tobii", "x", "x", "gaze_samples", "x", loss_risk="none")
+    required = pd.DataFrame({"canonical_table": ["gaze_samples"], "canonical_field": ["x"]})
     coverage = ep.audit_vendor_field_coverage(corpus, required)
     assert coverage.supported.tolist() == [True]
 

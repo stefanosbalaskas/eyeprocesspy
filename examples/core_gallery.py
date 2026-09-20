@@ -3,6 +3,7 @@
 Run from a checkout with plotting dependencies installed:
     python examples/core_gallery.py
 """
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -24,7 +25,9 @@ valid = np.ones(n, dtype=bool)
 valid[[40, 41, 180, 181, 182, 300]] = False
 
 recordings = pd.DataFrame({"recording_id": ["demo-001"], "participant_id": ["P001"]})
-streams = pd.DataFrame({"stream_id": ["gaze-main"], "recording_id": ["demo-001"], "stream_type": ["gaze"]})
+streams = pd.DataFrame(
+    {"stream_id": ["gaze-main"], "recording_id": ["demo-001"], "stream_type": ["gaze"]}
+)
 gaze = pd.DataFrame(
     {
         "sample_id": [f"s{i:04d}" for i in range(n)],
@@ -61,7 +64,18 @@ for eye, phase in [("left", 0.0), ("right", 0.16)]:
 eye_samples = pd.DataFrame(eye_rows)
 
 starts = np.array([0.15, 0.72, 1.30, 1.93, 2.52, 3.15, 3.82, 4.48, 5.15, 5.70])
-sequence = ["Headline", "Evidence", "CTA", "Evidence", "Headline", "Evidence", "CTA", "Evidence", "Headline", "CTA"]
+sequence = [
+    "Headline",
+    "Evidence",
+    "CTA",
+    "Evidence",
+    "Headline",
+    "Evidence",
+    "CTA",
+    "Evidence",
+    "Headline",
+    "CTA",
+]
 center_map = {"Headline": centers[0], "Evidence": centers[1], "CTA": centers[2]}
 fixations, visits = [], []
 for i, (start, aoi) in enumerate(zip(starts, sequence)):
@@ -94,9 +108,30 @@ intervals = pd.DataFrame(
 )
 features = pd.DataFrame(
     [
-        {"feature_id": "d1", "recording_id": "demo-001", "trial_id": "T1", "aoi_id": "Headline", "feature_name": "dwell_time_ms", "value": 1180.0},
-        {"feature_id": "d2", "recording_id": "demo-001", "trial_id": "T1", "aoi_id": "Evidence", "feature_name": "dwell_time_ms", "value": 1950.0},
-        {"feature_id": "d3", "recording_id": "demo-001", "trial_id": "T1", "aoi_id": "CTA", "feature_name": "dwell_time_ms", "value": 870.0},
+        {
+            "feature_id": "d1",
+            "recording_id": "demo-001",
+            "trial_id": "T1",
+            "aoi_id": "Headline",
+            "feature_name": "dwell_time_ms",
+            "value": 1180.0,
+        },
+        {
+            "feature_id": "d2",
+            "recording_id": "demo-001",
+            "trial_id": "T1",
+            "aoi_id": "Evidence",
+            "feature_name": "dwell_time_ms",
+            "value": 1950.0,
+        },
+        {
+            "feature_id": "d3",
+            "recording_id": "demo-001",
+            "trial_id": "T1",
+            "aoi_id": "CTA",
+            "feature_name": "dwell_time_ms",
+            "value": 870.0,
+        },
     ]
 )
 

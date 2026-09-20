@@ -4,6 +4,7 @@ The example models time to first entry into a source/evidence AOI. It begins
 with trial windows plus AOI-visit rows so right censoring is constructed from
 an explicit observation window rather than hidden in a pre-censored fixture.
 """
+
 from __future__ import annotations
 
 import json
@@ -78,9 +79,7 @@ def run_verification_example(
     report = report_gaze_survival_model(cox)
 
     censoring.to_csv(output / "verification-censoring-summary.csv", index=False)
-    tidy_gaze_survival_model(cox).to_csv(
-        output / "verification-cox-effects.csv", index=False
-    )
+    tidy_gaze_survival_model(cox).to_csv(output / "verification-cox-effects.csv", index=False)
     tidy_gaze_survival_model(weibull).to_csv(
         output / "verification-weibull-aft-effects.csv", index=False
     )

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import builtins
-from pathlib import Path
 import types
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -109,7 +109,9 @@ def test_deep_size_benchmark_and_reporting_guards(tmp_path):
     eye = _eye()
     quality = eye["quality"].copy()
     if quality.empty:
-        quality = pd.DataFrame({"recording_id": ["R1"], "metric": ["missing_fraction"], "value": [0.1]})
+        quality = pd.DataFrame(
+            {"recording_id": ["R1"], "metric": ["missing_fraction"], "value": [0.1]}
+        )
     else:
         quality = quality.copy()
         quality.loc[quality.index[0], "metric"] = "missing_fraction"
@@ -186,10 +188,12 @@ def test_json_jobs_sanitize_and_plot_helper_contracts(tmp_path, monkeypatch):
     assert all((tmp_path / name).exists() for name in ["bar.png", "line.png", "bench.png"])
 
     real_import = builtins.__import__
+
     def blocked_import(name, globals=None, locals=None, fromlist=(), level=0):
         if name == "matplotlib.pyplot":
             raise ImportError("blocked")
         return real_import(name, globals, locals, fromlist, level)
+
     monkeypatch.setattr(builtins, "__import__", blocked_import)
     with pytest.raises(ep.EyeProcessValidationError, match="optional plotting"):
         vc._get_plt()
@@ -210,12 +214,15 @@ def test_evidence_corpus_and_result_helpers(monkeypatch):
     obj = types.SimpleNamespace(summary=summary, manifest=summary.copy(), status="pass")
     assert vc._corpus_result(obj)["status"] == "pass"
 
-    monkeypatch.setattr(vc, "validate_eye_corpus", lambda x: {"summary": summary, "status": "validated"})
+    monkeypatch.setattr(
+        vc, "validate_eye_corpus", lambda x: {"summary": summary, "status": "validated"}
+    )
     assert vc._corpus_result(["raw"])["status"] == "validated"
 
     class Result:
         comparison = pd.DataFrame({"x": [1]})
         results = pd.DataFrame({"y": [2]})
+
     assert not vc._comparison_frame({"comparison": pd.DataFrame({"x": [1]})}).empty
     assert not vc._comparison_frame(Result()).empty
     assert vc._comparison_frame({}).empty
@@ -226,22 +233,32 @@ def test_evidence_corpus_and_result_helpers(monkeypatch):
 
 def test_validation_program_exercises_all_orchestration_job_families(tmp_path, monkeypatch):
     summary = _corpus_summary()
-    monkeypatch.setattr(vc, "audit_vendor_validation", lambda corpus: pd.DataFrame(
-        {"vendor": ["gazepoint"], "pass_rate": [1.0], "cases": [2]}
-    ))
-    monkeypatch.setattr(vc, "write_vendor_validation_report", lambda x, path: Path(path).write_text("vendor", encoding="utf-8") or str(path))
+    monkeypatch.setattr(
+        vc,
+        "audit_vendor_validation",
+        lambda corpus: pd.DataFrame({"vendor": ["gazepoint"], "pass_rate": [1.0], "cases": [2]}),
+    )
+    monkeypatch.setattr(
+        vc,
+        "write_vendor_validation_report",
+        lambda x, path: Path(path).write_text("vendor", encoding="utf-8") or str(path),
+    )
 
     model_result = {"recovery": pd.DataFrame({"parameter": ["b"], "estimate": [0.1]})}
     monkeypatch.setattr(vc, "run_model_validation", lambda **job: model_result)
-    monkeypatch.setattr(vc, "model_validation_summary", lambda result: pd.DataFrame({"parameter": ["b"], "bias": [0.0]}))
+    monkeypatch.setattr(
+        vc,
+        "model_validation_summary",
+        lambda result: pd.DataFrame({"parameter": ["b"], "bias": [0.0]}),
+    )
 
     sbc_result = {
-        "ranks": pd.DataFrame(
-            {"parameter": ["a", "a", None], "normalized_rank": [0.2, 0.8, 0.5]}
-        )
+        "ranks": pd.DataFrame({"parameter": ["a", "a", None], "normalized_rank": [0.2, 0.8, 0.5]})
     }
     monkeypatch.setattr(vc, "simulation_based_calibration", lambda **job: sbc_result)
-    monkeypatch.setattr(vc, "sbc_summary", lambda result: pd.DataFrame({"parameter": ["a"], "n": [2]}))
+    monkeypatch.setattr(
+        vc, "sbc_summary", lambda result: pd.DataFrame({"parameter": ["a"], "n": [2]})
+    )
 
     engine_result = {"estimates": pd.DataFrame({"engine": ["a"], "estimate": [0.1]})}
     monkeypatch.setattr(vc, "compare_model_engines", lambda **job: engine_result)
@@ -270,14 +287,20 @@ def test_validation_program_exercises_all_orchestration_job_families(tmp_path, m
     )
     reporting.attrs["eyeprocess_class"] = "eye_reporting_audit"
     monkeypatch.setattr(vc, "reporting_guideline_audit", lambda *args, **kwargs: reporting)
-    monkeypatch.setattr(vc, "write_reporting_guideline_report", lambda x, path: Path(path).write_text("report", encoding="utf-8") or str(path))
+    monkeypatch.setattr(
+        vc,
+        "write_reporting_guideline_report",
+        lambda x, path: Path(path).write_text("report", encoding="utf-8") or str(path),
+    )
     monkeypatch.setattr(vc, "create_public_benchmark", lambda x, path, **kwargs: str(Path(path)))
 
-    evidence_audit = pd.DataFrame(
-        {"model": ["m"], "completed": [2], "required": [2]}
-    )
+    evidence_audit = pd.DataFrame({"model": ["m"], "completed": [2], "required": [2]})
     monkeypatch.setattr(vc, "audit_advanced_model_evidence", lambda evidence, spec: evidence_audit)
-    monkeypatch.setattr(vc, "write_advanced_model_evidence_report", lambda x, path: Path(path).write_text("evidence", encoding="utf-8") or str(path))
+    monkeypatch.setattr(
+        vc,
+        "write_advanced_model_evidence_report",
+        lambda x, path: Path(path).write_text("evidence", encoding="utf-8") or str(path),
+    )
 
     result = ep.run_eyeprocess_validation_program(
         {"summary": summary, "manifest": summary.copy(), "status": "pass"},

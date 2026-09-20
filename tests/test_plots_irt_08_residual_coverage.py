@@ -69,9 +69,7 @@ def test_simple_placeholder_plots_and_latent_alignment_branches():
     assert "Gated frontier model" in ax.get_title()
     _close(ax)
 
-    ax = p.plot_eye_mixture_irt_process(
-        _box("eye_mixture_irt_process", n_classes=3)
-    )
+    ax = p.plot_eye_mixture_irt_process(_box("eye_mixture_irt_process", n_classes=3))
     assert "Mixture IRT" in ax.get_title()
     _close(ax)
 
@@ -136,9 +134,7 @@ def test_item_reduction_and_biometric_imputation_branches():
     assert ax.gp3_data == ["i1", "i2"]
     _close(ax)
 
-    missingness = pd.DataFrame(
-        {"variable": ["pupil", "eda"], "missing_prop": [0.1, 0.3]}
-    )
+    missingness = pd.DataFrame({"variable": ["pupil", "eda"], "missing_prop": [0.1, 0.3]})
     ax = p.plot_eye_biometric_imputation_sensitivity(
         _box("eye_biometric_imputation_sensitivity", missingness=missingness)
     )
@@ -168,9 +164,7 @@ def test_bayesian_dashboard_loo_and_posterior_dispatch_branches():
 
     good_loo = _box(
         "eye_bayesian_process_dashboard",
-        loo_table=pd.DataFrame(
-            {"model": ["m1", "m2"], "elpd_loo": [-10.0, -8.0]}
-        ),
+        loo_table=pd.DataFrame({"model": ["m1", "m2"], "elpd_loo": [-10.0, -8.0]}),
         posterior=pd.DataFrame(),
     )
     ax = p.plot_eye_bayesian_process_dashboard(good_loo, type="loo")
@@ -349,9 +343,7 @@ def test_process_profile_posterior_profiles_parallel_and_scatter_branches():
     x = _box(
         "eye_process_profile_mixture",
         assignment=assignment,
-        summary=pd.DataFrame(
-            {"profile": [1, 2], "dwell": [0.3, 0.8], "revisit": [0.7, 0.2]}
-        ),
+        summary=pd.DataFrame({"profile": [1, 2], "dwell": [0.3, 0.8], "revisit": [0.7, 0.2]}),
         variables=["dwell", "revisit"],
         scaled_data=np.array([[0.1, 0.2], [0.8, 0.7]]),
         status="ok",
@@ -394,9 +386,7 @@ def test_process_profile_posterior_profiles_parallel_and_scatter_branches():
 
 
 def test_external_validity_all_plot_dispatch_paths():
-    associations = pd.DataFrame(
-        {"predictor": ["dwell", "pupil"], "correlation": [0.3, -0.2]}
-    )
+    associations = pd.DataFrame({"predictor": ["dwell", "pupil"], "correlation": [0.3, -0.2]})
     x = _box(
         "eye_process_external_validity",
         associations=associations,
@@ -430,9 +420,7 @@ def test_external_validity_all_plot_dispatch_paths():
 
 
 def test_item_parameter_seed_training_and_candidate_paths(monkeypatch):
-    training = pd.DataFrame(
-        {"difficulty": [-1.0, 1.0], "discrimination": [0.8, 1.2]}
-    )
+    training = pd.DataFrame({"difficulty": [-1.0, 1.0], "discrimination": [0.8, 1.2]})
     x = _box(
         "eye_item_parameter_seed",
         training_data=training,
@@ -471,9 +459,7 @@ def test_candidate_bank_normal_review_and_visual_context_branches():
             "review_required": [False, True],
         }
     )
-    ax = p.plot_eye_candidate_item_bank_audit(
-        _box("eye_candidate_item_bank_audit", table=both)
-    )
+    ax = p.plot_eye_candidate_item_bank_audit(_box("eye_candidate_item_bank_audit", table=both))
     assert len(ax.collections) == 2
     _close(ax)
 

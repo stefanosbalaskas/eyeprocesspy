@@ -1,4 +1,5 @@
 """Unit conversion and perturbation-spec contracts for AOI uncertainty analysis."""
+
 from __future__ import annotations
 
 import math
@@ -111,20 +112,32 @@ def aoi_perturbation_spec(
     if operation == "dilation" and (mx < 0 or my < 0):
         raise EyeProcessValidationError("Dilation margins must be non-negative.")
     if operation == "erosion" and (mx < 0 or my < 0):
-        raise EyeProcessValidationError("Erosion margins must be non-negative; erosion direction is implied by the operation.")
+        raise EyeProcessValidationError(
+            "Erosion margins must be non-negative; erosion direction is implied by the operation."
+        )
     if operation in {"dilation", "erosion"} and not math.isclose(mx, my, rel_tol=0, abs_tol=1e-12):
-        raise EyeProcessValidationError("Polygon-safe dilation/erosion uses a uniform margin; use anisotropic_expansion for different x/y margins.")
+        raise EyeProcessValidationError(
+            "Polygon-safe dilation/erosion uses a uniform margin; use anisotropic_expansion for different x/y margins."
+        )
     resolved_dpp: tuple[float, float] | None = None
     if degrees_per_pixel is not None:
         resolved_dpp = _normalise_pair(degrees_per_pixel, "degrees_per_pixel", nonnegative=True)
         if min(resolved_dpp) <= 0:
             raise EyeProcessValidationError("`degrees_per_pixel` values must be positive.")
-    elif all(v is not None for v in (screen_width_px, screen_height_px, viewing_distance, physical_screen_size)):
+    elif all(
+        v is not None
+        for v in (screen_width_px, screen_height_px, viewing_distance, physical_screen_size)
+    ):
+        assert screen_width_px is not None
+        assert screen_height_px is not None
+        assert viewing_distance is not None
+        assert physical_screen_size is not None
+
         _, _, dx, dy = _screen_geometry(
             screen_width_px=int(screen_width_px),
             screen_height_px=int(screen_height_px),
             viewing_distance=float(viewing_distance),
-            physical_screen_size=physical_screen_size,  # type: ignore[arg-type]
+            physical_screen_size=physical_screen_size,
         )
         resolved_dpp = (dx, dy)
     if unit == "deg" and resolved_dpp is None:
@@ -147,7 +160,9 @@ def aoi_perturbation_spec(
         screen_width_px=None if screen_width_px is None else int(screen_width_px),
         screen_height_px=None if screen_height_px is None else int(screen_height_px),
         viewing_distance=viewing_distance,
-        physical_screen_size=None if physical_screen_size is None else tuple(float(v) for v in physical_screen_size),
+        physical_screen_size=None
+        if physical_screen_size is None
+        else tuple(float(v) for v in physical_screen_size),
         degrees_per_pixel=resolved_dpp,
         seed=seed,
         boundary_policy=boundary_policy,
@@ -161,7 +176,9 @@ def _spec_value(spec: Any, key: str) -> Any:
     try:
         return spec[key]
     except Exception as exc:
-        raise EyeProcessValidationError("Perturbation specifications must be mapping-like objects created by `aoi_perturbation_spec()`.") from exc
+        raise EyeProcessValidationError(
+            "Perturbation specifications must be mapping-like objects created by `aoi_perturbation_spec()`."
+        ) from exc
 
 
 def _spec_to_px(spec: Any) -> dict[str, Any]:
@@ -173,7 +190,9 @@ def _spec_to_px(spec: Any) -> dict[str, Any]:
     if unit == "deg":
         dpp = _spec_value(spec, "degrees_per_pixel")
         if dpp is None:
-            raise EyeProcessValidationError("Degree perturbation lacks `degrees_per_pixel` provenance.")
+            raise EyeProcessValidationError(
+                "Degree perturbation lacks `degrees_per_pixel` provenance."
+            )
         dx, dy = dpp
         mx, my, tx, ty = mx / dx, my / dy, tx / dx, ty / dy
     return {

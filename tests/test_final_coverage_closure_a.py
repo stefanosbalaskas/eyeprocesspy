@@ -75,7 +75,9 @@ def test_benchmark_boolean_normalization_and_table_guards(tmp_path: Path):
         ep.benchmark_expected_outputs(ep.eyeprocess_benchmark_study(root2))
 
 
-def test_benchmark_import_fallback_validation_without_hashes_and_broken_files(tmp_path: Path, monkeypatch):
+def test_benchmark_import_fallback_validation_without_hashes_and_broken_files(
+    tmp_path: Path, monkeypatch
+):
     import eyeprocesspy.dataset as dataset_mod
 
     def fail_dataset(**kwargs):
@@ -136,9 +138,7 @@ def test_reproducibility_path_manifest_and_scaffold_residuals(tmp_path: Path):
     with pytest.raises(TypeError, match="pandas DataFrame"):
         ep.verify_reproducibility_manifest({"files": []})
 
-    fake_files = pd.DataFrame(
-        [{"path": str(tmp_path / "gone.txt"), "bytes": 1, "md5": "x"}]
-    )
+    fake_files = pd.DataFrame([{"path": str(tmp_path / "gone.txt"), "bytes": 1, "md5": "x"}])
     checked = ep.verify_reproducibility_manifest({"files": fake_files})
     assert not bool(checked.loc[0, "exists"])
     assert not bool(checked.loc[0, "unchanged"])
@@ -150,7 +150,9 @@ def test_reproducibility_path_manifest_and_scaffold_residuals(tmp_path: Path):
     target = tmp_path / "scaffold"
     ep.write_software_paper_reproduction(target, ep.eyeprocess_benchmark_study(root))
     assert (target / "data" / "nested_resource" / "note.txt").is_file()
-    ep.write_software_paper_reproduction(target, ep.eyeprocess_benchmark_study(root), overwrite=True)
+    ep.write_software_paper_reproduction(
+        target, ep.eyeprocess_benchmark_study(root), overwrite=True
+    )
 
 
 def test_benchmark_release_invalid_branch(tmp_path: Path):
@@ -183,13 +185,21 @@ def test_process_quality_private_registry_and_search_guards():
 
     with pytest.raises(ep.EyeProcessValidationError, match="must be scalar"):
         ep.register_process_measure(
-            name=["a", "b"], channel="gaze", unit="ms", level="trial",
-            interpretation="x", guardrail="y"
+            name=["a", "b"],
+            channel="gaze",
+            unit="ms",
+            level="trial",
+            interpretation="x",
+            guardrail="y",
         )
     added = ep.register_process_measure(
         registry=compact,
-        name=["custom"], channel=["gaze"], unit=["ms"], level=["trial"],
-        interpretation=["custom interpretation"], guardrail=["custom guardrail"],
+        name=["custom"],
+        channel=["gaze"],
+        unit=["ms"],
+        level=["trial"],
+        interpretation=["custom interpretation"],
+        guardrail=["custom guardrail"],
         status=["user_defined"],
     )
     assert "custom" in set(added.name)
@@ -208,7 +218,9 @@ def test_process_quality_private_registry_and_search_guards():
     hit = cov.loc[cov.name == "fixation_count"].iloc[0]
     assert bool(hit.present) and hit.nonmissing_fraction == pytest.approx(0.5)
     empty_cov = ep.process_measure_coverage(pd.DataFrame(columns=["fixation_count"]), reg)
-    assert np.isnan(empty_cov.loc[empty_cov.name == "fixation_count", "nonmissing_fraction"].iloc[0])
+    assert np.isnan(
+        empty_cov.loc[empty_cov.name == "fixation_count", "nonmissing_fraction"].iloc[0]
+    )
 
 
 def _reliability_data(n_person: int = 4) -> pd.DataFrame:
@@ -217,7 +229,7 @@ def _reliability_data(n_person: int = 4) -> pd.DataFrame:
         for trial in range(1, 5):
             rows.append(
                 {
-                    "person": f"P{p+1}",
+                    "person": f"P{p + 1}",
                     "trial": trial,
                     "session": "A" if trial <= 2 else "B",
                     "measure": float(p + trial),
@@ -284,7 +296,9 @@ def test_process_reliability_degenerate_and_alternate_paths():
     no_ids["person"] = np.nan
     with pytest.raises(ep.EyeProcessValidationError, match="participant identifiers"):
         ep.bootstrap_process_reliability(no_ids, "person", "session", "measure", replications=1)
-    boot = ep.bootstrap_process_reliability(sparse, "person", "session", "measure", replications=2, seed=1)
+    boot = ep.bootstrap_process_reliability(
+        sparse, "person", "session", "measure", replications=2, seed=1
+    )
     assert len(boot) == 1
 
 
@@ -309,7 +323,9 @@ def test_process_quality_group_calibration_and_sampling_residuals(monkeypatch):
     cal = ep.estimate_calibration_error(all_nan)
     assert cal.loc[0, "n"] == 0 and np.isnan(cal.loc[0, "mean_radial_error"])
 
-    one = ep.gaze_precision_rms_s2s(pd.DataFrame({"gaze_x": [0.1], "gaze_y": [0.2], "t": [1]}), time="t")
+    one = ep.gaze_precision_rms_s2s(
+        pd.DataFrame({"gaze_x": [0.1], "gaze_y": [0.2], "t": [1]}), time="t"
+    )
     assert one.loc[0, "n_steps"] == 0
     with pytest.raises(ep.EyeProcessValidationError, match="unit must"):
         ep.effective_sampling_frequency(pd.DataFrame({"timestamp_ms": [0, 1]}), unit="bad")
@@ -320,10 +336,17 @@ def test_process_quality_group_calibration_and_sampling_residuals(monkeypatch):
 
     with pytest.raises(ep.EyeProcessValidationError, match="three complete"):
         ep.calibration_error_model(
-            pd.DataFrame({"gaze_x": [0, 1], "gaze_y": [0, 1], "target_x": [0, 0], "target_y": [0, 0]})
+            pd.DataFrame(
+                {"gaze_x": [0, 1], "gaze_y": [0, 1], "target_x": [0, 0], "target_y": [0, 0]}
+            )
         )
     fit_data = pd.DataFrame(
-        {"gaze_x": [0.1, 0.2, 0.3, 0.4], "gaze_y": [0.2, 0.3, 0.4, 0.5], "target_x": [0, 0, 0, 0], "target_y": [0, 0, 0, 0]}
+        {
+            "gaze_x": [0.1, 0.2, 0.3, 0.4],
+            "gaze_y": [0.2, 0.3, 0.4, 0.5],
+            "target_x": [0, 0, 0, 0],
+            "target_y": [0, 0, 0, 0],
+        }
     )
     model = ep.calibration_error_model(fit_data)
     with pytest.raises(ep.EyeProcessValidationError, match="calibration_error_model"):
@@ -401,9 +424,7 @@ def test_gaze_quality_profile_and_reporting_guards():
             pd.DataFrame({"gaze_x": [0.1], "gaze_y": [0.1], "timestamp_ms": [0]}),
             target_x="target_x",
         )
-    empty = ep.gaze_data_quality_profile(
-        pd.DataFrame(columns=["gaze_x", "gaze_y", "timestamp_ms"])
-    )
+    empty = ep.gaze_data_quality_profile(pd.DataFrame(columns=["gaze_x", "gaze_y", "timestamp_ms"]))
     assert empty["table"].empty
 
     data = pd.DataFrame(

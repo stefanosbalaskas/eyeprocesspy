@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import importlib
+
 import numpy as np
 import pandas as pd
 import pytest
 
 import eyeprocesspy as ep
+from eyeprocesspy.exceptions import EyeProcessValidationError
 from eyeprocesspy.irt import EyeResult
 
 
@@ -110,6 +113,19 @@ def test_p4_scoring_precision_targeting_and_exposure_contracts() -> None:
     assert np.all(np.isfinite(scores.estimate))
     assert np.all(scores.se > 0)
 
+    # Exercise every documented score-table dispatch branch.
+    for method in ("MAP", "ML"):
+        alternate = ep.eyeprocess_irt_score_table(
+            y,
+            items,
+            method=method,
+        )
+        assert len(alternate) == len(y)
+        assert alternate.person_id.tolist() == y.index.astype(str).tolist()
+        assert alternate.method.tolist() == [method] * len(y)
+        assert np.all(np.isfinite(alternate.estimate))
+        assert alternate.se.isna().all()
+
     reliability = ep.eyeprocess_irt_marginal_reliability(scores.estimate, scores.se)
     assert np.isnan(reliability) or 0 <= reliability <= 1
 
@@ -135,6 +151,67 @@ def test_p4_scoring_precision_targeting_and_exposure_contracts() -> None:
     assert ep.validate_eyeprocess_irt_item_bank(bank) is True
 
 
+def test_p4_information_targeting_default_and_invalid_weight_contracts() -> None:
+    irt_module = importlib.import_module("eyeprocesspy.irt")
+    direct = irt_module.eyeprocess_irt_information_targeting
+    public = ep.eyeprocess_irt_information_targeting
+
+    # The package-level API must expose the canonical implementation.
+    assert public is direct
+
+    items = _items()
+    theta = np.array(
+        [-1.0, 0.0, 1.0],
+        dtype=float,
+    )
+
+    # Exercise the canonical implementation directly so coverage
+    # proves src/eyeprocesspy/irt.py rather than an alias/wrapper.
+    default = direct(
+        items,
+        theta,
+    )
+
+    np.testing.assert_allclose(
+        default.weights,
+        np.full(
+            theta.size,
+            1.0 / theta.size,
+            dtype=float,
+        ),
+    )
+    assert default.weighted_information > 0
+    assert default.weighted_sem > 0
+
+    explicit = direct(
+        items,
+        theta,
+        weights=[1.0, 2.0, 1.0],
+    )
+    np.testing.assert_allclose(
+        explicit.weights,
+        [0.25, 0.50, 0.25],
+    )
+
+    invalid_weights = [
+        [1.0, 2.0],
+        [1.0, np.nan, 1.0],
+        [1.0, -1.0, 1.0],
+        [0.0, 0.0, 0.0],
+    ]
+
+    for weights in invalid_weights:
+        with pytest.raises(
+            EyeProcessValidationError,
+            match="weights must be non-negative and match theta",
+        ):
+            direct(
+                items,
+                theta,
+                weights=weights,
+            )
+
+
 def test_p4_linking_anchor_invariance_and_device_contracts() -> None:
     reference = _items()
     focal = reference.copy()
@@ -156,13 +233,17 @@ def test_p4_linking_anchor_invariance_and_device_contracts() -> None:
     assert len(stability.table) == 2
     assert np.all(stability.table.n_anchors == 3)
 
-    dif = pd.DataFrame({"item_id": reference.item_id, "effect": [0.01, 0.02, 0.03, 0.2, 0.01, 0.02]})
+    dif = pd.DataFrame(
+        {"item_id": reference.item_id, "effect": [0.01, 0.02, 0.03, 0.2, 0.01, 0.02]}
+    )
     anchor_audit = ep.eyeprocess_irt_anchor_audit(reference, dif=dif, max_abs_effect=0.1)
     assert int((~anchor_audit.eligible).sum()) == 1
 
     purified = ep.eyeprocess_irt_anchor_purification(
         reference,
-        effect_fun=lambda anchors: pd.DataFrame({"item_id": anchors, "effect": np.zeros(len(anchors))}),
+        effect_fun=lambda anchors: pd.DataFrame(
+            {"item_id": anchors, "effect": np.zeros(len(anchors))}
+        ),
         threshold=0.1,
     )
     assert purified.anchors == reference.item_id.tolist()
@@ -321,9 +402,7 @@ def test_p4_multidimensional_testlet_and_latent_regression_contracts() -> None:
     assert regression.matrix.shape == (3, 3)
     assert regression.complete.all()
 
-    spec = ep.eyeprocess_irt_testlet_spec(
-        ["I1", "I2", "I3", "I4"], ["T1", "T1", "T2", "T2"]
-    )
+    spec = ep.eyeprocess_irt_testlet_spec(["I1", "I2", "I3", "I4"], ["T1", "T1", "T2", "T2"])
     assert spec.attrs["eyeprocess_class"] == "eye_irt_testlet_spec"
     audit = ep.eyeprocess_irt_testlet_audit(spec, min_items=2)
     assert len(audit) == 2

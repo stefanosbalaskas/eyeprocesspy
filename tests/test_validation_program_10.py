@@ -194,7 +194,8 @@ def test_model_validation_records_extractor_and_truth_failures():
             "mode": mode,
         }
 
-    fit = lambda sim: float(np.mean(sim["y"]))
+    def fit(sim):
+        return float(np.mean(sim["y"]))
 
     extract_failure = ep.run_model_validation(
         simulator,

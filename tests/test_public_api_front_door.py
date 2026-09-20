@@ -5,7 +5,6 @@ from pathlib import Path
 
 import eyeprocesspy as ep
 
-
 MATRIX = Path(__file__).parents[1] / "parity" / "PARITY_MATRIX.csv"
 
 

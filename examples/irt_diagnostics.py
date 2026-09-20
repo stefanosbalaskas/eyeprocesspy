@@ -1,4 +1,5 @@
 """Deterministic IRT diagnostic plotting examples."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt

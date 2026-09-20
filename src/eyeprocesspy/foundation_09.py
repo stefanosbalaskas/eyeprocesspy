@@ -45,7 +45,10 @@ def _first_nonmissing(values, default=pd.NA):
 
 
 def _finite_numeric(values) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _mode_value(values):
@@ -182,7 +185,9 @@ def audit_clock_sync(x, channel=None):
     gaze = x["gaze_samples"]
     biometrics = x["biometrics"]
     if gaze.empty or biometrics.empty:
-        return pd.DataFrame([{"status": "unavailable", "message": "Gaze and biometric streams are both required."}])
+        return pd.DataFrame(
+            [{"status": "unavailable", "message": "Gaze and biometric streams are both required."}]
+        )
 
     b = biometrics
     if channel is not None:
@@ -233,7 +238,9 @@ def _event_matches(patterns: Sequence[str], values: pd.Series) -> pd.Series:
         try:
             regex = text.str.contains(pattern, case=False, regex=True, na=False)
         except re.error as exc:
-            raise ValueError(f"Invalid event pattern {pattern!r}. Invalid regular expression.") from exc
+            raise ValueError(
+                f"Invalid event pattern {pattern!r}. Invalid regular expression."
+            ) from exc
         result |= exact | regex
     return result
 
@@ -298,7 +305,10 @@ def build_trials(
                 idx
                 for idx in end_idx
                 if idx > start_idx_value
-                and pd.to_numeric(pd.Series([ev.at[idx, "timestamp_seconds"]]), errors="coerce").iloc[0] <= next_start
+                and pd.to_numeric(
+                    pd.Series([ev.at[idx, "timestamp_seconds"]]), errors="coerce"
+                ).iloc[0]
+                <= next_start
             ]
             if candidates:
                 end_time = float(
@@ -340,7 +350,9 @@ def build_trials(
 
             stimulus = ev.at[start_idx_value, "stimulus_id"]
             valid_interval = bool(
-                np.isfinite(start_time) and np.isfinite(end_time) and float(end_time) >= float(start_time)
+                np.isfinite(start_time)
+                and np.isfinite(end_time)
+                and float(end_time) >= float(start_time)
             )
             built_rows.append(
                 {
@@ -364,7 +376,9 @@ def build_trials(
 
     built = standardize_eye_table(pd.DataFrame(built_rows), "intervals")
     if overwrite:
-        out["intervals"] = out["intervals"][out["intervals"]["interval_type"].ne("trial")].reset_index(drop=True)
+        out["intervals"] = out["intervals"][
+            out["intervals"]["interval_type"].ne("trial")
+        ].reset_index(drop=True)
     out["intervals"] = standardize_eye_table(
         pd.concat([out["intervals"], built], ignore_index=True, sort=False),
         "intervals",
@@ -479,7 +493,9 @@ def build_stimulus_intervals(x, source="gaze_samples", overwrite=False):
 
     built = standardize_eye_table(pd.DataFrame(rows), "intervals")
     if overwrite:
-        out["intervals"] = out["intervals"][out["intervals"]["interval_type"].ne("stimulus")].reset_index(drop=True)
+        out["intervals"] = out["intervals"][
+            out["intervals"]["interval_type"].ne("stimulus")
+        ].reset_index(drop=True)
     out["intervals"] = standardize_eye_table(
         pd.concat([out["intervals"], built], ignore_index=True, sort=False),
         "intervals",
@@ -509,7 +525,9 @@ def _find_interval_id(time, recording, intervals, field):
         for _, interval in ints.iterrows():
             start = float(interval["start_time"])
             end = float(interval["end_time"])
-            hit = row_idx[(times[row_idx] >= start) & (times[row_idx] <= end) & pd.isna(out[row_idx])]
+            hit = row_idx[
+                (times[row_idx] >= start) & (times[row_idx] <= end) & pd.isna(out[row_idx])
+            ]
             out[hit] = str(interval[field])
     return out
 
@@ -542,7 +560,9 @@ def assign_trials(x, interval_type="trial", overwrite=False):
 
     if not out["episodes"].empty:
         data = out["episodes"].copy()
-        assigned = _find_interval_id(data["start_time"], data["recording_id"], intervals, "trial_id")
+        assigned = _find_interval_id(
+            data["start_time"], data["recording_id"], intervals, "trial_id"
+        )
         if overwrite:
             data["trial_id"] = assigned
         else:
@@ -736,8 +756,12 @@ def register_aois(x, *aois, overwrite=False):
 
     existing_ids = set(out["aoi_definitions"]["aoi_id"].dropna().astype(str))
     if overwrite:
-        out["aoi_definitions"] = out["aoi_definitions"][~out["aoi_definitions"]["aoi_id"].astype(str).isin(ids)]
-        out["aoi_geometry"] = out["aoi_geometry"][~out["aoi_geometry"]["aoi_id"].astype(str).isin(ids)]
+        out["aoi_definitions"] = out["aoi_definitions"][
+            ~out["aoi_definitions"]["aoi_id"].astype(str).isin(ids)
+        ]
+        out["aoi_geometry"] = out["aoi_geometry"][
+            ~out["aoi_geometry"]["aoi_id"].astype(str).isin(ids)
+        ]
     elif ids & existing_ids:
         raise ValueError("AOI id already exists; use `overwrite=True`.")
 
@@ -790,7 +814,11 @@ def _aoi_contains(x, y, time, definition, geometry):
     xv = np.asarray(x, dtype=float)
     yv = np.asarray(y, dtype=float)
     tv = np.asarray(time, dtype=float)
-    active = (tv >= float(geometry["valid_from"])) & (tv <= float(geometry["valid_to"])) & bool(geometry["visible"])
+    active = (
+        (tv >= float(geometry["valid_from"]))
+        & (tv <= float(geometry["valid_to"]))
+        & bool(geometry["visible"])
+    )
     if not np.any(active):
         return np.zeros(len(xv), dtype=bool)
 
@@ -802,7 +830,9 @@ def _aoi_contains(x, y, time, definition, geometry):
     if shape == "rectangle":
         return active & (xv >= gx) & (xv <= gx + width) & (yv >= gy) & (yv <= gy + height)
     if shape == "circle":
-        return active & (((xv - gx) ** 2 / (width / 2) ** 2) + ((yv - gy) ** 2 / (height / 2) ** 2) <= 1)
+        return active & (
+            ((xv - gx) ** 2 / (width / 2) ** 2) + ((yv - gy) ** 2 / (height / 2) ** 2) <= 1
+        )
     if shape == "polygon":
         return active & _point_in_polygon(xv, yv, geometry["polygon"])
     return np.zeros(len(xv), dtype=bool)
@@ -834,13 +864,19 @@ def assign_aois(x, component="gaze_samples", overlap="first", overwrite=True):
         for _, definition in definitions.iterrows():
             selected = geometries[geometries["aoi_id"].eq(definition["aoi_id"])]
             for _, geometry in selected.iterrows():
-                compatible = data["coordinate_space_id"].eq(geometry["coordinate_space_id"]).fillna(False)
+                compatible = (
+                    data["coordinate_space_id"].eq(geometry["coordinate_space_id"]).fillna(False)
+                )
                 stimulus = definition["stimulus_id"]
                 if pd.isna(stimulus) or not str(stimulus).strip():
                     stimulus_ok = pd.Series(True, index=data.index)
                 else:
                     stimulus_ok = data["stimulus_id"].eq(stimulus).fillna(False)
-                hit = compatible.to_numpy() & stimulus_ok.to_numpy() & _aoi_contains(gx, gy, gt, definition, geometry)
+                hit = (
+                    compatible.to_numpy()
+                    & stimulus_ok.to_numpy()
+                    & _aoi_contains(gx, gy, gt, definition, geometry)
+                )
                 for index in np.flatnonzero(hit):
                     assignments[index].append(str(definition["aoi_id"]))
 
@@ -848,7 +884,9 @@ def assign_aois(x, component="gaze_samples", overlap="first", overwrite=True):
             area_map = {}
             for aoi_id in definitions["aoi_id"].astype(str):
                 geo = geometries[geometries["aoi_id"].astype(str).eq(aoi_id)]
-                areas = pd.to_numeric(geo["width"], errors="coerce") * pd.to_numeric(geo["height"], errors="coerce")
+                areas = pd.to_numeric(geo["width"], errors="coerce") * pd.to_numeric(
+                    geo["height"], errors="coerce"
+                )
                 finite = areas[np.isfinite(areas)]
                 area_map[aoi_id] = float(finite.min()) if len(finite) else np.inf
             assigned = [
@@ -856,7 +894,9 @@ def assign_aois(x, component="gaze_samples", overlap="first", overwrite=True):
                 for values in assignments
             ]
         elif overlap == "all":
-            assigned = ["|".join(dict.fromkeys(values)) if values else pd.NA for values in assignments]
+            assigned = [
+                "|".join(dict.fromkeys(values)) if values else pd.NA for values in assignments
+            ]
         else:
             assigned = [values[0] if values else pd.NA for values in assignments]
 
@@ -880,7 +920,9 @@ def assign_aois(x, component="gaze_samples", overlap="first", overwrite=True):
         for _, definition in definitions.iterrows():
             selected = geometries[geometries["aoi_id"].eq(definition["aoi_id"])]
             for _, geometry in selected.iterrows():
-                compatible = data["coordinate_space_id"].eq(geometry["coordinate_space_id"]).fillna(False)
+                compatible = (
+                    data["coordinate_space_id"].eq(geometry["coordinate_space_id"]).fillna(False)
+                )
                 hit = compatible.to_numpy() & _aoi_contains(ex, ey, et, definition, geometry)
                 hit &= pd.isna(assigned)
                 assigned[hit] = str(definition["aoi_id"])
@@ -929,7 +971,13 @@ def build_aoi_visits(
                 continue
             times = _finite_numeric(z["timestamp_seconds"])
             gaps = np.r_[np.inf, np.diff(times) * 1000]
-            same = z["aoi_id"].astype("string").eq(z["aoi_id"].astype("string").shift()).fillna(False).to_numpy()
+            same = (
+                z["aoi_id"]
+                .astype("string")
+                .eq(z["aoi_id"].astype("string").shift())
+                .fillna(False)
+                .to_numpy()
+            )
             new_run = (~same) | (gaps > float(gap_tolerance_ms))
             run = np.cumsum(new_run)
             for run_id in pd.unique(run):
@@ -981,7 +1029,13 @@ def build_aoi_visits(
         )
         for _, group in groups:
             z = group.reset_index(drop=True)
-            same = z["aoi_id"].astype("string").eq(z["aoi_id"].astype("string").shift()).fillna(False).to_numpy()
+            same = (
+                z["aoi_id"]
+                .astype("string")
+                .eq(z["aoi_id"].astype("string").shift())
+                .fillna(False)
+                .to_numpy()
+            )
             start = _finite_numeric(z["start_time"])
             end = _finite_numeric(z["end_time"])
             gaps = np.r_[np.inf, (start[1:] - end[:-1]) * 1000]
@@ -1093,7 +1147,9 @@ def audit_sampling_rate(x, expected_hz=None, tolerance_hz=5, store=False):
             ]
             expected = _first_nonmissing(hit, np.nan)
         expected_num = pd.to_numeric(pd.Series([expected]), errors="coerce").iloc[0]
-        difference = abs(float(observed) - float(expected_num)) if np.isfinite(expected_num) else np.nan
+        difference = (
+            abs(float(observed) - float(expected_num)) if np.isfinite(expected_num) else np.nan
+        )
         if not np.isfinite(expected_num):
             status = "unknown"
             message = "Expected sampling rate is unavailable."
@@ -1139,7 +1195,11 @@ def audit_signal_quality(
 
     gaze = x["gaze_samples"]
     if not gaze.empty:
-        keys = ["recording_id", "trial_id"] if by_trial and gaze["trial_id"].notna().any() else ["recording_id"]
+        keys = (
+            ["recording_id", "trial_id"]
+            if by_trial and gaze["trial_id"].notna().any()
+            else ["recording_id"]
+        )
         for _, group in gaze.groupby(keys, dropna=False, sort=False):
             gx = _finite_numeric(group["gaze_x"])
             gy = _finite_numeric(group["gaze_y"])
@@ -1153,7 +1213,11 @@ def audit_signal_quality(
                     metric="valid_gaze_fraction",
                     value=fraction,
                     threshold=minimum_valid_gaze,
-                    status=("ok" if np.isfinite(fraction) and fraction >= minimum_valid_gaze else "warning"),
+                    status=(
+                        "ok"
+                        if np.isfinite(fraction) and fraction >= minimum_valid_gaze
+                        else "warning"
+                    ),
                     message=f"{round(100 * fraction, 1)}% valid gaze samples.",
                 )
             )
@@ -1179,13 +1243,19 @@ def audit_signal_quality(
                     metric=f"valid_pupil_fraction_{eye}",
                     value=fraction,
                     threshold=minimum_valid_pupil,
-                    status=("ok" if np.isfinite(fraction) and fraction >= minimum_valid_pupil else "warning"),
+                    status=(
+                        "ok"
+                        if np.isfinite(fraction) and fraction >= minimum_valid_pupil
+                        else "warning"
+                    ),
                     message=(f"{round(100 * fraction, 1)}% valid pupil observations ({eye})."),
                 )
             )
 
     report = (
-        standardize_eye_table(pd.concat(rows, ignore_index=True), "quality") if rows else empty_eye_table("quality")
+        standardize_eye_table(pd.concat(rows, ignore_index=True), "quality")
+        if rows
+        else empty_eye_table("quality")
     )
     return store_quality(x, report, replace_metric=True) if store else report
 
@@ -1218,7 +1288,9 @@ def audit_pupil_quality(
                 value=interpolated,
                 threshold=maximum_interpolated_fraction,
                 status=(
-                    "ok" if np.isfinite(interpolated) and interpolated <= maximum_interpolated_fraction else "warning"
+                    "ok"
+                    if np.isfinite(interpolated) and interpolated <= maximum_interpolated_fraction
+                    else "warning"
                 ),
                 message=(f"{round(100 * interpolated, 1)}% interpolated pupil observations."),
             )
@@ -1318,10 +1390,14 @@ def audit_trial_coverage(x):
             data = x[component]
             if data.empty:
                 return 0
-            return int((data["recording_id"].eq(recording_id) & data["trial_id"].eq(trial_id)).sum())
+            return int(
+                (data["recording_id"].eq(recording_id) & data["trial_id"].eq(trial_id)).sum()
+            )
 
         responses = x["responses"]
-        has_response = bool((responses["recording_id"].eq(recording_id) & responses["trial_id"].eq(trial_id)).any())
+        has_response = bool(
+            (responses["recording_id"].eq(recording_id) & responses["trial_id"].eq(trial_id)).any()
+        )
         start = pd.to_numeric(pd.Series([trial["start_time"]]), errors="coerce").iloc[0]
         end = pd.to_numeric(pd.Series([trial["end_time"]]), errors="coerce").iloc[0]
         duration = float(end - start) if np.isfinite(start) and np.isfinite(end) else np.nan
@@ -1505,10 +1581,16 @@ def interpretive_warnings():
     ]
     guidance = [
         "Interpret fixation within task, stimulus, and measurement context.",
-        ("Longer dwell may reflect difficulty, interest, confusion, rereading, or design properties."),
-        ("Control luminance, baseline, blink handling, timing, and alternative arousal explanations."),
+        (
+            "Longer dwell may reflect difficulty, interest, confusion, rereading, or design properties."
+        ),
+        (
+            "Control luminance, baseline, blink handling, timing, and alternative arousal explanations."
+        ),
         "Use task-specific evidence and model speed-accuracy relations explicitly.",
-        ("Physiological signals are nonspecific and require validated context-sensitive interpretation."),
+        (
+            "Physiological signals are nonspecific and require validated context-sensitive interpretation."
+        ),
         "Name factors neutrally until construct validity is demonstrated.",
         ("Validate classes externally and assess stability and preprocessing dependence."),
     ]
@@ -1531,11 +1613,23 @@ def analysis_readiness(x):
     time = audit_timebase(x)
     trials = audit_trial_coverage(x)
 
-    validation_has_error = bool(validation["severity"].eq("error").any()) if not validation.empty else False
-    time_warning = bool(time["status"].eq("warning").any()) if not time.empty and "status" in time else False
-    coordinate_ready = True if coordinate.empty else bool(coordinate["registered"].fillna(False).all())
-    trials_ready = bool(not trials.empty and not trials["status"].eq("error").all()) if "status" in trials else False
-    quality_ready = True if gaze_quality.empty else not bool(gaze_quality["status"].eq("warning").all())
+    validation_has_error = (
+        bool(validation["severity"].eq("error").any()) if not validation.empty else False
+    )
+    time_warning = (
+        bool(time["status"].eq("warning").any()) if not time.empty and "status" in time else False
+    )
+    coordinate_ready = (
+        True if coordinate.empty else bool(coordinate["registered"].fillna(False).all())
+    )
+    trials_ready = (
+        bool(not trials.empty and not trials["status"].eq("error").all())
+        if "status" in trials
+        else False
+    )
+    quality_ready = (
+        True if gaze_quality.empty else not bool(gaze_quality["status"].eq("warning").all())
+    )
 
     return pd.DataFrame(
         {
@@ -1602,10 +1696,14 @@ def compare_preprocessing(
             {
                 "pipeline": label,
                 "valid_gaze_fraction": (
-                    float(pd.to_numeric(gaze_values, errors="coerce").mean()) if len(gaze_values) else np.nan
+                    float(pd.to_numeric(gaze_values, errors="coerce").mean())
+                    if len(gaze_values)
+                    else np.nan
                 ),
                 "valid_pupil_fraction": (
-                    float(pd.to_numeric(pupil_values, errors="coerce").mean()) if len(pupil_values) else np.nan
+                    float(pd.to_numeric(pupil_values, errors="coerce").mean())
+                    if len(pupil_values)
+                    else np.nan
                 ),
                 "fixation_count": int(dataset["episodes"]["episode_type"].eq("fixation").sum()),
                 "feature_rows": len(dataset["features"]),

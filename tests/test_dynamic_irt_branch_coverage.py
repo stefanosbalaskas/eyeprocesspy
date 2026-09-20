@@ -6,7 +6,11 @@ import pytest
 
 import eyeprocesspy as ep
 import eyeprocesspy.dynamic_irt as dynamic_mod
-from eyeprocesspy.exceptions import EyeProcessBackendError, EyeProcessModelError, EyeProcessValidationError
+from eyeprocesspy.exceptions import (
+    EyeProcessBackendError,
+    EyeProcessModelError,
+    EyeProcessValidationError,
+)
 
 
 def _transition_frame() -> pd.DataFrame:
@@ -101,8 +105,13 @@ def test_dynamic_spec_effect_defaults_and_hidden_coercion():
     assert stan.person_effect == "random"
     assert stan.item_effect == "random"
     hidden = ep.dynamic_irtree_spec(
-        engine="stan", hidden_states=2, include_person=True, include_item=True,
-        condition_columns=None, transition_predictors=None, interactions=None,
+        engine="stan",
+        hidden_states=2,
+        include_person=True,
+        include_item=True,
+        condition_columns=None,
+        transition_predictors=None,
+        interactions=None,
     )
     assert hidden.person_effect == "fixed"
     assert hidden.item_effect == "fixed"
@@ -112,7 +121,9 @@ def test_dynamic_spec_effect_defaults_and_hidden_coercion():
 def test_long_transition_preparation_guards_and_time_path():
     with pytest.raises(EyeProcessValidationError, match="missing required"):
         ep.prepare_dynamic_irtree_data(pd.DataFrame({"participant_id": ["P1"]}))
-    bad_person = pd.DataFrame({"participant_id": [None, None], "item_id": ["I1", "I1"], "state": ["a", "b"]})
+    bad_person = pd.DataFrame(
+        {"participant_id": [None, None], "item_id": ["I1", "I1"], "state": ["a", "b"]}
+    )
     with pytest.raises(EyeProcessValidationError, match="identifiers"):
         ep.prepare_dynamic_irtree_data(bad_person)
     one = pd.DataFrame({"participant_id": ["P1"], "item_id": ["I1"], "state": ["a"]})
@@ -168,7 +179,9 @@ def test_transition_mask_allowed_forbidden_and_guard_paths():
     with pytest.raises(EyeProcessValidationError, match="from and to"):
         ep.structural_transition_mask(["a", "b"], forbidden=pd.DataFrame({"from": ["a"]}))
     with pytest.raises(EyeProcessValidationError, match="Unknown state"):
-        ep.structural_transition_mask(["a", "b"], forbidden=pd.DataFrame({"from": ["a"], "to": ["z"]}))
+        ep.structural_transition_mask(
+            ["a", "b"], forbidden=pd.DataFrame({"from": ["a"], "to": ["z"]})
+        )
     with pytest.raises(EyeProcessValidationError, match="at least one destination"):
         ep.structural_transition_mask(
             ["a", "b"],
@@ -182,9 +195,13 @@ def test_transition_mask_allowed_forbidden_and_guard_paths():
 def test_dynamic_design_predictor_fixed_effect_and_standardization_paths():
     d = _transition_frame()
     spec = ep.dynamic_irtree_spec(
-        engine="multinomial", person_effect="fixed", item_effect="fixed",
-        condition_columns=["condition"], transition_predictors=["numeric_predictor"],
-        include_time_gap=False, standardize=True,
+        engine="multinomial",
+        person_effect="fixed",
+        item_effect="fixed",
+        condition_columns=["condition"],
+        transition_predictors=["numeric_predictor"],
+        include_time_gap=False,
+        standardize=True,
     )
     design = ep.dynamic_transition_design(d, spec, formula="test")
     assert design.formula == "test"
@@ -197,21 +214,29 @@ def test_dynamic_design_predictor_fixed_effect_and_standardization_paths():
 def test_multinomial_and_decoding_validation_paths():
     with pytest.raises(EyeProcessValidationError, match="eye_transition_design"):
         ep.fit_multinomial_transition(dynamic_mod._result("wrong"))
-    design = ep.dynamic_transition_design(_transition_frame(), ep.dynamic_irtree_spec(engine="multinomial"))
+    design = ep.dynamic_transition_design(
+        _transition_frame(), ep.dynamic_irtree_spec(engine="multinomial")
+    )
     with pytest.raises(EyeProcessValidationError, match="Unknown reference"):
         ep.fit_multinomial_transition(design, reference_state="z")
-    fit = ep.fit_dynamic_irtree(_transition_frame(), ep.dynamic_irtree_spec(engine="multinomial"), min_transitions=1)
+    fit = ep.fit_dynamic_irtree(
+        _transition_frame(), ep.dynamic_irtree_spec(engine="multinomial"), min_transitions=1
+    )
     with pytest.raises(EyeProcessValidationError, match="method"):
         ep.decode_dynamic_states(fit, "bad")
     draw = ep.decode_dynamic_states(fit, "draw")
     assert len(draw) == len(fit.transitions)
     with pytest.raises(EyeProcessModelError, match="unavailable"):
-        ep.decode_dynamic_states(dynamic_mod._result("eye_dynamic_irtree", model=dynamic_mod._result("other")))
+        ep.decode_dynamic_states(
+            dynamic_mod._result("eye_dynamic_irtree", model=dynamic_mod._result("other"))
+        )
 
 
 @pytest.mark.parametrize("kind", ["deviance", "randomized"])
 def test_transition_residual_alternate_types(kind):
-    fit = ep.fit_dynamic_irtree(_transition_frame(), ep.dynamic_irtree_spec(engine="multinomial"), min_transitions=1)
+    fit = ep.fit_dynamic_irtree(
+        _transition_frame(), ep.dynamic_irtree_spec(engine="multinomial"), min_transitions=1
+    )
     diag = ep.transition_residual_diagnostics(fit, type=kind)
     assert len(diag.residuals) == len(fit.transitions)
 
@@ -234,7 +259,9 @@ def test_dynamic_simulation_validation_and_regular_time():
         ep.simulate_dynamic_irtree_data(n_person=2, n_item=2, state_misclassification=1)
     with pytest.raises(EyeProcessValidationError, match="heterogeneity"):
         ep.simulate_dynamic_irtree_data(n_person=2, n_item=2, person_sd=-1)
-    sim = ep.simulate_dynamic_irtree_data(n_person=2, n_item=2, transitions_per_trial=2, irregular_time=False, seed=3)
+    sim = ep.simulate_dynamic_irtree_data(
+        n_person=2, n_item=2, transitions_per_trial=2, irregular_time=False, seed=3
+    )
     assert set(sim.transitions["time_gap"]) == {1.0}
     default_recovery = ep.dynamic_irtree_recovery(replications=1, base_seed=2)
     assert len(default_recovery.plan.jobs) == 6
@@ -254,9 +281,18 @@ def test_dynamic_baseline_engine_and_no_support_guard():
     [
         ({"engine": "bad"}, "engine"),
         ({"strategies": {"only": {"f1": 1}}}, "strategies"),
-        ({"strategies": {"a": {"f1": 1}, "b": {"f2": 1}}, "feature_columns": ["f1"]}, "Unknown signature"),
-        ({"strategies": {"a": {"f1": 1}, "b": {"f1": -1}}, "multiple_starts": 0}, "multiple_starts"),
-        ({"strategies": {"a": {"f1": 1}, "b": {"f1": -1}}, "anchor_strength": -1}, "anchor_strength"),
+        (
+            {"strategies": {"a": {"f1": 1}, "b": {"f2": 1}}, "feature_columns": ["f1"]},
+            "Unknown signature",
+        ),
+        (
+            {"strategies": {"a": {"f1": 1}, "b": {"f1": -1}}, "multiple_starts": 0},
+            "multiple_starts",
+        ),
+        (
+            {"strategies": {"a": {"f1": 1}, "b": {"f1": -1}}, "anchor_strength": -1},
+            "anchor_strength",
+        ),
     ],
 )
 def test_strategy_spec_guard_paths(kwargs, message):
@@ -282,7 +318,9 @@ def test_strategy_legacy_matrix_paths_and_prepare_guards():
         }
     )
     with pytest.raises(EyeProcessValidationError, match="at least one strategy"):
-        ep.prepare_strategy_mixture_data(_strategy_frame(), _strategy_spec(item_availability=availability))
+        ep.prepare_strategy_mixture_data(
+            _strategy_frame(), _strategy_spec(item_availability=availability)
+        )
 
 
 def test_strategy_fit_probability_and_sensitivity_guards():
@@ -340,7 +378,8 @@ def test_diffusion_spec_and_data_validation_paths():
 
 def test_diffusion_diagnostics_comparison_and_simulation_guards():
     fit = ep.fit_gaze_diffusion_irt(
-        _diffusion_frame(), ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline")
+        _diffusion_frame(),
+        ep.gaze_diffusion_spec(drift_features=["gaze_balance"], engine="baseline"),
     )
     assert ep.diffusion_parameter_diagnostics(fit).engine == "baseline"
     assert ep.diffusion_posterior_predictive(fit).method == "baseline descriptive"
@@ -350,12 +389,16 @@ def test_diffusion_diagnostics_comparison_and_simulation_guards():
         ep.simulate_gaze_diffusion_data(n_person=1, n_item=2)
     with pytest.raises(EyeProcessValidationError, match="contaminant_fraction"):
         ep.simulate_gaze_diffusion_data(n_person=2, n_item=2, contaminant_fraction=1)
-    sim = ep.simulate_gaze_diffusion_data(n_person=2, n_item=2, time_step=0.01, max_decision_time=0.05, seed=2)
+    sim = ep.simulate_gaze_diffusion_data(
+        n_person=2, n_item=2, time_step=0.01, max_decision_time=0.05, seed=2
+    )
     assert len(sim) == 4
     default_plan = ep.diffusion_identification_study(replications=1)
     assert len(default_plan.plan.jobs) == 16
     frame_plan = ep.diffusion_identification_study(
-        pd.DataFrame({"n_person": [2], "n_item": [2], "gaze_effect": [0.1], "contaminant_fraction": [0.0]}),
+        pd.DataFrame(
+            {"n_person": [2], "n_item": [2], "gaze_effect": [0.1], "contaminant_fraction": [0.0]}
+        ),
         replications=2,
     )
     assert len(frame_plan.plan.jobs) == 2

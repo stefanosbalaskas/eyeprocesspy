@@ -3,14 +3,15 @@
 This is intentionally a local validation fallback for sandboxed/offline development.
 GitHub CI remains authoritative for the normal PEP 517 wheel/sdist build.
 """
+
 from __future__ import annotations
 
 import base64
 import csv
 import hashlib
 import io
-from pathlib import Path
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PKG = ROOT / "src" / "eyeprocesspy"

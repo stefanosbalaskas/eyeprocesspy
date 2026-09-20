@@ -11,7 +11,20 @@ trials = np.tile(np.arange(1, 7), 6)
 x = np.tile([0, 1, 0, 1, 0, 1], 6)
 participant_shift = np.repeat(rng.normal(0, 0.15, 6), 6)
 dwell = 1.2 + 0.45 * (x - 0.5) + participant_shift + rng.normal(0, 0.2, len(x))
-y = (rng.random(len(x)) < 1 / (1 + np.exp(-(-0.3 + 0.5 * (x - 0.5) + 0.6 * (dwell - pd.Series(dwell).groupby(participants).transform("mean")))))).astype(int)
+y = (
+    rng.random(len(x))
+    < 1
+    / (
+        1
+        + np.exp(
+            -(
+                -0.3
+                + 0.5 * (x - 0.5)
+                + 0.6 * (dwell - pd.Series(dwell).groupby(participants).transform("mean"))
+            )
+        )
+    )
+).astype(int)
 quality = np.full(len(x), 0.95)
 quality[4] = 0.40
 # An observed zero is different from an unobserved mediator.
@@ -41,16 +54,22 @@ prepared = prepare_multilevel_mediation_data(
     warn=False,
 )
 
-print(prepared.data[[
-    "participant_id",
-    "trial_id",
-    "X_within",
-    "X_between",
-    "M_within",
-    "M_between",
-    "mediation_mediator_state",
-    "mediation_analysis_eligible",
-]].head(12).to_string(index=False))
+print(
+    prepared.data[
+        [
+            "participant_id",
+            "trial_id",
+            "X_within",
+            "X_between",
+            "M_within",
+            "M_between",
+            "mediation_mediator_state",
+            "mediation_analysis_eligible",
+        ]
+    ]
+    .head(12)
+    .to_string(index=False)
+)
 print("\nMissingness audit")
 print(prepared.missingness.to_string(index=False))
 print("\nVariation classification")

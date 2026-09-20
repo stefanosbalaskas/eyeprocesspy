@@ -11,7 +11,15 @@ import eyeprocesspy.adapters as ad
 import eyeprocesspy.coordinates as co
 
 
-def _dataset(recording_id="R1", coordinate_spaces=None, gaze_samples=None, episodes=None, aoi_geometry=None, raw=None, metadata=None):
+def _dataset(
+    recording_id="R1",
+    coordinate_spaces=None,
+    gaze_samples=None,
+    episodes=None,
+    aoi_geometry=None,
+    raw=None,
+    metadata=None,
+):
     recordings = pd.DataFrame({"recording_id": [recording_id], "participant_id": ["P1"]})
     return ep.new_eye_dataset(
         recordings=recordings,
@@ -47,19 +55,28 @@ def _coordinate_dataset():
         {
             "episode_id": ["E1"],
             "recording_id": ["R1"],
-            "centroid_x": [0.5], "centroid_y": [0.5],
-            "start_x": [0.1], "start_y": [0.2],
-            "end_x": [0.8], "end_y": [0.9],
+            "centroid_x": [0.5],
+            "centroid_y": [0.5],
+            "start_x": [0.1],
+            "start_y": [0.2],
+            "end_x": [0.8],
+            "end_y": [0.9],
             "coordinate_space_id": ["norm"],
         }
     )
     geometry = pd.DataFrame(
         {
-            "aoi_id": ["A1"], "x": [0.2], "y": [0.3],
-            "width": [0.4], "height": [0.5], "coordinate_space_id": ["norm"]
+            "aoi_id": ["A1"],
+            "x": [0.2],
+            "y": [0.3],
+            "width": [0.4],
+            "height": [0.5],
+            "coordinate_space_id": ["norm"],
         }
     )
-    return _dataset(coordinate_spaces=spaces, gaze_samples=gaze, episodes=episodes, aoi_geometry=geometry)
+    return _dataset(
+        coordinate_spaces=spaces, gaze_samples=gaze, episodes=episodes, aoi_geometry=geometry
+    )
 
 
 def test_schema_residual_guards_and_defaults():
@@ -71,15 +88,21 @@ def test_schema_residual_guards_and_defaults():
         ep.schema_table("missing")
     with pytest.raises(TypeError, match="pandas DataFrame"):
         ep.standardize_eye_table([], "recordings")
-    standardized = ep.standardize_eye_table(pd.DataFrame({"recording_id": ["R"], "extra": [1]}), "recordings", keep_extra=False)
+    standardized = ep.standardize_eye_table(
+        pd.DataFrame({"recording_id": ["R"], "extra": [1]}), "recordings", keep_extra=False
+    )
     assert "extra" not in standardized
     with pytest.raises(TypeError, match="pandas DataFrame"):
         ep.validate_eye_table([], "recordings")
-    issues = ep.validate_eye_table(pd.DataFrame({"recording_id": ["R"], "extra": [1]}), "recordings", strict=True)
+    issues = ep.validate_eye_table(
+        pd.DataFrame({"recording_id": ["R"], "extra": [1]}), "recordings", strict=True
+    )
     assert {"missing_schema_field", "extra_field"}.issubset(set(issues.code))
     with pytest.raises(ValueError, match="Invalid `space_type`"):
         ep.new_coordinate_space("x", "invalid")
-    custom_space = ep.new_coordinate_space("x", "custom", origin="o", x_unit="xu", y_unit="yu", width=10, height=20)
+    custom_space = ep.new_coordinate_space(
+        "x", "custom", origin="o", x_unit="xu", y_unit="yu", width=10, height=20
+    )
     assert custom_space.loc[0, "origin"] == "o" and custom_space.loc[0, "width"] == 10
 
 
@@ -101,11 +124,20 @@ def test_dataset_repr_table_and_provenance_residuals(tmp_path: Path):
 
     source = tmp_path / "source.txt"
     source.write_text("payload\n", encoding="utf-8")
-    p1 = ep.add_provenance(x, "a", source_files=[source, tmp_path / "absent"], warnings=["w1", "w2"])
+    p1 = ep.add_provenance(
+        x, "a", source_files=[source, tmp_path / "absent"], warnings=["w1", "w2"]
+    )
     assert "|" in str(p1["provenance"].source_files.iloc[-1])
     assert "NA" in str(p1["provenance"].file_hashes.iloc[-1])
     assert "w1 | w2" == p1["provenance"].warnings.iloc[-1]
-    p2 = ep.add_provenance(x, "b", source_files=str(source), file_hashes="manual", warnings="warning", software_version="v")
+    p2 = ep.add_provenance(
+        x,
+        "b",
+        source_files=str(source),
+        file_hashes="manual",
+        warnings="warning",
+        software_version="v",
+    )
     assert p2["provenance"].file_hashes.iloc[-1] == "manual"
     p3 = ep.add_provenance(x, "c", source_files=pd.NA, file_hashes=None)
     assert p3["provenance"].file_hashes.iloc[-1] == ""
@@ -140,15 +172,31 @@ def test_coordinate_registration_lookup_and_low_level_conversion_guards():
     with pytest.raises(ep.EyeProcessCoordinateError, match="Destination width"):
         co._convert_xy([0.5], [0.5], "display_normalized_top_left", "display_pixels_top_left")
 
-    pix_to_norm = co._convert_xy([50], [100], "display_pixels_top_left", "display_normalized_top_left", 100, 200)
+    pix_to_norm = co._convert_xy(
+        [50], [100], "display_pixels_top_left", "display_normalized_top_left", 100, 200
+    )
     np.testing.assert_allclose(pix_to_norm[["x", "y"]], [[0.5, 0.5]])
-    surf_to_norm = co._convert_xy([0.25], [0.1], "surface_normalized_bottom_left", "display_normalized_top_left")
+    surf_to_norm = co._convert_xy(
+        [0.25], [0.1], "surface_normalized_bottom_left", "display_normalized_top_left"
+    )
     np.testing.assert_allclose(surf_to_norm[["x", "y"]], [[0.25, 0.9]])
-    norm_to_surf = co._convert_xy([0.25], [0.9], "display_normalized_top_left", "surface_normalized_bottom_left")
+    norm_to_surf = co._convert_xy(
+        [0.25], [0.9], "display_normalized_top_left", "surface_normalized_bottom_left"
+    )
     np.testing.assert_allclose(norm_to_surf[["x", "y"]], [[0.25, 0.1]])
-    clipped_norm = co._convert_xy([-1, 2], [2, -1], "display_normalized_top_left", "display_normalized_top_left", clip=True)
+    clipped_norm = co._convert_xy(
+        [-1, 2], [2, -1], "display_normalized_top_left", "display_normalized_top_left", clip=True
+    )
     assert clipped_norm.x.tolist() == [0.0, 1.0]
-    clipped_pix = co._convert_xy([-1, 2], [2, -1], "display_normalized_top_left", "display_pixels_top_left", to_width=100, to_height=200, clip=True)
+    clipped_pix = co._convert_xy(
+        [-1, 2],
+        [2, -1],
+        "display_normalized_top_left",
+        "display_pixels_top_left",
+        to_width=100,
+        to_height=200,
+        clip=True,
+    )
     assert clipped_pix.x.tolist() == [0.0, 100.0]
 
 
@@ -158,7 +206,9 @@ def test_convert_coordinates_all_component_and_overwrite_paths():
     assert len(copied["gaze_samples"]) == 2
     assert "S1_pix" in set(copied["gaze_samples"].sample_id.astype(str))
 
-    overwritten = ep.convert_coordinates(x, "norm", "pix", components="gaze_samples", overwrite=True, clip=True)
+    overwritten = ep.convert_coordinates(
+        x, "norm", "pix", components="gaze_samples", overwrite=True, clip=True
+    )
     row = overwritten["gaze_samples"].iloc[0]
     assert row.coordinate_space_id == "pix" and 0 <= row.gaze_x <= 100 and 0 <= row.gaze_y <= 200
 
@@ -176,7 +226,9 @@ def test_convert_coordinates_all_component_and_overwrite_paths():
     assert empty_component["events"].empty
 
     unregistered = _dataset(
-        gaze_samples=pd.DataFrame({"recording_id": ["R1"], "sample_id": ["S"], "coordinate_space_id": ["ghost"]})
+        gaze_samples=pd.DataFrame(
+            {"recording_id": ["R1"], "sample_id": ["S"], "coordinate_space_id": ["ghost"]}
+        )
     )
     audit = ep.audit_coordinate_spaces(unregistered)
     assert not bool(audit.loc[0, "registered"])
@@ -208,7 +260,9 @@ def test_adapter_registration_detection_and_read_guards(tmp_path: Path):
             ep.detect_eye_format(tmp_path / "missing.csv")
 
         ep.register_eye_adapter("nan", lambda *a, **k: np.nan, lambda *a, **k: "N", priority=1)
-        ep.register_eye_adapter("err", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("x")), lambda *a, **k: "E")
+        ep.register_eye_adapter(
+            "err", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("x")), lambda *a, **k: "E"
+        )
         ep.register_eye_adapter("high", lambda *a, **k: 5, lambda *a, **k: "H", priority=0)
         detected = ep.detect_eye_format(f)
         assert detected.loc[detected.format == "a", "confidence"].iloc[0] == 1
@@ -241,11 +295,17 @@ def test_adapter_folder_remap_combine_and_generic_detector(tmp_path: Path, monke
     folder.mkdir()
     (folder / "a.csv").write_text("x,y\n1,2\n", encoding="utf-8")
     (folder / "b.txt").write_text("x,y\n3,4\n", encoding="utf-8")
-    listed = ep.read_eye_folder(folder, vendor="generic", combine=False, mapping={"timestamp": "x", "x": "x", "y": "y"})
+    listed = ep.read_eye_folder(
+        folder, vendor="generic", combine=False, mapping={"timestamp": "x", "x": "x", "y": "y"}
+    )
     assert len(listed) == 2
 
     with monkeypatch.context() as ctx:
-        ctx.setattr(ad, "read_eye_export", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("bad")))
+        ctx.setattr(
+            ad,
+            "read_eye_export",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("bad")),
+        )
         with pytest.raises(ValueError, match="could be imported"):
             ep.read_eye_folder(folder)
 
@@ -277,5 +337,9 @@ def test_adapter_folder_remap_combine_and_generic_detector(tmp_path: Path, monke
     twocol.write_text("x,y\n1,2\n", encoding="utf-8")
     assert ad._detect_generic_delimited(twocol) == 0.1
     with monkeypatch.context() as ctx:
-        ctx.setattr(ad, "_read_delimited", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("bad")))
+        ctx.setattr(
+            ad,
+            "_read_delimited",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("bad")),
+        )
         assert ad._detect_generic_delimited(twocol) == 0.0

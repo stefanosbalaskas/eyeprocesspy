@@ -1,4 +1,5 @@
 """CI-sized worked example: detector choice -> AOI features -> inference."""
+
 from pathlib import Path
 
 import eyeprocesspy as ep
@@ -7,29 +8,55 @@ import eyeprocesspy as ep
 def build_specs():
     specs = [
         ep.define_event_detector_spec(
-            "ivt25", "ivt", velocity_threshold=25, minimum_duration_ms=60,
-            maximum_gap_ms=75, sampling_rate=60, coordinate_unit="degrees",
+            "ivt25",
+            "ivt",
+            velocity_threshold=25,
+            minimum_duration_ms=60,
+            maximum_gap_ms=75,
+            sampling_rate=60,
+            coordinate_unit="degrees",
         ),
         ep.define_event_detector_spec(
-            "ivt30", "ivt", velocity_threshold=30, minimum_duration_ms=60,
-            maximum_gap_ms=75, sampling_rate=60, coordinate_unit="degrees",
+            "ivt30",
+            "ivt",
+            velocity_threshold=30,
+            minimum_duration_ms=60,
+            maximum_gap_ms=75,
+            sampling_rate=60,
+            coordinate_unit="degrees",
         ),
         ep.define_event_detector_spec(
-            "ivt35", "ivt", velocity_threshold=35, minimum_duration_ms=60,
-            maximum_gap_ms=75, sampling_rate=60, coordinate_unit="degrees",
+            "ivt35",
+            "ivt",
+            velocity_threshold=35,
+            minimum_duration_ms=60,
+            maximum_gap_ms=75,
+            sampling_rate=60,
+            coordinate_unit="degrees",
         ),
         ep.define_event_detector_spec(
-            "idt_A", "idt", dispersion_threshold=1.2, minimum_duration_ms=80,
-            sampling_rate=60, coordinate_unit="degrees",
+            "idt_A",
+            "idt",
+            dispersion_threshold=1.2,
+            minimum_duration_ms=80,
+            sampling_rate=60,
+            coordinate_unit="degrees",
         ),
         ep.define_event_detector_spec(
-            "adaptive", "adaptive_velocity", minimum_duration_ms=60,
-            maximum_gap_ms=75, sampling_rate=60, coordinate_unit="degrees",
+            "adaptive",
+            "adaptive_velocity",
+            minimum_duration_ms=60,
+            maximum_gap_ms=75,
+            sampling_rate=60,
+            coordinate_unit="degrees",
             parameters={"noise_factor": 4, "minimum_velocity_threshold": 20},
         ),
         ep.define_event_detector_spec(
-            "remodnav", "remodnav", minimum_duration_ms=60,
-            sampling_rate=60, coordinate_unit="degrees",
+            "remodnav",
+            "remodnav",
+            minimum_duration_ms=60,
+            sampling_rate=60,
+            coordinate_unit="degrees",
             parameters={"noise_factor": 5},
         ),
     ]
@@ -76,7 +103,9 @@ def main(output_dir=None, n_participants=8):
     if output_dir is not None:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        ep.plot_detector_agreement(result).figure.savefig(output_dir / "detector-agreement.svg", bbox_inches="tight")
+        ep.plot_detector_agreement(result).figure.savefig(
+            output_dir / "detector-agreement.svg", bbox_inches="tight"
+        )
         ep.plot_detector_feature_distributions(
             result, feature="dwell_time_ms", aoi_id="disclosure"
         ).figure.savefig(output_dir / "disclosure-dwell-by-detector.svg", bbox_inches="tight")

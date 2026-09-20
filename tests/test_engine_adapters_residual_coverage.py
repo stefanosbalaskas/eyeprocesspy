@@ -281,7 +281,11 @@ def test_sequence_conversion_empty_nonempty_and_native_backend_gate():
     proc = ea.as_procdata_sequence(x, source="visits")
     assert proc.empty
     assert list(proc.columns) == [
-        "recording_id", "trial_id", "action_index", "action", "timestamp_order"
+        "recording_id",
+        "trial_id",
+        "action_index",
+        "action",
+        "timestamp_order",
     ]
 
     wide = ea.as_traminer_sequence(x, source="visits")
@@ -385,7 +389,9 @@ def test_compare_model_engines_all_extractor_forms_and_failure_paths():
     assert result["reference"] == "mapping"
     estimates = result["estimates"]
     assert set(estimates.loc[estimates["parameter"].notna(), "engine"]) == {
-        "mapping", "series", "frame"
+        "mapping",
+        "series",
+        "frame",
     }
     assert estimates.loc[estimates["engine"].eq("mapping"), "equivalent"].iloc[0]
     errors = estimates["error"].fillna("").str.cat(sep=" ")

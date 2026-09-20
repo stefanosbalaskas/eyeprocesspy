@@ -8,11 +8,12 @@ pandas/numpy data structures.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from itertools import product
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -83,11 +84,15 @@ def vendor_validation_spec(
     require_licence_reviewed=True,
 ):
     """Specify multi-vendor empirical validation requirements."""
-    vendors = tuple(value.lower() for value in _as_nonempty_strings(required_vendors, "required_vendors"))
+    vendors = tuple(
+        value.lower() for value in _as_nonempty_strings(required_vendors, "required_vendors")
+    )
     try:
         cases = int(min_cases_per_vendor)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError("`min_cases_per_vendor` must be a positive integer.") from exc
+        raise EyeProcessValidationError(
+            "`min_cases_per_vendor` must be a positive integer."
+        ) from exc
     if cases < 1 or float(cases) != float(min_cases_per_vendor):
         _raise("`min_cases_per_vendor` must be a positive integer.")
 
@@ -121,7 +126,9 @@ def _extract_corpus_frames(x: Any) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         manifest = getattr(x, "manifest", None)
 
     if not isinstance(summary, pd.DataFrame):
-        raise TypeError("`x` must be a validation-summary DataFrame or an object containing a DataFrame `summary`.")
+        raise TypeError(
+            "`x` must be a validation-summary DataFrame or an object containing a DataFrame `summary`."
+        )
     if manifest is not None and not isinstance(manifest, pd.DataFrame):
         raise TypeError("Corpus `manifest` must be a pandas DataFrame.")
     return summary.copy(), None if manifest is None else manifest.copy()
@@ -152,7 +159,12 @@ def audit_vendor_validation(x, spec=None):
     if missing:
         _raise("Validation summary is missing required column(s): " + ", ".join(sorted(missing)))
 
-    if manifest is not None and not manifest.empty and "case_id" in data.columns and "case_id" in manifest.columns:
+    if (
+        manifest is not None
+        and not manifest.empty
+        and "case_id" in data.columns
+        and "case_id" in manifest.columns
+    ):
         metadata_columns = [
             name
             for name in ("independent_source", "licence_reviewed")
@@ -183,15 +195,21 @@ def audit_vendor_validation(x, spec=None):
         pass_rate = passes / n_cases if n_cases else 0.0
 
         versions_ok = not spec.require_versions or (
-            "software_version" in subset.columns and n_cases > 0 and _complete_text(subset["software_version"])
+            "software_version" in subset.columns
+            and n_cases > 0
+            and _complete_text(subset["software_version"])
         )
         devices_ok = not spec.require_devices or (
-            "device_model" in subset.columns and n_cases > 0 and _complete_text(subset["device_model"])
+            "device_model" in subset.columns
+            and n_cases > 0
+            and _complete_text(subset["device_model"])
         )
 
         independent = _logical_flags(subset, "independent_source")
         independent_ok = not spec.require_independent_sources or (
-            n_cases > 0 and bool(independent.notna().all()) and bool(independent.fillna(False).all())
+            n_cases > 0
+            and bool(independent.notna().all())
+            and bool(independent.fillna(False).all())
         )
         independent_cases = int(independent.fillna(False).sum())
 
@@ -237,19 +255,24 @@ def audit_vendor_validation(x, spec=None):
 
 def write_vendor_validation_report(x, path):
     """Write the frozen multi-vendor validation Markdown report."""
-    if not isinstance(x, pd.DataFrame) or x.attrs.get("eyeprocess_class") != "eye_vendor_validation":
+    if (
+        not isinstance(x, pd.DataFrame)
+        or x.attrs.get("eyeprocess_class") != "eye_vendor_validation"
+    ):
         _raise("Expected an `eye_vendor_validation` object.")
 
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
-    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    generated = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     lines = [
         "# Multi-vendor empirical validation audit",
         "",
         f"Generated: {generated}",
         "",
-        ("| Vendor | Cases | Independent | Licence reviewed | Passes | Warnings | Failures | Pass rate | Status |"),
+        (
+            "| Vendor | Cases | Independent | Licence reviewed | Passes | Warnings | Failures | Pass rate | Status |"
+        ),
         "|---|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in x.itertuples(index=False):
@@ -302,13 +325,17 @@ def model_validation_spec(
                 "Confidence, coverage, and failure-rate thresholds must be between zero and one."
             ) from exc
         if not np.isfinite(numeric) or not 0 <= numeric <= 1:
-            _raise("Confidence, coverage, and failure-rate thresholds must be between zero and one.")
+            _raise(
+                "Confidence, coverage, and failure-rate thresholds must be between zero and one."
+            )
         bounded[name] = numeric
 
     try:
         bias = float(max_abs_bias)
     except (TypeError, ValueError) as exc:
-        raise EyeProcessValidationError("`max_abs_bias` must be a finite non-negative value.") from exc
+        raise EyeProcessValidationError(
+            "`max_abs_bias` must be a finite non-negative value."
+        ) from exc
     if not np.isfinite(bias) or bias < 0:
         _raise("`max_abs_bias` must be a finite non-negative value.")
 
@@ -529,9 +556,7 @@ def run_model_validation(
 
             estimates = _estimate_frame(extracted)
             if estimates is None or not {"parameter", "estimate"} <= set(estimates.columns):
-                message = (
-                    "Extractor must return a DataFrame with parameter and estimate columns or a named mapping/Series."
-                )
+                message = "Extractor must return a DataFrame with parameter and estimate columns or a named mapping/Series."
                 rows.append(
                     _failure_row(
                         scenario=scenario_number,
@@ -616,9 +641,9 @@ def run_model_validation(
         truth_values = runs["truth"].to_numpy(dtype=float)
         lower_values = runs["lower"].to_numpy(dtype=float)
         upper_values = runs["upper"].to_numpy(dtype=float)
-        covered[interval_available] = (lower_values[interval_available] <= truth_values[interval_available]) & (
-            upper_values[interval_available] >= truth_values[interval_available]
-        )
+        covered[interval_available] = (
+            lower_values[interval_available] <= truth_values[interval_available]
+        ) & (upper_values[interval_available] >= truth_values[interval_available])
     runs["covered"] = pd.Series(covered, dtype="boolean")
 
     return _ModelValidation(
@@ -677,7 +702,9 @@ def model_validation_summary(x):
         covered_series = group["covered"].astype("boolean")
         coverage_mask = ok & covered_series.notna().to_numpy()
         coverage = (
-            float(covered_series[coverage_mask].astype(bool).to_numpy().mean()) if coverage_mask.any() else np.nan
+            float(covered_series[coverage_mask].astype(bool).to_numpy().mean())
+            if coverage_mask.any()
+            else np.nan
         )
 
         row = {
@@ -699,7 +726,10 @@ def model_validation_summary(x):
         | ~np.isfinite(output["absolute_bias"].to_numpy(dtype=float))
         | output["failure_rate"].gt(spec.max_failure_rate)
         | output["absolute_bias"].gt(spec.max_abs_bias)
-        | (np.isfinite(output["coverage"].to_numpy(dtype=float)) & output["coverage"].lt(spec.min_coverage))
+        | (
+            np.isfinite(output["coverage"].to_numpy(dtype=float))
+            & output["coverage"].lt(spec.min_coverage)
+        )
     )
     output["status"] = np.where(fail, "fail", "pass")
     output.attrs["eyeprocess_class"] = "eye_model_validation_summary"

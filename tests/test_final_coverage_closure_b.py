@@ -58,9 +58,7 @@ def test_grouped_private_validation_backend_and_name_guards(monkeypatch):
         gv._fold_count(2.5)
     assert gv._fold_count("2") == 2
 
-    keyed = gv._group_key(
-        pd.DataFrame({"a": ["x", None], "b": ["y", "z"]}), ["a", "b"]
-    )
+    keyed = gv._group_key(pd.DataFrame({"a": ["x", None], "b": ["y", "z"]}), ["a", "b"])
     assert keyed.notna().tolist() == [True, False]
 
 
@@ -130,7 +128,11 @@ def test_grouped_fold_and_crossed_error_paths(monkeypatch):
 
     real_crossed = gv.crossed_grouped_folds
     with monkeypatch.context() as ctx:
-        ctx.setattr(gv, "_fit_and_score", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("forced")))
+        ctx.setattr(
+            gv,
+            "_fit_and_score",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("forced")),
+        )
         failed = ep.crossed_grouped_cv(data, "y ~ x", groups=["participant_id", "item_id"], v=2)
     assert failed["results"].error.notna().all()
     assert real_crossed is not None
@@ -138,9 +140,7 @@ def test_grouped_fold_and_crossed_error_paths(monkeypatch):
 
 def test_quantify_process_leakage_single_group_and_failure_reference(monkeypatch):
     data = _group_data()
-    one_group = ep.quantify_process_leakage(
-        data, "y ~ x", group="participant_id", v=3, seed=2
-    )
+    one_group = ep.quantify_process_leakage(data, "y ~ x", group="participant_id", v=3, seed=2)
     assert "cross_classified" not in set(one_group.scheme)
 
     def fail_cv(*args, **kwargs):
@@ -148,9 +148,7 @@ def test_quantify_process_leakage_single_group_and_failure_reference(monkeypatch
 
     with monkeypatch.context() as ctx:
         ctx.setattr(gv, "grouped_cv", fail_cv)
-        failed = ep.quantify_process_leakage(
-            data, "y ~ x", group="participant_id", v=3, seed=2
-        )
+        failed = ep.quantify_process_leakage(data, "y ~ x", group="participant_id", v=3, seed=2)
     assert failed.error.notna().all()
     assert failed.mean_log_loss.isna().all()
     assert failed.optimistic_difference.isna().all()
@@ -224,6 +222,7 @@ def test_software_claim_validation_coverage_and_readiness_residuals(tmp_path, mo
     assert gaps["claim_gaps"].empty
 
     import eyeprocesspy.governance_09 as gov
+
     with monkeypatch.context() as ctx:
         ctx.setattr(gov, "summarise_process_validation", lambda x: pd.DataFrame({"ok": [1]}))
         summarized = ep.software_paper_validation_table(
