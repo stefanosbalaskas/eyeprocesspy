@@ -113,6 +113,19 @@ def test_p4_scoring_precision_targeting_and_exposure_contracts() -> None:
     assert np.all(np.isfinite(scores.estimate))
     assert np.all(scores.se > 0)
 
+    # Exercise every documented score-table dispatch branch.
+    for method in ("MAP", "ML"):
+        alternate = ep.eyeprocess_irt_score_table(
+            y,
+            items,
+            method=method,
+        )
+        assert len(alternate) == len(y)
+        assert alternate.person_id.tolist() == y.index.astype(str).tolist()
+        assert alternate.method.tolist() == [method] * len(y)
+        assert np.all(np.isfinite(alternate.estimate))
+        assert alternate.se.isna().all()
+
     reliability = ep.eyeprocess_irt_marginal_reliability(scores.estimate, scores.se)
     assert np.isnan(reliability) or 0 <= reliability <= 1
 
