@@ -494,8 +494,9 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
         robust_sigma = 1.4826 * mad
         threshold = max(min_threshold, centre + noise_factor * robust_sigma)
         is_fix = np.isfinite(velocity) & valid & (velocity <= threshold)
-        if len(is_fix):
-            is_fix[0] = bool(is_fix[1]) if len(is_fix) > 1 else False
+        # usable.size >= 3 guarantees at least four samples, so both
+        # indices exist here.
+        is_fix[0] = bool(is_fix[1])
         gap_limit = float(spec.maximum_gap_ms or (1000.0 / float(spec.sampling_rate) * 2.5))
         run_ids = np.zeros(len(z), dtype=int)
         run = 0
@@ -509,9 +510,9 @@ def _run_adaptive_velocity(x: EyeDataset, spec: EventDetectorSpec) -> EyeDataset
                 run += 1
             run_ids[i] = run
         for run_id in pd.unique(run_ids[is_fix]):
+            # Every run_id is obtained from run_ids[is_fix], so it has
+            # at least one corresponding fixation position.
             pos = np.flatnonzero((run_ids == run_id) & is_fix)
-            if not len(pos):
-                continue
             duration = (np.nanmax(t[pos]) - np.nanmin(t[pos])) * 1000
             if duration < float(spec.minimum_duration_ms):
                 continue
@@ -829,11 +830,10 @@ def detect_events_with_spec(x: EyeDataset, spec: EventDetectorSpec) -> EyeDatase
             "episodes",
             f"detector_id={spec.detector_id};spec_hash={spec.fingerprint};n={len(external)}",
         )
-    elif spec.algorithm == "vendor":
+    else:  # validated remaining supported algorithm: vendor
         vendor = x["episodes"].copy()
         params = spec.parameter_dict
-        if "derived_by" in vendor:
-            vendor = vendor[vendor["derived_by"].eq(params.get("derived_by", "vendor"))]
+        vendor = vendor[vendor["derived_by"].eq(params.get("derived_by", "vendor"))]
         vendor = _attach_detector_columns(vendor, spec)
         branch["episodes"] = standardize_eye_table(
             pd.concat([branch["episodes"], vendor], ignore_index=True, sort=False),

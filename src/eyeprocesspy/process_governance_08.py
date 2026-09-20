@@ -1789,8 +1789,6 @@ def filter_eye_signal(
     width = width + 1 if width % 2 == 0 else width
     maxodd = len(y) if len(y) % 2 else len(y) - 1
     width = min(width, maxodd)
-    if width < 3:
-        raise EyeProcessValidationError("Signal is too short for median filtering.")
     chosen = "runmed" if method == "auto" else method
     if chosen == "robfilter":
         raise EyeProcessBackendError(

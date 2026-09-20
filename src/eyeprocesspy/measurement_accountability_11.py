@@ -83,10 +83,10 @@ def pupil_latency_sensitivity(
         raise ValueError("fewer than 8 finite samples")
     ts = [p[0] for p in pairs]
     ys = [p[1] for p in pairs]
-    dts = [b - a for a, b in zip(ts[:-1], ts[1:]) if b > a]
+    dts = [b - a for a, b in zip(ts[:-1], ts[1:])]
+    if any(delta <= 0 for delta in dts):
+        raise ValueError("time must contain increasing samples with no duplicate finite timestamps")
     dt = _median(dts)
-    if not math.isfinite(dt) or dt <= 0:
-        raise ValueError("time must contain increasing samples")
     sampling_hz = 1.0 / dt
 
     b0, b1 = event_time + baseline_window[0], event_time + baseline_window[1]
@@ -122,8 +122,6 @@ def pupil_latency_sensitivity(
         x0 = st[k]
         xs = [x - x0 for x in st[k:]]
         denom = sum(x * x for x in xs)
-        if denom <= 0:
-            continue
         beta = sum(x * r for x, r in zip(xs, response[k:])) / denom
         pred = [0.0] * k + [beta * x for x in xs]
         sse = sum((r - p) ** 2 for r, p in zip(response, pred))

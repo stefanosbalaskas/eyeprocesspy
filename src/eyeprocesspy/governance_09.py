@@ -959,8 +959,7 @@ def run_eye_pipeline(
         outputs = dict(previous.outputs)
         errors = dict(previous.errors)
         warns = dict(previous.warnings)
-        if len(previous.records):
-            records = {r.step: r.to_frame().T for _, r in previous.records.iterrows()}
+        records = {r.step: r.to_frame().T for _, r in previous.records.iterrows()}
     for nm in order:
         if nm in outputs:
             continue

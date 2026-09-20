@@ -172,8 +172,6 @@ def _polygon_self_intersects(poly: np.ndarray) -> bool:
         for j in range(i + 1, n):
             if j in {i, (i + 1) % n} or (j + 1) % n in {i, (i + 1) % n}:
                 continue
-            if i == 0 and (j + 1) % n == 0:
-                continue
             c, d = poly[j], poly[(j + 1) % n]
             if _segments_intersect(a, b, c, d):
                 return True

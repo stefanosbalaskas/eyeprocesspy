@@ -127,7 +127,7 @@ def _transform_geometry(geometry: pd.DataFrame, spec: Any) -> pd.DataFrame:
                 xmax += tx
                 ymin += ty
                 ymax += ty
-            elif op == "anisotropic_expansion":
+            else:  # validated remaining operation: anisotropic_expansion
                 xmin -= mx
                 xmax += mx
                 ymin -= my
@@ -161,7 +161,7 @@ def _transform_geometry(geometry: pd.DataFrame, spec: Any) -> pd.DataFrame:
             elif op in {"translate", "jitter"}:
                 poly[:, 0] += tx
                 poly[:, 1] += ty
-            elif op == "anisotropic_expansion":
+            else:  # validated remaining operation: anisotropic_expansion
                 cx, cy = np.mean(poly[:, 0]), np.mean(poly[:, 1])
                 bx0, bx1 = float(poly[:, 0].min()), float(poly[:, 0].max())
                 by0, by1 = float(poly[:, 1].min()), float(poly[:, 1].max())

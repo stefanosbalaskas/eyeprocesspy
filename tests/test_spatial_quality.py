@@ -245,7 +245,7 @@ def test_provenance_fingerprint_deterministic_and_changes_with_source():
     )
     av = ep.create_gaze_quality_report(d, by=["profile", "target_id"], valid="valid")
     d3 = d.copy()
-    d3.loc[0, "valid"] = 0
+    d3.loc[0, "valid"] = False
     e = ep.create_gaze_quality_report(d3, by=["profile", "target_id"], valid="valid")
     assert (
         av.attrs["gaze_quality_provenance"]["source_fingerprint"]

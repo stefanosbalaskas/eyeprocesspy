@@ -492,16 +492,13 @@ def gp_parse_media_events(x):
                 "stimulus_id": row.stimulus_id,
             }
         )
-    if rows:
-        x["events"] = standardize_eye_table(
-            pd.concat(
-                [x["events"], pd.DataFrame(rows)], ignore_index=True, sort=False
-            ).drop_duplicates(
-                subset=["recording_id", "timestamp_seconds", "event_type", "event_value"],
-                keep="first",
-            ),
-            "events",
-        )
+    x["events"] = standardize_eye_table(
+        pd.concat([x["events"], pd.DataFrame(rows)], ignore_index=True, sort=False).drop_duplicates(
+            subset=["recording_id", "timestamp_seconds", "event_type", "event_value"],
+            keep="first",
+        ),
+        "events",
+    )
     return x
 
 
@@ -582,8 +579,6 @@ def read_gazepoint(
         "biometric_channels": _gp_biometric_mapping(data),
     }
     if keep_raw:
-        if not isinstance(out.raw, dict):
-            out.raw = {}
         out.raw["gazepoint"] = data.copy()
     out = gp_parse_user_events(out)
     out = gp_parse_media_events(out)

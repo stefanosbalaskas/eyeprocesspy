@@ -30,10 +30,9 @@ def estimate_sampling_rate(timestamp_seconds, trim=0.05):
     t = np.unique(a[np.isfinite(a)])
     if t.size < 2:
         return np.nan
-    dt = np.diff(np.sort(t))
-    dt = dt[(dt > 0) & np.isfinite(dt)]
-    if not dt.size:
-        return np.nan
+    # `t` is finite and unique, so with at least two observations its
+    # sorted differences are necessarily finite and strictly positive.
+    dt = np.diff(t)
     if dt.size > 10 and trim > 0:
         q = np.quantile(dt, [trim, 1 - trim])
         dt = dt[(dt >= q[0]) & (dt <= q[1])]

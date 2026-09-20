@@ -386,13 +386,14 @@ def recompute_aoi_features(
 
     grouped: Any
     if group_cols:
-        grouped = frame.groupby(group_cols, dropna=False, sort=True)
+        grouper = group_cols[0] if len(group_cols) == 1 else group_cols
+        grouped = frame.groupby(grouper, dropna=False, sort=True)
     else:
         grouped = [((), frame)]
 
     rows: list[dict[str, Any]] = []
     for key, group in grouped:
-        if group_cols and not isinstance(key, tuple):
+        if len(group_cols) == 1:
             key = (key,)
         elif not group_cols:
             key = ()
@@ -460,14 +461,10 @@ def recompute_aoi_features(
 
     out = pd.DataFrame(rows, columns=columns)
     for count_col in ("observation_count", "fixation_count", "sample_count"):
-        if count_col in out:
-            out[count_col] = out[count_col].astype("Int64")
-    if "inspected" in out:
-        out["inspected"] = out["inspected"].astype("boolean")
-    if "duration_complete" in out:
-        out["duration_complete"] = out["duration_complete"].astype("boolean")
-    if "time_complete" in out:
-        out["time_complete"] = out["time_complete"].astype("boolean")
+        out[count_col] = out[count_col].astype("Int64")
+    out["inspected"] = out["inspected"].astype("boolean")
+    out["duration_complete"] = out["duration_complete"].astype("boolean")
+    out["time_complete"] = out["time_complete"].astype("boolean")
     return out
 
 

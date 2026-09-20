@@ -381,7 +381,9 @@ def process_pattern_mixture(x, delta=np.arange(-1, 1.0001, 0.1), metric=None, es
     if isinstance(x, pd.DataFrame):
         if metric is None:
             metric = next(c for c in x.columns if pd.api.types.is_numeric_dtype(x[c]))
-            values = pd.to_numeric(x[metric], errors="coerce").to_numpy(float)
+        if metric not in x:
+            raise EyeProcessValidationError(f"Metric `{metric}` is unavailable.")
+        values = pd.to_numeric(x[metric], errors="coerce").to_numpy(float)
     else:
         values = np.asarray(x, float)
     observed = values[np.isfinite(values)]

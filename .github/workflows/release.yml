@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Sync release environment
-        run: uv sync --extra dev --extra arrow
+        run: uv sync --extra dev --extra narrow
       - name: Verify tag matches package version
         if: github.ref_type == 'tag'
         run: |
@@ -47,14 +47,29 @@ jobs:
       - name: Build documentation strictly
         run: uv run mkdocs build --strict
       - name: Build distributions
-        run: uv build
+        run: uv build --no-sources
       - name: Validate distributions
-        run: uv run python -m twine check dist/*
+        run: uv run python -m twine check --strict dist/*
       - name: Clean wheel install smoke
         run: |
           python -m venv wheelcheck
           wheelcheck/bin/pip install dist/*.whl
+          wheelcheck/bin/pip check
           wheelcheck/bin/python - <<'PY'
+          import eyeprocesspy as ep
+          import tomllib
+          from pathlib import Path
+          expected_version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          assert ep.__version__ == expected_version
+          assert ep.__r_reference_version__ == '0.11.1'
+          print(ep.__version__, ep.__r_reference_version__)
+          PY
+      - name: Clean sdist install smoke
+        run: |
+          python -m venv sdistcheck
+          sdistcheck/bin/pip install dist/*.tar.gz
+          sdistcheck/bin/pip check
+          sdistcheck/bin/python - <<'PY'
           import eyeprocesspy as ep
           import tomllib
           from pathlib import Path

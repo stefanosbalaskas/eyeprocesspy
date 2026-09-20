@@ -1175,7 +1175,7 @@ def prepare_strategy_mixture_data(
             for _, r in z.iterrows():
                 if str(r.item_id) in avail_item.index and str(r.strategy) in avail_item.columns:
                     avail_item.loc[str(r.item_id), str(r.strategy)] = int(bool(r.available))
-    if (avail_item.sum(1) == 0).any():
+    if (avail_item.sum(axis=1) == 0).any():
         raise EyeProcessValidationError("Every item must permit at least one strategy.")
     availability = np.vstack([avail_item.loc[v].to_numpy(int) for v in d[spec.item].astype(str)])
     clevel = list(dict.fromkeys(d[spec.condition].astype(str))) if spec.condition else ["all"]

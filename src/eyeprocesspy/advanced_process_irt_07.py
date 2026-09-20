@@ -1023,8 +1023,7 @@ def _upgrade_registry() -> None:
         "flow_mirt": fit_flow_mirt,
     }
     for key, fn in mapping.items():
-        if key in _REGISTRY:
-            _REGISTRY[key]["fit_fun"] = fn
+        _REGISTRY[key]["fit_fun"] = fn
 
 
 _upgrade_registry()

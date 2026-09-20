@@ -653,7 +653,8 @@ def summarise_gaze_censoring(
     for group in groups:
         if group not in d:
             raise ValueError(f"Grouping column {group!r} is absent.")
-    iterator = [((), d)] if not groups else d.groupby(groups, dropna=False, sort=True)
+    grouper = groups[0] if len(groups) == 1 else groups
+    iterator = [((), d)] if not groups else d.groupby(grouper, dropna=False, sort=True)
     rows: list[dict[str, Any]] = []
     for key, z in iterator:
         if groups and not isinstance(key, tuple):
@@ -1357,16 +1358,19 @@ def compare_gaze_survival_specifications(
             tidy["n_observed_events"] = int(censoring["n_observed_events"])
             tidy["n_censored"] = int(censoring["n_censored"])
             tidy["censoring_fraction"] = float(censoring["censoring_fraction"])
-            for field_name in (
-                "event_detector",
-                "aoi_specification",
-                "quality_rules",
-                "preprocessing_specification",
-                "time_origin",
-            ):
-                if field_name in d:
-                    values = sorted(set(d[field_name].dropna().astype(str)))
-                    tidy[field_name] = " | ".join(values)
+            provenance_fields = d.columns.intersection(
+                [
+                    "event_detector",
+                    "aoi_specification",
+                    "quality_rules",
+                    "preprocessing_specification",
+                    "time_origin",
+                ],
+                sort=False,
+            )
+            for field_name in provenance_fields:
+                values = sorted(set(d[field_name].dropna().astype(str)))
+                tidy[field_name] = " | ".join(values)
             rows.append(tidy)
     return pd.concat(rows, ignore_index=True)
 

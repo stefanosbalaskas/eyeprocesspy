@@ -234,7 +234,8 @@ def audit_device_equivalence(
     d = x["paired"]
     groups = list(dict.fromkeys([x["device_col"], *[c for c in by if c in d.columns]]))
     rows = []
-    for key, g in d.groupby(groups, sort=False, dropna=False):
+    grouper = groups[0] if len(groups) == 1 else groups
+    for key, g in d.groupby(grouper, sort=False, dropna=False):
         if not isinstance(key, tuple):
             key = (key,)
         diff = g.difference.to_numpy(float)

@@ -1357,7 +1357,8 @@ def estimate_ez_diffusion(
     if missing:
         raise EyeProcessValidationError(f"Missing required columns: {', '.join(missing)}")
     rows = []
-    for key, z in d.groupby(by, sort=False, dropna=False):
+    grouper = by[0] if len(by) == 1 else by
+    for key, z in d.groupby(grouper, sort=False, dropna=False):
         if len(by) == 1 and not isinstance(key, tuple):
             key = (key,)
         acc = pd.to_numeric(z[accuracy], errors="coerce")
