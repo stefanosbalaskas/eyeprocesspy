@@ -41,6 +41,46 @@ jobs:
       - run: uv sync --frozen --extra dev
       - run: uv run --frozen pytest
 
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - run: uv sync --frozen --extra dev
+      - name: Enforce exact 100% statement and branch coverage
+        run: uv run --frozen pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=100
+      - name: Verify zero missing coverage counters
+        run: |
+          uv run --frozen python - <<'PY'
+          import json
+          from pathlib import Path
+
+          totals = json.loads(
+              Path("coverage.json").read_text(encoding="utf-8")
+          )["totals"]
+
+          missing_lines = int(totals["missing_lines"])
+          missing_branches = int(totals["missing_branches"])
+
+          if missing_lines != 0 or missing_branches != 0:
+              raise SystemExit(
+                  f"coverage gap: lines={missing_lines}, "
+                  f"branches={missing_branches}"
+              )
+
+          print("exact 100% statement + branch coverage")
+          PY
+      - name: Upload coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eyeprocesspy-coverage-${{ github.sha }}
+          path: coverage.json
+          if-no-files-found: error
+          retention-days: 30
+
   build-wheel:
     runs-on: ubuntu-latest
     steps:
