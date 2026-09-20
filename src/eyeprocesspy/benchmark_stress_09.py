@@ -66,7 +66,7 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     try:
         return list(value)
     except TypeError:
@@ -88,10 +88,13 @@ def _numeric(value: Any) -> np.ndarray:
         except Exception:
             raw = np.asarray([value], dtype=object)
 
-    return pd.to_numeric(
-        pd.Series(np.ravel(raw)),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(np.ravel(raw)),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _first_number(value: Any) -> float:

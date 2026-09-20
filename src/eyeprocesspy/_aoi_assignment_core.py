@@ -73,9 +73,8 @@ def compare_aoi_assignments(
         raise EyeProcessValidationError(
             "Baseline and perturbed assignments must have equal length."
         )
-    if ids is None:
-        ids = np.arange(1, len(base) + 1)
-    if len(ids) != len(base):
+    resolved_ids = list(range(1, len(base) + 1)) if ids is None else list(ids)
+    if len(resolved_ids) != len(base):
         raise EyeProcessValidationError("`ids` must have the same length as assignments.")
     missing = base.isna() | alt.isna()
     unchanged = (~missing) & base.eq(alt)
@@ -84,7 +83,7 @@ def compare_aoi_assignments(
     reassigned = (~missing) & ~unchanged & ~newly & ~lost
     detail = pd.DataFrame(
         {
-            "observation_id": list(ids),
+            "observation_id": resolved_ids,
             "baseline_aoi": base,
             "perturbed_aoi": alt,
             "unchanged": unchanged,

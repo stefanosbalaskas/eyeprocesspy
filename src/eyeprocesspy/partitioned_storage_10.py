@@ -24,7 +24,7 @@ import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -118,11 +118,11 @@ class EyePartitionedStorage(_EyeDict):
 
     @property
     def path(self) -> str:
-        return self["path"]
+        return cast(str, self["path"])
 
     @property
     def metadata(self) -> dict[str, Any]:
-        return self["metadata"]
+        return cast(dict[str, Any], self["metadata"])
 
     @property
     def partitions(self) -> pd.DataFrame:
@@ -642,10 +642,13 @@ def open_partitioned_eye_storage(path):
 
 def _ensure_storage(storage) -> EyePartitionedStorage:
     if isinstance(storage, (str, Path)):
-        return open_partitioned_eye_storage(storage)
+        return cast(
+            EyePartitionedStorage,
+            open_partitioned_eye_storage(storage),
+        )
     if not isinstance(storage, EyePartitionedStorage):
         _stop("Expected partitioned storage.")
-    return storage
+    return cast(EyePartitionedStorage, storage)
 
 
 def query_eye_storage(

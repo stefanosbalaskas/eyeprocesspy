@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -93,7 +93,13 @@ def _req(d: pd.DataFrame, cols: Sequence[str | None], name: str = "data") -> Non
 
 
 def _num(x: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(x), errors="coerce").to_numpy(float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(x),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _mean(x: Any) -> float:
@@ -116,7 +122,10 @@ def _z(x: Any) -> np.ndarray:
     s = _sd(a)
     if not np.isfinite(s) or s == 0:
         return np.zeros(len(a), dtype=float)
-    return (a - np.nanmean(a)) / s
+    return np.asarray(
+        (a - np.nanmean(a)) / s,
+        dtype=float,
+    )
 
 
 def _groups(d: pd.DataFrame, by: Sequence[str]) -> list[np.ndarray]:
@@ -143,7 +152,10 @@ def _group_values(d: pd.DataFrame, idx: np.ndarray, by: Sequence[str]) -> dict[s
 
 def _as_bool(x: Any) -> np.ndarray:
     s = pd.Series(x).astype("boolean").fillna(False)
-    return s.to_numpy(dtype=bool)
+    return np.asarray(
+        s.to_numpy(dtype=bool),
+        dtype=bool,
+    )
 
 
 def _class(obj: Any, cls: str) -> bool:
@@ -994,7 +1006,15 @@ def extract_process_windows(
                 ncol(gaze_y),
             )
             zt = _num(z[".ep08_relative_time"])
-            av = z[aoi].astype(object).to_numpy() if aoi in z else np.repeat(None, len(z))
+            av = (
+                z[aoi].astype(object).to_numpy()
+                if aoi in z
+                else np.full(
+                    len(z),
+                    None,
+                    dtype=object,
+                )
+            )
             gv, qv = ncol(valid_gaze), ncol(valid_pupil)
             bl = _as_bool(z[blink]).astype(float) if blink in z else np.full(len(z), np.nan)
             tl = _as_bool(z[trackloss]).astype(float) if trackloss in z else np.full(len(z), np.nan)
@@ -1076,7 +1096,7 @@ def summarize_process_windows(x: Any, by: Sequence[str] | None = None) -> pd.Dat
 def bind_process_windows(*args: Any, **kwargs: Any) -> EyeResult:
     xs = list(args) + list(kwargs.values())
     xs = (
-        xs[0]
+        list(xs[0])
         if len(xs) == 1
         and isinstance(xs[0], (list, tuple))
         and not _class(xs[0], "eye_process_windows")
@@ -1259,7 +1279,19 @@ def fit_aoi_growth_curve(data: Any, time: str, outcome: str, degree: int = 3) ->
 def predict_aoi_trajectory(object: Any, time: Any = None) -> pd.DataFrame:
     if not _class(object, "eye_aoi_growth_curve"):
         raise EyeProcessValidationError("object must be eye_aoi_growth_curve.")
-    t = np.linspace(*object.range, 101) if time is None else _num(time)
+    bounds = cast(
+        Sequence[float],
+        object.range,
+    )
+    t = (
+        np.linspace(
+            float(bounds[0]),
+            float(bounds[1]),
+            101,
+        )
+        if time is None
+        else _num(time)
+    )
     ts = (t - object.center) / object.scale
     A = np.column_stack([np.ones(len(t)), *[ts**j for j in range(1, object.degree + 1)]])
     beta = object.model.coefficients.estimate.to_numpy(float)
@@ -1268,7 +1300,7 @@ def predict_aoi_trajectory(object: Any, time: Any = None) -> pd.DataFrame:
 
 def compare_aoi_trajectories(*args: Any, **kwargs: Any) -> pd.DataFrame:
     xs = list(args) + list(kwargs.values())
-    xs = xs[0] if len(xs) == 1 and isinstance(xs[0], (list, tuple)) else xs
+    xs = list(xs[0]) if len(xs) == 1 and isinstance(xs[0], (list, tuple)) else xs
     if not xs:
         raise EyeProcessValidationError("Supply at least one eye_aoi_trajectory object.")
     if not all(_class(x, "eye_aoi_trajectory") for x in xs):
@@ -1295,7 +1327,14 @@ def _interp(y: Any) -> np.ndarray:
     ok = np.isfinite(a)
     if ok.sum() < 2:
         return np.full(len(a), np.nan)
-    return np.interp(idx, idx[ok], a[ok])
+    return np.asarray(
+        np.interp(
+            idx,
+            idx[ok],
+            a[ok],
+        ),
+        dtype=float,
+    )
 
 
 def pupil_band_power(
@@ -1376,8 +1415,24 @@ def pupil_activity_index(
     if method == "frequency_contrast":
         if sampling_rate_hz is None:
             raise EyeProcessValidationError("sampling_rate_hz is required for frequency_contrast.")
-        lo = pupil_band_power(y, sampling_rate_hz, *low_band)
-        hi = pupil_band_power(y, sampling_rate_hz, *high_band)
+        low = cast(
+            tuple[float, float],
+            tuple(low_band),
+        )
+        high = cast(
+            tuple[float, float],
+            tuple(high_band),
+        )
+        lo = pupil_band_power(
+            y,
+            sampling_rate_hz,
+            *low,
+        )
+        hi = pupil_band_power(
+            y,
+            sampling_rate_hz,
+            *high,
+        )
         return (
             float(np.log1p(hi) - np.log1p(lo)) if np.isfinite(lo) and np.isfinite(hi) else math.nan
         )
@@ -1415,8 +1470,24 @@ def pupil_frequency_features(
         )
         y = z[pupil]
         tt = z[time]
-        lo = pupil_band_power(y, sr, *low_band)
-        hi = pupil_band_power(y, sr, *high_band)
+        low = cast(
+            tuple[float, float],
+            tuple(low_band),
+        )
+        high = cast(
+            tuple[float, float],
+            tuple(high_band),
+        )
+        lo = pupil_band_power(
+            y,
+            sr,
+            *low,
+        )
+        hi = pupil_band_power(
+            y,
+            sr,
+            *high,
+        )
         rows.append(
             {
                 **_group_values(d, idx, by),
@@ -1493,13 +1564,23 @@ def pupil_response_kernel(
     out[~np.isfinite(out)] = 0
     if normalize and np.max(out) > 0:
         out = out / np.max(out)
-    return out
+    return np.asarray(
+        out,
+        dtype=float,
+    )
 
 
 def pupil_event_regressor(
     time_ms: Any, event_time_ms: float, tmax_ms: float = 930, shape: float = 10.1
 ) -> np.ndarray:
-    return pupil_response_kernel(_num(time_ms) - float(event_time_ms), tmax_ms, shape)
+    return np.asarray(
+        pupil_response_kernel(
+            _num(time_ms) - float(event_time_ms),
+            tmax_ms,
+            shape,
+        ),
+        dtype=float,
+    )
 
 
 def fit_pupil_event_deconvolution(

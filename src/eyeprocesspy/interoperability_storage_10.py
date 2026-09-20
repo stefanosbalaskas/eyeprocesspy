@@ -17,7 +17,7 @@ import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -71,7 +71,7 @@ class EyeStorage(dict):
 
     @property
     def spec(self) -> EyeStorageSpec:
-        return self["spec"]
+        return cast(EyeStorageSpec, self["spec"])
 
     @property
     def manifest(self) -> pd.DataFrame:

@@ -10,7 +10,7 @@ import math
 import warnings
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -30,7 +30,10 @@ def _result(cls: str, **kwargs: Any) -> EyeResult:
 def _require_dataset(x: Any) -> EyeDataset:
     if not is_eye_dataset(x):
         raise EyeProcessValidationError("`x` must be an EyeDataset.")
-    return x
+    return cast(
+        EyeDataset,
+        x,
+    )
 
 
 def _backend_error(engine: str, extra: str | None = None) -> None:
@@ -922,7 +925,10 @@ def simulate_eye_dataset(
         "dataset",
         f"n_person={n_person};n_item={n_item};sampling_rate={sampling_rate};samples_per_trial={samples_per_trial if samples_per_trial is not None else 'rate_derived'}",
     )
-    return out
+    return cast(
+        EyeDataset,
+        out,
+    )
 
 
 def simulate_process_irt(
@@ -999,7 +1005,7 @@ def parameter_recovery(
             "Simulator, estimator, extractor, and truth_extractor must be functions."
         )
     np.random.seed(int(seed))
-    rows = []
+    rows: list[dict[str, Any]] = []
     for r in range(1, int(replications) + 1):
         try:
             sim = simulator(**kwargs)

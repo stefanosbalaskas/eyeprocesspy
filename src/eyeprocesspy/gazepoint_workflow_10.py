@@ -17,7 +17,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from html import escape
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -199,9 +199,15 @@ def _first_nonmissing(values: Any, default=pd.NA):
 
 
 def _finite(values: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(values),
+            errors="coerce",
+        ).to_numpy(
+            dtype=float,
+            copy=True,
+        ),
         dtype=float,
-        copy=True,
     )
 
 
@@ -389,7 +395,10 @@ def _link_features_to_trials(x: EyeDataset) -> EyeDataset:
                 features.at[index, "recording_id"] = row["recording_id"]
 
     out["features"] = standardize_eye_table(features, "features")
-    return out
+    return cast(
+        EyeDataset,
+        out,
+    )
 
 
 def _prepare_responses(x, responses=None, score_key=None):

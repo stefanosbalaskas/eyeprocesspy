@@ -128,11 +128,16 @@ def aoi_perturbation_spec(
         v is not None
         for v in (screen_width_px, screen_height_px, viewing_distance, physical_screen_size)
     ):
+        assert screen_width_px is not None
+        assert screen_height_px is not None
+        assert viewing_distance is not None
+        assert physical_screen_size is not None
+
         _, _, dx, dy = _screen_geometry(
             screen_width_px=int(screen_width_px),
             screen_height_px=int(screen_height_px),
             viewing_distance=float(viewing_distance),
-            physical_screen_size=physical_screen_size,  # type: ignore[arg-type]
+            physical_screen_size=physical_screen_size,
         )
         resolved_dpp = (dx, dy)
     if unit == "deg" and resolved_dpp is None:

@@ -750,7 +750,7 @@ def _base_provenance(
         "quality_rules",
         "time_origin",
     ]
-    provenance = {
+    provenance: dict[str, Any] = {
         field: sorted(set(data[field].dropna().astype(str))) for field in fields if field in data
     }
     provenance.update({"model_specification": model_specification, "estimator": estimator})

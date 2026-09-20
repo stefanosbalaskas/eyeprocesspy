@@ -12,7 +12,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 import numpy as np
 import pandas as pd
@@ -78,7 +78,7 @@ class _EmpiricalReproduction(dict):
     eyeprocess_class = "eye_empirical_reproduction"
 
 
-def _raise(message: str) -> None:
+def _raise(message: str) -> NoReturn:
     raise EyeProcessValidationError(message)
 
 

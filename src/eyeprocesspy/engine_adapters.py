@@ -248,7 +248,7 @@ def validate_model_object(object: Any, strict: bool = False) -> EyeResult:
         "eye_functional_pupil_irt": "functional_pupil",
         "eyeprocess_model": "generic",
     }
-    family = family_map.get(cls)
+    family = family_map.get(cls) if isinstance(cls, str) else None
     spec = object.get("specification", object.get("spec"))
     fit = object.get("fit", object.get("model"))
     interpretation = object.get("interpretation")

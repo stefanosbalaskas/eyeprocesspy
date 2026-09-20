@@ -424,7 +424,10 @@ def validate_latent_space_process_similarity(
 
 
 def _icc(theta: np.ndarray, a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    return expit(theta[:, None] * a[None, :] - (a * b)[None, :])
+    return np.asarray(
+        expit(theta[:, None] * a[None, :] - (a * b)[None, :]),
+        dtype=float,
+    )
 
 
 def equate_irt_scales(
@@ -620,22 +623,44 @@ def process_ngram_features(
 ) -> np.ndarray:
     seqs = _seqs(sequence, separator)
     orders = sorted({int(k) for k in n if int(k) > 0})
-    counts = []
-    vocab = set()
+    counts: list[Counter[str]] = []
+    vocab: set[str] = set()
+
     for s in seqs:
-        c = Counter()
+        count: Counter[str] = Counter()
         for k in orders:
-            for i in range(max(0, len(s) - k + 1)):
-                c[separator.join(s[i : i + k])] += 1
-        counts.append(c)
-        vocab.update(c)
-    vocab = sorted(vocab)
-    M = np.zeros((len(seqs), len(vocab)), float)
-    for i, c in enumerate(counts):
-        for j, g in enumerate(vocab):
-            M[i, j] = c.get(g, 0)
-    # preserve language-neutral metadata through ndarray attributes is impossible; return subclass not needed for parity tests.
-    return M
+            for i in range(
+                max(
+                    0,
+                    len(s) - k + 1,
+                )
+            ):
+                count[separator.join(s[i : i + k])] += 1
+        counts.append(count)
+        vocab.update(count)
+
+    vocab_items = sorted(vocab)
+
+    matrix = np.zeros(
+        (
+            len(seqs),
+            len(vocab_items),
+        ),
+        dtype=float,
+    )
+
+    for i, count in enumerate(counts):
+        for j, gram in enumerate(vocab_items):
+            matrix[i, j] = count.get(
+                gram,
+                0,
+            )
+
+    # ndarray metadata cannot carry the R vocabulary attribute.
+    return np.asarray(
+        matrix,
+        dtype=float,
+    )
 
 
 def process_sequence_embedding(
@@ -649,7 +674,10 @@ def process_sequence_embedding(
     Z = tf * idf
     u, s, _ = np.linalg.svd(Z, full_matrices=False)
     k = min(int(dimensions), len(s))
-    return u[:, :k] * s[:k]
+    return np.asarray(
+        u[:, :k] * s[:k],
+        dtype=float,
+    )
 
 
 def fit_response_process_embedding_irt(
@@ -744,7 +772,7 @@ def compare_parametric_nonparametric_irf(
             "This comparison requires a spline-reference eye_gpirt object."
         )
     grid = np.linspace(-4, 4, 101) if theta_grid is None else np.asarray(theta_grid, float)
-    rows = []
+    rows: list[dict[str, Any]] = []
     for j in range(X.shape[1]):
         ok = np.isfinite(X[:, j])
         th = obj.theta_proxy[ok]
@@ -938,7 +966,14 @@ def expected_process_information(info: Any, theta_weights: Any = None) -> np.nda
         else np.asarray(theta_weights, float)
     )
     w = w / w.sum()
-    return w @ np.asarray(info.utility, float)
+    return np.asarray(
+        w
+        @ np.asarray(
+            info.utility,
+            dtype=float,
+        ),
+        dtype=float,
+    )
 
 
 def select_next_item_process(
@@ -979,9 +1014,9 @@ def simulate_process_cat(
     bank = _as_df(item_bank, "item_bank")
     rng = np.random.default_rng(seed)
     theta_hat = 0.0
-    used = []
-    rows = []
-    responses = []
+    used: list[str] = []
+    rows: list[dict[str, Any]] = []
+    responses: list[int] = []
     for step in range(1, min(int(n_items), len(bank)) + 1):
         sel = select_next_item_process(theta_hat, bank, used, weights, burden_weight)
         it = sel.row.iloc[0]

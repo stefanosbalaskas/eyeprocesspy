@@ -86,7 +86,10 @@ def _lm_predict(model: Mapping[str, Any], newdata: pd.DataFrame) -> np.ndarray:
     _req(newdata, preds, "newdata")
     Xn = newdata[preds].apply(pd.to_numeric, errors="coerce").to_numpy(float)
     beta = np.asarray(model["coefficients"], dtype=float)
-    return np.column_stack([np.ones(len(newdata)), Xn]) @ beta
+    return np.asarray(
+        np.column_stack([np.ones(len(newdata)), Xn]) @ beta,
+        dtype=float,
+    )
 
 
 def visual_context_registry(
@@ -374,7 +377,10 @@ def _soft_cluster_prob(z: np.ndarray, centers: np.ndarray) -> np.ndarray:
     d2 = np.column_stack([np.sum((z - c) ** 2, axis=1) for c in centers])
     d2 -= np.min(d2, axis=1, keepdims=True)
     s = np.exp(-0.5 * d2)
-    return s / s.sum(axis=1, keepdims=True)
+    return np.asarray(
+        s / s.sum(axis=1, keepdims=True),
+        dtype=float,
+    )
 
 
 def fit_process_profile_mixture(

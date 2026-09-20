@@ -214,9 +214,9 @@ def _as_levels(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     if isinstance(value, np.ndarray):
-        return value.tolist()
+        return list(value.tolist())
     if isinstance(value, Sequence):
         return list(value)
     return [value]
@@ -1224,25 +1224,25 @@ def _run_and_checkpoint(
 def _backend(backend: Any, workers: int) -> str:
     if isinstance(backend, (list, tuple)):
         backend = backend[0]
-    backend = str(backend)
-    if backend not in {"auto", "sequential", "future"}:
+    selected = str(backend)
+    if selected not in {"auto", "sequential", "future"}:
         _stop("`backend` must be auto, sequential, or future.")
-    if backend == "auto":
+    if selected == "auto":
         return "future" if workers > 1 else "sequential"
-    return backend
+    return selected
 
 
 def _isolation(isolation: Any, timeout_seconds: float) -> str:
     if isinstance(isolation, (list, tuple)):
         isolation = isolation[0]
-    isolation = str(isolation)
-    if isolation not in {"auto", "in_process", "callr"}:
+    selected = str(isolation)
+    if selected not in {"auto", "in_process", "callr"}:
         _stop("`isolation` must be auto, in_process, or callr.")
-    if isolation == "auto":
+    if selected == "auto":
         if math.isfinite(timeout_seconds):
             return "callr"
         return "in_process"
-    return isolation
+    return selected
 
 
 def _status_table(output_dir: Path, plan: EyeValidationJobPlan) -> None:

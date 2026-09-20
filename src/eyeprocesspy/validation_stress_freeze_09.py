@@ -103,7 +103,7 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes, Path)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     if np.isscalar(value):
         return [value]
     try:

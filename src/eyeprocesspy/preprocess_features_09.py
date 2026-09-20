@@ -22,7 +22,13 @@ from .schema import empty_eye_table, standardize_eye_table
 
 
 def _finite(values: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float, copy=True)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(values),
+            errors="coerce",
+        ).to_numpy(dtype=float, copy=True),
+        dtype=float,
+    )
 
 
 def _mode_value(values: Any):

@@ -4,6 +4,7 @@ The script deliberately triggers an external-detector failure, one quality
 exclusion, one missing outcome, and one invalid duplicate-term model callback.
 Every state is retained in an audit table rather than repaired silently.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -29,18 +30,20 @@ def _failing_external(*, data, spec):
 
 
 def _tidy_callback(data, spec):
-    return pd.DataFrame([
-        {
-            "term": "condition",
-            "estimate": 1.0,
-            "SE": 0.2,
-            "CI_lower": 0.6,
-            "CI_upper": 1.4,
-            "p": 0.01,
-            "converged": True,
-            "N": len(data),
-        }
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "term": "condition",
+                "estimate": 1.0,
+                "SE": 0.2,
+                "CI_lower": 0.6,
+                "CI_upper": 1.4,
+                "p": 0.01,
+                "converged": True,
+                "N": len(data),
+            }
+        ]
+    )
 
 
 def _duplicate_callback(data, spec):

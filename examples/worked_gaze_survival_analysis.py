@@ -3,6 +3,7 @@
 The example deliberately begins with trial windows plus fixation/AOI-visit rows,
 so right censoring is constructed rather than hidden inside a prepared fixture.
 """
+
 from __future__ import annotations
 
 import json

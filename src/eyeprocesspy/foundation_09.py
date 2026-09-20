@@ -45,7 +45,10 @@ def _first_nonmissing(values, default=pd.NA):
 
 
 def _finite_numeric(values) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _mode_value(values):

@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -314,7 +314,10 @@ def register_irt_model(spec: Any, overwrite: bool = False) -> EyeResult:
             f"IRT model `{spec.id}` is already registered. Use overwrite=True deliberately."
         )
     _REGISTRY[spec.id] = spec
-    return spec
+    return cast(
+        EyeResult,
+        spec,
+    )
 
 
 def _unavailable(name: str) -> Callable[..., Any]:
@@ -829,7 +832,13 @@ def fit_joint_gaze_rt_irt(
 def fit_speed_accuracy_engagement_irt(
     data: Any, *args: Any, engine: str = "reference", **kwargs: Any
 ) -> EyeResult:
-    fit = fit_joint_gaze_rt_irt(data, *args, engine=engine, **kwargs)
+    call_kwargs = dict(kwargs)
+    call_kwargs["engine"] = engine
+    fit = fit_joint_gaze_rt_irt(
+        data,
+        *args,
+        **call_kwargs,
+    )
     fit.eyeprocess_class = "eye_speed_accuracy_engagement_irt"
     return fit
 
@@ -1018,22 +1027,28 @@ def audit_distractor_attention(
         map_names = cols
     d = _df(data, [response_option, *cols])
     cats = d[response_option].astype(str).to_numpy()
-    chosen = []
-    unchosen = []
+    chosen: list[float] = []
+    unchosen: list[float] = []
     for i, cat in enumerate(cats):
         z = pd.to_numeric(d.iloc[i][cols], errors="coerce").fillna(0).to_numpy(float)
         idx = map_names.index(cat) if cat in map_names else None
         chosen.append(np.nan if idx is None else z[idx])
         unchosen.append(np.nan if idx is None or len(z) < 2 else float(np.mean(np.delete(z, idx))))
-    chosen = np.asarray(chosen)
-    unchosen = np.asarray(unchosen)
-    diff = chosen - unchosen
+    chosen_values = np.asarray(
+        chosen,
+        dtype=float,
+    )
+    unchosen_values = np.asarray(
+        unchosen,
+        dtype=float,
+    )
+    diff = chosen_values - unchosen_values
     return pd.DataFrame(
         [
             {
                 "n": int(np.isfinite(diff).sum()),
-                "mean_chosen": float(np.nanmean(chosen)),
-                "mean_unchosen": float(np.nanmean(unchosen)),
+                "mean_chosen": float(np.nanmean(chosen_values)),
+                "mean_unchosen": float(np.nanmean(unchosen_values)),
                 "mean_difference": float(np.nanmean(diff)),
                 "median_difference": float(np.nanmedian(diff)),
             }
@@ -1420,10 +1435,16 @@ def detect_irt_changepoints(
 
 
 def fit_changepoint_rt_irt(data: Any, *args: Any, refit: bool = True, **kwargs: Any) -> EyeResult:
-    kwargs.pop("gaze", None)
+    call_kwargs = dict(kwargs)
+    call_kwargs["gaze"] = None
+
     return _result(
         "eye_changepoint_rt_irt",
-        changepoints=detect_irt_changepoints(data, *args, gaze=None, **kwargs),
+        changepoints=detect_irt_changepoints(
+            data,
+            *args,
+            **call_kwargs,
+        ),
         refit_requested=bool(refit),
         status="experimental-reference",
     )
@@ -1432,9 +1453,16 @@ def fit_changepoint_rt_irt(data: Any, *args: Any, refit: bool = True, **kwargs: 
 def fit_changepoint_multimodal_irt(
     data: Any, *args: Any, gaze: str = "fixation_count", refit: bool = True, **kwargs: Any
 ) -> EyeResult:
+    call_kwargs = dict(kwargs)
+    call_kwargs["gaze"] = gaze
+
     return _result(
         "eye_changepoint_multimodal_irt",
-        changepoints=detect_irt_changepoints(data, *args, gaze=gaze, **kwargs),
+        changepoints=detect_irt_changepoints(
+            data,
+            *args,
+            **call_kwargs,
+        ),
         refit_requested=bool(refit),
         status="experimental-reference",
     )
@@ -1508,8 +1536,8 @@ def fit_censored_normal_process_irt(
         raise EyeProcessValidationError("lower must be < upper.")
     if np.any((X < lower) | (X > upper)):
         raise EyeProcessValidationError("All observed values must lie within [lower, upper].")
-    fits = []
-    rows = []
+    fits: list[Any] = []
+    rows: list[dict[str, Any]] = []
     maxiter = int((control or {}).get("maxit", 1000))
     for j, item in enumerate(items):
         y = X[:, j]

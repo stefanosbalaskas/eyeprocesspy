@@ -1048,7 +1048,16 @@ def _usable_text(values: Any) -> pd.Series:
 
 
 def _safe_numeric(values: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float, copy=True)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(values),
+            errors="coerce",
+        ).to_numpy(
+            dtype=float,
+            copy=True,
+        ),
+        dtype=float,
+    )
 
 
 def source_preservation_audit(x, require_raw=False):

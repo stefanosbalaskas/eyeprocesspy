@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from importlib import resources
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,10 @@ def _softmax(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     z = x - np.max(x, axis=1, keepdims=True)
     e = np.exp(z)
-    return e / np.sum(e, axis=1, keepdims=True)
+    return np.asarray(
+        e / np.sum(e, axis=1, keepdims=True),
+        dtype=float,
+    )
 
 
 def _stan_path(name: str) -> str:
@@ -649,7 +652,8 @@ def decode_dynamic_states(object: EyeResult, method: str = "mode") -> pd.DataFra
         raise EyeProcessValidationError("method must be mode, probability, or draw.")
     model = object.get("model")
     if getattr(model, "eyeprocess_class", None) == "eye_multinomial_transition":
-        p = model.probabilities.copy()
+        typed_model = cast(EyeResult, model)
+        p = typed_model.probabilities.copy()
         if method == "probability":
             out = p.copy()
             out["transition"] = np.arange(1, len(out) + 1)
@@ -1659,7 +1663,10 @@ def _std_matrix(d: pd.DataFrame, cols: Sequence[str], prefix: str) -> np.ndarray
     scale = X.std(0, ddof=1)
     scale[(~np.isfinite(scale)) | (scale == 0)] = 1
     z = (X - center) / scale
-    return z
+    return np.asarray(
+        z,
+        dtype=float,
+    )
 
 
 def prepare_gaze_diffusion_data(data: Any, spec: EyeResult, minimum_rt: float = 0.05) -> EyeResult:
@@ -1726,7 +1733,14 @@ def _logistic_fit(X: np.ndarray, y: np.ndarray) -> np.ndarray:
         p = np.clip(expit(X @ b), 1e-12, 1 - 1e-12)
         return float(-np.sum(y * np.log(p) + (1 - y) * np.log(1 - p)))
 
-    return minimize(obj, np.zeros(X.shape[1]), method="BFGS").x
+    return np.asarray(
+        minimize(
+            obj,
+            np.zeros(X.shape[1]),
+            method="BFGS",
+        ).x,
+        dtype=float,
+    )
 
 
 def _baseline_diffusion(prep: EyeResult) -> EyeResult:

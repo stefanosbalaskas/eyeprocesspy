@@ -295,6 +295,8 @@ def plot_process_changepoint(object: Any, ax: Any = None):
         raise EyeProcessValidationError(
             "Supply a process/change-point object returned by eyeprocesspy."
         )
+
+    assert cp is not None
     z = cp.results.copy()
     ax = plt.subplots()[1] if ax is None else ax
     if z.empty:

@@ -1,4 +1,5 @@
 """Calibration-error propagation and probabilistic AOI assignment."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -68,4 +69,6 @@ for name, axis in {
     axis.figure.savefig(OUT / f"{name}.svg", format="svg", bbox_inches="tight")
     plt.close(axis.figure)
 
-print("\nImportant: membership probabilities quantify propagated calibration uncertainty; they are not probabilities of psychological attention.")
+print(
+    "\nImportant: membership probabilities quantify propagated calibration uncertainty; they are not probabilities of psychological attention."
+)

@@ -982,14 +982,17 @@ def pupil_preprocessing_sensitivity(
             "Sensitivity grid is missing: " + ", ".join(sorted(required - set(grid)))
         )
     rows = []
-    models = []
+    models: list[EyeResult | Exception] = []
     for i, row in grid.reset_index(drop=True).iterrows():
         spec = EyeResult(dict(base_spec), eyeprocess_class="eye_functional_pupil_irt_spec")
-        spec.baseline_window = (float(row.baseline_start), float(row.baseline_end))
-        spec.latency_ms = float(row.latency_ms)
-        spec.df = int(row.df)
-        spec.baseline_method = str(row.baseline_method)
-        spec.max_interpolated_fraction = float(row.max_interpolated_fraction)
+        spec["baseline_window"] = (
+            float(row.baseline_start),
+            float(row.baseline_end),
+        )
+        spec["latency_ms"] = float(row.latency_ms)
+        spec["df"] = int(row.df)
+        spec["baseline_method"] = str(row.baseline_method)
+        spec["max_interpolated_fraction"] = float(row.max_interpolated_fraction)
         try:
             result = (
                 fit_joint_functional_pupil_irt(x, spec, **kwargs)
@@ -1079,7 +1082,7 @@ def compare_functional_scalar_models(
 
 
 def advanced_validation_grid(quick: bool = False, full_factorial: bool = False) -> pd.DataFrame:
-    levels = {
+    levels: dict[str, list[int | float]] = {
         "n_person": [80, 150] if quick else [200, 500, 1000, 2000],
         "n_item": [10, 20] if quick else [10, 20, 40, 80],
         "ability_speed_correlation": [-0.3, 0.3] if quick else [-0.5, 0, 0.5],

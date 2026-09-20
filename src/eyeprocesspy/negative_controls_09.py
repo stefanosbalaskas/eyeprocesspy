@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import warnings
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -64,10 +64,13 @@ def _numeric_vector(value: Any) -> np.ndarray:
         except Exception:
             raw = np.asarray([value], dtype=object)
 
-    return pd.to_numeric(
-        pd.Series(np.ravel(raw)),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(np.ravel(raw)),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _first_numeric(value: Any) -> float:
@@ -81,7 +84,7 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, (str, bytes)):
         return [value]
     if isinstance(value, pd.Series):
-        return value.tolist()
+        return list(value.tolist())
     try:
         return list(value)
     except TypeError:
@@ -146,14 +149,36 @@ def _default_control_extract(value: Any) -> pd.DataFrame:
     )
 
 
-def _quantile(values: np.ndarray, probability: float) -> float:
+def _quantile(
+    values: np.ndarray,
+    probability: float,
+) -> float:
     finite = values[np.isfinite(values)]
+
     if finite.size == 0:
         return math.nan
+
+    quantile = cast(
+        Callable[..., Any],
+        np.quantile,
+    )
+
     try:
-        return float(np.quantile(finite, probability, method="linear"))
+        return float(
+            quantile(
+                finite,
+                probability,
+                method="linear",
+            )
+        )
     except TypeError:
-        return float(np.quantile(finite, probability, interpolation="linear"))
+        return float(
+            quantile(
+                finite,
+                probability,
+                interpolation="linear",
+            )
+        )
 
 
 def process_feature_time_provenance(

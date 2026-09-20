@@ -5,19 +5,21 @@ advertising/interface layout, degree-based dilation/erosion and translations,
 feature recomputation, an explicit model callback, failure-aware summaries,
 and four visual diagnostics. No private or empirical participant data are used.
 """
+
 from __future__ import annotations
 
 import math
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")
-matplotlib.rcParams["svg.fonttype"] = "none"
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import eyeprocesspy as ep
+
+matplotlib.use("Agg")
+matplotlib.rcParams["svg.fonttype"] = "none"
 
 OUTPUT = Path(__file__).resolve().parents[1] / "workflow-output"
 OUTPUT.mkdir(exist_ok=True)
@@ -66,40 +68,48 @@ def make_fixations(seed: int = 12) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def explicit_ols_callback(
-    features: pd.DataFrame, assigned: pd.DataFrame, spec
-) -> pd.DataFrame:
+def explicit_ols_callback(features: pd.DataFrame, assigned: pd.DataFrame, spec) -> pd.DataFrame:
     """Explicit illustrative OLS callback for disclosure dwell."""
     target = features.loc[features["aoi"].eq("disclosure")].copy()
     condition_map = assigned[["participant", "condition"]].drop_duplicates()
-    target = target.merge(
-        condition_map, on="participant", how="left", validate="many_to_one"
-    )
+    target = target.merge(condition_map, on="participant", how="left", validate="many_to_one")
     y = target["dwell"].to_numpy(float)
-    X = np.column_stack(
-        [np.ones(len(target)), target["condition"].to_numpy(float)]
-    )
+    X = np.column_stack([np.ones(len(target)), target["condition"].to_numpy(float)])
     beta = np.linalg.lstsq(X, y, rcond=None)[0]
     residual = y - X @ beta
     df = len(y) - X.shape[1]
     if df <= 0:
         return pd.DataFrame(
-            [{
-                "term": "condition", "estimate": np.nan, "SE": np.nan,
-                "CI_low": np.nan, "CI_high": np.nan, "p_value": np.nan,
-                "model_converged": False, "N": len(y),
-            }]
+            [
+                {
+                    "term": "condition",
+                    "estimate": np.nan,
+                    "SE": np.nan,
+                    "CI_low": np.nan,
+                    "CI_high": np.nan,
+                    "p_value": np.nan,
+                    "model_converged": False,
+                    "N": len(y),
+                }
+            ]
         )
     sigma2 = float(np.sum(residual**2) / df)
     covariance = sigma2 * np.linalg.inv(X.T @ X)
     se = math.sqrt(float(covariance[1, 1]))
     estimate = float(beta[1])
     return pd.DataFrame(
-        [{
-            "term": "condition", "estimate": estimate, "SE": se,
-            "CI_low": estimate - 1.96 * se, "CI_high": estimate + 1.96 * se,
-            "p_value": np.nan, "model_converged": True, "N": len(y),
-        }]
+        [
+            {
+                "term": "condition",
+                "estimate": estimate,
+                "SE": se,
+                "CI_low": estimate - 1.96 * se,
+                "CI_high": estimate + 1.96 * se,
+                "p_value": np.nan,
+                "model_converged": True,
+                "N": len(y),
+            }
+        ]
     )
 
 
@@ -172,11 +182,7 @@ def main() -> None:
     ax.figure.savefig(OUTPUT / "aoi-coefficient-stability.svg", bbox_inches="tight")
     plt.close(ax.figure)
 
-    pairs = [
-        (x, y)
-        for x in (-0.25, 0.0, 0.25, 0.50)
-        for y in (-0.25, 0.0, 0.25, 0.50)
-    ]
+    pairs = [(x, y) for x in (-0.25, 0.0, 0.25, 0.50) for y in (-0.25, 0.0, 0.25, 0.50)]
     surface_grid = ep.create_aoi_perturbation_grid(
         anisotropic=pairs,
         unit="deg",

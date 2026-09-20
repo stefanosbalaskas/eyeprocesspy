@@ -18,7 +18,7 @@ from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from importlib import import_module, resources
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -58,7 +58,13 @@ def _req(d: pd.DataFrame, cols: Sequence[str | None], label: str = "data") -> No
 
 
 def _num(x: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(x), errors="coerce").to_numpy(float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(x),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _hash_object(x: Any) -> str:
@@ -215,7 +221,7 @@ def validation_condition_id(x: Any) -> list[str]:
         x = expand_process_validation_design(x)
     d = _df(x)
     _req(d, ["condition_id"], "x")
-    return d["condition_id"].astype(str).tolist()
+    return list(d["condition_id"].astype(str).tolist())
 
 
 def simulate_process_validation_data(
@@ -605,13 +611,22 @@ def validation_condition_ranking(x: Any, weights: Any = None) -> pd.DataFrame:
     s["coverage_error"] = (s.coverage - 0.95).abs()
 
     def scale(v: pd.Series) -> np.ndarray:
-        a = pd.to_numeric(v, errors="coerce").to_numpy(float)
+        a = np.asarray(
+            pd.to_numeric(
+                v,
+                errors="coerce",
+            ).to_numpy(dtype=float),
+            dtype=float,
+        )
         fin = a[np.isfinite(a)]
         if not fin.size or np.ptp(fin) == 0:
             return np.zeros(len(a))
         z = (a - fin.min()) / (fin.max() - fin.min())
         z[~np.isfinite(z)] = 0
-        return z
+        return np.asarray(
+            z,
+            dtype=float,
+        )
 
     ks = ["rmse", "abs_bias", "coverage_error", "failure_rate"]
     denom = sum(abs(float(weights[k])) for k in ks) or 1
@@ -1172,7 +1187,11 @@ _ALLOWED_API_STATUS = {
 
 def _lifecycle_path() -> Path:
     return Path(
-        resources.files("eyeprocesspy").joinpath("resources/extdata/api-lifecycle-registry-0.9.csv")
+        str(
+            resources.files("eyeprocesspy").joinpath(
+                "resources/extdata/api-lifecycle-registry-0.9.csv"
+            )
+        )
     )
 
 
@@ -1741,10 +1760,10 @@ def sensitivity_rank_stability(
     d = _df(x)
     _req(d, [id, rank, specification], "x")
     groups = [z for _, z in d.groupby(specification)]
-    common = set(map(str, groups[0][id]))
+    common_ids = set(map(str, groups[0][id]))
     for z in groups[1:]:
-        common &= set(map(str, z[id]))
-    common = sorted(common)
+        common_ids &= set(map(str, z[id]))
+    common = sorted(common_ids)
     if len(common) < 2 or len(groups) < 2:
         return math.nan
     vec = []
@@ -1913,6 +1932,7 @@ def _flatten_manifest(x: Any, prefix: str = "") -> list[dict[str, Any]]:
         for i, v in enumerate(x, 1):
             rows += _flatten_manifest(v, f"{prefix}.[[{i}]]" if prefix else f"[[{i}]]")
         return rows
+    value: Any
     if x is None:
         value = np.nan
     elif isinstance(x, (list, tuple, np.ndarray, pd.Series)):
@@ -1953,7 +1973,7 @@ def lock_decision_manifest(x: Any, label: str = "analysis_decisions") -> EyeResu
 def verify_decision_manifest_lock(x: Any) -> bool:
     if not _is(x, "eye_decision_manifest_lock"):
         raise EyeProcessValidationError("x must be an eye_decision_manifest_lock.")
-    return x.manifest_hash == decision_manifest_hash(x.manifest)
+    return bool(x.manifest_hash == decision_manifest_hash(x.manifest))
 
 
 def compare_decision_manifests(old: Any, new: Any) -> pd.DataFrame:
@@ -2015,7 +2035,7 @@ def read_decision_manifest(path: str | Path, format: str | None = None) -> EyeRe
         raise EyeProcessValidationError(
             "Decision manifest hash is missing or does not match the imported decision content."
         )
-    return x
+    return cast(EyeResult, x)
 
 
 def audit_decision_provenance(

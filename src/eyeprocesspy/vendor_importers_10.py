@@ -996,11 +996,11 @@ def _parse_float(value: str) -> float:
 
 
 def _parse_eyelink_asc(lines: list[str], recording_id: str):
-    samples = []
-    eye_samples = []
-    episodes = []
-    events = []
-    calibrations = []
+    samples: list[dict[str, Any]] = []
+    eye_samples: list[dict[str, Any]] = []
+    episodes: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
+    calibrations: list[dict[str, Any]] = []
     record_types: dict[str, int] = {}
 
     for raw_line in lines:

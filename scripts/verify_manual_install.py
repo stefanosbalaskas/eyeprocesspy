@@ -1,4 +1,5 @@
 """Smoke-check a manual eyeprocesspy installation."""
+
 import eyeprocesspy as ep
 
 print("eyeprocesspy version:", ep.__version__)

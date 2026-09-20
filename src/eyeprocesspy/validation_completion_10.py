@@ -11,7 +11,7 @@ import time
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 import numpy as np
 import pandas as pd
@@ -72,7 +72,7 @@ class EyeValidationProgram(dict):
             raise AttributeError(name) from exc
 
 
-def _stop(message: str) -> None:
+def _stop(message: str) -> NoReturn:
     raise EyeProcessValidationError(message)
 
 

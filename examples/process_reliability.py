@@ -1,4 +1,5 @@
 """Repeated-measure process reliability with ICC and Bland-Altman diagnostics."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -30,4 +31,6 @@ axis.figure.tight_layout()
 axis.figure.savefig(OUT / "process-reliability.svg", format="svg", bbox_inches="tight")
 plt.close(axis.figure)
 
-print("\nInterpretation boundary: reliability is design- and population-dependent and does not establish construct validity.")
+print(
+    "\nInterpretation boundary: reliability is design- and population-dependent and does not establish construct validity."
+)

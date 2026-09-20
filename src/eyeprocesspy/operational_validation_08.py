@@ -421,7 +421,15 @@ def preaction_process_features(
             rr = rel[keep]
             if len(zz) < 3:
                 continue
-            av = zz[aoi].astype(object).to_numpy() if aoi in zz else np.repeat(None, len(zz))
+            av = (
+                zz[aoi].astype(object).to_numpy()
+                if aoi in zz
+                else np.full(
+                    len(zz),
+                    None,
+                    dtype=object,
+                )
+            )
             pv = _num(zz[pupil]) if pupil in zz else np.repeat(np.nan, len(zz))
             bv = _as_bool(zz[blink]).astype(float) if blink in zz else np.repeat(np.nan, len(zz))
             row = {

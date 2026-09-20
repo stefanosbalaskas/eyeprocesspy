@@ -593,17 +593,28 @@ def _evidence_pass(value: Any, kind: str) -> bool:
         isinstance(value, EyeValidationCompletionAudit)
         or class_name == "eye_validation_completion_audit"
     ):
-        return _field(value, "status") == "complete"
+        return bool(
+            _field(
+                value,
+                "status",
+            )
+            == "complete"
+        )
 
     if kind == "grouped_validation" and class_name in {
         "eye_grouped_cv",
         "eye_crossed_grouped_cv",
     }:
         results = _frame_field(value, "results")
-        return (
+        return bool(
             not results.empty
             and "score" in results
-            and np.isfinite(pd.to_numeric(results["score"], errors="coerce")).all()
+            and np.isfinite(
+                pd.to_numeric(
+                    results["score"],
+                    errors="coerce",
+                )
+            ).all()
         )
 
     if kind == "engine_equivalence" and class_name == "eye_engine_comparison":

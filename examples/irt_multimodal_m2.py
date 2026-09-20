@@ -1,4 +1,5 @@
 """M2 response + response-time + gaze reference workflow."""
+
 import eyeprocesspy as ep
 
 sim = ep.simulate_multimodal_m2(n_person=40, n_item=8, seed=20260814)

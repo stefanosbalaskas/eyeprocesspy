@@ -68,6 +68,7 @@ def _require_frame(data: Any) -> pd.DataFrame:
 
 
 def _names(value: Any, name: str, minimum: int = 1) -> tuple[str, ...]:
+    values: tuple[str, ...]
     if isinstance(value, str):
         values = (value,)
     else:
@@ -193,7 +194,13 @@ def _response_values(formula: Any, data: pd.DataFrame) -> np.ndarray:
         raise EyeProcessValidationError(f"Could not evaluate model formula: {exc}") from exc
     if response.shape[1] != 1:
         _stop("Grouped validation currently requires a scalar response.")
-    values = pd.to_numeric(response.iloc[:, 0], errors="coerce").to_numpy(dtype=float)
+    values = np.asarray(
+        pd.to_numeric(
+            response.iloc[:, 0],
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
     if len(values) != len(data):
         _stop("Formula evaluation removed rows; grouped validation requires complete model fields.")
     return values

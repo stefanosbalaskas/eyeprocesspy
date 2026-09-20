@@ -52,13 +52,20 @@ Issues = "https://github.com/stefanosbalaskas/eyeprocesspy/issues"
 Changelog = "https://github.com/stefanosbalaskas/eyeprocesspy/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-arrow = ["pyarrow>=20"]
+arrow = [
+    "pyarrow>=20",
+]
 stan = ["cmdstanpy>=1.3"]
 bayes = ["pymc", "arviz"]
 physio = ["neurokit2", "biosppy"]
 streaming = ["pylsl", "pyxdf"]
 gaze = ["pymovements", "remodnav", "multimatch-gaze"]
-survival = ["patsy>=1.0", "statsmodels>=0.14", "lifelines>=0.30.3,<0.31", "matplotlib>=3.9"]
+survival = [
+    "patsy>=1.0",
+    "statsmodels>=0.14",
+    "lifelines>=0.30.3,<0.31",
+    "matplotlib>=3.9",
+]
 psychometrics = ["girth", "catsim", "patsy>=1.0", "statsmodels>=0.14"]
 plots = ["matplotlib>=3.9"]
 ml = ["scikit-learn>=1.5"]

@@ -135,6 +135,49 @@ def test_p4_scoring_precision_targeting_and_exposure_contracts() -> None:
     assert ep.validate_eyeprocess_irt_item_bank(bank) is True
 
 
+def test_p4_information_targeting_default_and_invalid_weight_contracts() -> None:
+    items = _items()
+    theta = np.array(
+        [-1.0, 0.0, 1.0],
+        dtype=float,
+    )
+
+    default = ep.eyeprocess_irt_information_targeting(
+        items,
+        theta,
+    )
+
+    np.testing.assert_allclose(
+        default.weights,
+        np.repeat(
+            1.0 / len(theta),
+            len(theta),
+        ),
+    )
+
+    assert default.weighted_information > 0
+
+    assert default.weighted_sem > 0
+
+    invalid_weights = [
+        [1.0, 2.0],
+        [1.0, np.nan, 1.0],
+        [1.0, -1.0, 1.0],
+        [0.0, 0.0, 0.0],
+    ]
+
+    for weights in invalid_weights:
+        with pytest.raises(
+            Exception,
+            match="weights must be non-negative and match theta",
+        ):
+            ep.eyeprocess_irt_information_targeting(
+                items,
+                theta,
+                weights=weights,
+            )
+
+
 def test_p4_linking_anchor_invariance_and_device_contracts() -> None:
     reference = _items()
     focal = reference.copy()

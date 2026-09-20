@@ -64,9 +64,15 @@ def write_reporting_bundle(
 
     add_text("analysis-plan.yml", analysis_plan_text, "prespecified analysis plan")
     add_csv("perturbation-audit.csv", result["grid_result"]["audit"], "geometry branch audit")
-    add_csv("assignment-stability.csv", result["stability"]["overall"], "assignment robustness summary")
+    add_csv(
+        "assignment-stability.csv", result["stability"]["overall"], "assignment robustness summary"
+    )
     add_csv("assignment-table.csv", result["assignment_table"], "observation-level assignments")
-    add_csv("assignment-frequency.csv", result["assignment_probability"], "empirical assignment frequencies")
+    add_csv(
+        "assignment-frequency.csv",
+        result["assignment_probability"],
+        "empirical assignment frequencies",
+    )
     add_csv("model-results.csv", result["models"], "branch-level model outputs")
     add_csv("inference-stability.csv", inference_stability, "model robustness summary")
     add_csv("failures.csv", result["failures"], "retained geometry/model failures")
@@ -127,12 +133,13 @@ def write_reporting_bundle(
 def run(output_dir: Path) -> dict[str, Path]:
     """Build the existing synthetic AOI result and write a reporting bundle."""
     import matplotlib.pyplot as plt
-    import eyeprocesspy as ep
     from aoi_perturbation_sensitivity import (
         explicit_ols_callback,
         make_aois,
         make_fixations,
     )
+
+    import eyeprocesspy as ep
 
     data = make_fixations()
     aois = make_aois()

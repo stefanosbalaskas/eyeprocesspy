@@ -1,4 +1,5 @@
 """Frozen R API lifecycle registry and Python implementation inventory."""
+
 import eyeprocesspy as ep
 
 registry = ep.eye_api_lifecycle()

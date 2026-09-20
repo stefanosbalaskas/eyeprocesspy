@@ -1,4 +1,5 @@
 """Legacy/core IRT and process-model API example."""
+
 import eyeprocesspy as ep
 
 x = ep.simulate_eye_dataset(n_person=12, n_item=5, sampling_rate=10, samples_per_trial=5, seed=12)

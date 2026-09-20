@@ -1,4 +1,5 @@
 """End-to-end deterministic eyeprocesspy workflow using a canonical EyeDataset."""
+
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,9 @@ xy = np.array([centers[x] for x in aoi], dtype=float) + rng.normal(0, 0.025, (n,
 xy = np.clip(xy, 0.01, 0.99)
 
 recordings = pd.DataFrame({"recording_id": ["demo-001"], "participant_id": ["P001"]})
-streams = pd.DataFrame({"stream_id": ["gaze-main"], "recording_id": ["demo-001"], "stream_type": ["gaze"]})
+streams = pd.DataFrame(
+    {"stream_id": ["gaze-main"], "recording_id": ["demo-001"], "stream_type": ["gaze"]}
+)
 gaze = pd.DataFrame(
     {
         "sample_id": [f"s{i:04d}" for i in range(n)],

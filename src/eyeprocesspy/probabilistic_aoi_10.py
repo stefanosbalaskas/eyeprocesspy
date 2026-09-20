@@ -100,11 +100,19 @@ def _aoi_columns(aois: pd.DataFrame) -> dict[str, str]:
 
 def _numeric(value: Any) -> np.ndarray:
     if isinstance(value, pd.Series):
-        return pd.to_numeric(value, errors="coerce").to_numpy(dtype=float)
-    return pd.to_numeric(
-        pd.Series(value),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+        raw = pd.to_numeric(
+            value,
+            errors="coerce",
+        ).to_numpy(dtype=float)
+    else:
+        raw = pd.to_numeric(
+            pd.Series(value),
+            errors="coerce",
+        ).to_numpy(dtype=float)
+    return np.asarray(
+        raw,
+        dtype=float,
+    )
 
 
 def _safe_mean(value: Any) -> float:
@@ -169,7 +177,10 @@ def _softmax(logits: Any) -> np.ndarray:
     totals[invalid_total] = 1.0
 
     with np.errstate(divide="ignore", invalid="ignore"):
-        return values / totals[:, None]
+        return np.asarray(
+            values / totals[:, None],
+            dtype=float,
+        )
 
 
 def _signed_rectangle_margin(
@@ -196,7 +207,14 @@ def _signed_rectangle_margin(
             ymax - y,
         ]
     )
-    return np.where(inside, inside_margin, -outside_distance)
+    return np.asarray(
+        np.where(
+            inside,
+            inside_margin,
+            -outside_distance,
+        ),
+        dtype=float,
+    )
 
 
 def _resolve_two_scale(value: Any, fallback: float) -> np.ndarray:
@@ -209,7 +227,10 @@ def _resolve_two_scale(value: Any, fallback: float) -> np.ndarray:
         return np.repeat(float(fallback), 2)
     if values.size == 1:
         return np.repeat(float(values[0]), 2)
-    return values[:2].astype(float)
+    return np.asarray(
+        values[:2],
+        dtype=float,
+    )
 
 
 def _resolve_bias(value: Any) -> np.ndarray:
@@ -222,7 +243,10 @@ def _resolve_bias(value: Any) -> np.ndarray:
         return np.zeros(2, dtype=float)
     if values.size == 1:
         return np.repeat(float(values[0]), 2)
-    return values[:2].astype(float)
+    return np.asarray(
+        values[:2],
+        dtype=float,
+    )
 
 
 def assign_aois_probabilistic(

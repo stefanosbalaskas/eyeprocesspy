@@ -58,10 +58,13 @@ def _numeric_vector(value: Any) -> np.ndarray:
         except Exception:
             raw = np.asarray([value], dtype=object)
 
-    return pd.to_numeric(
-        pd.Series(np.ravel(raw)),
-        errors="coerce",
-    ).to_numpy(dtype=float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(np.ravel(raw)),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _first_numeric(value: Any) -> float:

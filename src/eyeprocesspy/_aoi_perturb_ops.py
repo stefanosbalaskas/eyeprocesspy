@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -279,7 +279,10 @@ def create_aoi_perturbation_grid(
             if len(seq) == 2 and all(np.isscalar(v) for v in seq):
                 return [seq]
             return seq
-        return values
+        return cast(
+            Iterable[Sequence[float]],
+            values,
+        )
 
     for value in values_or_empty(dilations):
         specs.append(

@@ -72,11 +72,18 @@ def _normalise_pair(value: Any, name: str, *, nonnegative: bool = False) -> tupl
 
 
 def _software_provenance() -> dict[str, Any]:
+    package_version: str | None
+
     try:
-        from . import __version__  # local import avoids import-cycle at module load
+        from . import __version__ as package_version
     except Exception:  # pragma: no cover - defensive when module is executed standalone
-        __version__ = None
-    return {"package": "eyeprocesspy", "version": __version__, "module": __name__}
+        package_version = None
+
+    return {
+        "package": "eyeprocesspy",
+        "version": package_version,
+        "module": __name__,
+    }
 
 
 def _stable_frame_hash(frame: pd.DataFrame) -> str:
@@ -199,7 +206,10 @@ def _line_intersection(
         )
     q = p2 - p1
     t = (q[0] * d2[1] - q[1] * d2[0]) / cross
-    return p1 + t * d1
+    return np.asarray(
+        p1 + t * d1,
+        dtype=float,
+    )
 
 
 def _offset_convex_polygon(poly: np.ndarray, distance: float) -> np.ndarray:

@@ -358,7 +358,10 @@ def eyeprocess_irt_2pl_probability(
     a = _scalar(a, "a", positive=True)
     b = _scalar(b, "b")
     D = _scalar(D, "D", positive=True)
-    return expit(D * a * (th - b))
+    return np.asarray(
+        expit(D * a * (th - b)),
+        dtype=float,
+    )
 
 
 def eyeprocess_irt_3pl_probability(
@@ -386,16 +389,19 @@ def eyeprocess_irt_grm_probability(
     th = _theta(theta)
     a = _scalar(a, "a", positive=True)
     D = _scalar(D, "D", positive=True)
-    thresholds = np.asarray(thresholds, dtype=float)
+    threshold_values = np.asarray(
+        thresholds,
+        dtype=float,
+    )
     if (
-        thresholds.size == 0
-        or not np.all(np.isfinite(thresholds))
-        or np.any(np.diff(thresholds) <= 0)
+        threshold_values.size == 0
+        or not np.all(np.isfinite(threshold_values))
+        or np.any(np.diff(threshold_values) <= 0)
     ):
         raise EyeProcessValidationError("thresholds must be finite and strictly increasing.")
     rows = []
     for t in th:
-        ge = expit(D * a * (t - thresholds))
+        ge = expit(D * a * (t - threshold_values))
         p = np.r_[1 - ge[0], ge[:-1] - ge[1:], ge[-1]]
         p = np.maximum(0.0, p)
         p /= p.sum()
@@ -409,12 +415,18 @@ def eyeprocess_irt_gpcm_probability(
     th = _theta(theta)
     a = _scalar(a, "a", positive=True)
     D = _scalar(D, "D", positive=True)
-    steps = np.asarray(steps, dtype=float)
-    if steps.size == 0 or not np.all(np.isfinite(steps)):
+    step_values = np.asarray(
+        steps,
+        dtype=float,
+    )
+    if step_values.size == 0 or not np.all(np.isfinite(step_values)):
         raise EyeProcessValidationError("steps must be finite and non-empty.")
     rows = []
     for t in th:
-        eta = np.r_[0.0, np.cumsum(D * a * (t - steps))]
+        eta = np.r_[
+            0.0,
+            np.cumsum(D * a * (t - step_values)),
+        ]
         eta -= eta.max()
         z = np.exp(eta)
         rows.append(z / z.sum())
@@ -425,20 +437,26 @@ def eyeprocess_irt_nominal_probability(
     theta: Any, slopes: Sequence[float], intercepts: Sequence[float]
 ) -> np.ndarray:
     th = _theta(theta)
-    slopes = np.asarray(slopes, dtype=float)
-    intercepts = np.asarray(intercepts, dtype=float)
+    slope_values = np.asarray(
+        slopes,
+        dtype=float,
+    )
+    intercept_values = np.asarray(
+        intercepts,
+        dtype=float,
+    )
     if (
-        slopes.size < 2
-        or slopes.shape != intercepts.shape
-        or not np.all(np.isfinite(slopes))
-        or not np.all(np.isfinite(intercepts))
+        slope_values.size < 2
+        or slope_values.shape != intercept_values.shape
+        or not np.all(np.isfinite(slope_values))
+        or not np.all(np.isfinite(intercept_values))
     ):
         raise EyeProcessValidationError(
             "slopes and intercepts must be finite vectors of equal length >= 2."
         )
     rows = []
     for t in th:
-        eta = intercepts + slopes * t
+        eta = intercept_values + slope_values * t
         eta -= eta.max()
         z = np.exp(eta)
         rows.append(z / z.sum())
@@ -486,7 +504,14 @@ def eyeprocess_irt_item_information(
                 )
             p = c + (d - c) * L
             deriv = (d - c) * D * a * L * (1 - L)
-        return deriv**2 / np.maximum(p * (1 - p), _EPS)
+        return np.asarray(
+            deriv**2
+            / np.maximum(
+                p * (1 - p),
+                _EPS,
+            ),
+            dtype=float,
+        )
     if family == "grm":
         return _numeric_information(
             lambda t: eyeprocess_irt_grm_probability(
@@ -525,7 +550,14 @@ def eyeprocess_irt_conditional_sem(information: Any) -> np.ndarray:
     x = np.asarray(information, dtype=float)
     if np.any(~np.isfinite(x)) or np.any(x < 0):
         raise EyeProcessValidationError("information must be finite and non-negative.")
-    return np.where(x > 0, 1 / np.sqrt(x), np.inf)
+    return np.asarray(
+        np.where(
+            x > 0,
+            1 / np.sqrt(x),
+            np.inf,
+        ),
+        dtype=float,
+    )
 
 
 def eyeprocess_irt_expected_score(theta: Any, family: str = "2pl", **kwargs: Any) -> np.ndarray:
@@ -565,7 +597,14 @@ def eyeprocess_irt_expected_score(theta: Any, family: str = "2pl", **kwargs: Any
         )
     else:
         raise EyeProcessValidationError("unsupported IRT family.")
-    return p @ np.arange(p.shape[1], dtype=float)
+    return np.asarray(
+        p
+        @ np.arange(
+            p.shape[1],
+            dtype=float,
+        ),
+        dtype=float,
+    )
 
 
 def eyeprocess_irt_test_characteristic_curve(theta: Any, items: Any, D: float = 1) -> pd.DataFrame:
@@ -599,11 +638,18 @@ def eyeprocess_irt_information_area(theta: Any, information: Any) -> float:
 def eyeprocess_irt_measurement_precision_profile(
     theta: Any, items: Any, target: Sequence[float] = (-2, 2), D: float = 1
 ) -> EyeResult:
-    target = np.asarray(target, dtype=float)
-    if target.size != 2 or not np.all(np.isfinite(target)) or target[0] >= target[1]:
+    target_values = np.asarray(
+        target,
+        dtype=float,
+    )
+    if (
+        target_values.size != 2
+        or not np.all(np.isfinite(target_values))
+        or target_values[0] >= target_values[1]
+    ):
         raise EyeProcessValidationError("target must be an increasing finite length-2 vector.")
     info = eyeprocess_irt_test_information(theta, items, D=D)
-    keep = (info.theta >= target[0]) & (info.theta <= target[1])
+    keep = (info.theta >= target_values[0]) & (info.theta <= target_values[1])
     if int(keep.sum()) < 2:
         raise EyeProcessValidationError(
             "theta must contain at least two finite grid points inside target."
@@ -611,7 +657,7 @@ def eyeprocess_irt_measurement_precision_profile(
     return _result(
         "eye_irt_precision_profile",
         curve=info,
-        target=target,
+        target=target_values,
         area=eyeprocess_irt_information_area(
             info.loc[keep, "theta"], info.loc[keep, "information"]
         ),
@@ -998,16 +1044,26 @@ def eyeprocess_irt_map_score(
     prior_sd: float = 1,
     D: float = 1,
 ) -> EyeResult:
-    bounds = np.asarray(bounds, dtype=float)
+    bound_values = np.asarray(
+        bounds,
+        dtype=float,
+    )
     prior_mean = _scalar(prior_mean, "prior_mean")
     prior_sd = _scalar(prior_sd, "prior_sd", positive=True)
-    if bounds.size != 2 or not np.all(np.isfinite(bounds)) or bounds[0] >= bounds[1]:
+    if (
+        bound_values.size != 2
+        or not np.all(np.isfinite(bound_values))
+        or bound_values[0] >= bound_values[1]
+    ):
         raise EyeProcessValidationError("invalid bounds or normal prior.")
     fit = minimize_scalar(
         lambda t: (
             -(_response_loglik(float(t), response, items, D) + norm.logpdf(t, prior_mean, prior_sd))
         ),
-        bounds=(bounds[0], bounds[1]),
+        bounds=(
+            bound_values[0],
+            bound_values[1],
+        ),
         method="bounded",
     )
     return _result(
@@ -1015,28 +1071,38 @@ def eyeprocess_irt_map_score(
         estimate=float(fit.x),
         objective=float(fit.fun),
         method="MAP",
-        bounds=bounds,
+        bounds=bound_values,
     )
 
 
 def eyeprocess_irt_mle_score(
     response: Any, items: Any, bounds: Sequence[float] = (-6, 6), D: float = 1
 ) -> EyeResult:
-    bounds = np.asarray(bounds, dtype=float)
-    if bounds.size != 2 or not np.all(np.isfinite(bounds)) or bounds[0] >= bounds[1]:
+    bound_values = np.asarray(
+        bounds,
+        dtype=float,
+    )
+    if (
+        bound_values.size != 2
+        or not np.all(np.isfinite(bound_values))
+        or bound_values[0] >= bound_values[1]
+    ):
         raise EyeProcessValidationError("bounds must be increasing and finite.")
     fit = minimize_scalar(
         lambda t: -_response_loglik(float(t), response, items, D),
-        bounds=(bounds[0], bounds[1]),
+        bounds=(
+            bound_values[0],
+            bound_values[1],
+        ),
         method="bounded",
     )
-    boundary = bool(abs(fit.x - bounds[0]) <= 1e-4 or abs(fit.x - bounds[1]) <= 1e-4)
+    boundary = bool(abs(fit.x - bound_values[0]) <= 1e-4 or abs(fit.x - bound_values[1]) <= 1e-4)
     return _result(
         "eye_irt_score",
         estimate=float(fit.x),
         objective=float(fit.fun),
         method="ML",
-        bounds=bounds,
+        bounds=bound_values,
         boundary=boundary,
     )
 
@@ -1060,14 +1126,26 @@ def eyeprocess_irt_score_table(
         )
     if len(person_ids) != y.shape[0]:
         raise EyeProcessValidationError("person_ids length mismatch.")
-    fun = {
-        "EAP": eyeprocess_irt_eap_score,
-        "MAP": eyeprocess_irt_map_score,
-        "ML": eyeprocess_irt_mle_score,
-    }[method]
     rows = []
     for i, pid in enumerate(person_ids):
-        z = fun(y[i], items, **kwargs)
+        if method == "EAP":
+            z = eyeprocess_irt_eap_score(
+                y[i],
+                items,
+                **kwargs,
+            )
+        elif method == "MAP":
+            z = eyeprocess_irt_map_score(
+                y[i],
+                items,
+                **kwargs,
+            )
+        else:
+            z = eyeprocess_irt_mle_score(
+                y[i],
+                items,
+                **kwargs,
+            )
         rows.append(
             {
                 "person_id": str(pid),
@@ -1387,7 +1465,10 @@ def eyeprocess_irt_process_aware_selection_penalty(
         raise EyeProcessValidationError("inputs must be finite compatible vectors.")
     burden_weight = _scalar(burden_weight, "burden_weight", nonnegative=True)
     quality_weight = _scalar(quality_weight, "quality_weight", nonnegative=True)
-    return info - burden_weight * burden - quality_weight * risk
+    return np.asarray(
+        info - burden_weight * burden - quality_weight * risk,
+        dtype=float,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1472,8 +1553,11 @@ def _link_opt(
             "weights must be finite, non-negative, match theta, and have positive sum."
         )
     w = w / w.sum()
-    start = np.asarray(start, float)
-    if start.size != 2 or not np.all(np.isfinite(start)) or start[0] <= 0:
+    start_values = np.asarray(
+        start,
+        dtype=float,
+    )
+    if start_values.size != 2 or not np.all(np.isfinite(start_values)) or start_values[0] <= 0:
         raise EyeProcessValidationError("start must contain positive finite A and finite B.")
     if method == "Stocking-Lord":
         target = eyeprocess_irt_test_characteristic_curve(th, r).expected_score.to_numpy()
@@ -1500,7 +1584,14 @@ def _link_opt(
             )
             return float(np.sum(w * np.sum((pref - pf) ** 2, axis=1)))
 
-    fit = minimize(obj, [math.log(start[0]), start[1]], method="BFGS")
+    fit = minimize(
+        obj,
+        [
+            math.log(start_values[0]),
+            start_values[1],
+        ],
+        method="BFGS",
+    )
     return _result(
         "eye_irt_link",
         A=float(math.exp(fit.x[0])),
@@ -3028,18 +3119,25 @@ def eyeprocess_irt_bank_coverage(
 ) -> EyeResult:
     th = _theta(theta)
     ti = _scalar(target_information, "target_information", nonnegative=True)
-    target = np.asarray(target, dtype=float)
-    if target.size != 2 or not np.all(np.isfinite(target)) or target[0] >= target[1]:
+    target_values = np.asarray(
+        target,
+        dtype=float,
+    )
+    if (
+        target_values.size != 2
+        or not np.all(np.isfinite(target_values))
+        or target_values[0] >= target_values[1]
+    ):
         raise EyeProcessValidationError("target must be an increasing finite length-2 vector.")
     curve = eyeprocess_irt_test_information(th, items)
-    keep = (curve.theta >= target[0]) & (curve.theta <= target[1])
+    keep = (curve.theta >= target_values[0]) & (curve.theta <= target_values[1])
     if not keep.any():
         raise EyeProcessValidationError("theta grid does not overlap the target region.")
     gaps = curve.loc[keep & (curve.information < ti)].copy()
     return _result(
         "eye_irt_bank_coverage",
         curve=curve,
-        target=target,
+        target=target_values,
         target_information=ti,
         fraction_target_met=float(np.mean(curve.loc[keep, "information"] >= ti)),
         minimum_information=float(curve.loc[keep, "information"].min()),

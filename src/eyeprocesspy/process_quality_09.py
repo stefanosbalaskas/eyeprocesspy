@@ -198,7 +198,13 @@ def _req(d: pd.DataFrame, cols: Sequence[str | None], name: str = "data") -> Non
 
 
 def _num(x: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(x), errors="coerce").to_numpy(float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(x),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _q(x: Any, p: float) -> float:
@@ -1121,8 +1127,15 @@ def gaze_data_quality_profile(
         pr = gaze_precision_rms_s2s(z.loc[valid_vec], x, y, time, None)
         ef = effective_sampling_frequency(z, time, time_unit, None)
         acc = (
-            estimate_calibration_error(z, x, y, target_x, target_y, None)
-            if target_x is not None and target_x in z and target_y in z
+            estimate_calibration_error(
+                z,
+                x,
+                y,
+                target_x,
+                target_y,
+                None,
+            )
+            if target_x is not None and target_y is not None and target_x in z and target_y in z
             else None
         )
         vf = float(valid_vec.mean()) if len(valid_vec) else math.nan

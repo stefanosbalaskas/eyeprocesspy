@@ -432,7 +432,7 @@ def ablate_multimodal_channels(
 
 
 def multimodal_backend_status() -> pd.DataFrame:
-    rows = [
+    rows: list[dict[str, Any]] = [
         {"backend": "cmdstanr", "installed": False, "version": None},
         {"backend": "cmdstanpy", "installed": find_spec("cmdstanpy") is not None, "version": None},
         {"backend": "posterior", "installed": False, "version": None},
@@ -443,7 +443,7 @@ def multimodal_backend_status() -> pd.DataFrame:
             try:
                 import importlib.metadata as md
 
-                row["version"] = md.version(row["backend"])
+                row["version"] = md.version(str(row["backend"]))
             except Exception:
                 pass
     return pd.DataFrame(rows)
@@ -1533,7 +1533,10 @@ def fit_multimodal_m4(
 def _softmax(x: np.ndarray) -> np.ndarray:
     z = np.asarray(x, float)
     z = np.exp(z - np.max(z))
-    return z / z.sum()
+    return np.asarray(
+        z / z.sum(),
+        dtype=float,
+    )
 
 
 def _m4_transition_array(
@@ -1886,7 +1889,7 @@ def multimodal_m4_state_diagnostics(x: Any) -> EyeResult:
             [(i + 1, j + 1, float(transition[i, j])) for i in range(K) for j in range(K)],
             columns=["from", "to", "probability"],
         )
-        run_rows = []
+        run_rows: list[dict[str, Any]] = []
         for seq, g in prob.groupby("sequence_id", sort=False):
             vals = g.MAP_state.to_numpy(int)
             lengths = []

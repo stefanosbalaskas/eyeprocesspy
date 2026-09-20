@@ -69,7 +69,13 @@ def _require(d: pd.DataFrame, columns: Iterable[str | None], label: str = "data"
 
 
 def _numeric(x: Any) -> np.ndarray:
-    return pd.to_numeric(pd.Series(x), errors="coerce").to_numpy(float)
+    return np.asarray(
+        pd.to_numeric(
+            pd.Series(x),
+            errors="coerce",
+        ).to_numpy(dtype=float),
+        dtype=float,
+    )
 
 
 def _groups(d: pd.DataFrame, by: str | Sequence[str] | None):
@@ -125,12 +131,20 @@ def _convert_xy(
 
     def to_px(a: np.ndarray, axis: str) -> np.ndarray:
         if unit == "pixels":
-            return a
+            return np.asarray(
+                a,
+                dtype=float,
+            )
         if unit == "normalized":
-            return a * (wpx if axis == "x" else hpx)
+            return np.asarray(
+                a * (wpx if axis == "x" else hpx),
+                dtype=float,
+            )
         cm = np.tan(np.deg2rad(a)) * dist
-        return cm * ((wpx / wcm) if axis == "x" else (hpx / hcm)) + (
-            wpx / 2 if axis == "x" else hpx / 2
+        return np.asarray(
+            cm * ((wpx / wcm) if axis == "x" else (hpx / hcm))
+            + (wpx / 2 if axis == "x" else hpx / 2),
+            dtype=float,
         )
 
     px = to_px(x, "x")
@@ -138,10 +152,22 @@ def _convert_xy(
     if output_unit == "pixels":
         return px, py
     if output_unit == "normalized":
-        return px / wpx, py / hpx
+        return (
+            np.asarray(px / wpx, dtype=float),
+            np.asarray(py / hpx, dtype=float),
+        )
     xcm = (px - wpx / 2) * (wcm / wpx)
     ycm = (py - hpx / 2) * (hcm / hpx)
-    return np.rad2deg(np.arctan2(xcm, dist)), np.rad2deg(np.arctan2(ycm, dist))
+    return (
+        np.asarray(
+            np.rad2deg(np.arctan2(xcm, dist)),
+            dtype=float,
+        ),
+        np.asarray(
+            np.rad2deg(np.arctan2(ycm, dist)),
+            dtype=float,
+        ),
+    )
 
 
 def _prepare_coordinates(
@@ -607,8 +633,13 @@ def estimate_effective_sampling_rate(
                 else math.nan
             )
         )
-        if x is not None:
-            good, _, _ = _valid_masks(z, x, y, valid)
+        if x is not None and y is not None:
+            good, _, _ = _valid_masks(
+                z,
+                x,
+                y,
+                valid,
+            )
             effective_count = int(np.sum(good & finite_t))
             count_rule = "valid gaze samples with finite timestamps"
         else:
@@ -909,7 +940,7 @@ def _validate_thresholds(thresholds: Mapping[str, Any] | None, columns: Sequence
 
 
 def _threshold_flags(row: pd.Series, thresholds: Mapping[str, Any] | None) -> list[str]:
-    flags = []
+    flags: list[str] = []
     if not thresholds:
         return flags
     for metric, rule in thresholds.items():
@@ -1083,14 +1114,18 @@ def create_gaze_quality_report(
         "source_fingerprint": _source_fingerprint(
             d,
             [
-                x,
-                y,
-                time,
-                valid,
-                missing_reason,
-                resolved_unit_column,
-                *([target_x, target_y] if has_targets else []),
-                *keys,
+                column
+                for column in [
+                    x,
+                    y,
+                    time,
+                    valid,
+                    missing_reason,
+                    resolved_unit_column,
+                    *([target_x, target_y] if has_targets else []),
+                    *keys,
+                ]
+                if column is not None
             ],
         ),
         "preprocessing_spec": preprocessing_spec,
@@ -1203,7 +1238,11 @@ def plot_gaze_quality_dashboard(report: Any):
             ax.text(0.5, 0.5, f"{m} unavailable", ha="center", va="center")
             ax.set_title(title)
     fig.tight_layout()
-    fig.eyeprocess_plot_data = d
+    setattr(
+        fig,
+        "eyeprocess_plot_data",
+        d,
+    )
     return fig
 
 

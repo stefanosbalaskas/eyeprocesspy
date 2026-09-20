@@ -1,6 +1,8 @@
 """External-engine adapter and equivalence example."""
+
 import numpy as np
 import pandas as pd
+
 import eyeprocesspy as ep
 
 registry = ep.external_model_engines()

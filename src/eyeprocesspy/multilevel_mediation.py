@@ -319,6 +319,7 @@ def audit_mediation_missingness(
         response_observed &= _indicator_series(frame, response_observed_col)
     poor_quality = pd.Series(False, index=frame.index, dtype=bool)
     if quality_col is not None:
+        assert minimum_quality is not None
         quality = _quality_series(frame, quality_col)
         poor_quality = quality.isna() | quality.lt(float(minimum_quality))
     observed_zero = mediator_observed & m.eq(0)
@@ -559,6 +560,7 @@ def prepare_multilevel_mediation_data(
 
     poor_quality = pd.Series(False, index=frame.index, dtype=bool)
     if quality_col is not None:
+        assert minimum_quality is not None
         quality = _quality_series(frame, quality_col)
         poor_quality = quality.isna() | quality.lt(float(minimum_quality))
 
