@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import importlib
 import numpy as np
 import pandas as pd
 import pytest
 
 import eyeprocesspy as ep
+from eyeprocesspy.exceptions import EyeProcessValidationError
 from eyeprocesspy.irt import EyeResult
 
 
@@ -136,28 +138,46 @@ def test_p4_scoring_precision_targeting_and_exposure_contracts() -> None:
 
 
 def test_p4_information_targeting_default_and_invalid_weight_contracts() -> None:
+    irt_module = importlib.import_module("eyeprocesspy.irt")
+    direct = irt_module.eyeprocess_irt_information_targeting
+    public = ep.eyeprocess_irt_information_targeting
+
+    # The package-level API must expose the canonical implementation.
+    assert public is direct
+
     items = _items()
     theta = np.array(
         [-1.0, 0.0, 1.0],
         dtype=float,
     )
 
-    default = ep.eyeprocess_irt_information_targeting(
+    # Exercise the canonical implementation directly so coverage
+    # proves src/eyeprocesspy/irt.py rather than an alias/wrapper.
+    default = direct(
         items,
         theta,
     )
 
     np.testing.assert_allclose(
         default.weights,
-        np.repeat(
-            1.0 / len(theta),
-            len(theta),
+        np.full(
+            theta.size,
+            1.0 / theta.size,
+            dtype=float,
         ),
     )
-
     assert default.weighted_information > 0
-
     assert default.weighted_sem > 0
+
+    explicit = direct(
+        items,
+        theta,
+        weights=[1.0, 2.0, 1.0],
+    )
+    np.testing.assert_allclose(
+        explicit.weights,
+        [0.25, 0.50, 0.25],
+    )
 
     invalid_weights = [
         [1.0, 2.0],
@@ -168,10 +188,10 @@ def test_p4_information_targeting_default_and_invalid_weight_contracts() -> None
 
     for weights in invalid_weights:
         with pytest.raises(
-            Exception,
+            EyeProcessValidationError,
             match="weights must be non-negative and match theta",
         ):
-            ep.eyeprocess_irt_information_targeting(
+            direct(
                 items,
                 theta,
                 weights=weights,
