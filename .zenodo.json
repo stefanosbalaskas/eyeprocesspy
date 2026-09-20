@@ -1,6 +1,6 @@
 {
   "title": "eyeprocesspy: Vendor-neutral Python infrastructure for eye-tracking and multimodal process data",
-  "description": "eyeprocesspy is the Python port of the frozen R eyeprocess 0.11.1 reference. Version 0.1.0 implements the full 1,182-function public API and provides vendor-neutral infrastructure for eye-tracking, pupillometry, biometrics, psychometrics, item-response theory, multimodal process data, validation evidence, reproducibility, plotting, storage, and controlled interoperability. Cross-language differences that cannot be byte-identical are explicitly gated and documented rather than silently substituted.",
+  "description": "eyeprocesspy is vendor-neutral Python infrastructure aligned to the frozen R eyeprocess 0.11.1 reference. Version 0.2.0 extends the parity foundation with detector-sensitivity workflows, standardized spatial data quality, censored gaze-latency survival analysis, multimodal and psychometric process tooling, expanded methodological documentation, strict typing and exact coverage gates, reproducibility evidence, plotting, storage, and controlled interoperability. Cross-language differences that cannot be byte-identical are explicitly gated and documented rather than silently substituted.",
   "creators": [
     {
       "name": "Balaskas, Stefanos",
@@ -27,5 +27,6 @@
       "relation": "isSupplementTo",
       "scheme": "url"
     }
-  ]
+  ],
+  "version": "0.2.0"
 }

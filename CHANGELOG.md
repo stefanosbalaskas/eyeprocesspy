@@ -4,6 +4,19 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+## 0.2.0 — 2026-09-21
+
+### Release qualification and hardening
+
+- Promoted the hardened development tranche after exact-head pull-request certification and an exact-main post-merge rerun.
+- Full source typing is enforced with mypy under the declared Python 3.11 typing target, while runtime CI remains Python 3.11–3.14 across Ubuntu, Windows, and macOS.
+- Exact-main release qualification passed **1,845 tests**, **34,161 / 34,161 statements**, and **11,796 / 11,796 branches**, with zero missing statement or branch counters.
+- Hardened artifact validation uses source-independent builds, strict Twine checks, clean wheel and sdist installation smoke tests, and `pip check`.
+- Hardened release validation includes frozen dependency sync, strict package/docs/parity gates, dependency auditing, artifact hashes, provenance evidence, and Trusted Publishing.
+- Corrected the lockfile optional-extra contract from the stale `arrow` name to the public `narrow` extra and added CI validation of that release extra.
+- The frozen R reference remains **eyeprocess 0.11.1**; the Python package version advances independently to **0.2.0**.
+
+
 ### Event-detector multiverse and inference robustness
 
 - Added an explicit vendor-neutral detector-sensitivity workflow spanning detector specifications, deterministic branch execution, temporal event matching/agreement, AOI and feature propagation, identical-model inference, stability summaries, visualization, and reproducible Markdown reporting.
