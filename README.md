@@ -29,7 +29,7 @@
 
 `eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It provides one governed analytical surface for vendor import, canonical data contracts, preprocessing, gaze and AOI analysis, pupillometry, process measurement, psychometrics/IRT, multimodal workflows, validation, provenance, plotting, and reproducible reporting.
 
-> **Release candidate — 0.2.0.** The 0.2.0 candidate is anchored to an exact-main qualification with **1,845 tests**, **34,161 / 34,161 statements**, and **11,796 / 11,796 branches** covered, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix. It is **not yet published** to PyPI or Zenodo. The latest published release remains **0.1.0**, archived at **DOI 10.5281/zenodo.22285167**.
+> **Published release — 0.2.0.** Version 0.2.0 is published to PyPI and GitHub Releases from certified commit `2adfc2a440f9dd8685cd193929183030d2bc2065`. The release gate passed **1,845 tests**, **34,161 / 34,161 statements**, and **11,796 / 11,796 branches** covered, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix. The GitHub release includes the wheel, source distribution, SHA-256 checksums, and build-provenance attestation. Zenodo metadata is prepared for 0.2.0; a new DOI will be added only after Zenodo mints it. The previous published release 0.1.0 remains archived at **DOI 10.5281/zenodo.22285167**.
 
 ## Install
 

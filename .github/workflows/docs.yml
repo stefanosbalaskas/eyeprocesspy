@@ -1,17 +1,13 @@
 name: Documentation
 
 on:
+  # Deploy MkDocs after every main push. GitHub may also start its
+  # legacy Pages/Jekyll deployment for arbitrary main commits; running this
+  # workflow on every main push ensures the MkDocs deployment is the final
+  # published site rather than leaving a legacy build live.
   push:
     branches:
       - main
-    paths:
-      - "docs/**"
-      - "src/**"
-      - "mkdocs.yml"
-      - "pyproject.toml"
-      - "README.md"
-      - ".github/scripts/check_docs_assets.py"
-      - ".github/workflows/docs.yml"
   pull_request:
     paths:
       - "docs/**"
