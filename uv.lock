@@ -935,7 +935,7 @@ wheels = [
 
 [[package]]
 name = "eyeprocesspy"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
@@ -946,7 +946,7 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-arrow = [
+narrow = [
     { name = "pyarrow" },
 ]
 bayes = [
@@ -1041,7 +1041,7 @@ requires-dist = [
     { name = "patsy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "patsy", marker = "extra == 'psychometrics'", specifier = ">=1.0" },
     { name = "patsy", marker = "extra == 'survival'", specifier = ">=1.0" },
-    { name = "pyarrow", marker = "extra == 'arrow'", specifier = ">=20" },
+    { name = "pyarrow", marker = "extra == 'narrow'", specifier = ">=20" },
     { name = "pyarrow", marker = "extra == 'dev'", specifier = ">=20" },
     { name = "pylsl", marker = "extra == 'streaming'" },
     { name = "pymc", marker = "extra == 'bayes'" },
@@ -1059,7 +1059,7 @@ requires-dist = [
     { name = "statsmodels", marker = "extra == 'survival'", specifier = ">=0.14" },
     { name = "twine", marker = "extra == 'dev'", specifier = ">=6" },
 ]
-provides-extras = ["arrow", "stan", "bayes", "physio", "streaming", "gaze", "survival", "psychometrics", "plots", "ml", "docs", "dev"]
+provides-extras = ["narrow", "stan", "bayes", "physio", "streaming", "gaze", "survival", "psychometrics", "plots", "ml", "docs", "dev"]
 
 [[package]]
 name = "fastexcel"

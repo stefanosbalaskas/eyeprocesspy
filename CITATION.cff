@@ -6,9 +6,8 @@ authors:
   - family-names: Balaskas
     given-names: Stefanos
     orcid: https://orcid.org/0000-0003-2444-9796
-version: 0.1.0
-date-released: 2026-09-03
-doi: 10.5281/zenodo.22285167
+version: 0.2.0
+date-released: 2026-09-21
 repository-code: https://github.com/stefanosbalaskas/eyeprocesspy
 url: https://stefanosbalaskas.github.io/eyeprocesspy/
 license: MIT
@@ -24,7 +23,8 @@ abstract: >-
   eyeprocesspy is vendor-neutral Python infrastructure for harmonizing,
   validating, processing, analysing, and documenting eye-tracking,
   pupillometry, biometric, psychometric, and multimodal process data. Version
-  0.1.0 ports the complete 1,182-function public API of the frozen R
-  eyeprocess 0.11.1 reference and preserves explicit governance for
-  cross-language numerical, serialization, random-number, and backend
-  differences.
+  0.2.0 extends the complete frozen R eyeprocess 0.11.1 parity foundation with
+  detector-sensitivity workflows, standardized spatial data quality, censored
+  gaze-latency survival analysis, expanded methodological documentation, and
+  stricter typing, coverage, build, and release qualification while preserving
+  explicit governance for cross-language and backend differences.
