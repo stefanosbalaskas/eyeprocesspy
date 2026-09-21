@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Sync release environment
-        run: uv sync --frozen --extra dev
+        run: uv sync --frozen --extra dev --extra narrow
       - name: Verify tag matches package version
         if: github.ref_type == 'tag'
         run: |
@@ -42,8 +42,29 @@ jobs:
         run: uv run --frozen ruff check .
       - name: Mypy
         run: uv run --frozen mypy src/eyeprocesspy
-      - name: Full tests and 100% branch coverage
-        run: uv run --frozen pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100
+      - name: Full tests and exact 100% branch coverage
+        run: uv run --frozen pytest --cov=eyeprocesspy --cov-branch --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=100
+      - name: Verify zero missing coverage counters
+        run: |
+          uv run --frozen python - <<'PY'
+          import json
+          from pathlib import Path
+
+          totals = json.loads(
+              Path("coverage.json").read_text(encoding="utf-8")
+          )["totals"]
+
+          missing_lines = int(totals["missing_lines"])
+          missing_branches = int(totals["missing_branches"])
+
+          if missing_lines != 0 or missing_branches != 0:
+              raise SystemExit(
+                  f"coverage gap: lines={missing_lines}, "
+                  f"branches={missing_branches}"
+              )
+
+          print("exact 100% statement + branch coverage")
+          PY
       - name: Deep parity release gate
         run: uv run --frozen python tools/deep_parity_audit.py --release-gate
       - name: Public API documentation gate
