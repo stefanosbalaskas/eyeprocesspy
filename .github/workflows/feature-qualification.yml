@@ -39,21 +39,28 @@ jobs:
             src/eyeprocesspy/scanpath_sensitivity.py \
             src/eyeprocesspy/gaze_stress.py \
             src/eyeprocesspy/bayesian_networks/robustness.py
-      - name: Focused tests and exact branch coverage
+      - name: Focused tests with branch coverage
         run: |
           uv run --frozen pytest \
             tests/test_measurement_validity_dynamic_gaze.py \
             tests/test_advanced_events_benchmark_coordinates.py \
             tests/test_scanpath_and_gaze_stress.py \
             tests/test_bayesian_network_robustness.py \
-            --cov=eyeprocesspy.measurement_validity \
-            --cov=eyeprocesspy.dynamic_aoi \
-            --cov=eyeprocesspy.advanced_events \
-            --cov=eyeprocesspy.event_benchmark \
-            --cov=eyeprocesspy.naturalistic_coordinates \
-            --cov=eyeprocesspy.scanpath_sensitivity \
-            --cov=eyeprocesspy.gaze_stress \
-            --cov=eyeprocesspy.bayesian_networks.robustness \
+            --cov=eyeprocesspy \
             --cov-branch \
             --cov-report=term-missing \
-            --cov-fail-under=100
+            --cov-report=json:coverage-feature.json \
+            --cov-fail-under=0
+      - name: Enforce exact 100% coverage on new scientific core
+        run: |
+          uv run --frozen coverage report \
+            src/eyeprocesspy/measurement_validity.py \
+            src/eyeprocesspy/dynamic_aoi.py \
+            src/eyeprocesspy/advanced_events.py \
+            src/eyeprocesspy/event_benchmark.py \
+            src/eyeprocesspy/naturalistic_coordinates.py \
+            src/eyeprocesspy/scanpath_sensitivity.py \
+            src/eyeprocesspy/gaze_stress.py \
+            src/eyeprocesspy/bayesian_networks/robustness.py \
+            --show-missing \
+            --fail-under=100
