@@ -77,6 +77,15 @@ def test_known_gaze_simulation_and_corruptions():
     assert gaps.synthetic_blink_gap.any()
     mislabeled = ep.inject_event_misclassification(data, probability=0.2, seed=3)
     assert "event_type_clean" in mislabeled
+    missing_label = data.copy()
+    missing_label.loc[0, "event_type"] = pd.NA
+    missing_corrupted = ep.inject_event_misclassification(
+        missing_label,
+        probability=0.2,
+        seed=3,
+    )
+    assert pd.isna(missing_corrupted.loc[0, "event_type"])
+    assert pd.isna(missing_corrupted.loc[0, "event_type_clean"])
 
     with pytest.raises(ep.EyeProcessValidationError):
         ep.simulate_known_gaze_process(n_cycles=0)
