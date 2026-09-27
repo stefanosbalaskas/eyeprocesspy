@@ -83,8 +83,16 @@ def validate_dynamic_aoi_spec(
             vals = pd.to_numeric(
                 pd.Series([row.x_min, row.x_max, row.y_min, row.y_max]), errors="coerce"
             ).to_numpy(float)
-            if mask.ndim != 2 or mask.size == 0 or not np.isfinite(vals).all():
-                raise EyeProcessValidationError("Mask AOIs require a 2D mask and finite extent.")
+            if (
+                mask.ndim != 2
+                or mask.size == 0
+                or not np.isfinite(vals).all()
+                or vals[0] >= vals[1]
+                or vals[2] >= vals[3]
+            ):
+                raise EyeProcessValidationError(
+                    "Mask AOIs require a 2D mask and finite, non-zero extent."
+                )
     table = table.sort_values([aoi, time], kind="stable").reset_index(drop=True)
     return EyeResult(
         {
