@@ -377,6 +377,10 @@ def sample_size_stability_curve(
         raise EyeProcessValidationError("repeats must be positive and seed non-negative.")
     if resample_by is not None and resample_by not in data_spec.data:
         raise EyeProcessValidationError("resample_by is not present in BayesianDataSpec.data.")
+    if resample_by is not None and data_spec.data[resample_by].isna().any():
+        raise EyeProcessValidationError(
+            "resample_by contains missing values; grouped subsampling will not silently drop them."
+        )
     baseline = learn_bayesian_network(
         data_spec,
         algorithm=algorithm,
@@ -447,9 +451,16 @@ def predictive_calibration(
     else:
         evidence_nodes = tuple(str(node) for node in evidence_nodes)
     unknown_evidence = sorted(set(evidence_nodes).difference(result.nodes))
+    missing_evidence_columns = sorted(set(evidence_nodes).difference(frame.columns))
     if target in evidence_nodes or unknown_evidence:
         raise EyeProcessValidationError(
             "evidence_nodes must contain known BN nodes and must exclude the target."
+        )
+    if missing_evidence_columns:
+        raise EyeProcessValidationError(
+            "Prediction data are missing evidence node column(s): "
+            + ", ".join(missing_evidence_columns)
+            + "."
         )
     if positive_state is None and len(states) == 2:
         positive_state = states[-1]
@@ -466,7 +477,7 @@ def predictive_calibration(
         evidence = {
             node: row[node]
             for node in evidence_nodes
-            if node in frame and not pd.isna(row[node])
+            if not pd.isna(row[node])
         }
         query = query_bayesian_network(result, target=target, evidence=evidence)
         probabilities = dict(query.posterior or {})
