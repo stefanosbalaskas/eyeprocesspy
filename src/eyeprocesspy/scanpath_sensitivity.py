@@ -52,6 +52,8 @@ def transition_js_distance(a: Any, b: Any) -> float:
     keys = sorted(set(left) | set(right))
     if not keys:
         return 0.0
+    if not left or not right:
+        return 1.0
     p = np.asarray([left.get(k, 0.0) for k in keys], float)
     q = np.asarray([right.get(k, 0.0) for k in keys], float)
     return float(jensenshannon(p, q, base=2.0))
