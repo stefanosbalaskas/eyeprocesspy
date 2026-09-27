@@ -132,12 +132,18 @@ def fit_parameters(
         if estimator in {"mle", "maximum_likelihood"}:
             model.fit(data[nodes], estimator=estimators.MaximumLikelihoodEstimator)
         elif estimator in {"bayesian", "bayes"}:
-            model.fit(
-                data[nodes],
-                estimator=estimators.BayesianEstimator,
-                prior_type=prior,
+            normalized_prior = {
+                "bdeu": "BDeu",
+                "k2": "K2",
+                "dirichlet": "dirichlet",
+            }.get(prior.lower(), prior)
+            bayes = estimators.BayesianEstimator(model, data[nodes])
+            cpds = bayes.get_parameters(
+                prior_type=normalized_prior,
                 equivalent_sample_size=equivalent_sample_size,
+                n_jobs=1,
             )
+            model.add_cpds(*cpds)
         else:
             raise ValueError("Discrete estimator must be 'mle' or 'bayesian'.")
         model.check_model()
