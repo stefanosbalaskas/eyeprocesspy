@@ -89,7 +89,8 @@ def bootstrap_bn_structure(
         success += 1
         for source, target in set(result.edges):
             directed[(source, target)] += 1
-            key = (source, target) if source <= target else (target, source)\n            undirected[key] += 1
+            key = (source, target) if source <= target else (target, source)
+            undirected[key] += 1
 
     rows: list[dict[str, object]] = []
     for a, b in sorted(undirected):
