@@ -79,3 +79,28 @@ __all__ = [
     "validate_bayesian_network_data",
     "validate_bayesian_network_recovery",
 ]
+
+
+from .robustness import (
+    cpt_sensitivity_analysis,
+    discretization_sensitivity,
+    measurement_noise_sensitivity,
+    plot_bn_cpt_sensitivity,
+    plot_bn_predictive_calibration,
+    plot_bn_sample_size_stability,
+    predictive_calibration,
+    sample_size_stability_curve,
+    structural_perturbation_sensitivity,
+)
+
+__all__.extend([
+    "cpt_sensitivity_analysis",
+    "discretization_sensitivity",
+    "measurement_noise_sensitivity",
+    "plot_bn_cpt_sensitivity",
+    "plot_bn_predictive_calibration",
+    "plot_bn_sample_size_stability",
+    "predictive_calibration",
+    "sample_size_stability_curve",
+    "structural_perturbation_sensitivity",
+])
