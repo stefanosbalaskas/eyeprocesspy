@@ -53,6 +53,8 @@ jobs:
       - name: Enforce exact 100% coverage on new scientific core
         run: |
           uv run --frozen coverage report \
+            --show-missing \
+            --fail-under=100 \
             src/eyeprocesspy/measurement_validity.py \
             src/eyeprocesspy/dynamic_aoi.py \
             src/eyeprocesspy/advanced_events.py \
@@ -60,6 +62,4 @@ jobs:
             src/eyeprocesspy/naturalistic_coordinates.py \
             src/eyeprocesspy/scanpath_sensitivity.py \
             src/eyeprocesspy/gaze_stress.py \
-            src/eyeprocesspy/bayesian_networks/robustness.py \
-            --show-missing \
-            --fail-under=100
+            src/eyeprocesspy/bayesian_networks/robustness.py
