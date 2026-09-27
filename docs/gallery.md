@@ -167,22 +167,22 @@ These deterministic synthetic panels expose measurement assumptions rather than 
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="assets/measurement-validity/spatial-error-field.svg" alt="Spatial calibration error field">
+  <img src="../assets/measurement-validity/spatial-error-field.svg" alt="Spatial calibration error field">
   <figcaption><strong>Spatial error field.</strong> Target-local systematic gaze error used for explicit spatial correction or uncertainty analysis.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/measurement-validity/dynamic-aoi-alignment.svg" alt="Dynamic AOI assignment coverage">
+  <img src="../assets/measurement-validity/dynamic-aoi-alignment.svg" alt="Dynamic AOI assignment coverage">
   <figcaption><strong>Dynamic AOI coverage.</strong> Assigned, outside, ambiguous, missing, and uncovered-geometry states remain distinguishable.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/measurement-validity/pursuit-classification.svg" alt="Smooth pursuit velocity classification">
+  <img src="../assets/measurement-validity/pursuit-classification.svg" alt="Smooth pursuit velocity classification">
   <figcaption><strong>Pursuit classification.</strong> Transparent velocity/direction rules support review and sensitivity analysis.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/measurement-validity/gaze-stress.svg" alt="Synthetic gaze measurement stress curve">
+  <img src="../assets/measurement-validity/gaze-stress.svg" alt="Synthetic gaze measurement stress curve">
   <figcaption><strong>Measurement stress.</strong> Downstream degradation is traced across declared corruption severity rather than inferred from one dataset.</figcaption>
 </figure>
 
