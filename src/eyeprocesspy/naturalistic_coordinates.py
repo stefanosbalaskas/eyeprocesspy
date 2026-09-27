@@ -38,7 +38,7 @@ def pixels_to_visual_angle(
     if ppm <= 0 or distance <= 0 or not np.isfinite([ppm, distance]).all():
         raise EyeProcessValidationError("pixels_per_mm and viewing_distance_mm must be finite and positive.")
     millimetres = np.asarray(pixels, dtype=float) / ppm
-    return np.degrees(2 * np.arctan2(millimetres / 2, distance))
+    return np.asarray(np.degrees(2 * np.arctan2(millimetres / 2, distance)), dtype=float)
 
 
 def visual_angle_to_pixels(
@@ -52,7 +52,7 @@ def visual_angle_to_pixels(
     if ppm <= 0 or distance <= 0 or not np.isfinite([ppm, distance]).all():
         raise EyeProcessValidationError("pixels_per_mm and viewing_distance_mm must be finite and positive.")
     mm = 2 * distance * np.tan(np.radians(np.asarray(degrees, dtype=float)) / 2)
-    return mm * ppm
+    return np.asarray(mm * ppm, dtype=float)
 
 
 def screen_gaze_to_head_vectors(
@@ -233,7 +233,7 @@ def plot_world_gaze_vectors(data: Any, ax: Any = None) -> Any:
     axis.set_xlabel("World gaze x/z")
     axis.set_ylabel("World gaze y/z")
     axis.set_title("World-space gaze directions")
-    axis.eyeprocess_plot_data = frame.copy()
+    setattr(axis, "eyeprocess_plot_data", frame.copy())
     return axis
 
 
