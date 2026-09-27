@@ -164,7 +164,8 @@ def test_event_benchmark_confusion_sensitivity_and_plots():
 
     empty = ep.benchmark_event_detector(truth, detected.assign(event_type="other"), minimum_iou=0.3)
     assert ep.event_boundary_error(empty).empty
-    assert ep.event_confusion_matrix([], []).empty
+    empty_events = truth.iloc[:0].copy()
+    assert ep.event_confusion_matrix(empty_events, empty_events).empty
 
     with pytest.raises(ep.EyeProcessValidationError):
         ep.benchmark_event_detector(truth, detected, minimum_iou=2)
