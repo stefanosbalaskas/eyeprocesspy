@@ -225,7 +225,7 @@ def plot_detector_benchmark(comparison: Any, *, metric: str = "f1", ax: Any = No
     axis.bar(table.detector.astype(str), pd.to_numeric(table[metric], errors="coerce"))
     axis.set_ylabel(metric)
     axis.set_title("Event-detector benchmark")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
