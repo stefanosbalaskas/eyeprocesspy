@@ -271,8 +271,10 @@ def detect_microsaccades(
     frame = _frame(data)
     if (right_x is None) != (right_y is None):
         raise EyeProcessValidationError("right_x and right_y must be supplied together.")
-    required = [time, x, y] + ([] if right_x is None else [right_x, right_y])
-    _require(frame, [c for c in required if c is not None])
+    required = [time, x, y]
+    if right_x is not None and right_y is not None:
+        required.extend([right_x, right_y])
+    _require(frame, required)
     if float(lambda_threshold) <= 0 or float(minimum_duration_ms) < 0 or float(maximum_amplitude_deg) <= 0:
         raise EyeProcessValidationError("Microsaccade thresholds must be scientifically meaningful positive values.")
 
