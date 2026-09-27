@@ -10,6 +10,12 @@
 
     [Open mediation guide](../guides/multilevel-mediation/index.md)
 
+-   :material-crosshairs-gps: **Measurement validity and dynamic gaze**
+
+    Audit calibration error, pupil-size artefact, moving AOIs, pursuit/microsaccade classification, naturalistic coordinates, scanpath metric dependence, and synthetic measurement stress.
+
+    [Open worked workflow](measurement-validity-dynamic-gaze.md)
+
 -   :material-eye: **Core gaze, AOI and provenance**
 
     Validate a canonical `EyeDataset`, recover scanpaths and transitions, compute gaze entropy, render auditable plots and inspect provenance.
@@ -90,7 +96,7 @@
 
 </div>
 
-For short task-oriented snippets, use the [Cookbook](../cookbook.md). For visual output, browse the [15-figure gallery](../gallery.md).
+For short task-oriented snippets, use the [Cookbook](../cookbook.md). For visual output, browse the [visual gallery](../gallery.md).
 
 ## Verify the installation
 
