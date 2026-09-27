@@ -45,7 +45,13 @@ def _time_velocity(data: pd.DataFrame, time: str, x: str, y: str, time_unit: str
     return vx, vy, np.hypot(vx, vy), hz
 
 
-def _episodes(labels: np.ndarray, t: np.ndarray, speed: np.ndarray, minimum_duration_ms: float) -> pd.DataFrame:
+def _episodes(
+    labels: np.ndarray,
+    t: np.ndarray,
+    speed: np.ndarray,
+    minimum_duration_ms: float,
+    duration_scale_to_ms: float = 1.0,
+) -> pd.DataFrame:
     rows = []
     start = 0
     event_id = 0
@@ -54,7 +60,11 @@ def _episodes(labels: np.ndarray, t: np.ndarray, speed: np.ndarray, minimum_dura
             continue
         label = str(labels[start])
         if label != "unclassified":
-            duration = 0.0 if i - start < 2 else float(t[i - 1] - t[start])
+            duration = (
+                0.0
+                if i - start < 2
+                else float(t[i - 1] - t[start]) * float(duration_scale_to_ms)
+            )
             if duration >= minimum_duration_ms:
                 event_id += 1
                 rows.append(
@@ -103,9 +113,16 @@ def detect_events_ivvt(
     sample_table["velocity_y"] = vy
     sample_table["velocity"] = speed
     sample_table["event_type"] = labels
-    events = _episodes(labels, _num(frame[time]), speed, float(minimum_duration_ms))
+    duration_scale = 1000.0 if time_unit == "s" else 1.0
+    events = _episodes(
+        labels,
+        _num(frame[time]),
+        speed,
+        float(minimum_duration_ms),
+        duration_scale_to_ms=duration_scale,
+    )
     return EyeResult(
-        {"samples": sample_table, "events": events, "sampling_hz": hz, "method": "ivvt"},
+        {"samples": sample_table, "events": events, "sampling_hz": hz, "method": "ivvt", "time_unit": time_unit},
         eyeprocess_class="eye_ivvt_events",
     )
 
@@ -147,9 +164,16 @@ def detect_events_directional(
     sample_table["velocity"] = speed
     sample_table["direction_change_deg"] = change
     sample_table["event_type"] = labels
-    events = _episodes(labels, _num(frame[time]), speed, float(minimum_duration_ms))
+    duration_scale = 1000.0 if time_unit == "s" else 1.0
+    events = _episodes(
+        labels,
+        _num(frame[time]),
+        speed,
+        float(minimum_duration_ms),
+        duration_scale_to_ms=duration_scale,
+    )
     return EyeResult(
-        {"samples": sample_table, "events": events, "sampling_hz": hz, "method": "directional"},
+        {"samples": sample_table, "events": events, "sampling_hz": hz, "method": "directional", "time_unit": time_unit},
         eyeprocess_class="eye_directional_pursuit_events",
     )
 
@@ -260,7 +284,14 @@ def detect_microsaccades(
         raise EyeProcessValidationError("Velocity dispersion is insufficient for robust microsaccade thresholds.")
     candidate = (vx / (float(lambda_threshold) * sx)) ** 2 + (vy / (float(lambda_threshold) * sy)) ** 2 > 1
     labels = np.where(candidate, "microsaccade", "unclassified").astype(object)
-    events = _episodes(labels, _num(frame[time]), speed, float(minimum_duration_ms))
+    duration_scale = 1000.0 if time_unit == "s" else 1.0
+    events = _episodes(
+        labels,
+        _num(frame[time]),
+        speed,
+        float(minimum_duration_ms),
+        duration_scale_to_ms=duration_scale,
+    )
     gx, gy = _num(frame[x]), _num(frame[y])
     amplitudes = []
     for _, event in events.iterrows():
@@ -292,7 +323,12 @@ def detect_microsaccades(
                 np.maximum(right_events.start_time.to_numpy(float) - float(event.end_time), float(event.start_time) - right_events.end_time.to_numpy(float)),
                 0.0,
             )
-            keep.append(bool(np.min(separation) <= float(binocular_tolerance_ms)))
+            keep.append(
+                bool(
+                    np.min(separation) * duration_scale
+                    <= float(binocular_tolerance_ms)
+                )
+            )
         events = events.loc[keep].reset_index(drop=True)
     return EyeResult(
         {
