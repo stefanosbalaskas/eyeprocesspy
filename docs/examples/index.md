@@ -282,3 +282,9 @@ All listed examples are deterministic and use no private participant data.
 - [Quality-rule sensitivity](data-quality-sensitivity.md): compare defensible review/exclusion specifications while keeping the canonical quality report intact.
 - [Methodological guide](../guides/data-quality.md): equations, units, interpretation boundaries, and when not to use each metric.
 - [Reporting guideline](../guides/data-quality-reporting.md): manuscript items, suggested wording, limitations, and long-gap versus estimated dropped-sample reporting.
+
+## Bayesian-network examples
+
+- [Multimodal Bayesian-network example](bayesian-network-multimodal.md): Condition, gaze, pupil, EDA, trust, and choice with fixed-DAG fitting, constrained structure learning, and posterior evidence propagation.
+- [Bayesian-network sensitivity](bayesian-network-sensitivity.md): compare graph robustness across detector and AOI specifications while keeping preprocessing outside the BN layer.
+
