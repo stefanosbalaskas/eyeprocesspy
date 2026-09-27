@@ -211,7 +211,7 @@ def plot_gaze_stress(result: Any, *, metric: str, ax: Any = None) -> Any:
     axis.set_xlabel("Corruption severity")
     axis.set_ylabel(metric)
     axis.set_title(f"Gaze stress: {result['corruption']}")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
