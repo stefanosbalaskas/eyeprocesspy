@@ -193,22 +193,22 @@ These deterministic illustrations accompany the static Bayesian-network guide. T
 <div class="ep-gallery" markdown>
 
 <figure>
-  <img src="assets/bayesian-networks/bn-multimodal-dag.svg" alt="Multimodal Bayesian network">
+  <img src="../assets/bayesian-networks/bn-multimodal-dag.svg" alt="Multimodal Bayesian network">
   <figcaption><strong>Multimodal DAG.</strong> Validated features enter a downstream probabilistic network after preprocessing and provenance capture.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/bayesian-networks/bn-posterior-update.svg" alt="Bayesian posterior update">
+  <img src="../assets/bayesian-networks/bn-posterior-update.svg" alt="Bayesian posterior update">
   <figcaption><strong>Evidence propagation.</strong> Illustrative updates to the posterior probability of high gaze inspection as multimodal evidence is added.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/bayesian-networks/bn-edge-stability.svg" alt="Bayesian network edge stability">
+  <img src="../assets/bayesian-networks/bn-edge-stability.svg" alt="Bayesian network edge stability">
   <figcaption><strong>Bootstrap stability.</strong> Edge presence across planned bootstrap replications, with failures retained in the denominator.</figcaption>
 </figure>
 
 <figure>
-  <img src="assets/bayesian-networks/bn-detector-robustness.svg" alt="Bayesian network detector sensitivity">
+  <img src="../assets/bayesian-networks/bn-detector-robustness.svg" alt="Bayesian network detector sensitivity">
   <figcaption><strong>Detector sensitivity.</strong> Edge robustness across alternative defensible detector-derived feature tables.</figcaption>
 </figure>
 
