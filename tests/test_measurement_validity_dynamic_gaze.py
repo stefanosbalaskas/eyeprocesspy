@@ -58,6 +58,14 @@ def test_spatial_error_field_correction_and_plots():
         ep.compute_spatial_error_field(data.assign(gaze_x=np.nan))
     with pytest.raises(ep.EyeProcessValidationError):
         ep.compute_spatial_error_field(data.iloc[:2], target_id="target_id", minimum_samples_per_target=3)
+    missing_target = data.copy()
+    missing_target.loc[0, "target_id"] = pd.NA
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.compute_spatial_error_field(missing_target, target_id="target_id")
+    inconsistent_target = data.copy()
+    inconsistent_target.loc[0, "target_x"] = 99.0
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.compute_spatial_error_field(inconsistent_target, target_id="target_id")
     with pytest.raises(ep.EyeProcessValidationError):
         ep.correct_gaze_with_spatial_error(data, {}, method="idw")
     with pytest.raises(ep.EyeProcessValidationError):
@@ -80,8 +88,8 @@ def test_pupil_artifact_and_preprocessing_audit():
 
     unknown_group = data.copy()
     unknown_group["session"] = "unknown"
-    corrected_unknown = ep.correct_pupil_size_artifact(unknown_group, grouped, by="session")
-    assert corrected_unknown.gaze_x_pupil_artifact.isna().all()
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.correct_pupil_size_artifact(unknown_group, grouped, by="session")
 
     audit = ep.audit_pupil_preprocessing(
         data,
@@ -110,6 +118,16 @@ def test_pupil_artifact_and_preprocessing_audit():
         ep.fit_pupil_size_artifact(data, minimum_samples=2)
     with pytest.raises(ep.EyeProcessValidationError):
         ep.fit_pupil_size_artifact(data.iloc[:2], minimum_samples=3)
+    flat_pupil = data.copy()
+    flat_pupil["pupil"] = 3.0
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.fit_pupil_size_artifact(flat_pupil, minimum_samples=3)
+    missing_session = data.copy()
+    missing_session.loc[0, "session"] = pd.NA
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.fit_pupil_size_artifact(missing_session, by="session", minimum_samples=3)
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.correct_pupil_size_artifact(missing_session, grouped, by="session")
     with pytest.raises(ep.EyeProcessValidationError):
         ep.correct_pupil_size_artifact(data, {})
     with pytest.raises(ep.EyeProcessValidationError):
@@ -186,6 +204,10 @@ def test_dynamic_aoi_assignment_shapes_sensitivity_and_guards():
             interpolation="linear",
         )
 
+    unnamed = rectangles.copy()
+    unnamed.loc[0, "aoi"] = pd.NA
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.validate_dynamic_aoi_spec(unnamed)
     with pytest.raises(ep.EyeProcessValidationError):
         ep.validate_dynamic_aoi_spec(rectangles.assign(shape="bad"))
     with pytest.raises(ep.EyeProcessValidationError):
