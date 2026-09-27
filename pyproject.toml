@@ -51,7 +51,7 @@ Issues = "https://github.com/stefanosbalaskas/eyeprocesspy/issues"
 Changelog = "https://github.com/stefanosbalaskas/eyeprocesspy/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-arrow = [
+narrow = [
     "pyarrow>=20",
 ]
 stan = ["cmdstanpy>=1.3"]
