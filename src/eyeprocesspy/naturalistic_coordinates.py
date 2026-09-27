@@ -38,7 +38,7 @@ def pixels_to_visual_angle(
     if ppm <= 0 or distance <= 0 or not np.isfinite([ppm, distance]).all():
         raise EyeProcessValidationError("pixels_per_mm and viewing_distance_mm must be finite and positive.")
     millimetres = np.asarray(pixels, dtype=float) / ppm
-    return np.asarray(np.degrees(2 * np.arctan2(millimetres / 2, distance)), dtype=float)
+    return np.asarray(np.degrees(np.arctan2(millimetres, distance)), dtype=float)
 
 
 def visual_angle_to_pixels(
@@ -51,7 +51,7 @@ def visual_angle_to_pixels(
     ppm, distance = float(pixels_per_mm), float(viewing_distance_mm)
     if ppm <= 0 or distance <= 0 or not np.isfinite([ppm, distance]).all():
         raise EyeProcessValidationError("pixels_per_mm and viewing_distance_mm must be finite and positive.")
-    mm = 2 * distance * np.tan(np.radians(np.asarray(degrees, dtype=float)) / 2)
+    mm = distance * np.tan(np.radians(np.asarray(degrees, dtype=float)))
     return np.asarray(mm * ppm, dtype=float)
 
 
@@ -131,6 +131,8 @@ def align_head_pose_to_gaze(
     pos = p[list(position)].apply(pd.to_numeric, errors="coerce").to_numpy(float)
     if not np.isfinite(q).all() or not np.isfinite(pos).all():
         raise EyeProcessValidationError("Pose quaternions and positions must be finite.")
+    if np.any(np.linalg.norm(q, axis=1) <= np.finfo(float).eps):
+        raise EyeProcessValidationError("Pose quaternions must have non-zero norm.")
     rotations = Slerp(pt, Rotation.from_quat(q))(gt).as_quat()
     interpolated_pos = np.column_stack([np.interp(gt, pt, pos[:, i]) for i in range(3)])
     out = g.copy()
