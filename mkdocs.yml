@@ -21,6 +21,13 @@ nav:
       - FAQ: faq.md
   - Workflows:
       - Scientific guide map: guides/index.md
+      - Bayesian networks:
+          - Overview: guides/bayesian-networks/index.md
+          - Data contract: guides/bayesian-networks/data-contract.md
+          - Structure learning: guides/bayesian-networks/structure-learning.md
+          - Stability & validation: guides/bayesian-networks/stability-validation.md
+          - Detector & AOI sensitivity: guides/bayesian-networks/sensitivity.md
+          - Reporting: guides/bayesian-networks/reporting.md
       - Trial-level mediation:
           - Overview: guides/multilevel-mediation/index.md
           - Decision guide: guides/multilevel-mediation/decision-guide.md
@@ -89,6 +96,8 @@ nav:
           - AOI reporting bundle: examples/aoi-reporting-bundle.md
           - AOI failure clinic: examples/aoi-perturbation-failure-clinic.md
           - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
+          - Multimodal Bayesian network: examples/bayesian-network-multimodal.md
+          - Bayesian-network sensitivity: examples/bayesian-network-sensitivity.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
@@ -102,6 +111,7 @@ nav:
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md
       - Data Quality API: reference/data-quality.md
+      - Bayesian-network API: reference/bayesian-networks.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
