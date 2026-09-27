@@ -55,6 +55,7 @@ def validate_dynamic_aoi_spec(
     _require(table, [aoi, time], "aois")
     if table[aoi].isna().any() or table[aoi].astype(str).str.strip().eq("").any():
         raise EyeProcessValidationError("Dynamic AOI names must be non-missing and non-empty.")
+    table[aoi] = table[aoi].astype(str)
     if shape not in table:
         table[shape] = "rectangle"
     table[shape] = table[shape].astype(str).str.lower()
