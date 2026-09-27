@@ -535,7 +535,7 @@ def plot_bn_sample_size_stability(table: Any, ax: Any = None) -> Any:
     if not required.issubset(frame):
         raise EyeProcessValidationError("table must contain fraction and skeleton_jaccard.")
     axis = plt.subplots()[1] if ax is None else ax
-    good = frame.loc[frame.get("status", "success").eq("success")]
+    good = frame if "status" not in frame else frame.loc[frame["status"].eq("success")]
     axis.scatter(good.fraction, good.skeleton_jaccard)
     means = good.groupby("fraction", observed=True).skeleton_jaccard.mean()
     axis.plot(means.index, means.values)
