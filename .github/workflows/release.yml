@@ -2,6 +2,8 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
   workflow_dispatch:
@@ -10,7 +12,58 @@ permissions:
   contents: read
 
 jobs:
+  resolve_release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      release_tag: ${{ steps.resolve.outputs.release_tag }}
+      should_validate: ${{ steps.resolve.outputs.should_validate }}
+      should_release: ${{ steps.resolve.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: resolve
+        name: Resolve release intent
+        shell: bash
+        run: |
+          version="$(python - <<'PY'
+          from pathlib import Path
+          import tomllib
+          print(tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"])
+          PY
+          )"
+          release_tag="v${version}"
+          should_validate=false
+          should_release=false
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            if [[ "${GITHUB_REF_NAME}" != "${release_tag}" ]]; then
+              echo "Tag ${GITHUB_REF_NAME} does not match package version ${release_tag}" >&2
+              exit 1
+            fi
+            should_validate=true
+            should_release=true
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            git fetch --tags --force
+            if git rev-parse -q --verify "refs/tags/${release_tag}" >/dev/null; then
+              echo "${release_tag} already exists; this main push is not a new release."
+            else
+              should_validate=true
+              should_release=true
+            fi
+          elif [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            should_validate=true
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "release_tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+          echo "should_validate=${should_validate}" >> "${GITHUB_OUTPUT}"
+          echo "should_release=${should_release}" >> "${GITHUB_OUTPUT}"
+
   validate:
+    if: needs.resolve_release.outputs.should_validate == 'true'
+    needs: resolve_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,24 +72,30 @@ jobs:
           python-version: "3.11"
       - name: Sync release environment
         run: uv sync --frozen --extra dev --extra narrow
-      - name: Verify tag matches package version
-        if: github.ref_type == 'tag'
+      - name: Verify package versions and release tag
+        env:
+          RELEASE_TAG: ${{ needs.resolve_release.outputs.release_tag }}
+          RELEASE_VERSION: ${{ needs.resolve_release.outputs.version }}
         run: |
           python - <<'PY'
+          import os
           import re
           from pathlib import Path
           import tomllib
 
-          version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
-          tag = '${{ github.ref_name }}'
-          expected = f'v{version}'
-          if tag != expected:
-              raise SystemExit(f'Release tag {tag!r} does not match package version {expected!r}')
-          init_text = Path('src/eyeprocesspy/__init__.py').read_text(encoding='utf-8')
+          version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+          expected_version = os.environ["RELEASE_VERSION"]
+          expected_tag = os.environ["RELEASE_TAG"]
+          if version != expected_version:
+              raise SystemExit(f"Resolved version {expected_version!r} does not match pyproject version {version!r}")
+          if expected_tag != f"v{version}":
+              raise SystemExit(f"Resolved release tag {expected_tag!r} does not match package version v{version}")
+          init_text = Path("src/eyeprocesspy/__init__.py").read_text(encoding="utf-8")
           match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', init_text, re.MULTILINE)
           if not match or match.group(1) != version:
-              raise SystemExit('pyproject.toml and eyeprocesspy.__version__ disagree')
-          print('release version:', version)
+              raise SystemExit("pyproject.toml and eyeprocesspy.__version__ disagree")
+          print("release version:", version)
+          print("release tag:", expected_tag)
           PY
       - name: Ruff
         run: uv run --frozen ruff check .
@@ -86,9 +145,9 @@ jobs:
           import eyeprocesspy as ep
           import tomllib
           from pathlib import Path
-          expected_version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          expected_version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
           assert ep.__version__ == expected_version
-          assert ep.__r_reference_version__ == '0.11.1'
+          assert ep.__r_reference_version__ == "0.11.1"
           print(ep.__version__, ep.__r_reference_version__)
           PY
       - name: Clean sdist install smoke
@@ -100,9 +159,9 @@ jobs:
           import eyeprocesspy as ep
           import tomllib
           from pathlib import Path
-          expected_version = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8'))['project']['version']
+          expected_version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
           assert ep.__version__ == expected_version
-          assert ep.__r_reference_version__ == '0.11.1'
+          assert ep.__r_reference_version__ == "0.11.1"
           print(ep.__version__, ep.__r_reference_version__)
           PY
       - name: Generate SHA-256 release evidence
@@ -125,9 +184,52 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  tag_release:
+    if: needs.resolve_release.outputs.should_release == 'true'
+    needs:
+      - resolve_release
+      - validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create release tag after validation
+        if: github.ref_type != 'tag'
+        env:
+          RELEASE_TAG: ${{ needs.resolve_release.outputs.release_tag }}
+          RELEASE_VERSION: ${{ needs.resolve_release.outputs.version }}
+        shell: bash
+        run: |
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null; then
+            existing="$(git rev-list -n 1 "${RELEASE_TAG}")"
+            if [[ "${existing}" != "${GITHUB_SHA}" ]]; then
+              echo "${RELEASE_TAG} already points to ${existing}, not ${GITHUB_SHA}" >&2
+              exit 1
+            fi
+            echo "${RELEASE_TAG} already points to the validated commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${RELEASE_TAG}" "${GITHUB_SHA}" -m "eyeprocesspy ${RELEASE_VERSION}"
+          git push origin "refs/tags/${RELEASE_TAG}"
+
+      - name: Confirm externally supplied tag
+        if: github.ref_type == 'tag'
+        env:
+          RELEASE_TAG: ${{ needs.resolve_release.outputs.release_tag }}
+        run: echo "Validated existing release tag ${RELEASE_TAG}"
+
   publish-pypi:
-    if: github.ref_type == 'tag'
-    needs: validate
+    if: needs.resolve_release.outputs.should_release == 'true'
+    needs:
+      - resolve_release
+      - validate
+      - tag_release
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -144,8 +246,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   attest:
-    if: github.ref_type == 'tag'
-    needs: validate
+    if: needs.resolve_release.outputs.should_release == 'true'
+    needs:
+      - resolve_release
+      - validate
+      - tag_release
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -163,9 +268,11 @@ jobs:
           subject-path: "dist/*"
 
   github-release:
-    if: github.ref_type == 'tag'
+    if: needs.resolve_release.outputs.should_release == 'true'
     needs:
+      - resolve_release
       - validate
+      - tag_release
       - publish-pypi
       - attest
     runs-on: ubuntu-latest
@@ -185,9 +292,11 @@ jobs:
       - name: Create GitHub release after all publication gates pass
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.resolve_release.outputs.release_tag }}
+          RELEASE_VERSION: ${{ needs.resolve_release.outputs.version }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" dist/* release-evidence/SHA256SUMS.txt \
+          gh release create "${RELEASE_TAG}" dist/* release-evidence/SHA256SUMS.txt \
             --repo "${GITHUB_REPOSITORY}" \
             --verify-tag \
             --generate-notes \
-            --title "eyeprocesspy ${GITHUB_REF_NAME#v}"
+            --title "eyeprocesspy ${RELEASE_VERSION}"
