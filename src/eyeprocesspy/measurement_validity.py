@@ -131,8 +131,8 @@ def _idw_bias(x: float, y: float, field: pd.DataFrame, power: float) -> tuple[fl
     distances = np.hypot(field.target_x.to_numpy(float) - x, field.target_y.to_numpy(float) - y)
     exact = np.flatnonzero(distances == 0)
     if exact.size:
-        row = field.iloc[int(exact[0])]
-        return float(row.bias_x), float(row.bias_y)
+        rows = field.iloc[exact]
+        return float(rows.bias_x.mean()), float(rows.bias_y.mean())
     weights = 1.0 / np.power(distances, power)
     weights = weights / weights.sum()
     return (
@@ -178,8 +178,9 @@ def correct_gaze_with_spatial_error(
                 spatial.target_x.to_numpy(float) - xx,
                 spatial.target_y.to_numpy(float) - yy,
             )
-            row = spatial.iloc[int(np.argmin(distances))]
-            bx[i], by[i] = float(row.bias_x), float(row.bias_y)
+            minimum = float(np.min(distances))
+            nearest = spatial.iloc[np.flatnonzero(np.isclose(distances, minimum))]
+            bx[i], by[i] = float(nearest.bias_x.mean()), float(nearest.bias_y.mean())
         else:
             bx[i], by[i] = _idw_bias(xx, yy, spatial, power)
 
