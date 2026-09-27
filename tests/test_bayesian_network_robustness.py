@@ -106,6 +106,12 @@ def test_cpt_sensitivity_and_predictive_calibration_plots():
     with pytest.raises(Exception):
         predictive_calibration(fitted, target="choice", n_bins=1)
     with pytest.raises(Exception):
+        predictive_calibration(
+            fitted,
+            target="choice",
+            data=fitted.data_spec.data.drop(columns="trust"),
+        )
+    with pytest.raises(Exception):
         plot_bn_cpt_sensitivity({})
     with pytest.raises(Exception):
         plot_bn_predictive_calibration({})
@@ -204,5 +210,14 @@ def test_discretization_noise_and_sample_size_stability():
         sample_size_stability_curve(discrete, fractions=(1,), repeats=0)
     with pytest.raises(Exception):
         sample_size_stability_curve(discrete, fractions=(1,), repeats=1, resample_by="missing")
+    missing_group = _discrete_spec()
+    missing_group.data.loc[0, "participant_id"] = pd.NA
+    with pytest.raises(Exception):
+        sample_size_stability_curve(
+            missing_group,
+            fractions=(1,),
+            repeats=1,
+            resample_by="participant_id",
+        )
     with pytest.raises(Exception):
         plot_bn_sample_size_stability(pd.DataFrame({"x": [1]}))
