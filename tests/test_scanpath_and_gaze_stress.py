@@ -16,6 +16,7 @@ def test_scanpath_metrics_sensitivity_and_plot():
     assert ep.levenshtein_scanpath([], [], normalize=False) == 0
     assert 0 <= ep.transition_js_distance(reference, other) <= 1
     assert ep.transition_js_distance(["A"], ["B"]) == 0
+    assert ep.transition_js_distance(["A"], ["A", "B"]) == 1
     assert ep.ngram_jaccard_similarity(reference, same) == 1
     assert ep.ngram_jaccard_similarity(["A"], ["A"], n=2) == 1
 
