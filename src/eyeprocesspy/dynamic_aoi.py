@@ -53,6 +53,8 @@ def validate_dynamic_aoi_spec(
     """Validate rectangle, polygon, or mask keyframes without filling missing geometry."""
     table = _frame(aois, "aois")
     _require(table, [aoi, time], "aois")
+    if table[aoi].isna().any() or table[aoi].astype(str).str.strip().eq("").any():
+        raise EyeProcessValidationError("Dynamic AOI names must be non-missing and non-empty.")
     if shape not in table:
         table[shape] = "rectangle"
     table[shape] = table[shape].astype(str).str.lower()
