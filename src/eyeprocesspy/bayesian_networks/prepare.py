@@ -6,7 +6,6 @@ import warnings
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 from .schema import (
@@ -111,11 +110,7 @@ def prepare_bayesian_network_data(
     if missing_nodes:
         raise ValueError(f"data is missing requested nodes: {missing_nodes}.")
 
-    id_columns = [
-        x
-        for x in (participant_id, trial_id, stimulus_id)
-        if x is not None and x in data
-    ]
+    id_columns = [x for x in (participant_id, trial_id, stimulus_id) if x is not None and x in data]
     provenance_columns = tuple(provenance_columns or ())
     absent_prov = [name for name in provenance_columns if name not in data]
     if absent_prov:
@@ -178,8 +173,7 @@ def validate_bayesian_network_data(
         missing_count = int(series.isna().sum())
         if missing_count and not spec.missing_allowed:
             errors.append(
-                f"Node {name!r} contains {missing_count} missing values "
-                "but missing_allowed=False."
+                f"Node {name!r} contains {missing_count} missing values but missing_allowed=False."
             )
         if (
             spec.zero_is_missing

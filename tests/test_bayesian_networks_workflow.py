@@ -45,16 +45,8 @@ from eyeprocesspy.bayesian_networks import (
 def discrete_spec(repeated=True):
     d = pd.DataFrame(
         {
-            "participant_id": (
-                ["p1", "p1", "p2", "p2"]
-                if repeated
-                else ["p1", "p2", "p3", "p4"]
-            ),
-            "trial_id": (
-                ["t1", "t2", "t1", "t2"]
-                if repeated
-                else ["t1"] * 4
-            ),
+            "participant_id": (["p1", "p1", "p2", "p2"] if repeated else ["p1", "p2", "p3", "p4"]),
+            "trial_id": (["t1", "t2", "t1", "t2"] if repeated else ["t1"] * 4),
             "condition": ["A", "B", "A", "B"],
             "trust": ["H", "H", "L", "L"],
             "choice": ["Y", "Y", "N", "N"],
@@ -185,9 +177,7 @@ def test_query_and_predict(monkeypatch):
     pred = predict_bayesian_network(
         fitted,
         target="trust",
-        evidence=pd.DataFrame(
-            {"choice": ["Y", "N"], "unused": [pd.NA, pd.NA]}
-        ),
+        evidence=pd.DataFrame({"choice": ["Y", "N"], "unused": [pd.NA, pd.NA]}),
     )
     assert len(pred) == 4
     with pytest.raises(ValueError):
@@ -227,11 +217,7 @@ def test_bootstrap_stability_group_and_failures(monkeypatch):
         calls["n"] += 1
         if calls["n"] == 2:
             raise RuntimeError("fit failed")
-        edges = (
-            (("condition", "trust"),)
-            if calls["n"] % 2
-            else (("trust", "condition"),)
-        )
+        edges = (("condition", "trust"),) if calls["n"] % 2 else (("trust", "condition"),)
         return fake_result(sampled, edges=edges)
 
     monkeypatch.setattr(
@@ -403,9 +389,7 @@ def test_plots_and_report(tmp_path: Path):
         failed_fits=0,
     )
     val = BayesianNetworkValidationResult(
-        fold_table=pd.DataFrame(
-            {"fold": [0, 1], "mean_log_likelihood": [-1.0, -1.2]}
-        ),
+        fold_table=pd.DataFrame({"fold": [0, 1], "mean_log_likelihood": [-1.0, -1.2]}),
         method="group_kfold",
         group_column="participant_id",
         summary={"mean_log_likelihood": -1.1},
@@ -527,9 +511,7 @@ def test_additional_fitting_stability_plot_reporting_branches(monkeypatch):
         failed_fits=0,
     )
     val = BayesianNetworkValidationResult(
-        fold_table=pd.DataFrame(
-            {"fold": [0], "mean_log_likelihood": [-1.0]}
-        ),
+        fold_table=pd.DataFrame({"fold": [0], "mean_log_likelihood": [-1.0]}),
         method="group_kfold",
         group_column=None,
         summary={"mean_log_likelihood": -1.0},

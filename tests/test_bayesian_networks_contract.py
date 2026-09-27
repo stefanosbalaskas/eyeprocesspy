@@ -115,17 +115,11 @@ def test_prepare_inference_and_input_errors():
     with pytest.raises(TypeError):
         prepare_bayesian_network_data([], nodes=["x"])  # type: ignore[arg-type]
     with pytest.raises(ValueError):
-        prepare_bayesian_network_data(
-            d, nodes=[], participant_id=None, trial_id=None
-        )
+        prepare_bayesian_network_data(d, nodes=[], participant_id=None, trial_id=None)
     with pytest.raises(ValueError):
-        prepare_bayesian_network_data(
-            d, nodes=["gaze", "gaze"], participant_id=None, trial_id=None
-        )
+        prepare_bayesian_network_data(d, nodes=["gaze", "gaze"], participant_id=None, trial_id=None)
     with pytest.raises(ValueError):
-        prepare_bayesian_network_data(
-            d, nodes=["missing"], participant_id=None, trial_id=None
-        )
+        prepare_bayesian_network_data(d, nodes=["missing"], participant_id=None, trial_id=None)
     with pytest.raises(ValueError):
         prepare_bayesian_network_data(
             d,
@@ -254,10 +248,7 @@ def test_validation_no_structure_node_and_missing_manual_corruption():
     result = validate_bayesian_network_data(spec)
     assert not result.valid and "No nodes" in result.errors[0]
     spec.node_specs["missing"] = BayesianNodeSpec("missing", "continuous")
-    assert any(
-        "absent" in x
-        for x in validate_bayesian_network_data(spec).errors
-    )
+    assert any("absent" in x for x in validate_bayesian_network_data(spec).errors)
 
 
 def test_constraints_contract():
@@ -361,6 +352,4 @@ def test_additional_prepare_branches():
 
 def test_node_spec_conflicting_type_keys_is_explicit_error():
     with pytest.raises(TypeError):
-        define_bn_nodes(
-            {"x": {"type": "continuous", "variable_type": "continuous"}}
-        )
+        define_bn_nodes({"x": {"type": "continuous", "variable_type": "continuous"}})

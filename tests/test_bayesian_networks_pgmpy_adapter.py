@@ -83,8 +83,6 @@ class GaussianModel(nx.DiGraph):
         return -float(len(data))
 
 
-
-
 class BayesianEstimator:
     def __init__(self, model, data):
         self.model = model
@@ -305,9 +303,7 @@ def test_query_discrete_and_gaussian(monkeypatch):
         backend.query(d, family="mixed", target="a", evidence={})
 
     g = GaussianModel([("a", "b")])
-    _, mean0, var0, method0 = backend.query(
-        g, family="gaussian", target="a", evidence={}
-    )
+    _, mean0, var0, method0 = backend.query(g, family="gaussian", target="a", evidence={})
     assert mean0 == 0.0
     assert var0 == 1.0
     assert method0 == "gaussian_conditioning"

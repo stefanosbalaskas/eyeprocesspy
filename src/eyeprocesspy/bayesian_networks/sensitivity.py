@@ -28,8 +28,7 @@ def compare_bayesian_networks(
         raise ValueError("results must contain at least one named BayesianNetworkResult.")
     names = list(results)
     all_skeletons = {
-        name: {tuple(sorted(edge)) for edge in result.edges}
-        for name, result in results.items()
+        name: {tuple(sorted(edge)) for edge in result.edges} for name, result in results.items()
     }
     edge_union = sorted(set().union(*all_skeletons.values()))
     edge_rows: list[dict[str, Any]] = []
@@ -104,9 +103,7 @@ def compare_bn_across_detectors(
 ) -> BayesianNetworkComparisonResult:
     """Learn the same constrained BN across detector-derived feature tables."""
     if not analyses:
-        raise ValueError(
-            "analyses must contain at least one detector-labelled BayesianDataSpec."
-        )
+        raise ValueError("analyses must contain at least one detector-labelled BayesianDataSpec.")
     learned = {
         name: learn_bayesian_network(
             data_spec,

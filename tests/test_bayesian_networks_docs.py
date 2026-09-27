@@ -24,9 +24,7 @@ def test_bayesian_network_documentation_surface():
         assert path.exists(), relative
         assert path.stat().st_size > 100, relative
 
-    overview = (
-        root / "docs/guides/bayesian-networks/index.md"
-    ).read_text(encoding="utf-8")
+    overview = (root / "docs/guides/bayesian-networks/index.md").read_text(encoding="utf-8")
     assert "not, by itself, evidence of a causal effect" in overview
     assert "does not" in overview
     assert "silently discretize" in overview

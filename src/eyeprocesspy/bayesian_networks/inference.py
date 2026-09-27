@@ -53,9 +53,7 @@ def predict_bayesian_network(
     rows: list[dict[str, Any]] = []
     for index, row in evidence.iterrows():
         observed = {
-            name: value
-            for name, value in row.items()
-            if pd.notna(value) and name != target
+            name: value for name, value in row.items() if pd.notna(value) and name != target
         }
         q = query_bayesian_network(result, target=target, evidence=observed)
         if q.posterior is not None:

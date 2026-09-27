@@ -141,10 +141,7 @@ def validate_bayesian_network_recovery(
     skeleton_learned = {tuple(sorted(edge)) for edge in learned}
     skeleton_truth = {tuple(sorted(edge)) for edge in truth}
     skeleton_errors = len(skeleton_learned ^ skeleton_truth)
-    reversed_edges = sum(
-        (b, a) in learned and (a, b) not in learned
-        for a, b in truth
-    )
+    reversed_edges = sum((b, a) in learned and (a, b) not in learned for a, b in truth)
     return {
         "true_positive_edges": tp,
         "false_positive_edges": fp,

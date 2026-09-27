@@ -10,7 +10,6 @@ import pandas as pd
 
 from ..schema import BayesianConstraintSpec, ModelFamily
 
-
 _INSTALL = (
     "Bayesian-network functionality requires the optional 'bayesnet' dependency. "
     "Install it with `pip install eyeprocesspy[bayesnet]`."
@@ -181,10 +180,7 @@ def query(
         )
         states = factor.state_names[target]
         values = np.asarray(factor.values, dtype=float).reshape(-1)
-        posterior = {
-            str(state): float(value)
-            for state, value in zip(states, values, strict=True)
-        }
+        posterior = {str(state): float(value) for state, value in zip(states, values, strict=True)}
         return posterior, None, None, "variable_elimination"
 
     if family == "mixed":
@@ -212,10 +208,7 @@ def query(
     cov_te = cov[target_i, ev_idx]
     adjustment = cov_te @ np.linalg.pinv(cov_ee)
     cond_mean = mean[target_i] + adjustment @ (ev_values - mu_e)
-    cond_var = (
-        cov[target_i, target_i]
-        - adjustment @ cov[np.ix_(ev_idx, [target_i])].reshape(-1)
-    )
+    cond_var = cov[target_i, target_i] - adjustment @ cov[np.ix_(ev_idx, [target_i])].reshape(-1)
     return (
         None,
         float(cond_mean),
@@ -237,6 +230,4 @@ def log_likelihood(
         return float(metrics.log_likelihood_score(model, data[nodes]))
     if family == "gaussian":
         return float(model.log_likelihood(data[nodes]))
-    raise NotImplementedError(
-        "Held-out likelihood for mixed BNs is not exposed by this backend."
-    )
+    raise NotImplementedError("Held-out likelihood for mixed BNs is not exposed by this backend.")

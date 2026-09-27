@@ -68,11 +68,7 @@ class BayesianDataSpec:
 
     @property
     def structure_nodes(self) -> list[str]:
-        return [
-            name
-            for name, spec in self.node_specs.items()
-            if bool(spec.include_in_structure)
-        ]
+        return [name for name, spec in self.node_specs.items() if bool(spec.include_in_structure)]
 
     @property
     def model_family(self) -> ModelFamily:

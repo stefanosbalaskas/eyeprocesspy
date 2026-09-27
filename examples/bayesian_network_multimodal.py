@@ -8,7 +8,6 @@ from eyeprocesspy.bayesian_networks import (
     simulate_multimodal_bayesian_network_example,
 )
 
-
 data = simulate_multimodal_bayesian_network_example(
     n_participants=1000,
     random_state=2026,

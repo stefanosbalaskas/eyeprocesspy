@@ -54,10 +54,7 @@ def plot_bayesian_network(
             tuple(sorted((str(row.node_a), str(row.node_b)))): float(row.edge_strength)
             for row in edge_strength.itertuples()
         }
-        widths = [
-            0.8 + 3.2 * strength_map.get(tuple(sorted(edge)), 0.5)
-            for edge in result.edges
-        ]
+        widths = [0.8 + 3.2 * strength_map.get(tuple(sorted(edge)), 0.5) for edge in result.edges]
     nx.draw_networkx_nodes(graph, pos=pos, ax=ax, node_size=1800)
     nx.draw_networkx_labels(graph, pos=pos, ax=ax, font_size=9)
     nx.draw_networkx_edges(
@@ -137,9 +134,7 @@ def plot_bn_posterior(
         if query.mean is None or query.variance is None:
             raise ValueError("Gaussian posterior requires mean and variance.")
         sd = float(np.sqrt(max(query.variance, 0.0)))
-        table = pd.DataFrame(
-            {"target": [query.target], "mean": [query.mean], "sd": [sd]}
-        )
+        table = pd.DataFrame({"target": [query.target], "mean": [query.mean], "sd": [sd]})
         ax.errorbar([query.target], [query.mean], yerr=[sd], fmt="o", capsize=5)
         ax.set_ylabel("Conditional mean ± 1 SD")
     ax.set_title(f"Posterior: {query.target}")
