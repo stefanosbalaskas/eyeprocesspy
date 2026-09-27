@@ -6055,3 +6055,141 @@ __all__ = [
     "report_gaze_quality",
     "simulate_gaze_quality_calibration",
 ]
+
+
+# Measurement-validity and dynamic-gaze tranche (0.2.x development).
+from . import advanced_events as advanced_events
+from . import dynamic_aoi as dynamic_aoi
+from . import event_benchmark as event_benchmark
+from . import gaze_stress as gaze_stress
+from . import measurement_validity as measurement_validity
+from . import naturalistic_coordinates as naturalistic_coordinates
+from . import scanpath_sensitivity as scanpath_sensitivity
+from .advanced_events import (
+    compute_pursuit_gain,
+    compute_pursuit_velocity_error,
+    detect_events_directional,
+    detect_events_ivvt,
+    detect_microsaccades,
+    detect_smooth_pursuits,
+    microsaccade_main_sequence,
+    plot_microsaccade_main_sequence,
+    plot_pursuit_velocity,
+    summarise_microsaccades,
+    summarise_pursuits,
+    validate_pursuit_detection,
+)
+from .dynamic_aoi import (
+    assign_dynamic_aoi,
+    audit_dynamic_aoi_coverage,
+    dynamic_aoi_sensitivity,
+    plot_dynamic_aoi_alignment,
+    validate_dynamic_aoi_spec,
+)
+from .event_benchmark import (
+    benchmark_event_detector,
+    compare_event_detectors,
+    detector_parameter_sensitivity,
+    event_boundary_error,
+    event_confusion_matrix,
+    plot_detector_benchmark,
+)
+from .gaze_stress import (
+    inject_blink_gaps,
+    inject_event_misclassification,
+    inject_spatial_drift,
+    inject_spatial_noise,
+    plot_gaze_stress,
+    run_gaze_stress_suite,
+    simulate_known_gaze_process,
+)
+from .measurement_validity import (
+    audit_pupil_preprocessing,
+    compute_spatial_error_field,
+    correct_gaze_with_spatial_error,
+    correct_pupil_size_artifact,
+    fit_pupil_size_artifact,
+    plot_pupil_size_artifact,
+    plot_spatial_error_field,
+)
+from .naturalistic_coordinates import (
+    align_head_pose_to_gaze,
+    pixels_to_visual_angle,
+    plot_world_gaze_vectors,
+    propagate_coordinate_uncertainty,
+    screen_gaze_to_head_vectors,
+    transform_head_gaze_to_world,
+    transform_screen_gaze_to_world,
+    visual_angle_to_pixels,
+)
+from .scanpath_sensitivity import (
+    compare_scanpath_metrics,
+    dynamic_time_warping_distance,
+    levenshtein_scanpath,
+    ngram_jaccard_similarity,
+    plot_scanpath_sensitivity,
+    scanpath_metric_sensitivity,
+    transition_js_distance,
+)
+
+__all__.extend([
+    "advanced_events",
+    "dynamic_aoi",
+    "event_benchmark",
+    "gaze_stress",
+    "measurement_validity",
+    "naturalistic_coordinates",
+    "scanpath_sensitivity",
+    "align_head_pose_to_gaze",
+    "assign_dynamic_aoi",
+    "audit_dynamic_aoi_coverage",
+    "audit_pupil_preprocessing",
+    "benchmark_event_detector",
+    "compare_event_detectors",
+    "compare_scanpath_metrics",
+    "compute_pursuit_gain",
+    "compute_pursuit_velocity_error",
+    "compute_spatial_error_field",
+    "correct_gaze_with_spatial_error",
+    "correct_pupil_size_artifact",
+    "detect_events_directional",
+    "detect_events_ivvt",
+    "detect_microsaccades",
+    "detect_smooth_pursuits",
+    "detector_parameter_sensitivity",
+    "dynamic_aoi_sensitivity",
+    "dynamic_time_warping_distance",
+    "event_boundary_error",
+    "event_confusion_matrix",
+    "fit_pupil_size_artifact",
+    "inject_blink_gaps",
+    "inject_event_misclassification",
+    "inject_spatial_drift",
+    "inject_spatial_noise",
+    "levenshtein_scanpath",
+    "microsaccade_main_sequence",
+    "ngram_jaccard_similarity",
+    "pixels_to_visual_angle",
+    "plot_detector_benchmark",
+    "plot_dynamic_aoi_alignment",
+    "plot_gaze_stress",
+    "plot_microsaccade_main_sequence",
+    "plot_pupil_size_artifact",
+    "plot_pursuit_velocity",
+    "plot_scanpath_sensitivity",
+    "plot_spatial_error_field",
+    "plot_world_gaze_vectors",
+    "propagate_coordinate_uncertainty",
+    "run_gaze_stress_suite",
+    "scanpath_metric_sensitivity",
+    "screen_gaze_to_head_vectors",
+    "simulate_known_gaze_process",
+    "summarise_microsaccades",
+    "summarise_pursuits",
+    "transform_head_gaze_to_world",
+    "transform_screen_gaze_to_world",
+    "transition_js_distance",
+    "validate_dynamic_aoi_spec",
+    "validate_pursuit_detection",
+    "visual_angle_to_pixels",
+])
