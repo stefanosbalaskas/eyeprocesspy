@@ -95,10 +95,12 @@ def validate_dynamic_aoi_spec(
                 raise EyeProcessValidationError(
                     "Mask AOIs require a 2D mask and finite, non-zero extent."
                 )
+    aoi_order = tuple(dict.fromkeys(table[aoi].astype(str).tolist()))
     table = table.sort_values([aoi, time], kind="stable").reset_index(drop=True)
     return EyeResult(
         {
             "keyframes": table,
+            "aoi_order": aoi_order,
             "aoi_column": aoi,
             "time_column": time,
             "shape_column": shape,
@@ -194,7 +196,10 @@ def assign_dynamic_aoi(
 
     keyframes = spec["keyframes"]
     ac, tc, sc = spec["aoi_column"], spec["time_column"], spec["shape_column"]
-    grouped = {name: group.reset_index(drop=True) for name, group in keyframes.groupby(ac, sort=False)}
+    grouped = {
+        name: keyframes.loc[keyframes[ac].astype(str).eq(name)].reset_index(drop=True)
+        for name in spec["aoi_order"]
+    }
     rows = []
     for sample_id, row in data.reset_index(drop=False).iterrows():
         tt = pd.to_numeric(pd.Series([row[time]]), errors="coerce").iloc[0]
