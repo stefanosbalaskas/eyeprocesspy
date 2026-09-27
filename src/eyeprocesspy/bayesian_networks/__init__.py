@@ -22,6 +22,17 @@ from .plotting import (
 )
 from .prepare import define_bn_nodes, prepare_bayesian_network_data, validate_bayesian_network_data
 from .reporting import report_bayesian_network
+from .robustness import (
+    cpt_sensitivity_analysis as cpt_sensitivity_analysis,
+    discretization_sensitivity as discretization_sensitivity,
+    measurement_noise_sensitivity as measurement_noise_sensitivity,
+    plot_bn_cpt_sensitivity as plot_bn_cpt_sensitivity,
+    plot_bn_predictive_calibration as plot_bn_predictive_calibration,
+    plot_bn_sample_size_stability as plot_bn_sample_size_stability,
+    predictive_calibration as predictive_calibration,
+    sample_size_stability_curve as sample_size_stability_curve,
+    structural_perturbation_sensitivity as structural_perturbation_sensitivity,
+)
 from .schema import (
     BayesianConstraintSpec,
     BayesianDataSpec,
@@ -78,22 +89,6 @@ __all__ = [
     "validate_bayesian_network",
     "validate_bayesian_network_data",
     "validate_bayesian_network_recovery",
-]
-
-
-from .robustness import (
-    cpt_sensitivity_analysis,
-    discretization_sensitivity,
-    measurement_noise_sensitivity,
-    plot_bn_cpt_sensitivity,
-    plot_bn_predictive_calibration,
-    plot_bn_sample_size_stability,
-    predictive_calibration,
-    sample_size_stability_curve,
-    structural_perturbation_sensitivity,
-)
-
-__all__.extend([
     "cpt_sensitivity_analysis",
     "discretization_sensitivity",
     "measurement_noise_sensitivity",
@@ -103,4 +98,5 @@ __all__.extend([
     "predictive_calibration",
     "sample_size_stability_curve",
     "structural_perturbation_sensitivity",
-])
+]
+
