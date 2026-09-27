@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/">Documentation</a> ·
   <a href="https://pypi.org/project/eyeprocesspy/">PyPI</a> ·
-  <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.1.0">Release v0.1.0</a> ·
+  <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.2.1">Release v0.2.1</a> ·
   <a href="https://doi.org/10.5281/zenodo.22285167">Zenodo DOI</a> ·
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/articles/">88 workflows</a>
 </p>
@@ -29,7 +29,7 @@
 
 `eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It provides one governed analytical surface for vendor import, canonical data contracts, preprocessing, gaze and AOI analysis, pupillometry, process measurement, psychometrics/IRT, multimodal workflows, validation, provenance, plotting, and reproducible reporting.
 
-> **Published release — 0.2.0.** Version 0.2.0 is published to PyPI and GitHub Releases from certified commit `2adfc2a440f9dd8685cd193929183030d2bc2065`. The release gate passed **1,845 tests**, **34,161 / 34,161 statements**, and **11,796 / 11,796 branches** covered, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix. The GitHub release includes the wheel, source distribution, SHA-256 checksums, and build-provenance attestation. Zenodo metadata is prepared for 0.2.0; a new DOI will be added only after Zenodo mints it. The previous published release 0.1.0 remains archived at **DOI 10.5281/zenodo.22285167**.
+> **Published release — 0.2.1.** Version 0.2.1 packages the fully certified provenance-aware static Bayesian-network tranche together with the 0.2.0 scientific foundation. The controlling qualification passed **1,872 tests**, **35,013 / 35,013 statements**, and **12,098 / 12,098 branches** with exact 100% coverage, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix, Ruff, mypy, build/install, frozen-R oracle, and strict documentation gates. The release workflow publishes the wheel and source distribution to PyPI using Trusted Publishing, attaches SHA-256 evidence and build-provenance attestation, and creates the matching GitHub Release.
 
 ## Install
 
@@ -47,16 +47,16 @@ The BN layer consumes already processed feature tables and provides theory-const
 
 [Open the Bayesian-network guide →](https://stefanosbalaskas.github.io/eyeprocesspy/guides/bayesian-networks/)
 
-Pin the initial scientific release when exact reproducibility matters:
+Pin the current release when exact reproducibility matters:
 
 ```bash
-pip install eyeprocesspy==0.1.0
+pip install eyeprocesspy==0.2.1
 ```
 
 For source installation from the immutable release tag:
 
 ```bash
-pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@v0.1.0"
+pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@v0.2.1"
 ```
 
 Windows users can also use the hardened installer described in the [manual-install guide](https://stefanosbalaskas.github.io/eyeprocesspy/manual-install/). It has been exercised on a real Windows/Python 3.11.9 installation with the recommended extras and a clean `pip check`.
@@ -68,13 +68,13 @@ Windows users can also use the hardened installer described in the [manual-insta
 | Frozen R public APIs resolved | **1,182 / 1,182** |
 | Frozen R reference | **0.11.1** |
 | Workflow articles linked | **88 / 88** |
-| Deep-parity tests | **1,458 passed** |
-| Statement coverage | **23,085 / 23,085 (100%)** |
-| Branch coverage | **9,680 / 9,680 (100%)** |
+| Release-gate tests | **1,872 passed** |
+| Statement coverage | **35,013 / 35,013 (100%)** |
+| Branch coverage | **12,098 / 12,098 (100%)** |
 | Numerical `not_started` debt | **0** |
 | Plot `not_started` debt | **0** |
 | CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
-| PyPI | **eyeprocesspy 0.1.0** |
+| PyPI | **eyeprocesspy 0.2.1** |
 | Zenodo | **10.5281/zenodo.22285167** |
 
 See [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md), [`TEST_SUMMARY.md`](TEST_SUMMARY.md), and the [parity & validation guide](https://stefanosbalaskas.github.io/eyeprocesspy/parity-and-validation/) for the underlying evidence.
