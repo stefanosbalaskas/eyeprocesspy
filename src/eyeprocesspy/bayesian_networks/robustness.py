@@ -35,7 +35,7 @@ def _require_result(result: BayesianNetworkResult, *, fitted: bool = False) -> N
 
 
 def _acyclic(nodes: Sequence[str], edges: Sequence[tuple[str, str]]) -> bool:
-    adjacency = {node: [] for node in nodes}
+    adjacency: dict[str, list[str]] = {node: [] for node in nodes}
     indegree = {node: 0 for node in nodes}
     for source, target in edges:
         if source not in adjacency or target not in adjacency or source == target:
@@ -535,7 +535,7 @@ def plot_bn_cpt_sensitivity(result: Any, *, target_state: Any | None = None, ax:
     axis.set_ylabel("Target posterior probability")
     axis.set_title("Bayesian-network CPT sensitivity")
     axis.legend()
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
@@ -557,7 +557,7 @@ def plot_bn_sample_size_stability(table: Any, ax: Any = None) -> Any:
     axis.set_xlabel("Sample fraction")
     axis.set_ylabel("Skeleton Jaccard vs full data")
     axis.set_title("Bayesian-network sample-size stability")
-    axis.eyeprocess_plot_data = frame.copy()
+    setattr(axis, "eyeprocess_plot_data", frame.copy())
     return axis
 
 
@@ -576,7 +576,7 @@ def plot_bn_predictive_calibration(result: Any, ax: Any = None) -> Any:
     axis.set_xlabel("Mean predicted probability")
     axis.set_ylabel("Observed frequency")
     axis.set_title("Bayesian-network predictive calibration")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
