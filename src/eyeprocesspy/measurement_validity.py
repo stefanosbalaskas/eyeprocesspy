@@ -35,7 +35,7 @@ def _require(data: pd.DataFrame, columns: Sequence[str], name: str = "data") -> 
 
 
 def _numeric(series: pd.Series) -> np.ndarray:
-    return pd.to_numeric(series, errors="coerce").to_numpy(dtype=float)
+    return np.asarray(pd.to_numeric(series, errors="coerce").to_numpy(dtype=float), dtype=float)
 
 
 def _result(cls: str, **kwargs: Any) -> EyeResult:
@@ -359,7 +359,7 @@ def plot_spatial_error_field(field: Any, ax: Any = None) -> Any:
     axis.set_title("Spatial calibration error field")
     axis.set_xlabel("Target x")
     axis.set_ylabel("Target y")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
@@ -381,7 +381,7 @@ def plot_pupil_size_artifact(model: Any, ax: Any = None) -> Any:
     axis.set_xlabel("Horizontal error / pupil unit")
     axis.set_ylabel("Vertical error / pupil unit")
     axis.set_title("Pupil-size artefact")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
