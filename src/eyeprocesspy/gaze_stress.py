@@ -145,17 +145,19 @@ def inject_event_misclassification(
     if event_type not in frame or not 0 <= probability < 1 or seed < 0:
         raise EyeProcessValidationError("event_type must exist; probability in [0,1), seed non-negative.")
     rng = np.random.default_rng(seed)
-    labels = frame[event_type].astype(str)
-    states = sorted(labels.dropna().unique())
+    raw = frame[event_type].copy()
+    observed = raw.notna().to_numpy(bool)
+    labels = raw.astype("string")
+    states = sorted(labels.loc[observed].astype(str).unique())
     if len(states) < 2:
-        raise EyeProcessValidationError("At least two event states are required for misclassification.")
-    change = rng.random(len(frame)) < probability
+        raise EyeProcessValidationError("At least two observed event states are required for misclassification.")
+    change = (rng.random(len(frame)) < probability) & observed
     new = labels.copy()
     for i in np.flatnonzero(change):
-        alternatives = [state for state in states if state != labels.iloc[i]]
+        alternatives = [state for state in states if state != str(labels.iloc[i])]
         new.iloc[i] = alternatives[int(rng.integers(0, len(alternatives)))]
     out = frame.copy()
-    out[f"{event_type}_clean"] = labels
+    out[f"{event_type}_clean"] = raw
     out[event_type] = new
     out.attrs["corruption"] = {"type": "event_misclassification", "probability": probability, "seed": seed}
     return out
