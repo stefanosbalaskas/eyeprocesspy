@@ -94,3 +94,10 @@ Benchmarks, provenance, manifests, validation evidence, frozen-R checks, and dis
 </div>
 
 For compact copy-paste workflows, use [Runnable examples](../examples/index.md). For exact source-port context, use the [88-article library](../articles/index.md). For visual discovery, use the [plot gallery](../gallery.md).
+
+## Bayesian networks
+
+Use the [Bayesian-network guide](bayesian-networks/index.md) for provenance-aware downstream dependency modeling from validated eye-tracking, pupil, physiology, questionnaire, and behavioral features. The workflow covers the [data contract](bayesian-networks/data-contract.md), [theory-constrained structure learning](bayesian-networks/structure-learning.md), [bootstrap stability and participant-grouped validation](bayesian-networks/stability-validation.md), [detector/AOI sensitivity](bayesian-networks/sensitivity.md), and [reporting](bayesian-networks/reporting.md).
+
+The BN layer is deliberately downstream of event detection, AOI assignment, pupil/physiology preprocessing, and feature construction; a learned directed edge is not, by itself, evidence of a causal effect.
+
