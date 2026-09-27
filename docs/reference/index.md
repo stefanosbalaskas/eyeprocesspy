@@ -6,6 +6,7 @@ The `eyeprocesspy` public surface preserves the frozen eyeprocess 0.11.1 API led
 [Plotting reference](plotting.md){ .md-button }
 [Gaze-survival API](gaze-survival.md){ .md-button }
 [Detector multiverse API](detector-multiverse.md){ .md-button }
+[Measurement-validity API](measurement-validity.md){ .md-button }
 [Visual gallery](../gallery.md){ .md-button }
 
 ## Scientific families
@@ -16,7 +17,8 @@ The `eyeprocesspy` public surface preserves the frozen eyeprocess 0.11.1 API led
 | **Import and adapters** | generic readers, adapter registry, folder workflows, vendor detection |
 | **Gazepoint** | gaze/fixation/event/biometric readers, pairing, real-export validation, workflow helpers |
 | **Preprocessing and features** | fixations, saccades, AOIs, dwell, scanpaths, transitions, entropy, wide/trial feature tables |
-| **Detector robustness** | detector specifications, event matching/agreement, AOI/feature propagation, inference stability, reports |
+| **Detector robustness** | detector specifications, event matching/agreement, annotated-event benchmarking, parameter sensitivity, AOI/feature propagation, inference stability, reports |
+| **Measurement validity & dynamic gaze** | spatial error fields, pupil-size artefact correction, dynamic AOIs, pursuits, microsaccades, naturalistic coordinates, scanpath sensitivity, gaze stress tests |
 | **Censored gaze latency** | right-censoring preparation, Kaplan–Meier, clustered Cox, AFT, diagnostics, sensitivity, reporting |
 | **Pupil and multimodal** | pupil preprocessing, functional pupil, missingness, synchronized/staged multimodal workflows |
 | **Trial-level mediation preparation** | within/between decomposition, mediation-level audits, explicit missing/zero states, trial-count support, provenance, serial/moderator preparation |
@@ -52,5 +54,5 @@ The generated API page is intentionally comprehensive; the curated guides and pl
 
 [Bayesian-network API](bayesian-networks.md){ .md-button .md-button--primary }
 
-The Python-native Bayesian-network extension adds explicit node/data/constraint contracts, pgmpy-backed static structure learning and parameter fitting, posterior queries, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, plots, and reproducibility-oriented reporting. It is additive and does not alter the frozen R parity ledger.
+The Python-native Bayesian-network extension adds explicit node/data/constraint contracts, pgmpy-backed static structure learning and parameter fitting, posterior queries, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, CPT and structural perturbation sensitivity, discretization/noise/sample-size robustness, predictive calibration, plots, and reproducibility-oriented reporting. It is additive and does not alter the frozen R parity ledger.
 

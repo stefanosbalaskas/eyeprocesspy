@@ -4,6 +4,20 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+### Measurement validity, dynamic gaze, and BN robustness
+
+- Added target-referenced spatial calibration error fields, explicit IDW/nearest correction, pupil-size artefact estimation/correction, and pupil preprocessing audit/QC.
+- Added vendor-neutral keyframed dynamic AOIs for rectangles, polygons, and masks with explicit interpolation, lag tolerance, overlap policy, uncovered-geometry accounting, and sensitivity analysis.
+- Added transparent smooth-pursuit IVVT/directional classification, pursuit gain/velocity error, microsaccade detection with a declared sampling-rate gate, and main-sequence diagnostics.
+- Added ground-truth event-detector benchmarking with event precision/recall/F1, interval overlap, boundary error, sample-level confusion matrices, and parameter-grid failure accounting.
+- Added screen/pixel/visual-angle/head/world coordinate utilities with pose interpolation, no silent extrapolation, viewing-distance uncertainty propagation, and world-ray diagnostics.
+- Added scanpath metric sensitivity across edit distance, transition divergence, n-gram overlap, and trajectory DTW.
+- Added known-process gaze simulation plus drift, noise, contiguous blink-gap, and event-misclassification stress tests.
+- Completed the static BN robustness layer with CPT sensitivity, structural add/delete/reverse perturbation, discretization sensitivity, measurement-noise sensitivity, sample-size stability curves, and predictive calibration with Brier/log-loss summaries.
+- Added focused tests, API exports, a worked example, reproducible gallery script/assets, site navigation, and dedicated measurement-validity and BN-robustness guides.
+- Existing calibration/recalibration and stress-test APIs remain canonical where already implemented; this tranche extends rather than duplicates them.
+
+
 ## 0.2.1 — 2026-09-27
 
 ### Bayesian-network analysis

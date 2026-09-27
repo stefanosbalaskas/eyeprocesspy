@@ -152,6 +152,80 @@ compare_bn_across_aoi_specs(analyses, **kwargs)
 
 These helpers compare already-created feature tables. They do not rerun event detection or redefine AOIs inside the Bayesian-network layer.
 
+## Robustness and predictive calibration
+
+```python
+cpt_sensitivity_analysis(
+    result,
+    *,
+    node,
+    state,
+    values,
+    target,
+    evidence=None,
+    parent_configuration=None,
+)
+
+structural_perturbation_sensitivity(
+    result,
+    *,
+    target=None,
+    evidence=None,
+    include_delete=True,
+    include_reverse=True,
+    add_edges=(),
+)
+
+discretization_sensitivity(
+    data_spec,
+    *,
+    columns,
+    schemes,
+    algorithm="hill_climb",
+    score="bic",
+    constraints=None,
+    random_state=42,
+)
+
+measurement_noise_sensitivity(
+    data_spec,
+    *,
+    columns,
+    noise_scales=(0.0, 0.05, 0.10, 0.20),
+    repeats=3,
+    algorithm="hill_climb",
+    score="bic",
+    constraints=None,
+    seed=1,
+)
+
+sample_size_stability_curve(
+    data_spec,
+    *,
+    fractions=(0.25, 0.5, 0.75, 1.0),
+    repeats=10,
+    resample_by=None,
+    algorithm="hill_climb",
+    score="bic",
+    constraints=None,
+    seed=1,
+)
+
+predictive_calibration(
+    result,
+    *,
+    target,
+    data=None,
+    positive_state=None,
+    n_bins=10,
+    evidence_nodes=None,
+)
+```
+
+Predictive calibration conditions on the target node's parents by default. Supply `evidence_nodes` explicitly to use a different scientifically justified evidence set. It does not silently condition on descendants. Grouped sample-size stability rejects missing group identifiers rather than silently excluding those rows.
+
+See the [robustness guide](../guides/bayesian-networks/robustness.md) for interpretation and reporting boundaries.
+
 ## Plotting
 
 ```python
@@ -161,6 +235,9 @@ plot_bn_direction_stability(stability, *, ax=None)
 plot_bn_posterior(query, *, ax=None)
 plot_bn_detector_robustness(comparison, *, ax=None)
 plot_bn_validation(validation, *, ax=None)
+plot_bn_cpt_sensitivity(result, *, target_state=None, ax=None)
+plot_bn_sample_size_stability(table, *, ax=None)
+plot_bn_predictive_calibration(result, *, ax=None)
 ```
 
 Plots return standard Matplotlib axes and attach their numerical payload to `ax.eyeprocess_plot_data` for auditability.
