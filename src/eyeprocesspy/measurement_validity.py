@@ -81,10 +81,16 @@ def compute_spatial_error_field(
             f"{x:.12g}|{y:.12g}" for x, y in zip(work.target_x, work.target_y, strict=True)
         ]
     else:
+        if data.loc[ok, target_id].isna().any():
+            raise EyeProcessValidationError("target_id contains missing values.")
         work["target_id"] = data.loc[ok, target_id].astype(str).to_numpy()
 
     rows: list[dict[str, Any]] = []
     for key, group in work.groupby("target_id", sort=False, dropna=False):
+        if len(group[["target_x", "target_y"]].drop_duplicates()) != 1:
+            raise EyeProcessValidationError(
+                f"target_id {key!r} maps to inconsistent target coordinates."
+            )
         ex = group.error_x.to_numpy(float)
         ey = group.error_y.to_numpy(float)
         radial = np.hypot(ex, ey)
@@ -210,6 +216,8 @@ def fit_pupil_size_artifact(
     minimum_samples = int(minimum_samples)
     if minimum_samples < 3:
         raise EyeProcessValidationError("minimum_samples must be at least 3.")
+    if by is not None and data[by].isna().any():
+        raise EyeProcessValidationError("Grouping variable contains missing values.")
 
     rows: list[dict[str, Any]] = []
     grouped = [(None, data)] if by is None else list(data.groupby(by, sort=False, dropna=False))
@@ -221,8 +229,20 @@ def fit_pupil_size_artifact(
         if int(ok.sum()) < minimum_samples:
             rows.append({"group": key, "n": int(ok.sum()), "status": "insufficient_data"})
             continue
-        center = float(np.mean(p[ok]))
-        pc = p[ok] - center
+        observed_pupil = p[ok]
+        center = float(np.mean(observed_pupil))
+        tolerance = np.finfo(float).eps * max(1.0, abs(center))
+        if float(np.ptp(observed_pupil)) <= tolerance:
+            rows.append(
+                {
+                    "group": key,
+                    "n": int(ok.sum()),
+                    "pupil_center": center,
+                    "status": "insufficient_pupil_variation",
+                }
+            )
+            continue
+        pc = observed_pupil - center
         design = np.column_stack([np.ones(ok.sum()), pc])
         bx = np.linalg.lstsq(design, ex[ok], rcond=None)[0]
         by_fit = np.linalg.lstsq(design, ey[ok], rcond=None)[0]
@@ -240,7 +260,9 @@ def fit_pupil_size_artifact(
         )
     model = pd.DataFrame(rows)
     if not (model.status == "estimated").any():
-        raise EyeProcessValidationError("No group has enough target-referenced samples.")
+        raise EyeProcessValidationError(
+            "No group has enough target-referenced samples with pupil-size variation."
+        )
     return _result(
         "eye_pupil_size_artifact_model",
         table=model,
@@ -271,8 +293,18 @@ def correct_pupil_size_artifact(
     by = model["by"] if by is None else by
     required = [pupil, gaze_x, gaze_y] + ([] if by is None else [by])
     _require(frame, required)
+    if by is not None and frame[by].isna().any():
+        raise EyeProcessValidationError("Grouping variable contains missing values.")
     table = model["table"].loc[lambda z: z.status == "estimated"].copy()
     lookup = {row.group: row for _, row in table.iterrows()}
+    if by is not None:
+        unknown_groups = [value for value in pd.unique(frame[by]) if value not in lookup]
+        if unknown_groups:
+            raise EyeProcessValidationError(
+                "No pupil-size artefact model is available for group(s): "
+                + ", ".join(map(str, unknown_groups))
+                + "."
+            )
 
     out = frame.copy()
     correction_x = np.full(len(out), np.nan)
