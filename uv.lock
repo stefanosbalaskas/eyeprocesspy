@@ -1078,7 +1078,7 @@ requires-dist = [
     { name = "statsmodels", marker = "extra == 'survival'", specifier = ">=0.14" },
     { name = "twine", marker = "extra == 'dev'", specifier = ">=6" },
 ]
-provides-extras = ["arrow", "stan", "bayes", "bayesnet", "physio", "streaming", "gaze", "survival", "psychometrics", "plots", "ml", "docs", "dev"]
+provides-extras = ["narrow", "stan", "bayes", "bayesnet", "physio", "streaming", "gaze", "survival", "psychometrics", "plots", "ml", "docs", "dev"]
 
 [[package]]
 name = "fastexcel"
