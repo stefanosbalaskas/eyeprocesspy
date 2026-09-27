@@ -26,6 +26,7 @@ nav:
           - Data contract: guides/bayesian-networks/data-contract.md
           - Structure learning: guides/bayesian-networks/structure-learning.md
           - Stability & validation: guides/bayesian-networks/stability-validation.md
+          - Robustness & calibration: guides/bayesian-networks/robustness.md
           - Detector & AOI sensitivity: guides/bayesian-networks/sensitivity.md
           - Reporting: guides/bayesian-networks/reporting.md
       - Trial-level mediation:
@@ -50,6 +51,7 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Measurement validity & dynamic gaze: guides/measurement-validity-dynamic-gaze.md
       - Standardized Data Quality:
           - Overview & equations: guides/data-quality.md
           - Reporting guideline: guides/data-quality-reporting.md
@@ -98,6 +100,7 @@ nav:
           - Sample-level AOI sensitivity: examples/sample-level-aoi-sensitivity.md
           - Multimodal Bayesian network: examples/bayesian-network-multimodal.md
           - Bayesian-network sensitivity: examples/bayesian-network-sensitivity.md
+          - Measurement validity & dynamic gaze: examples/measurement-validity-dynamic-gaze.md
   - Plot gallery: gallery.md
   - Articles:
       - 88-workflow library: articles/index.md
@@ -112,6 +115,7 @@ nav:
       - AOI perturbation API: reference/aoi-perturbation.md
       - Data Quality API: reference/data-quality.md
       - Bayesian-network API: reference/bayesian-networks.md
+      - Measurement-validity API: reference/measurement-validity.md
   - Validation & trust:
       - Parity & validation: parity-and-validation.md
       - Release & reproducibility: release-and-reproducibility.md
