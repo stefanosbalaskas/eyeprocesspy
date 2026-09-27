@@ -47,3 +47,10 @@ The plotting reference documents the major Matplotlib families and how to save, 
 The frozen parity surface contains **1,182 resolved APIs** spanning import, data contracts, preprocessing, gaze/AOI analysis, pupil workflows, process measurement, IRT, validation, reproducibility, interoperability, governance, storage, scientific plots, and reporting. The mediation preparation module adds **10 public functions and 1 public data-contract class** beyond that frozen ledger.
 
 The generated API page is intentionally comprehensive; the curated guides and plotting reference provide the higher-level navigation layer.
+
+## Bayesian-network API
+
+[Bayesian-network API](bayesian-networks.md){ .md-button .md-button--primary }
+
+The Python-native Bayesian-network extension adds explicit node/data/constraint contracts, pgmpy-backed static structure learning and parameter fitting, posterior queries, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, plots, and reproducibility-oriented reporting. It is additive and does not alter the frozen R parity ledger.
+
