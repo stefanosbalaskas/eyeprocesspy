@@ -156,6 +156,31 @@ def test_event_benchmark_confusion_sensitivity_and_plots():
     assert len(boundaries) == 2
     confusion = ep.event_confusion_matrix(truth, detected, sample_step=10)
     assert not confusion.empty
+    overlapping = pd.DataFrame(
+        {
+            "start_time": [0.0, 0.0],
+            "end_time": [20.0, 20.0],
+            "event_type": ["fixation", "saccade"],
+        }
+    )
+    overlap_confusion = ep.event_confusion_matrix(
+        overlapping,
+        overlapping,
+        sample_step=10,
+    )
+    assert "overlap" in overlap_confusion.index
+    missing_label = truth.copy()
+    missing_label.loc[0, "event_type"] = pd.NA
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.benchmark_event_detector(missing_label, detected)
+    grouped_truth = truth.assign(participant=["p1", pd.NA])
+    grouped_detected = detected.assign(participant=["p1", "p1", "p1"])
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.benchmark_event_detector(
+            grouped_truth,
+            grouped_detected,
+            group="participant",
+        )
     comparison = ep.compare_event_detectors(truth, {"a": detected, "b": truth}, minimum_iou=0.3)
     assert len(comparison) == 2
 
@@ -271,6 +296,10 @@ def test_naturalistic_coordinate_pipeline_uncertainty_and_guards():
     bad_pose.loc[1, "timestamp"] = 0
     with pytest.raises(ep.EyeProcessValidationError):
         ep.align_head_pose_to_gaze(gaze, bad_pose)
+    zero_quaternion = pose.copy()
+    zero_quaternion.loc[0, ["qx", "qy", "qz", "qw"]] = 0.0
+    with pytest.raises(ep.EyeProcessValidationError):
+        ep.align_head_pose_to_gaze(gaze, zero_quaternion)
     bad_world = aligned.copy()
     bad_world.loc[0, "head_gaze_x"] = np.nan
     with pytest.raises(ep.EyeProcessValidationError):
