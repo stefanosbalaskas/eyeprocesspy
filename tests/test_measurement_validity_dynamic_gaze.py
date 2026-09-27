@@ -161,6 +161,19 @@ def test_dynamic_aoi_assignment_shapes_sensitivity_and_guards():
     assert set(result.assignments.status) >= {"assigned", "outside", "no_active_geometry", "missing_sample"}
     first = ep.assign_dynamic_aoi(samples.iloc[:2], rectangles, interpolation="step", overlap="first", lag_tolerance=1)
     assert len(first.assignments) == 2
+    declared_priority = pd.DataFrame(
+        [
+            {"aoi": "z_first", "timestamp": 0.0, "shape": "rectangle", "x_min": 0.0, "x_max": 1.0, "y_min": 0.0, "y_max": 1.0},
+            {"aoi": "a_second", "timestamp": 0.0, "shape": "rectangle", "x_min": 0.0, "x_max": 1.0, "y_min": 0.0, "y_max": 1.0},
+        ]
+    )
+    priority_result = ep.assign_dynamic_aoi(
+        pd.DataFrame({"timestamp": [0.0], "gaze_x": [0.5], "gaze_y": [0.5]}),
+        declared_priority,
+        interpolation="step",
+        overlap="first",
+    )
+    assert priority_result.assignments.aoi.iloc[0] == "z_first"
     all_hits = ep.assign_dynamic_aoi(
         pd.DataFrame({"timestamp": [5.0], "gaze_x": [1.0], "gaze_y": [0.6]}),
         rectangles,
