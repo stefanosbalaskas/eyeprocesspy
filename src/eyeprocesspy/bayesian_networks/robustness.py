@@ -428,8 +428,9 @@ def predictive_calibration(
     data: pd.DataFrame | None = None,
     positive_state: Any | None = None,
     n_bins: int = 10,
+    evidence_nodes: Sequence[str] | None = None,
 ) -> EyeResult:
-    """Compute held-out-style probability calibration diagnostics for a fitted discrete BN."""
+    """Compute probability calibration without silently conditioning on descendants."""
     _require_result(result, fitted=True)
     if result.model_family != "discrete":
         raise EyeProcessValidationError("Probability calibration currently requires a discrete BN.")
@@ -441,6 +442,15 @@ def predictive_calibration(
         raise EyeProcessValidationError("n_bins must be at least 2.")
     cpd = result.backend_model.get_cpds(target)
     states = [str(value) for value in cpd.state_names[target]]
+    if evidence_nodes is None:
+        evidence_nodes = tuple(str(node) for node in result.backend_model.get_parents(target))
+    else:
+        evidence_nodes = tuple(str(node) for node in evidence_nodes)
+    unknown_evidence = sorted(set(evidence_nodes).difference(result.nodes))
+    if target in evidence_nodes or unknown_evidence:
+        raise EyeProcessValidationError(
+            "evidence_nodes must contain known BN nodes and must exclude the target."
+        )
     if positive_state is None and len(states) == 2:
         positive_state = states[-1]
     if positive_state is not None and str(positive_state) not in states:
@@ -455,8 +465,8 @@ def predictive_calibration(
             continue
         evidence = {
             node: row[node]
-            for node in result.nodes
-            if node != target and node in frame and not pd.isna(row[node])
+            for node in evidence_nodes
+            if node in frame and not pd.isna(row[node])
         }
         query = query_bayesian_network(result, target=target, evidence=evidence)
         probabilities = dict(query.posterior or {})
@@ -497,7 +507,12 @@ def predictive_calibration(
         "calibration_target": str(positive_state) if positive_state is not None else "maximum_confidence_correctness",
     }
     return EyeResult(
-        {"predictions": predictions, "calibration": calibration, "summary": summary},
+        {
+            "predictions": predictions,
+            "calibration": calibration,
+            "summary": summary,
+            "evidence_nodes": tuple(evidence_nodes),
+        },
         eyeprocess_class="eye_bn_predictive_calibration",
     )
 
