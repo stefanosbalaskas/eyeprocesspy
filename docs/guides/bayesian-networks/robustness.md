@@ -93,7 +93,9 @@ cal = predictive_calibration(
 )
 ~~~
 
-The result contains row-level predicted probabilities, a reliability table, multiclass Brier score, and log loss.
+The result contains row-level predicted probabilities, a reliability table, multiclass Brier score, and log loss. By default, predictions condition only on the fitted target node's parents; this avoids silently using descendant information. Supply `evidence_nodes` explicitly when a different evidence set is scientifically justified.
+
+Prediction tables must contain every requested evidence node. Missing evidence columns cause an explicit failure; row-level missing evidence values are retained as unobserved rather than imputed.
 
 !!! warning "Validation design"
     Calibration on the same observations used to fit the network is descriptive, not out-of-sample validation. Use held-out or grouped data when making predictive-generalization claims.
