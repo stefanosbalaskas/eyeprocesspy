@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from . import adapters as adapters
+from . import advanced_events as advanced_events
 from . import advanced_process_irt_07 as advanced_process_irt_07
 from . import aoi_perturbation as aoi_perturbation
 from . import bayesian_3pl_08 as bayesian_3pl_08
@@ -14,13 +15,16 @@ from . import coordinates as coordinates
 from . import core_plots_10 as core_plots_10
 from . import dataset as dataset
 from . import detector_multiverse as detector_multiverse
+from . import dynamic_aoi as dynamic_aoi
 from . import dynamic_irt as dynamic_irt
 from . import engine_adapters as engine_adapters
+from . import event_benchmark as event_benchmark
 from . import evidence_graph as evidence_graph
 from . import exceptions as exceptions
 from . import foundation_09 as foundation_09
 from . import frontier_08 as frontier_08
 from . import functional_pupil as functional_pupil
+from . import gaze_stress as gaze_stress
 from . import gazepoint as gazepoint
 from . import gazepoint_real_10 as gazepoint_real_10
 from . import gazepoint_workflow_10 as gazepoint_workflow_10
@@ -37,8 +41,10 @@ from . import measurement_accountability_11 as measurement_accountability_11
 from . import measurement_intelligence as measurement_intelligence
 from . import measurement_intelligence_utils_10 as measurement_intelligence_utils_10
 from . import measurement_quality_legacy as measurement_quality_legacy
+from . import measurement_validity as measurement_validity
 from . import multilevel_mediation as multilevel_mediation
 from . import multimodal_staged as multimodal_staged
+from . import naturalistic_coordinates as naturalistic_coordinates
 from . import negative_controls_09 as negative_controls_09
 from . import operational_validation_08 as operational_validation_08
 from . import partitioned_storage_10 as partitioned_storage_10
@@ -63,6 +69,7 @@ from . import process_quality_09 as process_quality_09
 from . import pupil_missingness as pupil_missingness
 from . import reproducibility_provenance_09 as reproducibility_provenance_09
 from . import requested_api_07 as requested_api_07
+from . import scanpath_sensitivity as scanpath_sensitivity
 from . import schema as schema
 from . import semantic_validation_07 as semantic_validation_07
 from . import sensitivity_08 as sensitivity_08
@@ -104,6 +111,20 @@ from .adapters import (
 )
 from .adapters import (
     unregister_eye_adapter as unregister_eye_adapter,
+)
+from .advanced_events import (
+    compute_pursuit_gain as compute_pursuit_gain,
+    compute_pursuit_velocity_error as compute_pursuit_velocity_error,
+    detect_events_directional as detect_events_directional,
+    detect_events_ivvt as detect_events_ivvt,
+    detect_microsaccades as detect_microsaccades,
+    detect_smooth_pursuits as detect_smooth_pursuits,
+    microsaccade_main_sequence as microsaccade_main_sequence,
+    plot_microsaccade_main_sequence as plot_microsaccade_main_sequence,
+    plot_pursuit_velocity as plot_pursuit_velocity,
+    summarise_microsaccades as summarise_microsaccades,
+    summarise_pursuits as summarise_pursuits,
+    validate_pursuit_detection as validate_pursuit_detection,
 )
 from .advanced_process_irt_07 import (
     audit_irf_shape as audit_irf_shape,
@@ -639,6 +660,13 @@ from .detector_multiverse import (
 from .detector_multiverse import (
     validate_event_detector_spec as validate_event_detector_spec,
 )
+from .dynamic_aoi import (
+    assign_dynamic_aoi as assign_dynamic_aoi,
+    audit_dynamic_aoi_coverage as audit_dynamic_aoi_coverage,
+    dynamic_aoi_sensitivity as dynamic_aoi_sensitivity,
+    plot_dynamic_aoi_alignment as plot_dynamic_aoi_alignment,
+    validate_dynamic_aoi_spec as validate_dynamic_aoi_spec,
+)
 from .dynamic_irt import (
     compare_diffusion_accuracy_rt as compare_diffusion_accuracy_rt,
 )
@@ -827,6 +855,14 @@ from .engine_adapters import (
 )
 from .engine_adapters import (
     validate_model_object as validate_model_object,
+)
+from .event_benchmark import (
+    benchmark_event_detector as benchmark_event_detector,
+    compare_event_detectors as compare_event_detectors,
+    detector_parameter_sensitivity as detector_parameter_sensitivity,
+    event_boundary_error as event_boundary_error,
+    event_confusion_matrix as event_confusion_matrix,
+    plot_detector_benchmark as plot_detector_benchmark,
 )
 from .evidence_graph import (
     audit_evidence_dependencies as audit_evidence_dependencies,
@@ -1040,6 +1076,15 @@ from .functional_pupil import (
 )
 from .functional_pupil import (
     simulate_advanced_process_data as simulate_advanced_process_data,
+)
+from .gaze_stress import (
+    inject_blink_gaps as inject_blink_gaps,
+    inject_event_misclassification as inject_event_misclassification,
+    inject_spatial_drift as inject_spatial_drift,
+    inject_spatial_noise as inject_spatial_noise,
+    plot_gaze_stress as plot_gaze_stress,
+    run_gaze_stress_suite as run_gaze_stress_suite,
+    simulate_known_gaze_process as simulate_known_gaze_process,
 )
 from .gazepoint import (
     gp_audit_file_pairs as gp_audit_file_pairs,
@@ -2343,6 +2388,15 @@ from .measurement_quality_legacy import (
 from .measurement_quality_legacy import (
     uncertainty_budget as uncertainty_budget,
 )
+from .measurement_validity import (
+    audit_pupil_preprocessing as audit_pupil_preprocessing,
+    compute_spatial_error_field as compute_spatial_error_field,
+    correct_gaze_with_spatial_error as correct_gaze_with_spatial_error,
+    correct_pupil_size_artifact as correct_pupil_size_artifact,
+    fit_pupil_size_artifact as fit_pupil_size_artifact,
+    plot_pupil_size_artifact as plot_pupil_size_artifact,
+    plot_spatial_error_field as plot_spatial_error_field,
+)
 from .multilevel_mediation import (
     MultilevelMediationData as MultilevelMediationData,
 )
@@ -2504,6 +2558,16 @@ from .multimodal_staged import (
 )
 from .multimodal_staged import (
     validate_multimodal_m4 as validate_multimodal_m4,
+)
+from .naturalistic_coordinates import (
+    align_head_pose_to_gaze as align_head_pose_to_gaze,
+    pixels_to_visual_angle as pixels_to_visual_angle,
+    plot_world_gaze_vectors as plot_world_gaze_vectors,
+    propagate_coordinate_uncertainty as propagate_coordinate_uncertainty,
+    screen_gaze_to_head_vectors as screen_gaze_to_head_vectors,
+    transform_head_gaze_to_world as transform_head_gaze_to_world,
+    transform_screen_gaze_to_world as transform_screen_gaze_to_world,
+    visual_angle_to_pixels as visual_angle_to_pixels,
 )
 from .negative_controls_09 import (
     audit_temporal_leakage as audit_temporal_leakage,
@@ -3845,6 +3909,15 @@ from .requested_api_07 import (
 )
 from .requested_api_07 import (
     vendor_schema_contract as vendor_schema_contract,
+)
+from .scanpath_sensitivity import (
+    compare_scanpath_metrics as compare_scanpath_metrics,
+    dynamic_time_warping_distance as dynamic_time_warping_distance,
+    levenshtein_scanpath as levenshtein_scanpath,
+    ngram_jaccard_similarity as ngram_jaccard_similarity,
+    plot_scanpath_sensitivity as plot_scanpath_sensitivity,
+    scanpath_metric_sensitivity as scanpath_metric_sensitivity,
+    transition_js_distance as transition_js_distance,
 )
 from .schema import (
     canonical_table_names as canonical_table_names,
@@ -6054,85 +6127,6 @@ __all__ = [
     "plot_gaze_quality_dashboard",
     "report_gaze_quality",
     "simulate_gaze_quality_calibration",
-]
-
-
-# Measurement-validity and dynamic-gaze tranche (0.2.x development).
-from . import advanced_events as advanced_events
-from . import dynamic_aoi as dynamic_aoi
-from . import event_benchmark as event_benchmark
-from . import gaze_stress as gaze_stress
-from . import measurement_validity as measurement_validity
-from . import naturalistic_coordinates as naturalistic_coordinates
-from . import scanpath_sensitivity as scanpath_sensitivity
-from .advanced_events import (
-    compute_pursuit_gain,
-    compute_pursuit_velocity_error,
-    detect_events_directional,
-    detect_events_ivvt,
-    detect_microsaccades,
-    detect_smooth_pursuits,
-    microsaccade_main_sequence,
-    plot_microsaccade_main_sequence,
-    plot_pursuit_velocity,
-    summarise_microsaccades,
-    summarise_pursuits,
-    validate_pursuit_detection,
-)
-from .dynamic_aoi import (
-    assign_dynamic_aoi,
-    audit_dynamic_aoi_coverage,
-    dynamic_aoi_sensitivity,
-    plot_dynamic_aoi_alignment,
-    validate_dynamic_aoi_spec,
-)
-from .event_benchmark import (
-    benchmark_event_detector,
-    compare_event_detectors,
-    detector_parameter_sensitivity,
-    event_boundary_error,
-    event_confusion_matrix,
-    plot_detector_benchmark,
-)
-from .gaze_stress import (
-    inject_blink_gaps,
-    inject_event_misclassification,
-    inject_spatial_drift,
-    inject_spatial_noise,
-    plot_gaze_stress,
-    run_gaze_stress_suite,
-    simulate_known_gaze_process,
-)
-from .measurement_validity import (
-    audit_pupil_preprocessing,
-    compute_spatial_error_field,
-    correct_gaze_with_spatial_error,
-    correct_pupil_size_artifact,
-    fit_pupil_size_artifact,
-    plot_pupil_size_artifact,
-    plot_spatial_error_field,
-)
-from .naturalistic_coordinates import (
-    align_head_pose_to_gaze,
-    pixels_to_visual_angle,
-    plot_world_gaze_vectors,
-    propagate_coordinate_uncertainty,
-    screen_gaze_to_head_vectors,
-    transform_head_gaze_to_world,
-    transform_screen_gaze_to_world,
-    visual_angle_to_pixels,
-)
-from .scanpath_sensitivity import (
-    compare_scanpath_metrics,
-    dynamic_time_warping_distance,
-    levenshtein_scanpath,
-    ngram_jaccard_similarity,
-    plot_scanpath_sensitivity,
-    scanpath_metric_sensitivity,
-    transition_js_distance,
-)
-
-__all__.extend([
     "advanced_events",
     "dynamic_aoi",
     "event_benchmark",
@@ -6192,4 +6186,5 @@ __all__.extend([
     "validate_dynamic_aoi_spec",
     "validate_pursuit_detection",
     "visual_angle_to_pixels",
-])
+]
+
