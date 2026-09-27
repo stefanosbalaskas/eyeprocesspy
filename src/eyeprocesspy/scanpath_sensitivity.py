@@ -133,10 +133,13 @@ def scanpath_metric_sensitivity(
         for _, row in table.iterrows():
             rows.append({"candidate": str(name), **row.to_dict()})
     out = pd.DataFrame(rows)
-    out["rank"] = out.groupby("metric", sort=False)["value"].rank(
-        ascending=out.groupby("metric", sort=False)["higher_is_more_similar"].transform("first").map({True: False, False: True}),
-        method="min",
-    )
+    out["rank"] = np.nan
+    for _, group in out.groupby("metric", sort=False):
+        higher = bool(group["higher_is_more_similar"].iloc[0])
+        out.loc[group.index, "rank"] = group["value"].rank(
+            ascending=not higher,
+            method="min",
+        )
     return EyeResult(
         {
             "table": out,
