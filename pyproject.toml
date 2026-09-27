@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eyeprocesspy"
-version = "0.2.1"
+version = "0.2.2"
 description = "Vendor-neutral Python infrastructure for eye-tracking, pupillometry, biometrics, psychometrics, and multimodal process data, ported from eyeprocess 0.11.1."
 readme = "README.md"
 requires-python = ">=3.11"
