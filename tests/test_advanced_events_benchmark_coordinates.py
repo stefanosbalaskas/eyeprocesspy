@@ -49,6 +49,22 @@ def test_pursuit_detectors_gain_summary_and_plots():
     ax = ep.plot_pursuit_velocity(directional)
     assert hasattr(ax, "eyeprocess_plot_data")
 
+    seconds = data.rename(columns={"timestamp_ms": "timestamp_s"}).copy()
+    seconds["timestamp_s"] = seconds["timestamp_s"] / 1000.0
+    seconds_result = ep.detect_events_ivvt(
+        seconds,
+        time="timestamp_s",
+        time_unit="s",
+        fixation_velocity_threshold=1,
+        saccade_velocity_threshold=80,
+        minimum_duration_ms=2,
+    )
+    if not seconds_result.events.empty and not ivvt.events.empty:
+        assert seconds_result.events.duration_ms.max() == pytest.approx(
+            ivvt.events.duration_ms.max(),
+            rel=1e-6,
+        )
+
     with pytest.raises(ep.EyeProcessValidationError):
         ep.detect_events_ivvt(data, fixation_velocity_threshold=10, saccade_velocity_threshold=5)
     with pytest.raises(ep.EyeProcessValidationError):
