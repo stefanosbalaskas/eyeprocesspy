@@ -1,0 +1,58 @@
+name: Feature qualification
+
+on:
+  pull_request:
+
+jobs:
+  qualify-new-scientific-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - run: uv sync --frozen --extra dev
+      - name: Ruff new tranche
+        run: |
+          uv run --frozen ruff check \
+            src/eyeprocesspy/measurement_validity.py \
+            src/eyeprocesspy/dynamic_aoi.py \
+            src/eyeprocesspy/advanced_events.py \
+            src/eyeprocesspy/event_benchmark.py \
+            src/eyeprocesspy/naturalistic_coordinates.py \
+            src/eyeprocesspy/scanpath_sensitivity.py \
+            src/eyeprocesspy/gaze_stress.py \
+            src/eyeprocesspy/bayesian_networks/robustness.py \
+            tests/test_measurement_validity_dynamic_gaze.py \
+            tests/test_advanced_events_benchmark_coordinates.py \
+            tests/test_scanpath_and_gaze_stress.py \
+            tests/test_bayesian_network_robustness.py
+      - name: Mypy new tranche
+        run: |
+          uv run --frozen mypy \
+            src/eyeprocesspy/measurement_validity.py \
+            src/eyeprocesspy/dynamic_aoi.py \
+            src/eyeprocesspy/advanced_events.py \
+            src/eyeprocesspy/event_benchmark.py \
+            src/eyeprocesspy/naturalistic_coordinates.py \
+            src/eyeprocesspy/scanpath_sensitivity.py \
+            src/eyeprocesspy/gaze_stress.py \
+            src/eyeprocesspy/bayesian_networks/robustness.py
+      - name: Focused tests and exact branch coverage
+        run: |
+          uv run --frozen pytest \
+            tests/test_measurement_validity_dynamic_gaze.py \
+            tests/test_advanced_events_benchmark_coordinates.py \
+            tests/test_scanpath_and_gaze_stress.py \
+            tests/test_bayesian_network_robustness.py \
+            --cov=eyeprocesspy.measurement_validity \
+            --cov=eyeprocesspy.dynamic_aoi \
+            --cov=eyeprocesspy.advanced_events \
+            --cov=eyeprocesspy.event_benchmark \
+            --cov=eyeprocesspy.naturalistic_coordinates \
+            --cov=eyeprocesspy.scanpath_sensitivity \
+            --cov=eyeprocesspy.gaze_stress \
+            --cov=eyeprocesspy.bayesian_networks.robustness \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-fail-under=100
