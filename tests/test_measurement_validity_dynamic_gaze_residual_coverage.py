@@ -607,6 +607,7 @@ def test_bn_robustness_residual_guards_sampling_and_calibration(monkeypatch):
         fitted,
         backend_model=FakeModel(FakeCPD([[1.0], [0.0]], ["a", "b"])),
     )
+    original_backend_query = br.pgmpy_backend.query
     monkeypatch.setattr(
         br.pgmpy_backend,
         "query",
@@ -634,6 +635,7 @@ def test_bn_robustness_residual_guards_sampling_and_calibration(monkeypatch):
         target="choice",
     )
     assert continuous_query.table.target_mean.iloc[0] == pytest.approx(1.25)
+    monkeypatch.setattr(br.pgmpy_backend, "query", original_backend_query)
 
     original_fit = br.fit_bayesian_network
 
