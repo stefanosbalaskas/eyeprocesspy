@@ -166,7 +166,7 @@ def plot_scanpath_sensitivity(result: Any, ax: Any = None) -> Any:
     axis.set_ylabel("Rank (1 = most similar)")
     axis.set_title("Scanpath metric sensitivity")
     axis.legend()
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
