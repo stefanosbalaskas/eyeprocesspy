@@ -87,6 +87,7 @@ def test_pursuit_detectors_gain_summary_and_plots():
 
 def test_microsaccades_and_main_sequence():
     data = _trajectory()
+    data["gaze_y_deg"] = 0.005 * np.sin(np.linspace(0, 8 * np.pi, len(data)))
     result = ep.detect_microsaccades(
         data,
         lambda_threshold=3,
@@ -245,7 +246,12 @@ def test_naturalistic_coordinate_pipeline_uncertainty_and_guards():
     )
     assert np.allclose(np.linalg.norm(head[["head_gaze_x","head_gaze_y","head_gaze_z"]], axis=1), 1)
 
-    q = Rotation.from_euler("z", [0, 10], degrees=True).as_quat()
+    q = np.vstack(
+        [
+            Rotation.from_euler("z", angle, degrees=True).as_quat()
+            for angle in (0, 10)
+        ]
+    )
     pose = pd.DataFrame(
         {
             "timestamp": [0.0, 1.0],
