@@ -551,3 +551,129 @@ def test_bn_robustness_residual_guards_sampling_and_calibration(monkeypatch):
             target="choice",
             data=no_targets,
         )
+
+
+    with pytest.raises(ep.EyeProcessValidationError):
+        br.cpt_sensitivity_analysis(
+            replace(fitted, model_family="gaussian"),
+            node="trust",
+            state="H",
+            values=(0.5,),
+            target="choice",
+            parent_configuration={"condition": "A"},
+        )
+
+    class FakeCPD:
+        def __init__(self, values, states):
+            self._values = np.asarray(values, dtype=float)
+            self.state_names = {"x": list(states)}
+            self.variables = ["x"]
+            self.variable_card = len(states)
+            self.cardinality = np.asarray([len(states)], dtype=int)
+
+        def get_values(self):
+            return self._values.copy()
+
+    class FakeModel:
+        def __init__(self, cpd):
+            self.cpd = cpd
+
+        def get_cpds(self, node):
+            return self.cpd
+
+        def remove_cpds(self, *cpds):
+            return None
+
+        def add_cpds(self, *cpds):
+            self.cpd = cpds[0]
+
+        def check_model(self):
+            return True
+
+    one_state = replace(
+        fitted,
+        backend_model=FakeModel(FakeCPD([[1.0]], ["only"])),
+    )
+    with pytest.raises(ep.EyeProcessValidationError):
+        br.cpt_sensitivity_analysis(
+            one_state,
+            node="x",
+            state="only",
+            values=(0.5,),
+            target="choice",
+        )
+
+    degenerate = replace(
+        fitted,
+        backend_model=FakeModel(FakeCPD([[1.0], [0.0]], ["a", "b"])),
+    )
+    monkeypatch.setattr(
+        br.pgmpy_backend,
+        "query",
+        lambda *args, **kwargs: ({"Y": 0.7, "N": 0.3}, None, None, "fake"),
+    )
+    redistributed = br.cpt_sensitivity_analysis(
+        degenerate,
+        node="x",
+        state="a",
+        values=(0.4,),
+        target="choice",
+    )
+    assert redistributed.table.target_probability.sum() == pytest.approx(1.0)
+
+    monkeypatch.setattr(
+        br.pgmpy_backend,
+        "query",
+        lambda *args, **kwargs: (None, 1.25, 0.5, "fake"),
+    )
+    continuous_query = br.cpt_sensitivity_analysis(
+        degenerate,
+        node="x",
+        state="a",
+        values=(0.6,),
+        target="choice",
+    )
+    assert continuous_query.table.target_mean.iloc[0] == pytest.approx(1.25)
+
+    original_fit = br.fit_bayesian_network
+
+    def fail_fit(*args, **kwargs):
+        raise RuntimeError("planned perturbation fit failure")
+
+    monkeypatch.setattr(br, "fit_bayesian_network", fail_fit)
+    structural_failure = br.structural_perturbation_sensitivity(
+        fitted,
+        include_delete=True,
+        include_reverse=False,
+    )
+    assert structural_failure.provenance["failures"]
+    monkeypatch.setattr(br, "fit_bayesian_network", original_fit)
+
+    multi_data = pd.DataFrame(
+        {
+            "condition": ["A", "A", "A", "B", "B", "B"] * 5,
+            "outcome": ["low", "mid", "high", "low", "mid", "high"] * 5,
+        }
+    )
+    multi_spec = prepare_bayesian_network_data(
+        multi_data,
+        nodes={
+            "condition": {"type": "categorical"},
+            "outcome": {"type": "categorical"},
+        },
+        participant_id=None,
+        trial_id=None,
+        stimulus_id=None,
+    )
+    multi_fit = fit_bayesian_network(
+        [("condition", "outcome")],
+        data=multi_spec,
+        estimator="bayesian",
+        equivalent_sample_size=5,
+    )
+    multiclass = br.predictive_calibration(
+        multi_fit,
+        target="outcome",
+        positive_state=None,
+    )
+    assert multiclass.summary["calibration_target"] == "maximum_confidence_correctness"
