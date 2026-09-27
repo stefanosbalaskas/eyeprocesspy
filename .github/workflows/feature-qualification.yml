@@ -26,7 +26,8 @@ jobs:
             tests/test_measurement_validity_dynamic_gaze.py \
             tests/test_advanced_events_benchmark_coordinates.py \
             tests/test_scanpath_and_gaze_stress.py \
-            tests/test_bayesian_network_robustness.py
+            tests/test_bayesian_network_robustness.py \
+            tests/test_measurement_validity_dynamic_gaze_residual_coverage.py
       - name: Mypy new tranche
         run: |
           uv run --frozen mypy \
@@ -45,6 +46,7 @@ jobs:
             tests/test_advanced_events_benchmark_coordinates.py \
             tests/test_scanpath_and_gaze_stress.py \
             tests/test_bayesian_network_robustness.py \
+            tests/test_measurement_validity_dynamic_gaze_residual_coverage.py \
             --cov=eyeprocesspy \
             --cov-branch \
             --cov-report=term-missing \
