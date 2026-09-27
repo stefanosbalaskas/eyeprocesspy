@@ -4,6 +4,8 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+## 0.2.2 — 2026-09-27
+
 ### Measurement validity, dynamic gaze, and BN robustness
 
 - Added target-referenced spatial calibration error fields, explicit IDW/nearest correction, pupil-size artefact estimation/correction, and pupil preprocessing audit/QC.
@@ -16,6 +18,13 @@ All notable changes to `eyeprocesspy` are documented here.
 - Completed the static BN robustness layer with CPT sensitivity, structural add/delete/reverse perturbation, discretization sensitivity, measurement-noise sensitivity, sample-size stability curves, and predictive calibration with Brier/log-loss summaries.
 - Added focused tests, API exports, a worked example, reproducible gallery script/assets, site navigation, and dedicated measurement-validity and BN-robustness guides.
 - Existing calibration/recalibration and stress-test APIs remain canonical where already implemented; this tranche extends rather than duplicates them.
+
+### Release qualification
+
+- Exact-main qualification passed **1,892 tests**, **36,556 / 36,556 statements**, and **12,630 / 12,630 branches** with exact 100% statement and branch coverage.
+- All Ubuntu/macOS/Windows × Python 3.11–3.14 lanes passed, together with Ruff, mypy, wheel/sdist build and clean-install smoke tests, frozen-R oracle validation, and strict documentation/assets deployment.
+- The frozen scientific reference remains **eyeprocess 0.11.1**.
+- Release artifacts are produced only after validation, using PyPI Trusted Publishing, SHA-256 evidence, build-provenance attestation, and a matching GitHub Release.
 
 
 ## 0.2.1 — 2026-09-27

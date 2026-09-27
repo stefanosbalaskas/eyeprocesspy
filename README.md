@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/">Documentation</a> ·
   <a href="https://pypi.org/project/eyeprocesspy/">PyPI</a> ·
-  <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.2.1">Release v0.2.1</a> ·
+  <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.2.2">Release v0.2.2</a> ·
   <a href="https://doi.org/10.5281/zenodo.22285167">Zenodo DOI</a> ·
   <a href="https://stefanosbalaskas.github.io/eyeprocesspy/articles/">88 workflows</a>
 </p>
@@ -29,7 +29,7 @@
 
 `eyeprocesspy` is the Python companion and deep-parity port of the R package **eyeprocess**, with frozen **eyeprocess 0.11.1** as the scientific reference. It provides one governed analytical surface for vendor import, canonical data contracts, preprocessing, gaze and AOI analysis, pupillometry, process measurement, psychometrics/IRT, multimodal workflows, validation, provenance, plotting, and reproducible reporting.
 
-> **Published release — 0.2.1.** Version 0.2.1 packages the fully certified provenance-aware static Bayesian-network tranche together with the 0.2.0 scientific foundation. The controlling qualification passed **1,872 tests**, **35,013 / 35,013 statements**, and **12,098 / 12,098 branches** with exact 100% coverage, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix, Ruff, mypy, build/install, frozen-R oracle, and strict documentation gates. The release workflow publishes the wheel and source distribution to PyPI using Trusted Publishing, attaches SHA-256 evidence and build-provenance attestation, and creates the matching GitHub Release.
+> **Published release — 0.2.2.** Version 0.2.2 adds the fully qualified measurement-validity and dynamic-gaze tranche plus the completed Bayesian-network robustness layer: spatial calibration error/correction, pupil-size artefact modelling, dynamic AOIs, smooth-pursuit and microsaccade analysis, event-detector benchmarking, naturalistic coordinates, scanpath metric sensitivity, gaze stress testing, CPT/structural/discretization/noise/sample-size robustness, and predictive calibration. The controlling qualification passed **1,892 tests**, **36,556 / 36,556 statements**, and **12,630 / 12,630 branches** with exact 100% coverage, plus a green Ubuntu/macOS/Windows × Python 3.11–3.14 matrix, Ruff, mypy, wheel/sdist build/install, frozen-R oracle, and strict documentation gates.
 
 ## Install
 
@@ -50,13 +50,13 @@ The BN layer consumes already processed feature tables and provides theory-const
 Pin the current release when exact reproducibility matters:
 
 ```bash
-pip install eyeprocesspy==0.2.1
+pip install eyeprocesspy==0.2.2
 ```
 
 For source installation from the immutable release tag:
 
 ```bash
-pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@v0.2.1"
+pip install "git+https://github.com/stefanosbalaskas/eyeprocesspy.git@v0.2.2"
 ```
 
 Windows users can also use the hardened installer described in the [manual-install guide](https://stefanosbalaskas.github.io/eyeprocesspy/manual-install/). It has been exercised on a real Windows/Python 3.11.9 installation with the recommended extras and a clean `pip check`.
@@ -68,13 +68,13 @@ Windows users can also use the hardened installer described in the [manual-insta
 | Frozen R public APIs resolved | **1,182 / 1,182** |
 | Frozen R reference | **0.11.1** |
 | Workflow articles linked | **88 / 88** |
-| Release-gate tests | **1,872 passed** |
-| Statement coverage | **35,013 / 35,013 (100%)** |
-| Branch coverage | **12,098 / 12,098 (100%)** |
+| Release-gate tests | **1,892 passed** |
+| Statement coverage | **36,556 / 36,556 (100%)** |
+| Branch coverage | **12,630 / 12,630 (100%)** |
 | Numerical `not_started` debt | **0** |
 | Plot `not_started` debt | **0** |
 | CI matrix | **Ubuntu / macOS / Windows × Python 3.11–3.14** |
-| PyPI | **eyeprocesspy 0.2.1** |
+| PyPI | **eyeprocesspy 0.2.2** |
 | Zenodo | **10.5281/zenodo.22285167** |
 
 See [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md), [`TEST_SUMMARY.md`](TEST_SUMMARY.md), and the [parity & validation guide](https://stefanosbalaskas.github.io/eyeprocesspy/parity-and-validation/) for the underlying evidence.
@@ -145,7 +145,7 @@ issues = ep.validate_eye_dataset(eye)
 
 ## Citation
 
-For `eyeprocesspy 0.2.1`, use the metadata in [`CITATION.cff`](CITATION.cff) and report the exact package version plus the frozen R reference exposed as `eyeprocesspy.__r_reference_version__`. The GitHub/PyPI release is available immediately; if Zenodo mints a new archive DOI for v0.2.1, that immutable DOI should be preferred in formal citations.
+For `eyeprocesspy 0.2.2`, use the metadata in [`CITATION.cff`](CITATION.cff) and report the exact package version plus the frozen R reference exposed as `eyeprocesspy.__r_reference_version__`. The GitHub/PyPI release is available immediately; if Zenodo mints a new archive DOI for v0.2.2, that immutable DOI should be preferred in formal citations.
 
 The initial 0.1.0 archive remains available at DOI **10.5281/zenodo.22285167** for studies that specifically used that release.
 
