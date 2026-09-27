@@ -297,7 +297,7 @@ def plot_dynamic_aoi_alignment(assignment: Any, ax: Any = None) -> Any:
     axis.set_ylabel("Fraction of samples")
     axis.set_title("Dynamic AOI alignment audit")
     axis.tick_params(axis="x", rotation=30)
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
