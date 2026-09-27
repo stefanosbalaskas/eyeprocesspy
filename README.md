@@ -143,11 +143,9 @@ issues = ep.validate_eye_dataset(eye)
 
 ## Citation
 
-If you use `eyeprocesspy 0.1.0`, cite the archived software release:
+For `eyeprocesspy 0.2.1`, use the metadata in [`CITATION.cff`](CITATION.cff) and report the exact package version plus the frozen R reference exposed as `eyeprocesspy.__r_reference_version__`. The GitHub/PyPI release is available immediately; if Zenodo mints a new archive DOI for v0.2.1, that immutable DOI should be preferred in formal citations.
 
-> Balaskas, S. (2026). *eyeprocesspy: Vendor-neutral Python infrastructure for eye-tracking and multimodal process data* (Version 0.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22285167
-
-For reproducibility, also report `eyeprocesspy.__version__` and the frozen R reference exposed as `eyeprocesspy.__r_reference_version__`.
+The initial 0.1.0 archive remains available at DOI **10.5281/zenodo.22285167** for studies that specifically used that release.
 
 ## Relationship to R eyeprocess
 
