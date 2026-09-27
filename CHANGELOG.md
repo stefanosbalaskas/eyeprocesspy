@@ -1,3 +1,14 @@
+### Bayesian-network analysis tranche
+
+- Added optional Python-native `eyeprocesspy.bayesian_networks` downstream analysis layer with explicit node, data, constraint, result, stability, validation, and comparison contracts.
+- Added pgmpy-backed static hill-climb/PC/GES structure learning, fixed-DAG fitting, discrete Bayesian or MLE parameter estimation, Gaussian MLE fitting, discrete exact queries, and Gaussian conditional queries.
+- Added temporal tiers, required/forbidden edges, max-parent constraints, warnings for unconstrained experimental structure learning, and explicit non-causal interpretation boundaries.
+- Added participant-level bootstrap edge/direction stability and participant-grouped cross-validation that relearns structure inside every training fold.
+- Added detector/AOI network sensitivity, plot families, reproducibility-oriented Markdown reports, and synthetic structure-recovery helpers.
+- Added guides, worked examples, API reference, visual gallery assets, and optional `bayesnet` installation extra.
+- Preserved missing values and QC/provenance semantics; the BN layer does not silently detect events, change AOIs, interpolate signals, discretize variables, impute data, or drop trials.
+- Dynamic Bayesian networks remain a separate future tranche.
+
 # Changelog
 
 All notable changes to `eyeprocesspy` are documented here.

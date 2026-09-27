@@ -37,6 +37,16 @@
 pip install eyeprocesspy
 ```
 
+For the optional Bayesian-network analysis layer:
+
+```bash
+pip install "eyeprocesspy[bayesnet]"
+```
+
+The BN layer consumes already processed feature tables and provides theory-constrained static structure learning, parameter fitting, posterior evidence propagation, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, plots, and reporting. It does not silently discretize continuous physiology or reinterpret learned directed edges as causal effects.
+
+[Open the Bayesian-network guide →](https://stefanosbalaskas.github.io/eyeprocesspy/guides/bayesian-networks/)
+
 Pin the initial scientific release when exact reproducibility matters:
 
 ```bash
@@ -79,7 +89,7 @@ See [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md), [`TEST_SUMMARY.md`](TEST_S
 | **Pupil & multimodal** | Baselines, pupil features, missingness, functional pupil, synchronized streams, staged multimodal models |
 | **Psychometrics & IRT** | Information, fit, DIF/DTF, process-informed and dynamic IRT, reliability, linking, norms, diagnostics |
 | **Measurement intelligence** | Calibration uncertainty, reliability, process guardrails, fairness, item-bank optimization |
-| **Validation** | Recovery, SBC-style evidence, stress tests, negative controls, grouped/leakage-aware validation, evidence atlases |
+| **Bayesian networks** | Static BN data contracts, temporal/edge constraints, pgmpy-backed learning/fitting/inference, participant bootstrap/CV, detector/AOI sensitivity |\n| **Validation** | Recovery, SBC-style evidence, stress tests, negative controls, grouped/leakage-aware validation, evidence atlases |
 | **Reproducibility** | Benchmarks, manifests, provenance, frozen-R oracle, release audits, software-paper evidence |
 | **Plots & reporting** | Publication-oriented gaze, AOI, pupil, quality, IRT, process and validation graphics |
 

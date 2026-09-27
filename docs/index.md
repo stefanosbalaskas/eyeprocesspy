@@ -265,3 +265,11 @@ assert audit["valid"]
 </section>
 
 </div>
+
+## Bayesian-network analysis
+
+`eyeprocesspy` now includes an optional downstream static Bayesian-network layer for validated multimodal features. It supports explicit scientific node metadata, temporal/edge constraints, pgmpy-backed learning and fitting, posterior queries, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, diagnostic plots, and reproducibility-oriented reports.
+
+The boundary is deliberate: preprocessing, event detection, AOI assignment, pupil/physiology processing, and feature construction remain upstream. A learned directed edge is not, by itself, evidence of a causal effect.
+
+[Start with the Bayesian-network guide →](guides/bayesian-networks/index.md)
