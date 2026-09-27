@@ -1,6 +1,7 @@
 name: Feature qualification
 
 on:
+  push:
   pull_request:
 
 jobs:
