@@ -6,7 +6,7 @@ authors:
   - family-names: Balaskas
     given-names: Stefanos
     orcid: https://orcid.org/0000-0003-2444-9796
-version: 0.2.1
+version: 0.2.2
 date-released: 2026-09-27
 repository-code: https://github.com/stefanosbalaskas/eyeprocesspy
 url: https://stefanosbalaskas.github.io/eyeprocesspy/
@@ -23,9 +23,10 @@ abstract: >-
   eyeprocesspy is vendor-neutral Python infrastructure for harmonizing,
   validating, processing, analysing, and documenting eye-tracking,
   pupillometry, biometric, psychometric, and multimodal process data. Version
-  0.2.1 extends the complete frozen R eyeprocess 0.11.1 parity foundation with
-  a provenance-aware static Bayesian-network analysis layer for validated
-  multimodal features, theory-constrained structure learning, posterior
-  inference, participant-level stability and validation, detector/AOI
-  sensitivity, expanded methodological documentation, and strict release
-  qualification while preserving explicit scientific interpretation boundaries.
+  0.2.2 extends the complete frozen R eyeprocess 0.11.1 parity foundation with
+  measurement-validity and dynamic-gaze capabilities, including target-referenced
+  spatial-error and pupil-size artefact correction, dynamic AOIs, pursuit and
+  microsaccade analysis, event-detector benchmarking, naturalistic coordinates,
+  scanpath metric sensitivity, eye-tracking stress testing, and a completed
+  Bayesian-network robustness layer, while preserving explicit scientific
+  interpretation boundaries and exact release qualification.
