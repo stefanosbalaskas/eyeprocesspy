@@ -1,19 +1,30 @@
-### Bayesian-network analysis tranche
-
-- Added optional Python-native `eyeprocesspy.bayesian_networks` downstream analysis layer with explicit node, data, constraint, result, stability, validation, and comparison contracts.
-- Added pgmpy-backed static hill-climb/PC/GES structure learning, fixed-DAG fitting, discrete Bayesian or MLE parameter estimation, Gaussian MLE fitting, discrete exact queries, and Gaussian conditional queries.
-- Added temporal tiers, required/forbidden edges, max-parent constraints, warnings for unconstrained experimental structure learning, and explicit non-causal interpretation boundaries.
-- Added participant-level bootstrap edge/direction stability and participant-grouped cross-validation that relearns structure inside every training fold.
-- Added detector/AOI network sensitivity, plot families, reproducibility-oriented Markdown reports, and synthetic structure-recovery helpers.
-- Added guides, worked examples, API reference, visual gallery assets, and optional `bayesnet` installation extra.
-- Preserved missing values and QC/provenance semantics; the BN layer does not silently detect events, change AOIs, interpolate signals, discretize variables, impute data, or drop trials.
-- Dynamic Bayesian networks remain a separate future tranche.
-
 # Changelog
 
 All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
+
+## 0.2.1 — 2026-09-27
+
+### Bayesian-network analysis
+
+- Added optional Python-native `eyeprocesspy.bayesian_networks` downstream analysis layer with explicit node, data, constraint, result, stability, validation, and comparison contracts.
+- Added pgmpy-backed static hill-climb/PC/GES structure learning, fixed-DAG fitting, discrete Bayesian or MLE parameter estimation, Gaussian MLE fitting, discrete exact queries, and Gaussian conditional queries.
+- Added temporal tiers, required/forbidden edges, max-parent constraints, warnings for unconstrained experimental structure learning, and explicit non-causal interpretation boundaries.
+- Added participant-level bootstrap edge/direction stability and participant-grouped cross-validation that relearns structure inside every training fold.
+- Added detector/AOI network sensitivity, plot families, reproducibility-oriented Markdown reports, deterministic multimodal simulation, and synthetic structure-recovery helpers.
+- Added full Bayesian-network guides, worked examples, API reference, website navigation, and visual gallery assets.
+- Added the optional `bayesnet` extra backed by `pgmpy>=1.0`.
+- Preserved missing values and QC/provenance semantics: the BN layer does not silently detect events, change AOIs, interpolate signals, discretize variables, impute data, or drop trials.
+- Dynamic Bayesian networks remain a separate future tranche.
+
+### Release qualification
+
+- Packages the static Bayesian-network tranche merged through PR #31 on top of the fully qualified 0.2.0 foundation.
+- The controlling BN qualification passed **1,872 tests**, **35,013 / 35,013 statements**, and **12,098 / 12,098 branches** with exact 100% statement and branch coverage.
+- Ruff, mypy, wheel/sdist install smoke, frozen-R oracle, strict MkDocs/assets, and the Ubuntu/macOS/Windows × Python 3.11–3.14 matrix were green.
+- Release artifacts continue to be produced by GitHub Actions with PyPI Trusted Publishing, SHA-256 evidence, and build-provenance attestation.
+
 
 ## 0.2.0 — 2026-09-21
 
