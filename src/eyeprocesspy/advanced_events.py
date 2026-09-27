@@ -27,7 +27,7 @@ def _require(data: pd.DataFrame, columns: list[str]) -> None:
 
 
 def _num(series: pd.Series) -> np.ndarray:
-    return pd.to_numeric(series, errors="coerce").to_numpy(float)
+    return np.asarray(pd.to_numeric(series, errors="coerce").to_numpy(float), dtype=float)
 
 
 def _time_velocity(data: pd.DataFrame, time: str, x: str, y: str, time_unit: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
@@ -248,7 +248,7 @@ def _robust_sigma(values: np.ndarray) -> float:
         return np.nan
     estimate = np.sqrt(max(float(np.median(values**2) - np.median(values) ** 2), 0.0))
     if estimate > 0:
-        return estimate
+        return float(estimate)
     return float(np.std(values, ddof=1))
 
 
@@ -382,7 +382,7 @@ def plot_pursuit_velocity(result: Any, ax: Any = None) -> Any:
     axis.scatter(np.flatnonzero(pursuit), data.loc[pursuit, "velocity"])
     axis.set_title("Smooth-pursuit classification")
     axis.set_ylabel("Velocity")
-    axis.eyeprocess_plot_data = data.copy()
+    setattr(axis, "eyeprocess_plot_data", data.copy())
     return axis
 
 
@@ -398,7 +398,7 @@ def plot_microsaccade_main_sequence(result: Any, ax: Any = None) -> Any:
     axis.set_xlabel("Amplitude (deg)")
     axis.set_ylabel("Peak velocity (deg/s)")
     axis.set_title("Microsaccade main sequence")
-    axis.eyeprocess_plot_data = table.copy()
+    setattr(axis, "eyeprocess_plot_data", table.copy())
     return axis
 
 
