@@ -43,7 +43,7 @@ For the optional Bayesian-network analysis layer:
 pip install "eyeprocesspy[bayesnet]"
 ```
 
-The BN layer consumes already processed feature tables and provides theory-constrained static structure learning, parameter fitting, posterior evidence propagation, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, plots, and reporting. It does not silently discretize continuous physiology or reinterpret learned directed edges as causal effects.
+The BN layer consumes already processed feature tables and provides theory-constrained static structure learning, parameter fitting, posterior evidence propagation, participant-level bootstrap stability, grouped validation, detector/AOI sensitivity, CPT/structural/discretization/noise/sample-size robustness, predictive calibration, plots, and reporting. It does not silently discretize continuous physiology or reinterpret learned directed edges as causal effects.
 
 [Open the Bayesian-network guide →](https://stefanosbalaskas.github.io/eyeprocesspy/guides/bayesian-networks/)
 
@@ -88,8 +88,10 @@ See [`RELEASE_VALIDATION.md`](RELEASE_VALIDATION.md), [`TEST_SUMMARY.md`](TEST_S
 | **Censored latency** | survival-ready event/censor tables, Kaplan–Meier, repeated-trial Cox, Weibull/log-normal AFT, PH diagnostics, sensitivity |
 | **Pupil & multimodal** | Baselines, pupil features, missingness, functional pupil, synchronized streams, staged multimodal models |
 | **Psychometrics & IRT** | Information, fit, DIF/DTF, process-informed and dynamic IRT, reliability, linking, norms, diagnostics |
-| **Measurement intelligence** | Calibration uncertainty, reliability, process guardrails, fairness, item-bank optimization |
-| **Bayesian networks** | Static BN data contracts, temporal/edge constraints, pgmpy-backed learning/fitting/inference, participant bootstrap/CV, detector/AOI sensitivity |\n| **Validation** | Recovery, SBC-style evidence, stress tests, negative controls, grouped/leakage-aware validation, evidence atlases |
+| **Measurement intelligence** | Calibration uncertainty, spatial error fields, pupil-size artefact checks, reliability, process guardrails, fairness, item-bank optimization |
+| **Dynamic & naturalistic gaze** | Dynamic AOIs, pursuit/microsaccade analysis, detector benchmarks, head/world coordinates, scanpath metric sensitivity |
+| **Bayesian networks** | Static BN data contracts, temporal/edge constraints, pgmpy-backed learning/fitting/inference, participant bootstrap/CV, detector/AOI and robustness sensitivity, predictive calibration |
+| **Validation** | Recovery, SBC-style evidence, stress tests, negative controls, grouped/leakage-aware validation, evidence atlases |
 | **Reproducibility** | Benchmarks, manifests, provenance, frozen-R oracle, release audits, software-paper evidence |
 | **Plots & reporting** | Publication-oriented gaze, AOI, pupil, quality, IRT, process and validation graphics |
 
@@ -130,7 +132,7 @@ issues = ep.validate_eye_dataset(eye)
 ## Choose your path
 
 - **New to the package:** [Getting started](https://stefanosbalaskas.github.io/eyeprocesspy/getting-started/) → [Worked examples](https://stefanosbalaskas.github.io/eyeprocesspy/examples/) → [Cookbook](https://stefanosbalaskas.github.io/eyeprocesspy/cookbook/)
-- **Standardized Data Quality:** [Overview](https://stefanosbalaskas.github.io/eyeprocesspy/guides/data-quality/) · [9-point example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-validation/) · [Plot gallery](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-plot-gallery/) · [Sensitivity](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-sensitivity/) · [Focused API](https://stefanosbalaskas.github.io/eyeprocesspy/reference/data-quality/)\n- **Eye-tracking / AOI work:** [End-to-end eye-tracking](https://stefanosbalaskas.github.io/eyeprocesspy/guides/end-to-end-eye-tracking/) · [Gazepoint import & QC](https://stefanosbalaskas.github.io/eyeprocesspy/guides/gazepoint-import-qc/)
+- **Standardized Data Quality:** [Overview](https://stefanosbalaskas.github.io/eyeprocesspy/guides/data-quality/) · [9-point example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-validation/) · [Plot gallery](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-plot-gallery/) · [Sensitivity](https://stefanosbalaskas.github.io/eyeprocesspy/examples/data-quality-sensitivity/) · [Focused API](https://stefanosbalaskas.github.io/eyeprocesspy/reference/data-quality/)\n- **Eye-tracking / AOI work:** [End-to-end eye-tracking](https://stefanosbalaskas.github.io/eyeprocesspy/guides/end-to-end-eye-tracking/) · [Measurement validity & dynamic gaze](https://stefanosbalaskas.github.io/eyeprocesspy/guides/measurement-validity-dynamic-gaze/) · [Gazepoint import & QC](https://stefanosbalaskas.github.io/eyeprocesspy/guides/gazepoint-import-qc/)
 - **Gaze latency / TTFF:** [Censored gaze-latency method](https://stefanosbalaskas.github.io/eyeprocesspy/methods/gaze-survival/) · [Disclosure example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/gaze-survival-analysis/) · [Evidence-verification example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/gaze-verification-survival/) · [Troubleshooting](https://stefanosbalaskas.github.io/eyeprocesspy/methods/gaze-survival/troubleshooting/) · [Reproducibility checklist](https://stefanosbalaskas.github.io/eyeprocesspy/methods/gaze-survival/reproducibility-checklist/)
 - **Pupillometry / multimodal:** [Pupillometry guide](https://stefanosbalaskas.github.io/eyeprocesspy/guides/pupillometry/) · [Quality & uncertainty](https://stefanosbalaskas.github.io/eyeprocesspy/guides/process-quality-uncertainty/)
 - **Psychometrics / IRT:** [Psychometrics & IRT](https://stefanosbalaskas.github.io/eyeprocesspy/guides/psychometrics-irt/) · [IRT example](https://stefanosbalaskas.github.io/eyeprocesspy/examples/irt-diagnostics/)
