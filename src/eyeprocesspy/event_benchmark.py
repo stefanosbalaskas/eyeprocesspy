@@ -32,6 +32,10 @@ def _prepare(value: Any, name: str, start: str, end: str, event_type: str, group
     data[end] = pd.to_numeric(data[end], errors="coerce")
     if not np.isfinite(data[[start, end]].to_numpy(float)).all() or (data[end] < data[start]).any():
         raise EyeProcessValidationError(f"{name} has invalid event intervals.")
+    if data[event_type].isna().any():
+        raise EyeProcessValidationError(f"{name} contains missing event labels.")
+    if group is not None and data[group].isna().any():
+        raise EyeProcessValidationError(f"{name} contains missing group identifiers.")
     return data.reset_index(drop=True)
 
 
@@ -155,7 +159,13 @@ def event_confusion_matrix(
         out = []
         for t in grid:
             active = events.loc[(events[start] <= t) & (events[end] >= t), event_type]
-            out.append(str(active.iloc[0]) if len(active) else none_label)
+            states = list(dict.fromkeys(active.astype(str)))
+            if not states:
+                out.append(none_label)
+            elif len(states) == 1:
+                out.append(states[0])
+            else:
+                out.append("overlap")
         return out
     return pd.crosstab(pd.Series(labels(tr), name="truth"), pd.Series(labels(de), name="detected"), dropna=False)
 
