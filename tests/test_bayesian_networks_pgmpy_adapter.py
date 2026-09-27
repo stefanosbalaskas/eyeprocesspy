@@ -39,6 +39,8 @@ class DiscreteModel:
         self.edges = list(edges)
         self._nodes = set(x for e in edges for x in e)
         self.fit_args = None
+        self.cpds = []
+        self.bayes_args = None
 
     def add_nodes_from(self, nodes):
         self._nodes.update(nodes)
@@ -46,6 +48,9 @@ class DiscreteModel:
     def fit(self, data, estimator=None, **kwargs):
         self.fit_args = (data.copy(), estimator, kwargs)
         return self
+
+    def add_cpds(self, *cpds):
+        self.cpds.extend(cpds)
 
     def check_model(self):
         return True
@@ -76,6 +81,18 @@ class GaussianModel(nx.DiGraph):
 
     def log_likelihood(self, data):
         return -float(len(data))
+
+
+
+
+class BayesianEstimator:
+    def __init__(self, model, data):
+        self.model = model
+        self.data = data
+
+    def get_parameters(self, **kwargs):
+        self.model.bayes_args = kwargs
+        return ["cpd"]
 
 
 class Factor:
@@ -109,7 +126,7 @@ def fake_import(name):
     if name == "pgmpy.estimators":
         return SimpleNamespace(
             MaximumLikelihoodEstimator=object,
-            BayesianEstimator=object,
+            BayesianEstimator=BayesianEstimator,
         )
     if name == "pgmpy.inference":
         return SimpleNamespace(VariableElimination=VE)
@@ -218,7 +235,9 @@ def test_fit_parameters(monkeypatch):
         prior="BDeu",
         equivalent_sample_size=5,
     )
-    assert bayes.fit_args[2]["equivalent_sample_size"] == 5
+    assert bayes.bayes_args["equivalent_sample_size"] == 5
+    assert bayes.bayes_args["prior_type"] == "BDeu"
+    assert bayes.cpds == ["cpd"]
     with pytest.raises(ValueError):
         backend.fit_parameters(
             edges=(),
