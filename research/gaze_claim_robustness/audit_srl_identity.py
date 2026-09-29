@@ -180,10 +180,8 @@ def audit_identity(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
                 number = int(source_id)
                 numeric_meta = [x for x in metadata_only if x.isdigit()]
                 candidates = sorted(
-                    (
-                        (abs(number - int(candidate)), candidate)
-                        for candidate in numeric_meta
-                    )
+                    (abs(number - int(candidate)), candidate)
+                    for candidate in numeric_meta
                 )[:5]
             unmatched_rows.append(
                 {
