@@ -29,6 +29,10 @@ srl_coordinates = _load_module(
     "srl_coordinates_research",
     RESEARCH / "srl_coordinate_branches.py",
 )
+srl_outcome = _load_module(
+    "srl_outcome_research",
+    RESEARCH / "srl_transition_outcome.py",
+)
 
 
 def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
@@ -286,3 +290,115 @@ def test_episode_aoi_assignment_respects_stimulus_identity():
 
     assert result["E1"] == "task1_quarter"
     assert result["E2"] == "task2_quarter"
+
+
+def test_srl_transition_outcome_preserves_unassigned_breaks_and_missing_trials():
+    recordings = pd.DataFrame(
+        [{"recording_id": "R1", "participant_id": "P1"}]
+    )
+    intervals = pd.DataFrame(
+        [
+            {
+                "interval_id": "I1",
+                "recording_id": "R1",
+                "interval_type": "trial",
+                "start_time": 0.0,
+                "end_time": 1.0,
+                "trial_id": "T1",
+                "participant_id": "P1",
+                "stimulus_id": "Task_1",
+                "condition_id": "Prompt|Text",
+                "valid_interval": True,
+                "experiment_condition": "Prompt",
+                "stimulus_type": "Text",
+            },
+            {
+                "interval_id": "I2",
+                "recording_id": "R1",
+                "interval_type": "trial",
+                "start_time": 2.0,
+                "end_time": 3.0,
+                "trial_id": "T2",
+                "participant_id": "P1",
+                "stimulus_id": "Task_2",
+                "condition_id": "Prompt|Multimedia",
+                "valid_interval": True,
+                "experiment_condition": "Prompt",
+                "stimulus_type": "Multimedia",
+            },
+            {
+                "interval_id": "I3",
+                "recording_id": "R1",
+                "interval_type": "trial",
+                "start_time": 4.0,
+                "end_time": 5.0,
+                "trial_id": "T3",
+                "participant_id": "P1",
+                "stimulus_id": "Task_3",
+                "condition_id": "Prompt|Text",
+                "valid_interval": True,
+                "experiment_condition": "Prompt",
+                "stimulus_type": "Text",
+            },
+        ]
+    )
+    aois = ["A", "A", "B", pd.NA, "C", "C", "D"]
+    episodes = []
+    for i, aoi in enumerate(aois):
+        episodes.append(
+            {
+                "episode_id": f"E{i}",
+                "recording_id": "R1",
+                "episode_type": "fixation",
+                "start_time": 0.1 * i,
+                "end_time": 0.1 * i + 0.05,
+                "duration_ms": 50.0,
+                "centroid_x": 10.0,
+                "centroid_y": 10.0,
+                "coordinate_space_id": "px",
+                "derived_by": "eyeprocess",
+                "trial_id": "T1",
+                "stimulus_id": "Task_1",
+                "aoi_id": aoi,
+            }
+        )
+    episodes.append(
+        {
+            "episode_id": "E_T3",
+            "recording_id": "R1",
+            "episode_type": "fixation",
+            "start_time": 4.1,
+            "end_time": 4.2,
+            "duration_ms": 100.0,
+            "centroid_x": 10.0,
+            "centroid_y": 10.0,
+            "coordinate_space_id": "px",
+            "derived_by": "eyeprocess",
+            "trial_id": "T3",
+            "stimulus_id": "Task_3",
+            "aoi_id": pd.NA,
+        }
+    )
+    dataset = ep.new_eye_dataset(
+        recordings=recordings,
+        intervals=intervals,
+        episodes=pd.DataFrame(episodes),
+    )
+
+    outcome = srl_outcome.derive_transition_counts(dataset).set_index("trial_id")
+    assert outcome.loc["T1", "status"] == "ok"
+    assert outcome.loc["T1", "transition_count"] == pytest.approx(2.0)
+    assert outcome.loc["T1", "n_fixations_total"] == 7
+    assert outcome.loc["T1", "n_fixations_assigned"] == 6
+    assert outcome.loc["T1", "n_evaluable_adjacent_pairs"] == 4
+
+    assert outcome.loc["T2", "status"] == "no_fixations"
+    assert pd.isna(outcome.loc["T2", "transition_count"])
+
+    assert outcome.loc["T3", "status"] == "no_aoi_assigned_fixations"
+    assert pd.isna(outcome.loc["T3", "transition_count"])
+
+    adjacency = srl_outcome.transition_sequence_audit(dataset)
+    t1 = adjacency.loc[adjacency["trial_id"].eq("T1")]
+    assert int(t1["between_aoi_transition"].sum()) == 2
+    assert int(t1["evaluable"].sum()) == 4
