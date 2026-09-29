@@ -232,16 +232,30 @@ The University of Seville infrared/webcam benchmark and non-public RecGaze remai
 
 Use the **Scientific Data SRL dataset** as the primary complete detector-to-claim pilot.
 
-The primary HCI contrast is prespecified as **Text versus Multimedia** and the primary outcome family as **between-AOI transition count per learning slide**. Prompt versus Non-prompt and the Prompt × Material-type interaction are secondary. No expected direction is prespecified and no multiverse branch effects have been inspected.
+The primary randomized HCI/learning contrast is now **Prompt versus Non-prompt**. The primary process estimand is the Prompt/Non-prompt **between-AOI transition-rate ratio**, implemented as transition count with `log(stimulus_time)` exposure offset.
 
-The research scaffold now includes:
+This replaces the earlier Text-versus-Multimedia primary framing for identification reasons. The published design randomized participant prompt assignment and presentation order, but it describes eight fixed learning-material pages, four Text and four Multimedia, and releases one `Task_1`–`Task_8` stimulus set. Until `audit_srl_identifiability.py` proves that modality actually varies within Task/topic identity across participants, Text-versus-Multimedia is treated only as a descriptive task-set contrast rather than a clean causal format effect.
+
+Prompt is preferable for the headline robustness claim because it remains identifiable while Task identity is controlled. Task fixed effects will block stable content/page differences. The source paper also reports differences in study time between prompt groups, so the primary model uses viewing time as an exposure rather than conflating longer observation with more transitions.
+
+The research scaffold includes:
 
 - `srl_pilot_protocol.md`: pre-analysis scientific protocol;
-- `srl_decision_registry.csv`: frozen, pending, reference, and provenance-gate decisions;
+- `srl_decision_registry.csv`: frozen, pending, reference, separate-estimand, and provenance-gate decisions;
+- `srl_detector_evidence.csv` and `srl_detector_plan.csv`: source-backed detector evidence and comparator plan;
+- `srl_aoi_evidence.csv`: source constraints on four quartile AOIs and unresolved pixel seams;
+- `srl_quality_plan.csv`: released-sample, historical-80%, trial-level sensitivity, and recovery-calibrated quality branches;
+- `srl_model_plan.csv`: primary repeated-measures transition-rate model structure;
 - `audit_srl_dataset.py`: archive/design/sample-structure audit with no focal effect estimation;
+- `audit_srl_identifiability.py`: Task × modality × prompt identifiability audit;
 - `srl_adapter.py`: explicit participant × Task × eye mapping into `EyeDataset`;
+- `srl_coordinate_branches.py`: reversible 60/65/70 cm visual-angle sensitivity branches;
 - `build_srl_design_manifest.py`: deterministic participant × Task × eye branch ledger;
-- `tests/test_research_srl_gaze_claim_robustness.py`: synthetic contract tests for the mapping and manifest.
+- `srl_transition_outcome.py`: audited adjacent-fixation between-AOI transition counts;
+- `prepare_srl_model_table.py`: exposure-aware model table plus explicit non-evaluable-row ledger;
+- `tests/test_research_srl_gaze_claim_robustness.py`: synthetic contracts for mapping, geometry, identifiability, AOI isolation, outcome semantics, and model-table retention.
+
+No expected effect direction is prespecified and no multiverse branch effect has been inspected.
 
 Emoji Keyboard Gaze Search remains a useful conditional dataset, but its raw/archive and geometry gaps mean it is no longer the headline complete-pipeline pilot. MCFW-Gaze remains the raw detector/quality qualification dataset and UEyes remains a downstream AOI/outcome/model validation dataset.
 
