@@ -1,5 +1,5 @@
 decision_family,decision,status,frozen_value,source_or_rationale,unfreeze_condition
-"scientific_claim","focal HCI contrast","frozen","Text versus Multimedia","2x2 mixed design in source descriptor; selected before multiverse effects","none"
+"scientific_claim","focal HCI contrast","frozen","Prompt versus Non-prompt","Prompt condition is the randomized between-participant manipulation and remains identifiable while controlling task identity; selected before multiverse effects","none"
 "scientific_claim","primary outcome family","frozen","between-AOI transition count per learning slide","depends on detector and AOI assignment, so it exercises the intended cross-stage measurement chain","none"
 "scientific_claim","expected effect direction","frozen","none specified","robustness study must remain informative whether the focal effect is positive, negative, null, stable, or sensitive","none"
 "eye_representation","left-eye branch","frozen","include","raw release contains separate left point-of-regard coordinates","none"
@@ -27,7 +27,9 @@ decision_family,decision,status,frozen_value,source_or_rationale,unfreeze_condit
 "quality","recovery-calibrated quality gate","pending_simulation","threshold not yet known","modern data-quality guidance supports tying exclusions to measurement requirements; calibrate using transition-recovery simulation independent of focal condition effects","freeze recovery-error criterion and simulation design before focal branch effects"
 "model","outcome distribution","pending","negative-binomial mixed model is current candidate","transition count is non-negative and overdispersion is plausible","freeze after structural count audit only; never choose based on desired focal result"
 "model","participant dependence","frozen_requirement","must account for repeated participant observations","within-subject Text/Multimedia factor","exact random-effects parameterization pending structural audit"
-"model","focal coefficient","frozen","Multimedia minus Text","primary contrast declared before multiverse effects","none"
+"model","focal coefficient","frozen","Prompt minus Non-prompt","primary randomized contrast declared before multiverse effects","none"
 "reporting","failed branches","frozen","retain in planned denominator","framework contract","none"
 "reporting","significance counting","frozen","do not use p<.05 branch counts as robustness definition","framework contract","none"
 "reporting","primary robustness summaries","frozen","direction, magnitude, uncertainty, N, branch status, failure reasons","framework contract","none"
+
+"scientific_claim","material-type contrast identifiability","provenance_gate","Text versus Multimedia remains secondary/descriptive unless stimuli.csv proves modality varies within task/topic identity","published design randomizes presentation order but describes eight fixed study-material pages, four text and four multimedia; one released Task_1..Task_8 image set strongly suggests modality may be nested in content","run audit_srl_identifiability.py on release before causal material-type wording"
