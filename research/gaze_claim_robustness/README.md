@@ -35,7 +35,7 @@ Reference: https://doi.org/10.3758/s13428-025-02689-0
 
 ## Candidate dataset audit
 
-### 1. Emoji Keyboard Gaze Search — preferred first feasibility pilot
+### 1. Emoji Keyboard Gaze Search — conditional secondary feasibility dataset
 
 Source: https://doi.org/10.5281/zenodo.21059646
 
@@ -51,12 +51,14 @@ Confirmed from the public record:
 - separate scroll-position logs;
 - 684 processed participant/task files.
 
-Why it is attractive:
+Why it remains useful:
 
 - direct interface/layout context;
-- raw sample stream can support detector re-analysis;
+- raw sample stream can support detector re-analysis in the archive branches that are actually present;
 - existing I-VT labels offer a useful reference branch without treating them as ground truth;
-- repeated tasks/layouts may allow a clear HCI contrast after the participant/task design is confirmed.
+- it can provide a later external interface-search validation case after the raw/archive and geometry gaps are resolved.
+
+It is **not** the primary complete-pipeline pilot.
 
 Current gates before a scientific claim is frozen:
 
@@ -133,6 +135,23 @@ The Zenodo raw-archive preview currently shows raw `extracted_data.xlsx` partici
 This mismatch is a hard feasibility warning. Processed Target Search/iOS files may be used only for downstream analyses supported by their released columns; they must not be treated as evidence that raw sample-level iOS Target Search data are available for detector re-analysis. Detector-level cross-layout claims therefore remain blocked until the original raw iOS workbooks are recovered or the archive is corrected by the dataset authors.
 
 The research-only script `audit_emoji_keyboard_dataset.py` inventories both ZIP archives and writes a cell-by-cell manifest of raw workbooks, scroll logs, processed task files, missing tasks, participant mismatches, and shortcut/link artifacts. It returns a non-zero status when the archive is structurally unsuitable for the full detector-to-claim pilot.
+
+### Frozen primary measurement universe
+
+The primary open/reproducible denominator is now fixed structurally at **96 specifications**:
+
+```text
+4 detector specifications
+× 2 eyes
+× 3 viewing-distance assumptions
+× 2 AOI geometries
+× 2 quality rules
+= 96 planned specifications
+```
+
+The four primary detector branches are simple I-VT 30°/s, simple I-VT 40°/s, I-DT 1°, and REMoDNaV 1.1.2. The two AOI branches are exact 800×450 mathematical quarters and a 799×450 published-area-compatible centered-seam geometry. The quality branches are the released retained sample and an explicit trial-level 80% sensitivity.
+
+The released proprietary BeGaze event catalogue is a historical reference **outside** the 96-row denominator, because duplicating already-detected vendor events across viewing-distance assumptions would artificially overweight one pipeline. The package's robust-MAD adaptive detector is likewise an implementation diagnostic outside the primary denominator until externally justified numerical parameters are frozen.
 
 ## Dataset selection rule
 
@@ -252,7 +271,12 @@ The research scaffold includes:
 - `srl_coordinate_branches.py`: reversible 60/65/70 cm visual-angle sensitivity branches;
 - `build_srl_design_manifest.py`: deterministic participant × Task × eye branch ledger;
 - `srl_transition_outcome.py`: audited adjacent-fixation between-AOI transition counts;
-- `prepare_srl_model_table.py`: exposure-aware model table plus explicit non-evaluable-row ledger;
+- `prepare_srl_model_tablele.py`: exposure-aware model table preserving non-evaluable rows;
+- `fit_srl_primary_glmm.R`: frozen glmmTMB NB2 random-intercept estimator for the Prompt transition-rate ratio;
+- `srl_glmm_bridge.py`: converts the R estimator output into the common robustness-result contract;
+- `srl_aoi_geometry.py`: independent exact-quarter and published-area-compatible AOI branches;
+- `build_srl_primary_universe.py`: deterministic 96-specification primary measurement universe;
+- `check_srl_execution_readiness.py`: blocks focal estimation while required archive/timebase/design gates remain unresolved;le plus explicit non-evaluable-row ledger;
 - `tests/test_research_srl_gaze_claim_robustness.py`: synthetic contracts for mapping, geometry, identifiability, AOI isolation, outcome semantics, and model-table retention.
 
 No expected effect direction is prespecified and no multiverse branch effect has been inspected.
