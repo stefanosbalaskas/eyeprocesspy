@@ -67,8 +67,6 @@ def evaluate_readiness(
     cohorts = _read(research_dir / "srl_cohort_plan.csv")
 
     rows: list[dict[str, object]] = []
-    dense_timebase_ok = False
-    dense_timebase_message = "actual archive audit not supplied"
 
     if archive_audit_dir is None:
         rows.append(
