@@ -4,14 +4,12 @@
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 import prepare_srl_model_table
 import srl_glmm_bridge
 
