@@ -157,10 +157,10 @@ def test_srl_design_manifest_is_pre_results_and_deterministic(tmp_path: Path):
     assert len(manifest) == 16
     assert set(manifest["eye"]) == {"left", "right"}
     assert manifest["outcome_frozen"].all()
-    assert not manifest["event_detector_frozen"].any()
-    assert not manifest["aoi_geometry_frozen"].any()
-    assert not manifest["quality_rule_frozen"].any()
-    assert not manifest["model_frozen"].any()
+    assert manifest["event_detector_frozen"].all()
+    assert manifest["aoi_geometry_frozen"].all()
+    assert manifest["quality_rule_frozen"].all()
+    assert manifest["model_frozen"].all()
     assert set(manifest["primary_estimand_family"]) == {
         "between_aoi_transition_rate"
     }
