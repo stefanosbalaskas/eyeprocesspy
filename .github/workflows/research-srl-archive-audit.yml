@@ -121,11 +121,24 @@ jobs:
           print("\n".join(lines))
           PY
 
-      - name: Run full-file SRL archive and 250 Hz audit
+      - name: Run structural SRL archive audit
         shell: bash
         run: |
           set -euo pipefail
-          uv run --frozen python             research/gaze_claim_robustness/audit_srl_dataset.py             /tmp/srl_release             --sample-rows 0             --output-dir evidence/archive_audit             | tee evidence/archive_audit_stdout.txt
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_dataset.py /tmp/srl_release --sample-rows 5000 --output-dir evidence/archive_audit | tee evidence/archive_audit_stdout.txt
+
+      - name: Reconcile participant identity across released sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_identity.py /tmp/srl_release --output-dir evidence/identity | tee evidence/identity_stdout.txt
+
+      - name: Audit Task-level raw sampling regularity
+        shell: bash
+        run: |
+          set -euo pipefail
+          source evidence/srl_paths.env
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_task_timebase.py "$RAW_DIR" --output-dir evidence/task_timebase | tee evidence/task_timebase_stdout.txt
 
       - name: Run estimand identifiability audit
         shell: bash
