@@ -1,6 +1,6 @@
 decision_family,decision,status,frozen_value,source_or_rationale,unfreeze_condition
 "scientific_claim","focal HCI contrast","frozen","Prompt versus Non-prompt","Prompt condition is the randomized between-participant manipulation and remains identifiable while controlling task identity; selected before multiverse effects","none"
-"scientific_claim","primary outcome family","frozen","between-AOI transition count per learning slide","depends on detector and AOI assignment, so it exercises the intended cross-stage measurement chain","none"
+"scientific_claim","primary outcome family","frozen","between-AOI transition rate per learning slide, modeled as transition count with log(stimulus_time) offset","depends on detector/AOI assignment while separating transition behavior from variable viewing exposure; AJET reports prompt-group differences in study time","none"
 "scientific_claim","expected effect direction","frozen","none specified","robustness study must remain informative whether the focal effect is positive, negative, null, stable, or sensitive","none"
 "eye_representation","left-eye branch","frozen","include","raw release contains separate left point-of-regard coordinates","none"
 "eye_representation","right-eye branch","frozen","include","raw release contains separate right point-of-regard coordinates","none"
@@ -33,3 +33,4 @@ decision_family,decision,status,frozen_value,source_or_rationale,unfreeze_condit
 "reporting","primary robustness summaries","frozen","direction, magnitude, uncertainty, N, branch status, failure reasons","framework contract","none"
 
 "scientific_claim","material-type contrast identifiability","provenance_gate","Text versus Multimedia remains secondary/descriptive unless stimuli.csv proves modality varies within task/topic identity","published design randomizes presentation order but describes eight fixed study-material pages, four text and four multimedia; one released Task_1..Task_8 image set strongly suggests modality may be nested in content","run audit_srl_identifiability.py on release before causal material-type wording"
+"scientific_claim","raw transition count estimand","separate_estimand","analyze without exposure offset only as a separate sensitivity analysis","raw counts mix transition behavior with variable viewing time, so they do not belong in the primary transition-rate robustness denominator","none"
