@@ -428,6 +428,15 @@ def test_srl_transition_outcome_preserves_unassigned_breaks_and_missing_trials()
     t1 = adjacency.loc[adjacency["trial_id"].eq("T1")]
     assert int(t1["between_aoi_transition"].sum()) == 2
     assert int(t1["evaluable"].sum()) == 4
+    assert t1["temporal_order_valid"].all()
+    assert t1["inter_fixation_gap_ms"].tolist() == pytest.approx([50.0] * 6)
+    assert outcome.loc["T1", "n_negative_gap_pairs"] == 0
+    assert outcome.loc["T1", "median_inter_fixation_gap_ms"] == pytest.approx(50.0)
+    assert outcome.loc["T1", "max_inter_fixation_gap_ms"] == pytest.approx(50.0)
+    assert (
+        outcome.loc["T1", "outcome_operationalization"]
+        == "adjacent_aoi_assigned_fixation_change"
+    )
 
 
 def test_srl_identifiability_audit_blocks_nested_modality_claim():
@@ -749,3 +758,79 @@ def test_srl_primary_universe_is_deterministic_and_structurally_compatible():
         "adaptive_mad_eyeprocesspy",
     }
     assert refs["role"].str.contains("outside_primary_denominator").all()
+
+
+def test_srl_transition_outcome_rejects_overlapping_fixation_sequence():
+    recordings = pd.DataFrame(
+        [{"recording_id": "R1", "participant_id": "P1"}]
+    )
+    intervals = pd.DataFrame(
+        [
+            {
+                "interval_id": "I1",
+                "recording_id": "R1",
+                "interval_type": "trial",
+                "start_time": 0.0,
+                "end_time": 1.0,
+                "trial_id": "T1",
+                "participant_id": "P1",
+                "stimulus_id": "Task_1",
+                "condition_id": "Prompt|Text",
+                "valid_interval": True,
+                "experiment_condition": "Prompt",
+                "stimulus_type": "Text",
+            }
+        ]
+    )
+    episodes = pd.DataFrame(
+        [
+            {
+                "episode_id": "E1",
+                "recording_id": "R1",
+                "episode_type": "fixation",
+                "start_time": 0.10,
+                "end_time": 0.30,
+                "duration_ms": 200.0,
+                "centroid_x": 10.0,
+                "centroid_y": 10.0,
+                "coordinate_space_id": "px",
+                "derived_by": "eyeprocess",
+                "trial_id": "T1",
+                "stimulus_id": "Task_1",
+                "aoi_id": "A",
+            },
+            {
+                "episode_id": "E2",
+                "recording_id": "R1",
+                "episode_type": "fixation",
+                "start_time": 0.25,
+                "end_time": 0.40,
+                "duration_ms": 150.0,
+                "centroid_x": 20.0,
+                "centroid_y": 20.0,
+                "coordinate_space_id": "px",
+                "derived_by": "eyeprocess",
+                "trial_id": "T1",
+                "stimulus_id": "Task_1",
+                "aoi_id": "B",
+            },
+        ]
+    )
+    dataset = ep.new_eye_dataset(
+        recordings=recordings,
+        intervals=intervals,
+        episodes=episodes,
+    )
+
+    outcome = srl_outcome.derive_transition_counts(dataset).iloc[0]
+    assert outcome["status"] == "overlapping_fixations"
+    assert pd.isna(outcome["transition_count"])
+    assert outcome["n_negative_gap_pairs"] == 1
+    assert outcome["median_inter_fixation_gap_ms"] == pytest.approx(-50.0)
+
+    adjacency = srl_outcome.transition_sequence_audit(dataset)
+    assert len(adjacency) == 1
+    assert adjacency.iloc[0]["inter_fixation_gap_ms"] == pytest.approx(-50.0)
+    assert not bool(adjacency.iloc[0]["temporal_order_valid"])
+    assert not bool(adjacency.iloc[0]["evaluable"])
+    assert not bool(adjacency.iloc[0]["between_aoi_transition"])
