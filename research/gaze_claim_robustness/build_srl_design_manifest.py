@@ -271,7 +271,7 @@ def build_manifest(
                         "nominal_sampling_rate_hz": 250.0,
                         "screen_width_px": 1600,
                         "screen_height_px": 900,
-                        "primary_estimand_family": "between_aoi_transition_count",
+                        "primary_estimand_family": "between_aoi_transition_rate",
                         "focal_factor": "experiment_condition",
                         "focal_contrast": "Prompt_minus_Non-prompt",
                         "outcome_frozen": True,
