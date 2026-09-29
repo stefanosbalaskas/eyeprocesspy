@@ -210,21 +210,15 @@ It satisfies the main structural requirements:
 
 This is therefore the first dataset in the audit that can plausibly support the full:
 
-[
-	ext{sample stream}
-ightarrow
-	ext{event detection}
-ightarrow
-	ext{AOI assignment}
-ightarrow
-	ext{quality handling}
-ightarrow
-	ext{gaze outcome}
-ightarrow
-	ext{fixed model}
-ightarrow
-	ext{HCI conclusion}
-]
+```text
+sample stream
+→ event detection
+→ AOI assignment
+→ quality handling
+→ gaze outcome
+→ fixed model
+→ HCI conclusion
+```
 
 chain using an actual experimental interface/material manipulation rather than a manufactured contrast.
 
@@ -236,9 +230,20 @@ The University of Seville infrared/webcam benchmark and non-public RecGaze remai
 
 ## First-pilot decision
 
-Use Emoji Keyboard Gaze Search as the first feasibility target, but do not freeze the focal claim until the task-target and geometry metadata are recovered.
+Use the **Scientific Data SRL dataset** as the primary complete detector-to-claim pilot.
 
-If those materials cannot support defensible AOIs and content-coordinate reconstruction, move the first full pipeline pilot to a dataset with complete raw measurement and stimulus geometry rather than weakening the research question.
+The primary HCI contrast is prespecified as **Text versus Multimedia** and the primary outcome family as **between-AOI transition count per learning slide**. Prompt versus Non-prompt and the Prompt × Material-type interaction are secondary. No expected direction is prespecified and no multiverse branch effects have been inspected.
+
+The research scaffold now includes:
+
+- `srl_pilot_protocol.md`: pre-analysis scientific protocol;
+- `srl_decision_registry.csv`: frozen, pending, reference, and provenance-gate decisions;
+- `audit_srl_dataset.py`: archive/design/sample-structure audit with no focal effect estimation;
+- `srl_adapter.py`: explicit participant × Task × eye mapping into `EyeDataset`;
+- `build_srl_design_manifest.py`: deterministic participant × Task × eye branch ledger;
+- `tests/test_research_srl_gaze_claim_robustness.py`: synthetic contract tests for the mapping and manifest.
+
+Emoji Keyboard Gaze Search remains a useful conditional dataset, but its raw/archive and geometry gaps mean it is no longer the headline complete-pipeline pilot. MCFW-Gaze remains the raw detector/quality qualification dataset and UEyes remains a downstream AOI/outcome/model validation dataset.
 
 ## Prespecification template
 
