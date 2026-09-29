@@ -51,6 +51,10 @@ srl_readiness = _load_module(
     "srl_readiness_research",
     RESEARCH / "check_srl_execution_readiness.py",
 )
+srl_universe = _load_module(
+    "srl_universe_research",
+    RESEARCH / "build_srl_primary_universe.py",
+)
 srl_model_table = _load_module(
     "srl_model_table_research",
     RESEARCH / "prepare_srl_model_table.py",
@@ -706,3 +710,42 @@ def test_srl_aoi_geometry_branches_are_pre_results_and_area_explicit(
     assert angular_geometry["height"].tolist() == pytest.approx(
         [450.0 / ppd] * 4
     )
+
+
+def test_srl_primary_universe_is_deterministic_and_structurally_compatible():
+    a = srl_universe.build_primary_universe(RESEARCH)
+    b = srl_universe.build_primary_universe(RESEARCH)
+
+    assert len(a) == 96
+    assert a.equals(b)
+    assert a["specification_hash"].nunique() == 96
+    assert set(a["eye"]) == {"left", "right"}
+    assert set(a["viewing_distance_cm"]) == {60.0, 65.0, 70.0}
+    assert set(a["aoi_convention"]) == {
+        "exact_quarters",
+        "reported_area_center_seam",
+    }
+    assert set(a["quality_rule"]) == {
+        "released_sample",
+        "trial_80_sensitivity",
+    }
+    assert set(a["detector_id"]) == {
+        "ivt_30_100_simple",
+        "ivt_40_50_simple",
+        "idt_1_100",
+        "remodnav_defaults",
+    }
+
+    remodnav = a.loc[a["detector_id"].eq("remodnav_defaults")]
+    assert remodnav["requires_dense_regular_timebase"].all()
+    assert not a.loc[
+        ~a["detector_id"].eq("remodnav_defaults"),
+        "requires_dense_regular_timebase",
+    ].any()
+
+    refs = srl_universe.historical_reference_manifest()
+    assert set(refs["reference_id"]) == {
+        "vendor_begaze_released",
+        "adaptive_mad_eyeprocesspy",
+    }
+    assert refs["role"].str.contains("outside_primary_denominator").all()
