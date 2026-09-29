@@ -60,6 +60,24 @@ Prompt assignment, by contrast, was randomized between participants. The primary
 
 The analysis does not prespecify that the prompt effect must be positive, negative, or statistically significant.
 
+## Transition operationalization boundary
+
+The source study defines a transition as a **saccade from one AOI to another**. The primary open/reproducible detector branches do not all expose identical proprietary saccade semantics, so the common primary outcome is operationalized more narrowly:
+
+> A between-AOI transition occurs when two directly adjacent fixation episodes are both assigned to AOIs, are in valid temporal order, and their AOI identifiers differ.
+
+An unassigned fixation breaks the chain. Thus:
+
+```text
+AOI A fixation → unassigned fixation → AOI B fixation
+```
+
+does **not** become an A→B transition.
+
+If adjacent fixation episodes overlap in time, that trial branch is marked non-evaluable rather than forcing an ordering.
+
+The released BeGaze saccade-defined transition catalogue remains a historical reference outside the primary 96-specification denominator. Agreement or disagreement between that vendor construct and the open adjacent-fixation construct is itself measurement evidence; the two are not declared algorithmically identical.
+
 ## Exposure-time decision
 
 The primary estimand is a **transition-rate ratio**, not a raw-count difference.
