@@ -369,8 +369,7 @@ def summarise_gaze_claim_robustness(result: GazeRobustnessAuditResult) -> pd.Dat
     primary_estimate = np.nan
     if len(primary) == 1 and primary.iloc[0]["status"] == "ok":
         candidate = pd.to_numeric(pd.Series([primary.iloc[0]["estimate"]]), errors="coerce").iloc[0]
-        if np.isfinite(candidate):
-            primary_estimate = float(candidate)
+        primary_estimate = float(candidate)
 
     same_direction_evaluable = np.nan
     same_direction_planned = np.nan
@@ -381,9 +380,8 @@ def summarise_gaze_claim_robustness(result: GazeRobustnessAuditResult) -> pd.Dat
             same = estimates.eq(0)
         else:
             same = np.sign(estimates) == primary_direction
-        if len(same):
-            same_direction_evaluable = float(same.mean())
-            same_direction_planned = float(same.sum() / planned) if planned else np.nan
+        same_direction_evaluable = float(same.mean())
+        same_direction_planned = float(same.sum() / planned) if planned else np.nan
 
     lowers = pd.to_numeric(evaluable["CI_lower"], errors="coerce")
     uppers = pd.to_numeric(evaluable["CI_upper"], errors="coerce")
