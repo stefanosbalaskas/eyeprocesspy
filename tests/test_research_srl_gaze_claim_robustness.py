@@ -43,6 +43,10 @@ srl_glmm_bridge = _load_module(
     "srl_glmm_bridge_research",
     RESEARCH / "srl_glmm_bridge.py",
 )
+srl_readiness = _load_module(
+    "srl_readiness_research",
+    RESEARCH / "check_srl_execution_readiness.py",
+)
 srl_model_table = _load_module(
     "srl_model_table_research",
     RESEARCH / "prepare_srl_model_table.py",
@@ -623,3 +627,24 @@ def test_srl_glmm_bridge_rejects_wrong_estimand_and_nonfinite_values(
     pd.DataFrame([base]).to_csv(result_path, index=False)
     with pytest.raises(ValueError, match="estimate_log_rate_ratio"):
         srl_glmm_bridge.read_primary_glmm_result(result_path)
+
+
+def test_srl_execution_readiness_blocks_pre_results_execution():
+    status = srl_readiness.evaluate_readiness(RESEARCH)
+    blockers = status.loc[
+        status["severity"].eq("BLOCKER") & ~status["ready"].astype(bool)
+    ]
+
+    assert not blockers.empty
+    assert "actual_archive_audit" in set(blockers["gate_id"])
+    assert "prompt_identifiability" in set(blockers["gate_id"])
+    assert "aoi_exact_boundary" in set(blockers["gate_id"])
+    assert "quality_recovery_calibration" in set(blockers["gate_id"])
+
+    model = status.loc[status["gate_id"].eq("primary_model_engine")]
+    assert len(model) == 1
+    assert bool(model.iloc[0]["ready"])
+
+    info = status.loc[status["gate_id"].eq("material_type_secondary_scope")]
+    assert len(info) == 1
+    assert bool(info.iloc[0]["ready"])
