@@ -170,7 +170,7 @@ def test_srl_design_manifest_is_pre_results_and_deterministic(tmp_path: Path):
     warnings = issues.loc[issues["severity"].eq("warning")]
     assert errors.empty
     assert len(warnings) == 1
-    assert "84 complete recordings" in warnings.iloc[0]["message"]
+    assert "84 complete ET recordings" in warnings.iloc[0]["message"]
 
 
 def test_srl_adapter_refuses_nonmonotonic_trial_time(tmp_path: Path):
@@ -725,9 +725,9 @@ def test_srl_primary_universe_is_deterministic_and_structurally_compatible():
     a = srl_universe.build_primary_universe(RESEARCH)
     b = srl_universe.build_primary_universe(RESEARCH)
 
-    assert len(a) == 96
+    assert len(a) == 144
     assert a.equals(b)
-    assert a["specification_hash"].nunique() == 96
+    assert a["specification_hash"].nunique() == 144
     assert set(a["eye"]) == {"left", "right"}
     assert set(a["viewing_distance_cm"]) == {60.0, 65.0, 70.0}
     assert set(a["aoi_convention"]) == {
@@ -738,22 +738,20 @@ def test_srl_primary_universe_is_deterministic_and_structurally_compatible():
         "released_sample",
         "trial_80_sensitivity",
     }
+    assert set(a["cohort_id"]) == {
+        "exact_raw82",
+        "nominal250_77",
+    }
     assert set(a["detector_id"]) == {
         "ivt_30_100_simple",
         "ivt_40_50_simple",
         "idt_1_100",
-        "remodnav_defaults",
     }
-
-    remodnav = a.loc[a["detector_id"].eq("remodnav_defaults")]
-    assert remodnav["requires_dense_regular_timebase"].all()
-    assert not a.loc[
-        ~a["detector_id"].eq("remodnav_defaults"),
-        "requires_dense_regular_timebase",
-    ].any()
+    assert not a["requires_dense_regular_timebase"].any()
 
     refs = srl_universe.historical_reference_manifest()
     assert set(refs["reference_id"]) == {
+        "remodnav_1_1_2",
         "vendor_begaze_released",
         "adaptive_mad_eyeprocesspy",
     }
