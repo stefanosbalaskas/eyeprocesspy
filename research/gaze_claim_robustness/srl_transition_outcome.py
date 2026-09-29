@@ -57,12 +57,27 @@ def derive_transition_counts(dataset: ep.EyeDataset) -> pd.DataFrame:
         transition_count: float = np.nan
         n_adjacent_pairs = max(total - 1, 0)
         n_evaluable_pairs = 0
+        n_negative_gap_pairs = 0
+        median_inter_fixation_gap_ms = np.nan
+        max_inter_fixation_gap_ms = np.nan
         status = "ok"
+
+        if total >= 2:
+            starts = pd.to_numeric(z["start_time"], errors="coerce").to_numpy(dtype=float)
+            ends = pd.to_numeric(z["end_time"], errors="coerce").to_numpy(dtype=float)
+            gaps_ms = (starts[1:] - ends[:-1]) * 1000.0
+            finite_gaps = gaps_ms[np.isfinite(gaps_ms)]
+            if finite_gaps.size:
+                n_negative_gap_pairs = int((finite_gaps < -1e-9).sum())
+                median_inter_fixation_gap_ms = float(np.median(finite_gaps))
+                max_inter_fixation_gap_ms = float(np.max(finite_gaps))
 
         if total == 0:
             status = "no_fixations"
         elif assigned == 0:
             status = "no_aoi_assigned_fixations"
+        elif n_negative_gap_pairs:
+            status = "overlapping_fixations"
         else:
             aois = z["aoi_id"].astype("string").reset_index(drop=True)
             transition_count = 0.0
@@ -96,6 +111,12 @@ def derive_transition_counts(dataset: ep.EyeDataset) -> pd.DataFrame:
                 "assigned_fixation_fraction": (
                     assigned / total if total else np.nan
                 ),
+                "n_negative_gap_pairs": n_negative_gap_pairs,
+                "median_inter_fixation_gap_ms": median_inter_fixation_gap_ms,
+                "max_inter_fixation_gap_ms": max_inter_fixation_gap_ms,
+                "outcome_operationalization": (
+                    "adjacent_aoi_assigned_fixation_change"
+                ),
             }
         )
 
@@ -119,6 +140,8 @@ def transition_sequence_audit(dataset: ep.EyeDataset) -> pd.DataFrame:
                 "to_episode_id",
                 "from_aoi_id",
                 "to_aoi_id",
+                "inter_fixation_gap_ms",
+                "temporal_order_valid",
                 "evaluable",
                 "between_aoi_transition",
             ]
@@ -138,7 +161,22 @@ def transition_sequence_audit(dataset: ep.EyeDataset) -> pd.DataFrame:
             right = z.iloc[i + 1]
             left_aoi = left["aoi_id"]
             right_aoi = right["aoi_id"]
-            evaluable = pd.notna(left_aoi) and pd.notna(right_aoi)
+            left_end = pd.to_numeric(pd.Series([left["end_time"]]), errors="coerce").iloc[0]
+            right_start = pd.to_numeric(
+                pd.Series([right["start_time"]]),
+                errors="coerce",
+            ).iloc[0]
+            gap_ms = (
+                float((right_start - left_end) * 1000.0)
+                if np.isfinite(left_end) and np.isfinite(right_start)
+                else np.nan
+            )
+            temporal_order_valid = bool(np.isfinite(gap_ms) and gap_ms >= -1e-9)
+            evaluable = (
+                pd.notna(left_aoi)
+                and pd.notna(right_aoi)
+                and temporal_order_valid
+            )
             transition = bool(evaluable and str(left_aoi) != str(right_aoi))
             rows.append(
                 {
@@ -148,6 +186,8 @@ def transition_sequence_audit(dataset: ep.EyeDataset) -> pd.DataFrame:
                     "to_episode_id": right["episode_id"],
                     "from_aoi_id": left_aoi,
                     "to_aoi_id": right_aoi,
+                    "inter_fixation_gap_ms": gap_ms,
+                    "temporal_order_valid": temporal_order_valid,
                     "evaluable": evaluable,
                     "between_aoi_transition": transition,
                 }
