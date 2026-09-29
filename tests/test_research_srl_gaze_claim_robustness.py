@@ -35,6 +35,10 @@ srl_outcome = _load_module(
     "srl_outcome_research",
     RESEARCH / "srl_transition_outcome.py",
 )
+srl_identifiability = _load_module(
+    "srl_identifiability_research",
+    RESEARCH / "audit_srl_identifiability.py",
+)
 
 
 def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
@@ -138,9 +142,9 @@ def test_srl_design_manifest_is_pre_results_and_deterministic(tmp_path: Path):
     assert not manifest["quality_rule_frozen"].any()
     assert not manifest["model_frozen"].any()
     assert set(manifest["primary_estimand_family"]) == {
-        "between_aoi_transition_count"
+        "between_aoi_transition_rate"
     }
-    assert set(manifest["focal_contrast"]) == {"Multimedia_minus_Text"}
+    assert set(manifest["focal_contrast"]) == {"Prompt_minus_Non-prompt"}
 
     errors = issues.loc[issues["severity"].eq("error")]
     warnings = issues.loc[issues["severity"].eq("warning")]
@@ -404,3 +408,96 @@ def test_srl_transition_outcome_preserves_unassigned_breaks_and_missing_trials()
     t1 = adjacency.loc[adjacency["trial_id"].eq("T1")]
     assert int(t1["between_aoi_transition"].sum()) == 2
     assert int(t1["evaluable"].sum()) == 4
+
+
+def test_srl_identifiability_audit_blocks_nested_modality_claim():
+    participants = pd.DataFrame(
+        {
+            "part_ID": ["P1", "P2", "P3", "P4"],
+            "experiment_condition": [
+                "Prompt",
+                "Prompt",
+                "Non-prompt",
+                "Non-prompt",
+            ],
+        }
+    )
+    rows = []
+    for participant in participants["part_ID"]:
+        for task in range(1, 9):
+            rows.append(
+                {
+                    "part_ID": participant,
+                    "stimulus_name": f"Task_{task}",
+                    "stimulus_type": (
+                        "Text" if task <= 4 else "Multimedia"
+                    ),
+                }
+            )
+    stimuli = pd.DataFrame(rows)
+
+    task_structure, estimands, issues = (
+        srl_identifiability.audit_identifiability(
+            participants,
+            stimuli,
+        )
+    )
+    assert task_structure["prompt_varies_within_task"].all()
+    assert not task_structure["modality_varies_within_task"].any()
+
+    status = estimands.set_index("estimand")
+    assert bool(status.loc["Prompt_vs_Non-prompt", "primary_eligible"])
+    assert (
+        status.loc["Prompt_vs_Non-prompt", "design_status"]
+        == "randomized_between_participants_and_crossed_with_tasks"
+    )
+    assert not bool(status.loc["Multimedia_vs_Text", "primary_eligible"])
+    assert (
+        status.loc["Multimedia_vs_Text", "design_status"]
+        == "nested_in_task_identity"
+    )
+    assert issues["severity"].eq("warning").any()
+    assert issues["message"].str.contains("nested in task identity").any()
+
+
+def test_srl_identifiability_audit_allows_crossed_modality_design():
+    participants = pd.DataFrame(
+        {
+            "part_ID": ["P1", "P2", "P3", "P4"],
+            "experiment_condition": [
+                "Prompt",
+                "Prompt",
+                "Non-prompt",
+                "Non-prompt",
+            ],
+        }
+    )
+    rows = []
+    for p_index, participant in enumerate(participants["part_ID"]):
+        for task in range(1, 9):
+            rows.append(
+                {
+                    "part_ID": participant,
+                    "stimulus_name": f"Task_{task}",
+                    "stimulus_type": (
+                        "Text" if (task + p_index) % 2 == 0 else "Multimedia"
+                    ),
+                }
+            )
+    stimuli = pd.DataFrame(rows)
+
+    task_structure, estimands, issues = (
+        srl_identifiability.audit_identifiability(
+            participants,
+            stimuli,
+        )
+    )
+    assert task_structure["prompt_varies_within_task"].all()
+    assert task_structure["modality_varies_within_task"].all()
+    status = estimands.set_index("estimand")
+    assert bool(status.loc["Multimedia_vs_Text", "primary_eligible"])
+    assert (
+        status.loc["Multimedia_vs_Text", "design_status"]
+        == "crossed_with_task_identity"
+    )
+    assert issues.empty
