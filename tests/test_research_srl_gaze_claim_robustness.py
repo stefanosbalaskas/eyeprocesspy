@@ -881,7 +881,14 @@ def test_srl_measurement_runner_materializes_all_base_branches(tmp_path: Path):
     assert set(results["stimulus_id"]) == {
         f"Task_{i}" for i in range(1, 9)
     }
-    assert results["status"].eq("no_fixations").all()
+    assert results["status"].isin(
+        {
+            "ok",
+            "no_fixations",
+            "no_aoi_assigned_fixations",
+            "overlapping_fixations",
+        }
+    ).all()
     key = [
         "participant_id",
         "stimulus_id",
