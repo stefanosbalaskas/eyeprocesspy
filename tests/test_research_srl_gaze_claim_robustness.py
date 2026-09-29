@@ -39,6 +39,10 @@ srl_identifiability = _load_module(
     "srl_identifiability_research",
     RESEARCH / "audit_srl_identifiability.py",
 )
+srl_model_table = _load_module(
+    "srl_model_table_research",
+    RESEARCH / "prepare_srl_model_table.py",
+)
 
 
 def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
@@ -501,3 +505,61 @@ def test_srl_identifiability_audit_allows_crossed_modality_design():
         == "crossed_with_task_identity"
     )
     assert issues.empty
+
+
+def test_srl_model_table_keeps_non_evaluable_rows_visible():
+    outcome = pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1", "P2", "P2"],
+            "stimulus_id": ["Task_1", "Task_2", "Task_1", "Task_2"],
+            "experiment_condition": [
+                "Prompt",
+                "Prompt",
+                "Non-prompt",
+                "Non-prompt",
+            ],
+            "transition_count": [5.0, pd.NA, 3.0, 4.0],
+            "status": [
+                "ok",
+                "no_fixations",
+                "ok",
+                "ok",
+            ],
+        }
+    )
+    stimuli = pd.DataFrame(
+        {
+            "part_ID": ["P1", "P1", "P2", "P2"],
+            "stimulus_name": ["Task_1", "Task_2", "Task_1", "Task_2"],
+            "stimulus_type": ["Text", "Multimedia", "Text", "Multimedia"],
+            "stimulus_time": [10.0, 12.0, 0.0, 8.0],
+        }
+    )
+
+    table, audit = srl_model_table.prepare_model_table(outcome, stimuli)
+
+    assert len(table) == 4
+    assert int(table["model_evaluable"].sum()) == 2
+    p1_t1 = table.loc[
+        table["participant_id"].eq("P1")
+        & table["stimulus_id"].eq("Task_1")
+    ].iloc[0]
+    assert p1_t1["prompt_indicator"] == pytest.approx(1.0)
+    assert p1_t1["log_exposure"] == pytest.approx(__import__("math").log(10.0))
+
+    p1_t2 = table.loc[
+        table["participant_id"].eq("P1")
+        & table["stimulus_id"].eq("Task_2")
+    ].iloc[0]
+    assert "outcome_status=no_fixations" in p1_t2["model_status"]
+
+    p2_t1 = table.loc[
+        table["participant_id"].eq("P2")
+        & table["stimulus_id"].eq("Task_1")
+    ].iloc[0]
+    assert "invalid_or_nonpositive_exposure" in p2_t1["model_status"]
+
+    analysis = srl_model_table.primary_analysis_rows(table)
+    assert len(analysis) == 2
+    assert analysis["model_status"].eq("ok").all()
+    assert int(audit["rows"].sum()) == 4
