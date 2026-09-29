@@ -2,7 +2,7 @@
 """Build the prespecified SRL participant × stimulus × eye design manifest.
 
 The manifest is structural evidence only. It does not calculate gaze outcomes
-or fit the focal Text-versus-Multimedia contrast.
+or fit the focal Prompt-versus-Non-prompt contrast.
 """
 
 from __future__ import annotations
@@ -275,10 +275,10 @@ def build_manifest(
                         "focal_factor": "experiment_condition",
                         "focal_contrast": "Prompt_minus_Non-prompt",
                         "outcome_frozen": True,
-                        "event_detector_frozen": False,
-                        "aoi_geometry_frozen": False,
-                        "quality_rule_frozen": False,
-                        "model_frozen": False,
+                        "event_detector_frozen": True,
+                        "aoi_geometry_frozen": True,
+                        "quality_rule_frozen": True,
+                        "model_frozen": True,
                     }
                 )
 
