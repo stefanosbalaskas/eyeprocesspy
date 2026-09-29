@@ -31,6 +31,10 @@ srl_coordinates = _load_module(
     "srl_coordinates_research",
     RESEARCH / "srl_coordinate_branches.py",
 )
+srl_aoi_geometry = _load_module(
+    "srl_aoi_geometry_research",
+    RESEARCH / "srl_aoi_geometry.py",
+)
 srl_outcome = _load_module(
     "srl_outcome_research",
     RESEARCH / "srl_transition_outcome.py",
@@ -638,8 +642,8 @@ def test_srl_execution_readiness_blocks_pre_results_execution():
     assert not blockers.empty
     assert "actual_archive_audit" in set(blockers["gate_id"])
     assert "prompt_identifiability" in set(blockers["gate_id"])
-    assert "aoi_exact_boundary" in set(blockers["gate_id"])
-    assert "quality_recovery_calibration" in set(blockers["gate_id"])
+    assert "aoi_exact_boundary" not in set(blockers["gate_id"])
+    assert "quality_recovery_calibration" not in set(blockers["gate_id"])
 
     model = status.loc[status["gate_id"].eq("primary_model_engine")]
     assert len(model) == 1
@@ -648,3 +652,57 @@ def test_srl_execution_readiness_blocks_pre_results_execution():
     info = status.loc[status["gate_id"].eq("material_type_secondary_scope")]
     assert len(info) == 1
     assert bool(info.iloc[0]["ready"])
+
+
+def test_srl_aoi_geometry_branches_are_pre_results_and_area_explicit(
+    tmp_path: Path,
+):
+    participants_path, stimuli_path, _raw_dir, raw_path = _write_fixture(tmp_path)
+    dataset = srl_adapter.load_srl_trial(
+        raw_path,
+        participants_path,
+        stimuli_path,
+        stimulus_name="Task_1",
+        eye="left",
+    )
+
+    manifest = srl_aoi_geometry.geometry_manifest()
+    exact = manifest.loc[manifest["convention"].eq("exact_quarters")]
+    reported = manifest.loc[
+        manifest["convention"].eq("reported_area_center_seam")
+    ]
+    assert len(exact) == 4
+    assert len(reported) == 4
+    assert exact["area_px"].eq(360000.0).all()
+    assert reported["area_px"].eq(359550.0).all()
+
+    registered = srl_aoi_geometry.register_srl_quartile_aois(
+        dataset,
+        stimulus_id="Task_1",
+        convention="reported_area_center_seam",
+    )
+    definitions = registered["aoi_definitions"]
+    geometry = registered["aoi_geometry"]
+
+    assert len(definitions) == 4
+    assert definitions["stimulus_id"].eq("Task_1").all()
+    assert geometry["width"].eq(799.0).all()
+    assert geometry["height"].eq(450.0).all()
+
+    angular = srl_coordinates.convert_srl_pixels_to_degrees(
+        dataset,
+        viewing_distance_cm=65.0,
+    )
+    angular_registered = srl_aoi_geometry.register_srl_quartile_aois(
+        angular,
+        stimulus_id="Task_1",
+        convention="exact_quarters",
+    )
+    angular_geometry = angular_registered["aoi_geometry"]
+    ppd = srl_coordinates.pixels_per_degree(65.0)
+    assert angular_geometry["width"].tolist() == pytest.approx(
+        [800.0 / ppd] * 4
+    )
+    assert angular_geometry["height"].tolist() == pytest.approx(
+        [450.0 / ppd] * 4
+    )
