@@ -57,11 +57,14 @@ def evaluate_readiness(
     *,
     archive_audit_dir: Path | None = None,
     identifiability_dir: Path | None = None,
+    identity_audit_dir: Path | None = None,
+    timebase_audit_dir: Path | None = None,
 ) -> pd.DataFrame:
     decisions = _read(research_dir / "srl_decision_registry.csv")
     detectors = _read(research_dir / "srl_detector_plan.csv")
     quality = _read(research_dir / "srl_quality_plan.csv")
     models = _read(research_dir / "srl_model_plan.csv")
+    cohorts = _read(research_dir / "srl_cohort_plan.csv")
 
     rows: list[dict[str, object]] = []
     dense_timebase_ok = False
@@ -91,20 +94,7 @@ def evaluate_readiness(
             stimulus_audit = _read(stimulus_audit_path)
             condition_counts = _read(condition_path)
 
-            raw_ok = len(raw_manifest) == 84 and raw_failures.empty
-            dense_column_ok = "dense_regular_250hz" in raw_manifest
-            dense_timebase_ok = bool(
-                dense_column_ok
-                and len(raw_manifest) == 84
-                and raw_manifest["dense_regular_250hz"].astype(bool).all()
-            )
-            dense_timebase_message = (
-                f"dense_regular_250hz_files="
-                f"{int(raw_manifest['dense_regular_250hz'].astype(bool).sum())}"
-                f"/{len(raw_manifest)}"
-                if dense_column_ok
-                else "dense_regular_250hz column missing; run full-file audit"
-            )
+            raw_ok = len(raw_manifest) == 83 and raw_failures.empty
             stimulus_ok = (
                 "present" in stimulus_audit
                 and stimulus_audit["present"].astype(bool).all()
@@ -121,7 +111,7 @@ def evaluate_readiness(
                     "BLOCKER",
                     archive_ok,
                     (
-                        f"raw_manifest_rows={len(raw_manifest)}; "
+                        f"raw_manifest_rows={len(raw_manifest)} (expected 83); "
                         f"raw_failures={len(raw_failures)}; "
                         f"stimuli_complete={stimulus_ok}; "
                         f"prompt_conditions_present={condition_ok}."
@@ -226,26 +216,96 @@ def evaluate_readiness(
         )
     )
 
-    remodnav = detectors.loc[
-        detectors["detector_id"].astype(str).eq("remodnav_defaults")
-    ]
-    remodnav_version_frozen = (
-        len(remodnav) == 1
-        and "REMoDNaV 1.1.2" in str(remodnav.iloc[0]["algorithm"])
-    )
-    remodnav_ok = bool(remodnav_version_frozen and dense_timebase_ok)
-    rows.append(
-        _status_row(
-            "remodnav_timebase",
-            "BLOCKER",
-            remodnav_ok,
-            (
-                f"REMoDNaV version_frozen={remodnav_version_frozen}; "
-                f"{dense_timebase_message}. Only dense regular sampling is "
-                "supported by REMoDNaV."
-            ),
+    if identity_audit_dir is None or timebase_audit_dir is None:
+        rows.append(
+            _status_row(
+                "cohort_timebase_validation",
+                "BLOCKER",
+                False,
+                (
+                    "Run audit_srl_identity.py and audit_srl_task_timebase.py on the "
+                    "actual release before executing the frozen cohort universe."
+                ),
+            )
         )
-    )
+    else:
+        try:
+            identity_summary = _read(identity_audit_dir / "identity_summary.csv")
+            presence = _read(identity_audit_dir / "id_source_presence.csv")
+            participant_timebase = _read(
+                timebase_audit_dir / "participant_timebase_summary.csv"
+            )
+
+            identity_values = {
+                str(row["metric"]): int(row["value"])
+                for _, row in identity_summary.iterrows()
+            }
+            exact_ids = set(
+                presence.loc[
+                    presence["exact_cross_source_raw_eligible"].astype(bool),
+                    "participant_id",
+                ].astype(str)
+            )
+            nominal_ids = set(
+                participant_timebase.loc[
+                    participant_timebase["all_8_tasks_nominal_250hz"].astype(bool),
+                    "participant_id",
+                ].astype(str)
+            )
+            dense_ids = set(
+                participant_timebase.loc[
+                    participant_timebase[
+                        "all_8_tasks_dense_regular_250hz"
+                    ].astype(bool),
+                    "participant_id",
+                ].astype(str)
+            )
+
+            exact_nominal_ids = exact_ids & nominal_ids
+            cohort_values = {
+                str(row["cohort_id"]): int(row["n_participants"])
+                for _, row in cohorts.iterrows()
+                if str(row["status"]).strip() == "frozen"
+            }
+
+            cohort_ok = bool(
+                identity_values.get("raw_file_ids") == 83
+                and identity_values.get("exact_raw_metadata_ids") == 82
+                and identity_values.get("exact_raw_prompt") == 41
+                and identity_values.get("exact_raw_non_prompt") == 41
+                and len(nominal_ids) == 78
+                and len(exact_nominal_ids) == 77
+                and len(dense_ids) == 0
+                and cohort_values.get("exact_raw82") == 82
+                and cohort_values.get("nominal250_77") == 77
+            )
+            rows.append(
+                _status_row(
+                    "cohort_timebase_validation",
+                    "BLOCKER",
+                    cohort_ok,
+                    (
+                        f"raw_ids={identity_values.get('raw_file_ids')}; "
+                        f"exact_raw={len(exact_ids)}; "
+                        f"exact_prompt={identity_values.get('exact_raw_prompt')}; "
+                        f"exact_non_prompt={identity_values.get('exact_raw_non_prompt')}; "
+                        f"raw_nominal250={len(nominal_ids)}; "
+                        f"exact_nominal250={len(exact_nominal_ids)}; "
+                        f"all8_dense250={len(dense_ids)}. "
+                        "REMoDNaV remains outside the primary denominator because "
+                        "the actual task-level timebase is not strictly dense/regular."
+                    ),
+                )
+            )
+        except Exception as exc:
+            rows.append(
+                _status_row(
+                    "cohort_timebase_validation",
+                    "BLOCKER",
+                    False,
+                    f"Identity/timebase audit outputs invalid: {type(exc).__name__}: {exc}",
+                )
+            )
 
     recovery = quality.loc[
         quality["quality_id"].astype(str).eq("transition_recovery_gate")
@@ -335,6 +395,8 @@ def main() -> int:
     )
     parser.add_argument("--archive-audit-dir", type=Path)
     parser.add_argument("--identifiability-dir", type=Path)
+    parser.add_argument("--identity-audit-dir", type=Path)
+    parser.add_argument("--timebase-audit-dir", type=Path)
     parser.add_argument(
         "--output",
         type=Path,
@@ -346,6 +408,8 @@ def main() -> int:
         args.research_dir,
         archive_audit_dir=args.archive_audit_dir,
         identifiability_dir=args.identifiability_dir,
+        identity_audit_dir=args.identity_audit_dir,
+        timebase_audit_dir=args.timebase_audit_dir,
     )
     status.to_csv(args.output, index=False)
 
