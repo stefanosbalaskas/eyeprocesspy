@@ -610,7 +610,7 @@ def main() -> int:
     print(
         f"Completed {len(ids)} participants; "
         f"rows={len(results)}; "
-        f"non_ok={int(~results['status'].eq('ok').sum()) if False else int((~results['status'].eq('ok')).sum())}; "
+        f"non_ok={int((~results['status'].eq('ok')).sum())}; "
         f"failure_records={len(failures)}"
     )
     return 0
