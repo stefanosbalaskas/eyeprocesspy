@@ -186,6 +186,22 @@ jobs:
             echo "raw_dir=$RAW_DIR"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Run cross-source identity audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identity.py" \
+            "$DATASET_ROOT" \
+            --output-dir audit/identity
+
+      - name: Run full Task-level timebase audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_task_timebase.py" \
+            "${{ steps.released_paths.outputs.raw_dir }}" \
+            --output-dir audit/timebase
+
       - name: Run design-identifiability audit
         shell: bash
         run: |
@@ -253,13 +269,31 @@ jobs:
           if raw.exists():
               frame = pd.read_csv(raw)
               lines.append(
-                  f"- raw participant files audited: {len(frame)}"
+                  f"- raw participant files inventoried: {len(frame)}"
               )
-              if "dense_regular_250hz" in frame:
-                  dense = int(frame["dense_regular_250hz"].astype(bool).sum())
-                  lines.append(
-                      f"- dense regular 250 Hz files: {dense}/{len(frame)}"
-                  )
+
+          identity = Path("audit/identity/identity_summary.csv")
+          if identity.exists():
+              frame = pd.read_csv(identity)
+              values = dict(zip(frame["metric"], frame["value"]))
+              lines.append(
+                  f"- exact raw+metadata participants: "
+                  f"{int(values.get('exact_raw_metadata_ids', 0))}"
+              )
+
+          timebase = Path("audit/timebase/participant_timebase_summary.csv")
+          if timebase.exists():
+              frame = pd.read_csv(timebase)
+              lines.append(
+                  f"- raw participants with 8 nominal 250 Hz tasks: "
+                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}"
+                  f"/{len(frame)}"
+              )
+              lines.append(
+                  f"- raw participants with 8 strictly dense 250 Hz tasks: "
+                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}"
+                  f"/{len(frame)}"
+              )
 
           universe = Path("audit/primary_universe/srl_primary_universe.csv")
           if universe.exists():
