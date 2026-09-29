@@ -123,6 +123,13 @@ def _raw_structure_audit(
             time = pd.to_numeric(frame["RecordingTime [ms]"], errors="coerce")
             finite_time = time[np.isfinite(time)]
             diffs = finite_time.diff().dropna()
+            finite_diffs = pd.to_numeric(diffs, errors="coerce")
+            finite_diffs = finite_diffs[np.isfinite(finite_diffs)]
+            regular_4ms = (
+                np.isclose(finite_diffs.to_numpy(dtype=float), 4.0, atol=0.25)
+                if len(finite_diffs)
+                else np.asarray([], dtype=bool)
+            )
 
             right_x = pd.to_numeric(
                 frame["Point of Regard Right X [px]"], errors="coerce"
@@ -149,10 +156,35 @@ def _raw_structure_audit(
                     "trials_in_sample": frame["Trial"].nunique(dropna=True),
                     "stimuli_in_sample": frame["Stimulus"].nunique(dropna=True),
                     "median_timestamp_step_ms": (
-                        float(diffs.median()) if len(diffs) else np.nan
+                        float(finite_diffs.median())
+                        if len(finite_diffs)
+                        else np.nan
+                    ),
+                    "minimum_timestamp_step_ms": (
+                        float(finite_diffs.min())
+                        if len(finite_diffs)
+                        else np.nan
+                    ),
+                    "maximum_timestamp_step_ms": (
+                        float(finite_diffs.max())
+                        if len(finite_diffs)
+                        else np.nan
+                    ),
+                    "fraction_4ms_timestamp_steps": (
+                        float(regular_4ms.mean())
+                        if regular_4ms.size
+                        else np.nan
+                    ),
+                    "dense_regular_250hz": bool(
+                        regular_4ms.size
+                        and bool(regular_4ms.all())
+                        and not bool((finite_diffs <= 0).any())
+                        and int((~np.isfinite(time)).sum()) == 0
                     ),
                     "nonfinite_timestamps": int((~np.isfinite(time)).sum()),
-                    "nonincreasing_timestamp_steps": int((diffs <= 0).sum()),
+                    "nonincreasing_timestamp_steps": int(
+                        (finite_diffs <= 0).sum()
+                    ),
                     "right_finite_fraction": (
                         float(right_finite.mean()) if len(frame) else np.nan
                     ),
@@ -207,15 +239,23 @@ def _stimulus_files(root: Path) -> pd.DataFrame:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset_root", type=Path)
-    parser.add_argument("--sample-rows", type=int, default=5000)
+    parser.add_argument(
+        "--sample-rows",
+        type=int,
+        default=5000,
+        help=(
+            "Rows read from each raw participant file. Use 0 to audit the "
+            "complete file, which is required for dense-timebase qualification."
+        ),
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("srl_dataset_audit"),
     )
     args = parser.parse_args()
-    if args.sample_rows < 2:
-        raise ValueError("sample_rows must be >= 2.")
+    if args.sample_rows == 1 or args.sample_rows < 0:
+        raise ValueError("sample_rows must be 0 (full file) or >= 2.")
 
     participants = _read_table(_unique_file(args.dataset_root, "participants.csv"))
     stimuli = _read_table(_unique_file(args.dataset_root, "stimuli.csv"))
@@ -224,7 +264,7 @@ def main() -> int:
     condition_counts, stimulus_cells = _metadata_audit(participants, stimuli)
     raw_manifest, raw_failures = _raw_structure_audit(
         raw_directory,
-        sample_rows=args.sample_rows,
+        sample_rows=(None if args.sample_rows == 0 else args.sample_rows),
     )
     stimulus_files = _stimulus_files(args.dataset_root)
 
@@ -265,6 +305,13 @@ def main() -> int:
         "/",
         len(stimulus_files),
     )
+    if not raw_manifest.empty and "dense_regular_250hz" in raw_manifest:
+        print(
+            "Dense regular 250 Hz raw files:",
+            int(raw_manifest["dense_regular_250hz"].astype(bool).sum()),
+            "/",
+            len(raw_manifest),
+        )
 
     if len(raw_failures) or not bool(stimulus_files["present"].all()):
         return 2
