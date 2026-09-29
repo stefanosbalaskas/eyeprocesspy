@@ -46,33 +46,66 @@ Therefore this pilot must not claim novelty from merely analyzing gaze transitio
 
 ## Primary HCI contrast
 
-The proposed primary scientific contrast is the effect of learning-material format:
+The primary scientific contrast is now the randomized manipulation:
 
-Text versus Multimedia
+**Prompt versus Non-prompt**
 
-on the number of transitions among the four declared content AOIs within each learning slide.
+on between-AOI transition **rate** during the eight learning slides.
 
-This is chosen from the experimental design before examining multiverse results. It directly depends on both event detection and AOI assignment, making it suitable for a measurement-robustness study.
+This is preferable to a Text-versus-Multimedia primary claim for identification. The published design states that presentation order was randomized, but the experiment contains eight fixed learning-material pages: four text and four multimedia pages. Only one released image exists for each `Task_1` to `Task_8`, and the paper does not describe alternate text/multimedia versions of the same optics topic. Therefore material type may be nested in topic/task identity rather than independently randomized within topic.
 
-The analysis does not prespecify that the effect must be positive, negative, or statistically significant.
+The archive-level `stimuli.csv` audit remains the definitive gate. Until it proves modality varies within task/topic identity across participants, Text versus Multimedia must not be described here as a pure causal format effect.
+
+Prompt assignment, by contrast, was randomized between participants. The primary prompt contrast remains identifiable while controlling for the eight task identities.
+
+The analysis does not prespecify that the prompt effect must be positive, negative, or statistically significant.
+
+## Exposure-time decision
+
+The primary estimand is a **transition-rate ratio**, not a raw-count difference.
+
+The published AJET analysis reports that prompted participants spent more time studying the learning materials on average. Raw transition counts can therefore differ simply because participants had more observation time.
+
+Operationally, the model uses:
+
+- outcome: between-AOI transition count per participant × learning slide;
+- exposure: observed `stimulus_time` for that slide;
+- offset: `log(stimulus_time)`.
+
+This preserves the auditable count outcome while estimating a rate. Trials with non-positive, missing, or internally inconsistent exposure time are non-evaluable and must remain visible in the branch audit.
+
+Raw transition count without an exposure offset is an **estimand-changing sensitivity analysis** and must not be included in the primary transition-rate robustness denominator.
 
 ## Secondary contrasts
 
-Subject to the structural audit confirming all required fields:
+Subject to the structural and identifiability audits:
 
-- Prompt versus Non-prompt effect on transition count;
-- Prompt × Material-type interaction;
-- optional transition subclasses such as text↔image transitions for Multimedia slides only.
+- Prompt-effect heterogeneity across the released Text-task versus Multimedia-task sets;
+- the released Text-task versus Multimedia-task difference as a descriptive set contrast;
+- raw transition count as a separate estimand;
+- optional transition subclasses such as top↔bottom or text↔image transitions where geometry supports them.
 
-Secondary analyses must remain distinct from the primary robustness claim.
+If material type is nested in Task identity, neither its main effect nor Prompt × Material-type should be described as a pure causal modality effect. The interaction can at most describe whether the randomized prompt effect differs between the four task sets labelled Text and the four labelled Multimedia.
 
 ## Primary estimand
 
-The intended estimand is a population-level relative difference in expected between-AOI transition count between Multimedia and Text trials for the observed participant population and released learning materials.
+The intended primary estimand is the population-level **transition-rate ratio for Prompt versus Non-prompt**, averaged over the eight released learning tasks for the released target population.
 
-The exact model/contrast implementation will be frozen after the structural dataset audit and before branch-specific multiverse estimates are inspected.
+The planned model structure is:
 
-A count model with repeated-participant structure is preferred. A negative-binomial mixed model is the current default candidate because the outcome is a non-negative count and overdispersion is plausible. Model-family choice must not be changed in response to which multiverse branches produce preferred conclusions.
+```text
+transition_count
+  ~ Prompt
+  + Task identity
+  + offset(log(stimulus_time))
+  + participant random intercept
+```
+
+with a negative-binomial count family as the current primary candidate because transition counts are non-negative and overdispersion is plausible.
+
+Task identity is included as a fixed blocking factor so content-specific baseline differences do not contaminate the randomized prompt contrast. Material type is not added as a main effect when it is perfectly nested in task identity because that parameter would be aliased with the task indicators.
+
+The exact negative-binomial parameterization and fitting engine remain to be frozen after the structural count/exposure audit, but they must be chosen without reference to which measurement branches strengthen the prompt effect.
 
 ## Measurement decision families
 
@@ -116,7 +149,7 @@ The open comparator plan is now source-backed:
 - REMoDNaV with published defaults, once the runtime version and dense-timebase checks are fixed;
 - the package's robust-MAD adaptive detector remains an implementation diagnostic until its numerical parameters are frozen.
 
-No detector may be added or removed because of its focal Text-versus-Multimedia result.
+No detector may be added or removed because of its focal Prompt-versus-Non-prompt result.
 
 ### 3. AOI definition
 
@@ -170,22 +203,24 @@ Consequently, the primary pilot can audit event-detection, AOI, quality-rule, an
 
 Before computing the focal effect:
 
-1. run audit_srl_dataset.py on the extracted Figshare release;
-2. verify participant counts and Prompt/Non-prompt assignment;
-3. verify each retained participant's Text/Multimedia trial structure;
-4. verify raw sample columns, millisecond timestamps, and observed sampling intervals;
-5. inspect all eight released Task images;
-6. create AOI geometry independently from those images;
-7. document the relationship between reconstructed AOIs and released vendor AOI labels;
-8. determine what gaze-offset-correction provenance is recoverable;
-9. freeze detector specifications;
-10. freeze AOI perturbation envelope;
-11. freeze quality-rule branches;
-12. freeze the count-model specification and focal contrast;
-13. record the complete planned universe before estimating branch-specific effects.
+1. run `audit_srl_dataset.py` on the extracted Figshare release;
+2. run `audit_srl_identifiability.py` and verify Prompt/Non-prompt is represented within every Task;
+3. determine empirically whether `stimulus_type` varies within Task identity or is nested in it;
+4. verify participant counts and each retained participant's eight-task structure;
+5. verify raw sample columns, millisecond timestamps, and observed sampling intervals;
+6. verify `stimulus_time` against raw trial duration and define the exposure discrepancy rule;
+7. inspect all eight released Task images;
+8. freeze source-compatible quartile AOI boundaries independently from focal outcomes;
+9. document agreement/disagreement with released vendor AOI labels;
+10. determine what gaze-offset-correction provenance is recoverable;
+11. freeze detector specifications and the remaining gap/interpolation semantics;
+12. freeze AOI perturbation envelope;
+13. freeze quality-rule branches, including any recovery-calibrated threshold;
+14. freeze the negative-binomial repeated-measures fitting engine and diagnostics;
+15. record the complete planned universe before estimating branch-specific effects.
 
 ## Success criterion
 
-The study is informative whether the focal Text-versus-Multimedia conclusion is stable or sensitive.
+The study is informative whether the focal Prompt-versus-Non-prompt transition-rate conclusion is stable or sensitive.
 
 No branch will be added, removed, or reparameterized because it strengthens or weakens the effect.
