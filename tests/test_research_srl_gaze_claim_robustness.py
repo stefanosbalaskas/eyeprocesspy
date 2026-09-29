@@ -39,6 +39,10 @@ srl_identifiability = _load_module(
     "srl_identifiability_research",
     RESEARCH / "audit_srl_identifiability.py",
 )
+srl_glmm_bridge = _load_module(
+    "srl_glmm_bridge_research",
+    RESEARCH / "srl_glmm_bridge.py",
+)
 srl_model_table = _load_module(
     "srl_model_table_research",
     RESEARCH / "prepare_srl_model_table.py",
@@ -563,3 +567,59 @@ def test_srl_model_table_keeps_non_evaluable_rows_visible():
     assert len(analysis) == 2
     assert analysis["model_status"].eq("ok").all()
     assert int(audit["rows"].sum()) == 4
+
+
+def test_srl_glmm_bridge_preserves_log_rate_ratio_contract(tmp_path: Path):
+    result_path = tmp_path / "primary_nb2_glmm_prompt_coefficient.csv"
+    pd.DataFrame(
+        [
+            {
+                "model_id": "primary_nb2_glmm",
+                "term": "prompt_indicator",
+                "estimand_id": "prompt_transition_rate_ratio",
+                "estimate_log_rate_ratio": 0.2,
+                "SE": 0.05,
+                "CI_lower_log": 0.1,
+                "CI_upper_log": 0.3,
+                "converged": True,
+                "n_rows": 640,
+            }
+        ]
+    ).to_csv(result_path, index=False)
+
+    result = srl_glmm_bridge.read_primary_glmm_result(result_path)
+
+    assert result["estimate"] == pytest.approx(0.2)
+    assert result["SE"] == pytest.approx(0.05)
+    assert result["CI_lower"] == pytest.approx(0.1)
+    assert result["CI_upper"] == pytest.approx(0.3)
+    assert result["N"] == 640
+    assert result["converged"] is True
+    assert result["effect_scale"] == "log_rate_ratio"
+    assert result["rate_ratio"] == pytest.approx(1.2214027581601699)
+
+
+def test_srl_glmm_bridge_rejects_wrong_estimand_and_nonfinite_values(
+    tmp_path: Path,
+):
+    result_path = tmp_path / "bad.csv"
+    base = {
+        "model_id": "primary_nb2_glmm",
+        "term": "prompt_indicator",
+        "estimand_id": "wrong",
+        "estimate_log_rate_ratio": 0.2,
+        "SE": 0.05,
+        "CI_lower_log": 0.1,
+        "CI_upper_log": 0.3,
+        "converged": True,
+        "n_rows": 640,
+    }
+    pd.DataFrame([base]).to_csv(result_path, index=False)
+    with pytest.raises(ValueError, match="estimand_id"):
+        srl_glmm_bridge.read_primary_glmm_result(result_path)
+
+    base["estimand_id"] = "prompt_transition_rate_ratio"
+    base["estimate_log_rate_ratio"] = float("nan")
+    pd.DataFrame([base]).to_csv(result_path, index=False)
+    with pytest.raises(ValueError, match="estimate_log_rate_ratio"):
+        srl_glmm_bridge.read_primary_glmm_result(result_path)
