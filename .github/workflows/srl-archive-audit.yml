@@ -1,4 +1,5 @@
 name: SRL archive audit
+# Audit revision: exact released cohorts + task-level timebase
 
 on:
   workflow_dispatch:
