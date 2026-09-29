@@ -158,16 +158,23 @@ def _fit_one(
     *,
     universe_row: pd.Series,
     branch: pd.DataFrame,
-    stimuli: pd.DataFrame,
+    stimuli: pd.DataFrame | None,
     r_script: Path,
     temp_root: Path,
 ) -> tuple[dict[str, object], pd.DataFrame]:
     quality_rule = str(universe_row["quality_rule"])
     quality_applied = apply_quality_rule(branch, quality_rule)
-    model_table, audit = prepare_srl_model_table.prepare_model_table(
-        quality_applied,
-        stimuli,
-    )
+    if stimuli is None:
+        model_table, audit = (
+            prepare_srl_model_table.prepare_model_table_from_measurement(
+                quality_applied
+            )
+        )
+    else:
+        model_table, audit = prepare_srl_model_table.prepare_model_table(
+            quality_applied,
+            stimuli,
+        )
 
     universe_id = str(universe_row["universe_id"])
     model_dir = temp_root / universe_id
@@ -251,7 +258,7 @@ def _fit_one(
 def fit_universe(
     *,
     measurement: pd.DataFrame,
-    stimuli: pd.DataFrame,
+    stimuli: pd.DataFrame | None,
     universe: pd.DataFrame,
     identity_presence: pd.DataFrame,
     timebase_summary: pd.DataFrame,
@@ -312,7 +319,16 @@ def fit_universe(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("measurement_csv", type=Path)
-    parser.add_argument("stimuli_csv", type=Path)
+    parser.add_argument(
+        "stimuli_csv",
+        type=Path,
+        nargs="?",
+        help=(
+            "Optional released stimuli.csv for independent metadata rejoin. "
+            "Omit to use exposure metadata embedded in the validated "
+            "measurement artifact."
+        ),
+    )
     parser.add_argument("universe_csv", type=Path)
     parser.add_argument("identity_presence_csv", type=Path)
     parser.add_argument("timebase_summary_csv", type=Path)
@@ -333,7 +349,11 @@ def main() -> int:
 
     results, audits = fit_universe(
         measurement=pd.read_csv(args.measurement_csv),
-        stimuli=pd.read_csv(args.stimuli_csv),
+        stimuli=(
+            pd.read_csv(args.stimuli_csv)
+            if args.stimuli_csv is not None
+            else None
+        ),
         universe=pd.read_csv(args.universe_csv),
         identity_presence=pd.read_csv(args.identity_presence_csv),
         timebase_summary=pd.read_csv(args.timebase_summary_csv),
