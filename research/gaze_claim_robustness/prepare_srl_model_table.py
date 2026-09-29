@@ -149,6 +149,81 @@ def prepare_model_table(
     return joined, audit
 
 
+def prepare_model_table_from_measurement(
+    outcome: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Prepare the frozen model table from embedded validated measurement metadata.
+
+    This path avoids re-downloading the source archive after the measurement-only
+    stage. It requires the measurement artifact to carry the exposure metadata
+    that was joined from the released stimuli table during measurement.
+    """
+    embedded_required = REQUIRED | {
+        "metadata_stimulus_time_seconds",
+    }
+    _require(outcome, embedded_required, "measurement outcome")
+
+    joined = outcome.copy()
+    joined["participant_id"] = joined["participant_id"].map(_clean)
+    joined["stimulus_id"] = joined["stimulus_id"].map(_stem)
+
+    exposure = pd.to_numeric(
+        joined["metadata_stimulus_time_seconds"],
+        errors="coerce",
+    )
+    count = pd.to_numeric(joined["transition_count"], errors="coerce")
+    source_ok = joined["status"].eq("ok")
+    exposure_ok = np.isfinite(exposure) & exposure.gt(0)
+    count_ok = np.isfinite(count) & count.ge(0)
+
+    model_status: list[str] = []
+    for i in range(len(joined)):
+        reasons: list[str] = []
+        if not bool(source_ok.iloc[i]):
+            reasons.append(f"outcome_status={joined.iloc[i]['status']}")
+        if not bool(exposure_ok.iloc[i]):
+            reasons.append("invalid_or_nonpositive_exposure")
+        if not bool(count_ok.iloc[i]):
+            reasons.append("invalid_transition_count")
+        model_status.append("ok" if not reasons else "|".join(reasons))
+
+    joined["model_status"] = model_status
+    joined["model_evaluable"] = joined["model_status"].eq("ok")
+    joined["exposure_seconds"] = exposure
+    joined["log_exposure"] = np.where(
+        joined["model_evaluable"],
+        np.log(exposure),
+        np.nan,
+    )
+    joined["prompt_indicator"] = joined["experiment_condition"].map(
+        {"Non-prompt": 0.0, "Prompt": 1.0}
+    )
+
+    bad_condition = joined["prompt_indicator"].isna()
+    if bad_condition.any():
+        joined.loc[bad_condition, "model_evaluable"] = False
+        joined.loc[bad_condition, "model_status"] = joined.loc[
+            bad_condition, "model_status"
+        ].map(
+            lambda value: (
+                "invalid_experiment_condition"
+                if value == "ok"
+                else value + "|invalid_experiment_condition"
+            )
+        )
+        joined.loc[bad_condition, "log_exposure"] = np.nan
+
+    audit = (
+        joined.groupby("model_status", dropna=False)
+        .size()
+        .rename("rows")
+        .reset_index()
+        .sort_values(["model_status"], kind="stable")
+        .reset_index(drop=True)
+    )
+    return joined, audit
+
+
 def primary_analysis_rows(model_table: pd.DataFrame) -> pd.DataFrame:
     """Return only explicitly evaluable rows for the eventual fitting engine."""
     if "model_evaluable" not in model_table:
