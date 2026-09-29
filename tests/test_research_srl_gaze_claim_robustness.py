@@ -854,7 +854,7 @@ def test_srl_measurement_runner_materializes_all_base_branches(tmp_path: Path):
     participants = pd.read_csv(participants_path)
     stimuli = pd.read_csv(stimuli_path)
 
-    results, statuses, failures = srl_measurement.run_participant(
+    results, statuses, failures, detector_warnings = srl_measurement.run_participant(
         "P001",
         raw_file=raw_path,
         participants_csv=participants_path,
@@ -866,6 +866,7 @@ def test_srl_measurement_runner_materializes_all_base_branches(tmp_path: Path):
     assert len(results) == 288
     assert len(statuses) == 18
     assert failures.empty
+    assert detector_warnings.empty
     assert set(results["detector_id"]) == {
         "ivt_30_100_simple",
         "ivt_40_50_simple",
