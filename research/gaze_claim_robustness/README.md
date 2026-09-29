@@ -194,19 +194,45 @@ but not for claims about re-running fixation detectors from the original sample 
 
 ### Tier 3 — complete detector-to-claim HCI validation
 
-The final paper still needs at least one dataset that combines:
+The strongest currently verified open candidate is the 2025 Scientific Data release **Experimental Dataset on Eye-tracking Activity During Self-Regulated Learning** (Figshare DOI 10.6084/m9.figshare.28304069).
 
-1. continuous raw gaze;
-2. reconstructable interface/stimulus geometry;
-3. a defensible HCI manipulation or comparison;
-4. participant/trial metadata;
-5. enough information to reproduce the focal outcome.
+It satisfies the main structural requirements:
 
-The University of Seville infrared/webcam benchmark is especially attractive because its record explicitly describes raw gaze/UI logs, scenario definitions, and low- versus high-density static-form tasks. Its files are currently restricted, so it is an access candidate rather than current evidence.
+- controlled 2 × 2 mixed design;
+- between-subject Prompt versus Non-prompt condition;
+- within-subject Text versus Multimedia study-material condition;
+- 84 complete recordings after the study's stated exclusions;
+- original sample-level eye-tracking exports with `RecordingTime [ms]`;
+- separate left/right point-of-regard coordinates in pixels;
+- 250 Hz SMI RED 250 acquisition;
+- released `participants.csv`, `stimuli.csv`, post-test data, event-level exports, raw sample exports, and stimulus images;
+- four documented AOIs per learning slide, with raw AOI labels also present in the sample export.
 
-The non-public RecGaze release is another strong later candidate because it adds raw gaze and pixel positions to genuinely interactive carousel-selection sessions, but it likewise requires authorized research access.
+This is therefore the first dataset in the audit that can plausibly support the full:
 
-A split Tier-1/Tier-2 demonstration is useful for framework qualification, but it must not be misrepresented as full cross-stage validation. Full detector-to-claim propagation remains a required milestone for the final CHI study.
+[
+	ext{sample stream}
+ightarrow
+	ext{event detection}
+ightarrow
+	ext{AOI assignment}
+ightarrow
+	ext{quality handling}
+ightarrow
+	ext{gaze outcome}
+ightarrow
+	ext{fixed model}
+ightarrow
+	ext{HCI conclusion}
+]
+
+chain using an actual experimental interface/material manipulation rather than a manufactured contrast.
+
+A crucial provenance limitation remains. The data descriptor reports manual BeGaze gaze-offset correction for recordings with correctable systematic distortion and excludes irreparable recordings. The released files are described as original raw data, but sample-level availability does not establish that every coordinate is sensor-native and untouched by those corrections. The first archive audit must therefore determine what correction provenance is recoverable. We can use the release for detector/AOI/quality robustness while avoiding claims about uncertainty *before* any unrecoverable manual offset correction.
+
+The published study also used an 80% tracking-ratio exclusion rule and a specific high-speed saccade-based event configuration. These are historical study choices, not defaults for our robustness framework. They may be included as documented reference branches, alongside other literature-defensible specifications fixed before branch-specific results are inspected.
+
+The University of Seville infrared/webcam benchmark and non-public RecGaze remain useful external validation candidates if access is obtained, but they are no longer required to make the first complete open-data pilot feasible.
 
 ## First-pilot decision
 
