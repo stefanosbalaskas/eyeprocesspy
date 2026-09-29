@@ -135,6 +135,7 @@ jobs:
           uv run --frozen python             research/gaze_claim_robustness/audit_srl_identifiability.py             "$PARTICIPANTS"             "$STIMULI"             --output-dir evidence/identifiability             | tee evidence/identifiability_stdout.txt
 
       - name: Build pre-results design manifest
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -178,6 +179,28 @@ jobs:
                       errors="coerce",
                   )
                   out.append(f"min_fraction_4ms={fraction.min():.8f}")
+
+          identity = Path("evidence/identity/identity_summary.csv")
+          if identity.exists():
+              frame = pd.read_csv(identity)
+              for _, row in frame.iterrows():
+                  out.append(f"identity:{row['metric']}={row['value']}")
+
+          timebase = Path("evidence/task_timebase/participant_timebase_summary.csv")
+          if timebase.exists():
+              frame = pd.read_csv(timebase)
+              out.append(
+                  "task_timebase:all8_nominal_250="
+                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+              out.append(
+                  "task_timebase:all8_dense_250="
+                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+              out.append(
+                  "task_timebase:all8_lossless_nan_grid_250="
+                  f"{int(frame['all_8_tasks_lossless_nan_grid_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
 
           estimands = Path("evidence/identifiability/estimand_identifiability.csv")
           if estimands.exists():
