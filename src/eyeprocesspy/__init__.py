@@ -682,39 +682,6 @@ from .detector_multiverse import (
 from .detector_multiverse import (
     validate_event_detector_spec as validate_event_detector_spec,
 )
-from .gaze_claim_robustness import (
-    GazeClaimSpec as GazeClaimSpec,
-)
-from .gaze_claim_robustness import (
-    GazeRobustnessAuditResult as GazeRobustnessAuditResult,
-)
-from .gaze_claim_robustness import (
-    GazeRobustnessSpec as GazeRobustnessSpec,
-)
-from .gaze_claim_robustness import (
-    decompose_gaze_decision_sensitivity as decompose_gaze_decision_sensitivity,
-)
-from .gaze_claim_robustness import (
-    define_gaze_claim_spec as define_gaze_claim_spec,
-)
-from .gaze_claim_robustness import (
-    define_gaze_robustness_spec as define_gaze_robustness_spec,
-)
-from .gaze_claim_robustness import (
-    expand_gaze_robustness_spec as expand_gaze_robustness_spec,
-)
-from .gaze_claim_robustness import (
-    plot_gaze_specification_curve as plot_gaze_specification_curve,
-)
-from .gaze_claim_robustness import (
-    report_gaze_claim_robustness as report_gaze_claim_robustness,
-)
-from .gaze_claim_robustness import (
-    run_gaze_robustness_audit as run_gaze_robustness_audit,
-)
-from .gaze_claim_robustness import (
-    summarise_gaze_claim_robustness as summarise_gaze_claim_robustness,
-)
 from .dynamic_aoi import (
     assign_dynamic_aoi as assign_dynamic_aoi,
 )
@@ -1149,6 +1116,39 @@ from .functional_pupil import (
 )
 from .functional_pupil import (
     simulate_advanced_process_data as simulate_advanced_process_data,
+)
+from .gaze_claim_robustness import (
+    GazeClaimSpec as GazeClaimSpec,
+)
+from .gaze_claim_robustness import (
+    GazeRobustnessAuditResult as GazeRobustnessAuditResult,
+)
+from .gaze_claim_robustness import (
+    GazeRobustnessSpec as GazeRobustnessSpec,
+)
+from .gaze_claim_robustness import (
+    decompose_gaze_decision_sensitivity as decompose_gaze_decision_sensitivity,
+)
+from .gaze_claim_robustness import (
+    define_gaze_claim_spec as define_gaze_claim_spec,
+)
+from .gaze_claim_robustness import (
+    define_gaze_robustness_spec as define_gaze_robustness_spec,
+)
+from .gaze_claim_robustness import (
+    expand_gaze_robustness_spec as expand_gaze_robustness_spec,
+)
+from .gaze_claim_robustness import (
+    plot_gaze_specification_curve as plot_gaze_specification_curve,
+)
+from .gaze_claim_robustness import (
+    report_gaze_claim_robustness as report_gaze_claim_robustness,
+)
+from .gaze_claim_robustness import (
+    run_gaze_robustness_audit as run_gaze_robustness_audit,
+)
+from .gaze_claim_robustness import (
+    summarise_gaze_claim_robustness as summarise_gaze_claim_robustness,
 )
 from .gaze_stress import (
     inject_blink_gaps as inject_blink_gaps,
