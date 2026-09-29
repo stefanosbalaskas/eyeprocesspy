@@ -319,17 +319,16 @@ def fit_universe(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("measurement_csv", type=Path)
+    parser.add_argument("universe_csv", type=Path)
     parser.add_argument(
-        "stimuli_csv",
+        "--stimuli-csv",
         type=Path,
-        nargs="?",
         help=(
             "Optional released stimuli.csv for independent metadata rejoin. "
             "Omit to use exposure metadata embedded in the validated "
             "measurement artifact."
         ),
     )
-    parser.add_argument("universe_csv", type=Path)
     parser.add_argument("identity_presence_csv", type=Path)
     parser.add_argument("timebase_summary_csv", type=Path)
     parser.add_argument(
