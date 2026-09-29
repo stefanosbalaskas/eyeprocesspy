@@ -14,7 +14,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
 TRIAL_REQUIRED = {
     "pid",
     "trial",
