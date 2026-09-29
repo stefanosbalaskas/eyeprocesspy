@@ -25,6 +25,10 @@ srl_manifest = _load_module(
     "srl_manifest_research",
     RESEARCH / "build_srl_design_manifest.py",
 )
+srl_coordinates = _load_module(
+    "srl_coordinates_research",
+    RESEARCH / "srl_coordinate_branches.py",
+)
 
 
 def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
@@ -157,3 +161,44 @@ def test_srl_adapter_refuses_nonmonotonic_trial_time(tmp_path: Path):
             stimulus_name="Task_1",
             eye="right",
         )
+
+
+def test_srl_coordinate_branches_make_viewing_distance_explicit(tmp_path: Path):
+    participants_path, stimuli_path, _raw_dir, raw_path = _write_fixture(tmp_path)
+    dataset = srl_adapter.load_srl_trial(
+        raw_path,
+        participants_path,
+        stimuli_path,
+        stimulus_name="Task_5",
+        eye="left",
+    )
+
+    angular = srl_coordinates.convert_srl_pixels_to_degrees(
+        dataset,
+        viewing_distance_cm=65.0,
+    )
+    samples = angular["gaze_samples"]
+
+    assert samples["source_gaze_x_px"].tolist() == pytest.approx(
+        [110.0, 111.0, 112.0]
+    )
+    assert samples["source_gaze_y_px"].tolist() == pytest.approx(
+        [210.0, 211.0, 212.0]
+    )
+    assert samples["valid"].tolist() == dataset["gaze_samples"]["valid"].tolist()
+    assert samples["coordinate_space_id"].nunique() == 1
+    assert "65cm" in samples["coordinate_space_id"].iloc[0]
+
+    ppd = srl_coordinates.pixels_per_degree(65.0)
+    assert ppd == pytest.approx(37.27007802017664)
+    assert samples["gaze_x"].iloc[1] - samples["gaze_x"].iloc[0] == pytest.approx(
+        1.0 / ppd
+    )
+
+    branch = angular.vendor_metadata["angular_coordinate_branch"]
+    assert branch["viewing_distance_cm"] == pytest.approx(65.0)
+    assert branch["source_pixel_coordinates_retained"] is True
+
+    manifest = srl_coordinates.coordinate_branch_manifest()
+    assert manifest["viewing_distance_cm"].tolist() == [60.0, 65.0, 70.0]
+    assert manifest["pixels_per_degree"].is_monotonic_increasing
