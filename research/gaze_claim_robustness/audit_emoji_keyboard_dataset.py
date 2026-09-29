@@ -12,7 +12,6 @@ import argparse
 import csv
 import re
 import zipfile
-from collections import defaultdict
 from pathlib import Path
 
 RAW_RE = re.compile(
@@ -86,26 +85,26 @@ def audit(raw_zip: Path, processed_zip: Path) -> tuple[list[dict[str, object]], 
 
     for task_type, layout in cells:
         raw_participants = sorted(
-            p for t, l, p in raw_workbooks if t == task_type and l == layout
+            p for task_name, layout_name, p in raw_workbooks if task_name == task_type and layout_name == layout
         )
         scroll_participants = sorted(
-            {p for t, l, p, _ in scroll_tasks if t == task_type and l == layout}
+            {p for task_name, layout_name, p, _ in scroll_tasks if task_name == task_type and layout_name == layout}
         )
         processed_participants = sorted(
-            {p for t, l, p, _ in processed_tasks if t == task_type and l == layout}
+            {p for task_name, layout_name, p, _ in processed_tasks if task_name == task_type and layout_name == layout}
         )
         processed_count = sum(
-            1 for t, l, _, _ in processed_tasks if t == task_type and l == layout
+            1 for task_name, layout_name, _, _ in processed_tasks if task_name == task_type and layout_name == layout
         )
         scroll_count = sum(
-            1 for t, l, _, _ in scroll_tasks if t == task_type and l == layout
+            1 for task_name, layout_name, _, _ in scroll_tasks if task_name == task_type and layout_name == layout
         )
         missing_processed = []
         for participant in processed_participants:
             present = {
                 task
-                for t, l, p, task in processed_tasks
-                if t == task_type and l == layout and p == participant
+                for task_name, layout_name, p, task in processed_tasks
+                if task_name == task_type and layout_name == layout and p == participant
             }
             for task in range(1, 7):
                 if task not in present:
