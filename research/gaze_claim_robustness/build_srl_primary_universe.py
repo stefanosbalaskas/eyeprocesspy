@@ -4,12 +4,20 @@
 The primary denominator contains only open/reproducible raw-sample branches
 whose decisions are structurally compatible:
 
-4 detector specifications
+3 detector specifications
 x 2 eyes
 x 3 viewing-distance assumptions
 x 2 AOI geometry conventions
 x 2 quality rules
-= 96 planned specifications.
+x 2 sampling-cohort definitions
+= 144 planned specifications.
+
+REMoDNaV is not in the primary denominator after the pre-results archive audit:
+78/83 raw participants have all eight learning tasks at nominal 250 Hz, five
+participants are nominally ~60 Hz, and no participant has all eight Task
+segments strictly dense/regular at 250 Hz. Adding REMoDNaV would therefore
+require a new resampling/regularization decision that was not part of the
+original primary detector contract.
 
 The released proprietary BeGaze event catalogue is retained as a historical
 reference outside this denominator. It is not duplicated across viewing
@@ -28,7 +36,6 @@ PRIMARY_DETECTORS = (
     "ivt_30_100_simple",
     "ivt_40_50_simple",
     "idt_1_100",
-    "remodnav_defaults",
 )
 EYES = ("left", "right")
 VIEWING_DISTANCES_CM = (60.0, 65.0, 70.0)
@@ -40,6 +47,10 @@ QUALITY_RULES = (
     "released_sample",
     "trial_80_sensitivity",
 )
+COHORTS = (
+    "exact_raw82",
+    "nominal250_77",
+)
 PRIMARY_MODEL_ID = "primary_nb_glmm"
 ESTIMAND_ID = "prompt_transition_rate_ratio"
 
@@ -50,10 +61,11 @@ def _hash(payload: dict[str, object]) -> str:
 
 
 def build_primary_universe(research_dir: Path) -> pd.DataFrame:
-    """Return the deterministic 96-row planned primary universe."""
+    """Return the deterministic 144-row planned primary universe."""
     detector_plan = pd.read_csv(research_dir / "srl_detector_plan.csv")
     quality_plan = pd.read_csv(research_dir / "srl_quality_plan.csv")
     model_plan = pd.read_csv(research_dir / "srl_model_plan.csv")
+    cohort_plan = pd.read_csv(research_dir / "srl_cohort_plan.csv")
 
     detector_rows = detector_plan.loc[
         detector_plan["detector_id"].astype(str).isin(PRIMARY_DETECTORS)
@@ -84,6 +96,21 @@ def build_primary_universe(research_dir: Path) -> pd.DataFrame:
         )
         raise ValueError(f"Primary quality plan is incomplete: {missing}.")
 
+    cohort_rows = cohort_plan.loc[
+        cohort_plan["cohort_id"].astype(str).isin(COHORTS)
+    ]
+    if set(cohort_rows["cohort_id"].astype(str)) != set(COHORTS):
+        missing = sorted(
+            set(COHORTS) - set(cohort_rows["cohort_id"].astype(str))
+        )
+        raise ValueError(f"Primary cohort plan is incomplete: {missing}.")
+    if not cohort_rows["status"].astype(str).eq("frozen").all():
+        bad = cohort_rows.loc[
+            ~cohort_rows["status"].astype(str).eq("frozen"),
+            ["cohort_id", "status"],
+        ].to_dict(orient="records")
+        raise ValueError(f"Primary cohort definitions are not frozen: {bad}.")
+
     model = model_plan.loc[
         model_plan["model_id"].astype(str).eq(PRIMARY_MODEL_ID)
     ]
@@ -103,33 +130,35 @@ def build_primary_universe(research_dir: Path) -> pd.DataFrame:
             for distance in VIEWING_DISTANCES_CM:
                 for aoi in AOI_CONVENTIONS:
                     for quality in QUALITY_RULES:
-                        index += 1
-                        payload: dict[str, object] = {
-                            "detector_id": detector,
-                            "eye": eye,
-                            "viewing_distance_cm": distance,
-                            "aoi_convention": aoi,
-                            "quality_rule": quality,
-                            "model_id": PRIMARY_MODEL_ID,
-                            "estimand_id": ESTIMAND_ID,
-                        }
-                        rows.append(
-                            {
-                                "universe_id": f"srl_u{index:03d}",
-                                **payload,
-                                "detector_status": detector_status,
-                                "requires_dense_regular_timebase": (
-                                    detector == "remodnav_defaults"
-                                ),
-                                "effect_scale": "log_rate_ratio",
-                                "planned": True,
-                                "specification_hash": _hash(payload),
+                        for cohort in COHORTS:
+                            index += 1
+                            payload: dict[str, object] = {
+                                "detector_id": detector,
+                                "eye": eye,
+                                "viewing_distance_cm": distance,
+                                "aoi_convention": aoi,
+                                "quality_rule": quality,
+                                "cohort_id": cohort,
+                                "model_id": PRIMARY_MODEL_ID,
+                                "estimand_id": ESTIMAND_ID,
                             }
-                        )
+                            rows.append(
+                                {
+                                    "universe_id": f"srl_u{index:03d}",
+                                    **payload,
+                                    "detector_status": detector_status,
+                                    "requires_dense_regular_timebase": False,
+                                    "effect_scale": "log_rate_ratio",
+                                    "planned": True,
+                                    "specification_hash": _hash(payload),
+                                }
+                            )
 
     out = pd.DataFrame(rows)
-    if len(out) != 96:
-        raise RuntimeError(f"Expected 96 primary specifications; generated {len(out)}.")
+    if len(out) != 144:
+        raise RuntimeError(
+            f"Expected 144 primary specifications; generated {len(out)}."
+        )
     if out["specification_hash"].duplicated().any():
         raise RuntimeError("Primary universe contains duplicate specification hashes.")
     return out
@@ -139,13 +168,29 @@ def historical_reference_manifest() -> pd.DataFrame:
     """Return non-denominator historical/reference branches."""
     rows = [
         {
+            "reference_id": "remodnav_1_1_2",
+            "role": "optional_regularization_diagnostic_outside_primary_denominator",
+            "event_source": "raw sample stream after an explicitly declared regularization rule",
+            "viewing_distance_branch": "60/65/70 cm if diagnostic is run",
+            "eye_semantics": "left/right explicit",
+            "aoi_reference": "same frozen AOI multiverse",
+            "quality_reference": "same frozen quality multiverse",
+            "reason_outside_denominator": (
+                "Actual archive audit found 78/83 participants with all eight tasks "
+                "nominally at 250 Hz, five participants at approximately 60 Hz, and "
+                "0/83 participants with all eight Task segments strictly dense regular "
+                "250 Hz sampling. REMoDNaV supports only dense regular sampling, so "
+                "including it would require a new resampling/regularization decision."
+            ),
+        },
+        {
             "reference_id": "vendor_begaze_released",
             "role": "historical_reference_outside_primary_denominator",
             "event_source": "released BeGaze event catalogue",
             "viewing_distance_branch": "not_applicable",
             "eye_semantics": "pending_actual_archive_audit",
             "aoi_reference": "released vendor AOI labels / transition columns",
-            "quality_reference": "released retained participant set",
+            "quality_reference": "exact raw/event/metadata IDs where comparable",
             "reason_outside_denominator": (
                 "Already-detected proprietary events are not meaningfully crossed "
                 "with raw-sample viewing-distance assumptions; duplicating them would "
