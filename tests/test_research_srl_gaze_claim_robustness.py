@@ -911,7 +911,8 @@ def test_srl_model_universe_cohort_quality_and_branch_selection():
 
     rows = []
     for participant in ("1", "2"):
-        for task in ("Task_1", "Task_2"):
+        for task_number in range(1, 9):
+            task = f"Task_{task_number}"
             rows.append(
                 {
                     "participant_id": participant,
@@ -945,7 +946,7 @@ def test_srl_model_universe_cohort_quality_and_branch_selection():
         spec,
         {"1", "2"},
     )
-    assert len(selected) == 4
+    assert len(selected) == 16
 
     released = srl_model_universe.apply_quality_rule(
         selected,
