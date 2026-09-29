@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -11,6 +12,8 @@ import eyeprocesspy as ep
 
 ROOT = Path(__file__).resolve().parents[1]
 RESEARCH = ROOT / "research" / "gaze_claim_robustness"
+if str(RESEARCH) not in sys.path:
+    sys.path.insert(0, str(RESEARCH))
 
 
 def _load_module(name: str, path: Path) -> ModuleType:
@@ -58,6 +61,10 @@ srl_universe = _load_module(
 srl_model_table = _load_module(
     "srl_model_table_research",
     RESEARCH / "prepare_srl_model_table.py",
+)
+srl_measurement = _load_module(
+    "srl_measurement_research",
+    RESEARCH / "run_srl_measurement_universe.py",
 )
 
 
@@ -832,3 +839,46 @@ def test_srl_transition_outcome_rejects_overlapping_fixation_sequence():
     assert not bool(adjacency.iloc[0]["temporal_order_valid"])
     assert not bool(adjacency.iloc[0]["evaluable"])
     assert not bool(adjacency.iloc[0]["between_aoi_transition"])
+
+
+def test_srl_measurement_runner_materializes_all_base_branches(tmp_path: Path):
+    participants_path, stimuli_path, _raw_dir, raw_path = _write_fixture(tmp_path)
+    participants = pd.read_csv(participants_path)
+    stimuli = pd.read_csv(stimuli_path)
+
+    results, statuses, failures = srl_measurement.run_participant(
+        "P001",
+        raw_file=raw_path,
+        participants_csv=participants_path,
+        stimuli_csv=stimuli_path,
+        participants=participants,
+        stimuli=stimuli,
+    )
+
+    assert len(results) == 288
+    assert len(statuses) == 18
+    assert failures.empty
+    assert set(results["detector_id"]) == {
+        "ivt_30_100_simple",
+        "ivt_40_50_simple",
+        "idt_1_100",
+    }
+    assert set(results["eye"]) == {"left", "right"}
+    assert set(results["viewing_distance_cm"]) == {60.0, 65.0, 70.0}
+    assert set(results["aoi_convention"]) == {
+        "exact_quarters",
+        "reported_area_center_seam",
+    }
+    assert set(results["stimulus_id"]) == {
+        f"Task_{i}" for i in range(1, 9)
+    }
+    assert results["status"].eq("no_fixations").all()
+    key = [
+        "participant_id",
+        "stimulus_id",
+        "detector_id",
+        "eye",
+        "viewing_distance_cm",
+        "aoi_convention",
+    ]
+    assert not results.duplicated(key).any()
