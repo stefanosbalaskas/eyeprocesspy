@@ -125,6 +125,15 @@ Gate:
 
 - raw-gaze analysis depends on obtaining the appropriate dataset access. Do not substitute the public processed data for raw detector-level claims.
 
+
+## Verified archive-structure finding
+
+The Zenodo raw-archive preview currently shows raw `extracted_data.xlsx` participant directories for Scenario-based Selection/android, Scenario-based Selection/iOS, and Target Search/android. For Target Search/iOS, the raw preview instead exposes `Target Search.lnk` plus `ios-scroll/` logs; no corresponding raw iOS participant workbook directory is visible in the archive preview. The processed archive nevertheless contains `Target Search_ios_...` CSV files.
+
+This mismatch is a hard feasibility warning. Processed Target Search/iOS files may be used only for downstream analyses supported by their released columns; they must not be treated as evidence that raw sample-level iOS Target Search data are available for detector re-analysis. Detector-level cross-layout claims therefore remain blocked until the original raw iOS workbooks are recovered or the archive is corrected by the dataset authors.
+
+The research-only script `audit_emoji_keyboard_dataset.py` inventories both ZIP archives and writes a cell-by-cell manifest of raw workbooks, scroll logs, processed task files, missing tasks, participant mismatches, and shortcut/link artifacts. It returns a non-zero status when the archive is structurally unsuitable for the full detector-to-claim pilot.
+
 ## Dataset selection rule
 
 A dataset can enter the complete detector-to-claim multiverse only if it provides, at minimum:
