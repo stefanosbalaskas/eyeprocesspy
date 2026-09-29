@@ -66,6 +66,14 @@ srl_measurement = _load_module(
     "srl_measurement_research",
     RESEARCH / "run_srl_measurement_universe.py",
 )
+srl_model_universe = _load_module(
+    "srl_model_universe_research",
+    RESEARCH / "run_srl_model_universe.py",
+)
+srl_summary = _load_module(
+    "srl_summary_research",
+    RESEARCH / "summarise_srl_multiverse.py",
+)
 
 
 def _write_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
@@ -882,3 +890,146 @@ def test_srl_measurement_runner_materializes_all_base_branches(tmp_path: Path):
         "aoi_convention",
     ]
     assert not results.duplicated(key).any()
+
+
+def test_srl_model_universe_cohort_quality_and_branch_selection():
+    identity = pd.DataFrame(
+        {
+            "participant_id": [str(i) for i in range(1, 83)],
+            "exact_cross_source_raw_eligible": [True] * 82,
+        }
+    )
+    timebase = pd.DataFrame(
+        {
+            "participant_id": [str(i) for i in range(1, 83)],
+            "all_8_tasks_nominal_250hz": [True] * 77 + [False] * 5,
+        }
+    )
+    cohorts = srl_model_universe.cohort_sets(identity, timebase)
+    assert len(cohorts["exact_raw82"]) == 82
+    assert len(cohorts["nominal250_77"]) == 77
+
+    rows = []
+    for participant in ("1", "2"):
+        for task in ("Task_1", "Task_2"):
+            rows.append(
+                {
+                    "participant_id": participant,
+                    "stimulus_id": task,
+                    "detector_id": "ivt_30_100_simple",
+                    "eye": "left",
+                    "viewing_distance_cm": 60.0,
+                    "aoi_convention": "exact_quarters",
+                    "transition_count": 2.0,
+                    "status": "ok",
+                    "experiment_condition": (
+                        "Prompt" if participant == "1" else "Non-prompt"
+                    ),
+                    "metadata_tracking_ratio_percent": (
+                        79.0 if task == "Task_1" else 90.0
+                    ),
+                }
+            )
+    measurement = pd.DataFrame(rows)
+    spec = pd.Series(
+        {
+            "universe_id": "srl_u001",
+            "detector_id": "ivt_30_100_simple",
+            "eye": "left",
+            "viewing_distance_cm": 60.0,
+            "aoi_convention": "exact_quarters",
+        }
+    )
+    selected = srl_model_universe.select_measurement_branch(
+        measurement,
+        spec,
+        {"1", "2"},
+    )
+    assert len(selected) == 4
+
+    released = srl_model_universe.apply_quality_rule(
+        selected,
+        "released_sample",
+    )
+    assert released["status"].eq("ok").all()
+
+    thresholded = srl_model_universe.apply_quality_rule(
+        selected,
+        "trial_80_sensitivity",
+    )
+    assert thresholded.loc[
+        thresholded["stimulus_id"].eq("Task_1"),
+        "status",
+    ].str.contains("quality_excluded_tracking_ratio_lt80").all()
+    assert thresholded.loc[
+        thresholded["stimulus_id"].eq("Task_2"),
+        "status",
+    ].eq("ok").all()
+
+
+def test_srl_summary_reports_direction_without_automatic_verdict():
+    results = pd.DataFrame(
+        [
+            {
+                "universe_id": "u1",
+                "status": "ok",
+                "estimate": 0.2,
+                "SE": 0.05,
+                "CI_lower": 0.1,
+                "CI_upper": 0.3,
+                "rate_ratio": 1.22,
+                "detector_id": "ivt30",
+                "eye": "left",
+                "viewing_distance_cm": 60.0,
+                "aoi_convention": "exact",
+                "quality_rule": "released",
+                "cohort_id": "all",
+            },
+            {
+                "universe_id": "u2",
+                "status": "ok",
+                "estimate": -0.1,
+                "SE": 0.04,
+                "CI_lower": -0.2,
+                "CI_upper": 0.0,
+                "rate_ratio": 0.90,
+                "detector_id": "idt",
+                "eye": "right",
+                "viewing_distance_cm": 70.0,
+                "aoi_convention": "seam",
+                "quality_rule": "80",
+                "cohort_id": "250",
+            },
+            {
+                "universe_id": "u3",
+                "status": "fit_failed",
+                "estimate": float("nan"),
+                "SE": float("nan"),
+                "CI_lower": float("nan"),
+                "CI_upper": float("nan"),
+                "rate_ratio": float("nan"),
+                "detector_id": "idt",
+                "eye": "left",
+                "viewing_distance_cm": 65.0,
+                "aoi_convention": "exact",
+                "quality_rule": "released",
+                "cohort_id": "all",
+            },
+        ]
+    )
+
+    summary, decision = srl_summary.summarize_results(results)
+    row = summary.iloc[0]
+    assert row["planned_specifications"] == 3
+    assert row["successful_specifications"] == 2
+    assert row["non_ok_specifications"] == 1
+    assert row["positive_direction_proportion"] == pytest.approx(0.5)
+    assert row["median_log_rate_ratio"] == pytest.approx(0.05)
+    assert set(decision["decision"]) == {
+        "detector_id",
+        "eye",
+        "viewing_distance_cm",
+        "aoi_convention",
+        "quality_rule",
+        "cohort_id",
+    }
