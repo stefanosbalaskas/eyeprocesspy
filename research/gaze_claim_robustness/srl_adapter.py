@@ -19,6 +19,7 @@ Those are separate, declared analysis decisions.
 from __future__ import annotations
 
 import argparse
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -61,13 +62,30 @@ STIMULI_REQUIRED = {
 }
 
 
-def _read_table(path: Path) -> pd.DataFrame:
+@lru_cache(maxsize=4)
+def _read_table_cached(
+    resolved_path: str,
+    mtime_ns: int,
+    size_bytes: int,
+) -> pd.DataFrame:
+    del mtime_ns, size_bytes
+    path = Path(resolved_path)
     suffix = path.suffix.lower()
     if suffix in {".xlsx", ".xls"}:
         return pd.read_excel(path)
     if suffix == ".tsv":
         return pd.read_csv(path, sep="\t")
     return pd.read_csv(path, sep=None, engine="python")
+
+
+def _read_table(path: Path) -> pd.DataFrame:
+    path = Path(path).resolve()
+    stat = path.stat()
+    return _read_table_cached(
+        str(path),
+        int(stat.st_mtime_ns),
+        int(stat.st_size),
+    )
 
 
 def _require(frame: pd.DataFrame, required: set[str], label: str) -> None:
@@ -194,6 +212,15 @@ def load_srl_trial(
             "the adapter will not reorder or repair samples."
         )
     timestamp_seconds = (native_time - native_time[0]) / 1000.0
+    positive_step_ms = np.diff(native_time)
+    positive_step_ms = positive_step_ms[
+        np.isfinite(positive_step_ms) & (positive_step_ms > 0)
+    ]
+    empirical_sampling_rate_hz = (
+        float(1000.0 / np.median(positive_step_ms))
+        if positive_step_ms.size
+        else np.nan
+    )
 
     gaze_x = pd.to_numeric(trial[fields["x"]], errors="coerce")
     gaze_y = pd.to_numeric(trial[fields["y"]], errors="coerce")
@@ -253,6 +280,7 @@ def load_srl_trial(
                 "software_name": "Experiment Center / BeGaze",
                 "experiment_type": "SRL 2x2 mixed factorial",
                 "nominal_sampling_rate": NOMINAL_SAMPLING_RATE_HZ,
+                "empirical_sampling_rate_hz": empirical_sampling_rate_hz,
                 "screen_width_px": SCREEN_WIDTH_PX,
                 "screen_height_px": SCREEN_HEIGHT_PX,
                 "source_file_set": str(raw_file),
@@ -269,6 +297,7 @@ def load_srl_trial(
                 "source_clock": "RecordingTime [ms]",
                 "sampling_type": "continuous",
                 "nominal_rate_hz": NOMINAL_SAMPLING_RATE_HZ,
+                "empirical_rate_hz": empirical_sampling_rate_hz,
                 "timestamp_unit": "milliseconds",
                 "value_unit": "pixels",
                 "coordinate_space_id": coordinate_space_id,
@@ -368,6 +397,8 @@ def load_srl_trial(
             "source_export": "ET_data_raw",
             "source_eye": eye,
             "source_aoi_labels_used_for_geometry": False,
+            "source_nominal_sampling_rate_hz": NOMINAL_SAMPLING_RATE_HZ,
+            "empirical_sampling_rate_hz": empirical_sampling_rate_hz,
             "binocular_fusion": "none",
             "interpolation": "none",
             "smoothing": "none",
@@ -384,6 +415,7 @@ def load_srl_trial(
             f"participant={participant_id};stimulus={requested_stimulus};"
             f"eye={eye};condition={experiment_condition};"
             f"stimulus_type={stimulus_type};"
+            f"empirical_sampling_rate_hz={empirical_sampling_rate_hz:.12g};"
             "timestamp_ms_to_seconds=true;"
             "coordinate_validity=finite_xy_only;"
             "binocular_fusion=none;interpolation=none;smoothing=none;"
