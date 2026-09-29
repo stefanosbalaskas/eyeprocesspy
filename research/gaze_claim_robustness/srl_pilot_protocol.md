@@ -38,6 +38,12 @@ raw point-of-regard
 
 The original event-level and AOI-labelled exports remain useful reference branches. They are not treated as ground truth.
 
+## Related-work risk and novelty boundary
+
+The Scientific Data descriptor cites an unpublished manuscript, *Gaze transitions as a mediator of the effect of metacognitive prompts on student learning: An eye-tracking experiment*. A broad public search did not identify a published version with that title as of 2026-09-29, but unpublished or later work may overlap substantively.
+
+Therefore this pilot must not claim novelty from merely analyzing gaze transitions in this dataset. The intended contribution is measurement robustness: whether a prespecified HCI/learning conclusion survives defensible event-detection, viewing-geometry, AOI-boundary, quality, eye-representation, and modeling decisions.
+
 ## Primary HCI contrast
 
 The proposed primary scientific contrast is the effect of learning-material format:
@@ -78,29 +84,56 @@ Possible branches may include separately justified left-eye, right-eye, and expl
 
 Any binocular rule must be specified as an analytical decision with its own missing-eye behavior.
 
+### 1a. Pixel-to-visual-degree geometry
+
+Angular detector thresholds require an explicit conversion. The source reports a 22-inch, 1600 × 900 display and an approximate 60–70 cm viewing distance, but no participant-specific distance.
+
+The prespecified geometry sensitivity family is therefore:
+
+- 60 cm: reported lower bound;
+- 65 cm: labelled midpoint sensitivity branch;
+- 70 cm: reported upper bound.
+
+Assuming the physical panel aspect ratio matches the 1600:900 pixel aspect ratio, these correspond to approximately 34.40, 37.27, and 40.14 pixels per degree. The transform is reversible and retains the original pixel coordinates. The 65 cm branch must never be described as a measured participant distance.
+
 ### 2. Event detection
 
-The authors report a BeGaze high-speed saccade-based configuration with:
+The SRL descriptor reports a BeGaze high-speed saccade-based configuration with:
 
 - minimum saccade duration 22 ms;
-- saccadic peak-velocity threshold 4 degrees/s;
+- saccadic peak-velocity threshold **4 degrees/s**;
 - minimum fixation duration 50 ms.
 
-The released event catalogue can be retained as a documented vendor/reference branch.
+The value 4 degrees/s must be preserved exactly as reported. It is also a source discrepancy: multiple SMI BeGaze / RED250 reports use 40 degrees/s with the same 22 ms saccade and 50 ms fixation settings, and some describe 40 degrees/s as the default SMI implementation. The project must not silently correct 4 to 40 or claim that the descriptor's value is a standard I-VT threshold.
 
-Open detector alternatives will be selected from literature-defensible I-VT, I-DT and/or adaptive specifications. Exact thresholds are not frozen until coordinate/viewing-geometry implications are audited.
+The released BeGaze event catalogue is therefore the faithful historical reference branch. Re-running eyeprocesspy I-VT at 4 degrees/s would not reproduce proprietary BeGaze High Speed Event Detection and is not an acceptable substitute.
+
+The open comparator plan is now source-backed:
+
+- threshold-matched simple I-VT at 30 degrees/s and 100 ms minimum fixation, explicitly without claiming equivalence to the full Tobii I-VT filter;
+- threshold-matched simple I-VT at 40 degrees/s and 50 ms as an SMI-context sensitivity comparator, not a BeGaze reproduction;
+- I-DT at 1 degree and 100 ms;
+- REMoDNaV with published defaults, once the runtime version and dense-timebase checks are fixed;
+- the package's robust-MAD adaptive detector remains an implementation diagnostic until its numerical parameters are frozen.
+
+No detector may be added or removed because of its focal Text-versus-Multimedia result.
 
 ### 3. AOI definition
 
-The original study reports four AOIs per slide and raw AOI labels, but the sample-level release does not by itself establish the exact boundary coordinates used in BeGaze.
+The source now constrains the nominal AOI family more tightly than the initial audit assumed:
 
-Primary geometric AOIs should therefore be independently reconstructed from the released 1600 × 900 stimulus images using a documented rule before outcomes are evaluated.
+- four AOIs per learning slide;
+- 1600 × 900 display;
+- 359,550 px reported area for each AOI;
+- usage notes explicitly describe transitions between different **quartiles of the learning slides**.
 
-The nominal geometry can then be perturbed using a prespecified spatial envelope.
+Therefore the nominal geometry family is frozen as **four slide quartiles** before focal effects are inspected.
 
-Do not infer AOI boundaries from gaze samples labelled by the vendor; that would make the geometry reconstruction circular.
+The exact pixel boundary convention remains unresolved. Exact 1600 × 900 quarters are 800 × 450 = 360,000 px, whereas the reported area is exactly 799 × 450 = 359,550 px. This is consistent with a narrow seam/edge convention but does not identify its placement.
 
-The vendor AOI assignment may be retained as a separate reference assignment branch.
+The analysis must therefore preserve all source-compatible boundary conventions until the released stimulus/archive metadata are inspected. Raw vendor AOI labels may be used as a reference-agreement audit, but not to manufacture the independent geometry or choose a boundary because it strengthens the focal effect.
+
+After the nominal source-compatible set is frozen, a broader prespecified spatial perturbation envelope can quantify measurement uncertainty around the boundaries.
 
 ### 4. Data quality
 
