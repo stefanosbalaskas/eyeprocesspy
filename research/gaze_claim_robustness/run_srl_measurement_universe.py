@@ -232,12 +232,13 @@ def run_participant(
     stimuli_csv: Path,
     participants: pd.DataFrame,
     stimuli: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Run all 36 measurement branches for one exact-cohort participant."""
     metadata = _metadata_lookup(participants, stimuli)
     result_rows: list[dict[str, object]] = []
     status_rows: list[dict[str, object]] = []
     failure_rows: list[dict[str, object]] = []
+    warning_rows: list[dict[str, object]] = []
     specs = frozen_detector_specs()
 
     for eye in EYES:
@@ -336,6 +337,16 @@ def run_participant(
                             "viewing_distance_cm": distance,
                             "aoi_convention": pd.NA,
                             "stimulus_id": pd.NA,
+                            **row.to_dict(),
+                        }
+                    )
+            if not detected.warnings.empty:
+                for _, row in detected.warnings.iterrows():
+                    warning_rows.append(
+                        {
+                            "participant_id": participant_id,
+                            "eye": eye,
+                            "viewing_distance_cm": distance,
                             **row.to_dict(),
                         }
                     )
@@ -450,6 +461,7 @@ def run_participant(
     results = pd.DataFrame(result_rows)
     statuses = pd.DataFrame(status_rows)
     failures = pd.DataFrame(failure_rows)
+    warnings = pd.DataFrame(warning_rows)
 
     expected = len(TASKS) * len(EYES) * len(DISTANCES_CM) * len(DETECTOR_IDS) * len(
         AOI_CONVENTIONS
@@ -475,7 +487,7 @@ def run_participant(
             + duplicate.head(10).astype(str).agg("|".join, axis=1).str.cat(sep=", ")
         )
 
-    return results, statuses, failures
+    return results, statuses, failures, warnings
 
 
 def exact_cohort_ids(identity_presence_csv: Path) -> list[str]:
@@ -549,13 +561,14 @@ def main() -> int:
     result_frames: list[pd.DataFrame] = []
     status_frames: list[pd.DataFrame] = []
     failure_frames: list[pd.DataFrame] = []
+    warning_frames: list[pd.DataFrame] = []
 
     for index, participant_id in enumerate(ids, start=1):
         raw_file = raw_dir / f"ET_data_raw_{participant_id}.txt"
         if not raw_file.exists():
             raise FileNotFoundError(raw_file)
 
-        results, statuses, failures = run_participant(
+        results, statuses, failures, detector_warnings = run_participant(
             participant_id,
             raw_file=raw_file,
             participants_csv=participants_csv,
@@ -568,10 +581,13 @@ def main() -> int:
             status_frames.append(statuses)
         if not failures.empty:
             failure_frames.append(failures)
+        if not detector_warnings.empty:
+            warning_frames.append(detector_warnings)
 
         print(
             f"[{index}/{len(ids)}] participant={participant_id}; "
-            f"measurement_rows={len(results)}; failures={len(failures)}",
+            f"measurement_rows={len(results)}; failures={len(failures)}; "
+            f"warnings={len(detector_warnings)}",
             flush=True,
         )
 
@@ -584,6 +600,11 @@ def main() -> int:
     failures = (
         pd.concat(failure_frames, ignore_index=True, sort=False)
         if failure_frames
+        else pd.DataFrame()
+    )
+    detector_warnings = (
+        pd.concat(warning_frames, ignore_index=True, sort=False)
+        if warning_frames
         else pd.DataFrame()
     )
 
@@ -606,12 +627,17 @@ def main() -> int:
         args.output_dir / "srl_measurement_failures.csv",
         index=False,
     )
+    detector_warnings.to_csv(
+        args.output_dir / "srl_detector_warnings.csv",
+        index=False,
+    )
 
     print(
         f"Completed {len(ids)} participants; "
         f"rows={len(results)}; "
         f"non_ok={int((~results['status'].eq('ok')).sum())}; "
-        f"failure_records={len(failures)}"
+        f"failure_records={len(failures)}; "
+        f"warning_records={len(detector_warnings)}"
     )
     return 0
 
