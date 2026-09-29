@@ -150,6 +150,19 @@ if (!requireNamespace("glmmTMB", quietly = TRUE)) {
   )
 }
 
+expected_glmmTMB_version <- "1.1.14"
+actual_glmmTMB_version <- as.character(utils::packageVersion("glmmTMB"))
+if (!identical(actual_glmmTMB_version, expected_glmmTMB_version)) {
+  stop(
+    "Frozen primary estimator requires glmmTMB ",
+    expected_glmmTMB_version,
+    "; installed version is ",
+    actual_glmmTMB_version,
+    ". No automatic version substitution is permitted.",
+    call. = FALSE
+  )
+}
+
 formula_primary <- stats::as.formula(
   "transition_count ~ prompt_indicator + factor(stimulus_id) + offset(log_exposure) + (1 | participant_id)"
 )
@@ -272,7 +285,7 @@ status <- data.frame(
   optimizer_convergence_code = optimizer_code,
   positive_definite_hessian = pd_hessian,
   participant_random_intercept_variance = random_variance,
-  glmmTMB_version = as.character(utils::packageVersion("glmmTMB")),
+  glmmTMB_version = actual_glmmTMB_version,
   stringsAsFactors = FALSE
 )
 utils::write.csv(
