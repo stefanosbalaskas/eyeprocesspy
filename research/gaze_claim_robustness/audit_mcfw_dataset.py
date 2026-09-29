@@ -15,7 +15,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
 REQUIRED = {
     "device_time_stamp",
     "system_time_stamp",
