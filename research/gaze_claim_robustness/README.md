@@ -264,6 +264,7 @@ The research scaffold includes:
 - `srl_detector_evidence.csv` and `srl_detector_plan.csv`: source-backed detector evidence and comparator plan;
 - `srl_aoi_evidence.csv`: source constraints on four quartile AOIs and unresolved pixel seams;
 - `srl_quality_plan.csv`: released-sample, historical-80%, trial-level sensitivity, and recovery-calibrated quality branches;
+- `srl_outcome_plan.csv`: freezes the primary adjacent-fixation transition construct, vendor saccade reference boundary, and separate raw-count estimand;
 - `srl_model_plan.csv`: primary repeated-measures transition-rate model structure;
 - `audit_srl_dataset.py`: archive/design/sample-structure audit with no focal effect estimation;
 - `audit_srl_identifiability.py`: Task × modality × prompt identifiability audit;
