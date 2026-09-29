@@ -605,6 +605,62 @@ def test_srl_model_table_keeps_non_evaluable_rows_visible():
     assert int(audit["rows"].sum()) == 4
 
 
+def test_embedded_measurement_metadata_matches_source_rejoin():
+    outcome = pd.DataFrame(
+        {
+            "participant_id": ["P1", "P1", "P2", "P2"],
+            "stimulus_id": ["Task_1", "Task_2", "Task_1", "Task_2"],
+            "experiment_condition": [
+                "Prompt",
+                "Prompt",
+                "Non-prompt",
+                "Non-prompt",
+            ],
+            "stimulus_type": ["Text", "Multimedia", "Text", "Multimedia"],
+            "transition_count": [5.0, 2.0, 3.0, 4.0],
+            "status": ["ok", "ok", "ok", "ok"],
+            "metadata_stimulus_time_seconds": [10.0, 12.0, 9.0, 8.0],
+        }
+    )
+    stimuli = pd.DataFrame(
+        {
+            "part_ID": ["P1", "P1", "P2", "P2"],
+            "stimulus_name": ["Task_1", "Task_2", "Task_1", "Task_2"],
+            "stimulus_type": ["Text", "Multimedia", "Text", "Multimedia"],
+            "stimulus_time": [10.0, 12.0, 9.0, 8.0],
+        }
+    )
+
+    source_joined, source_audit = srl_model_table.prepare_model_table(
+        outcome.drop(columns=["metadata_stimulus_time_seconds"]),
+        stimuli,
+    )
+    embedded, embedded_audit = (
+        srl_model_table.prepare_model_table_from_measurement(outcome)
+    )
+
+    keys = ["participant_id", "stimulus_id"]
+    source_cmp = source_joined.sort_values(keys).reset_index(drop=True)
+    embedded_cmp = embedded.sort_values(keys).reset_index(drop=True)
+
+    assert embedded_cmp["exposure_seconds"].tolist() == pytest.approx(
+        source_cmp["exposure_seconds"].tolist()
+    )
+    assert embedded_cmp["log_exposure"].tolist() == pytest.approx(
+        source_cmp["log_exposure"].tolist()
+    )
+    assert embedded_cmp["prompt_indicator"].tolist() == pytest.approx(
+        source_cmp["prompt_indicator"].tolist()
+    )
+    assert embedded_cmp["model_status"].tolist() == source_cmp[
+        "model_status"
+    ].tolist()
+    assert embedded_cmp["model_evaluable"].tolist() == source_cmp[
+        "model_evaluable"
+    ].tolist()
+    assert embedded_audit.equals(source_audit)
+
+
 def test_srl_glmm_bridge_preserves_log_rate_ratio_contract(tmp_path: Path):
     result_path = tmp_path / "primary_nb2_glmm_prompt_coefficient.csv"
     pd.DataFrame(
