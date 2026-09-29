@@ -165,6 +165,18 @@ MCFW-Gaze should not be presented as an interface A/B experiment unless a focal 
 
 The released `data_loss_per_trial.csv` also shows substantial trial-to-trial and eye-to-eye variation in invalid-sample fractions. That makes it suitable for testing quality-rule propagation, while any quality threshold used in a substantive multiverse must still be justified and frozen before inspecting focal effects.
 
+### MCFW canonical adapter
+
+The research-only `mcfw_adapter.py` maps one MCFW TSV into the canonical `EyeDataset` contract without changing the signal. It requires:
+
+- an explicit detector-input eye (`left` or `right`);
+- an explicit multiplicative conversion from the source device timestamp to seconds;
+- the declared nominal sampling rate.
+
+It deliberately has no binocular-average default, does not infer timestamp units from numeric magnitude, does not interpolate, and does not reorder non-monotonic timestamps. Invalid/unavailable gaze rows remain in the sample table with `valid=False`. The untouched source frame is retained in the dataset's raw component and the eye/timestamp choices are recorded in provenance.
+
+This is the correct boundary for the first MCFW tranche: canonicalize the released raw stream first; choose coordinate conversion and event-detector parameters only in the prespecified detector study.
+
 ### Tier 2 — downstream HCI qualification: UEyes
 
 UEyes is strongly HCI-facing: 62 participants viewed 1,980 screenshots spanning webpage, desktop UI, mobile UI, and poster categories. It releases the screenshots, metadata, scanpaths and eyetracker logs.
