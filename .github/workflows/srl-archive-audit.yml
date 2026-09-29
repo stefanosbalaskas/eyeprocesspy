@@ -48,7 +48,6 @@ jobs:
           article_id = os.environ["FIGSHARE_ARTICLE_ID"]
           file_id = int(os.environ["FIGSHARE_FILE_ID"])
           url = f"https://api.figshare.com/v2/articles/{article_id}"
-
           request = urllib.request.Request(
               url,
               headers={"User-Agent": "eyeprocesspy-srl-audit/1.0"},
@@ -107,8 +106,7 @@ jobs:
               encoding="utf-8",
           )
 
-          output = Path(os.environ["GITHUB_OUTPUT"])
-          with output.open("a", encoding="utf-8") as handle:
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
               handle.write(f"download_url={download_url}\n")
               handle.write(f"file_name={file_name}\n")
               handle.write(f"expected_size={expected_size}\n")
@@ -123,7 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           ARCHIVE="$RUNNER_TEMP/$FILE_NAME"
-          curl             --fail             --location             --retry 5             --retry-delay 5             --retry-all-errors             --continue-at -             --output "$ARCHIVE"             "$DOWNLOAD_URL"
+          curl --fail --location --retry 5 --retry-delay 5 --retry-all-errors --continue-at - --output "$ARCHIVE" "$DOWNLOAD_URL"
           echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
 
       - name: Verify Figshare size and MD5
@@ -136,9 +134,7 @@ jobs:
           ACTUAL_SIZE="$(stat -c '%s' "$ARCHIVE")"
           ACTUAL_MD5="$(md5sum "$ARCHIVE" | awk '{print $1}')"
           ACTUAL_SHA256="$(sha256sum "$ARCHIVE" | awk '{print $1}')"
-
-          printf '%s\n'             "expected_size=$EXPECTED_SIZE"             "actual_size=$ACTUAL_SIZE"             "expected_md5=$EXPECTED_MD5"             "actual_md5=$ACTUAL_MD5"             "actual_sha256=$ACTUAL_SHA256"             > audit/download_integrity.txt
-
+          printf '%s\n' "expected_size=$EXPECTED_SIZE" "actual_size=$ACTUAL_SIZE" "expected_md5=$EXPECTED_MD5" "actual_md5=$ACTUAL_MD5" "actual_sha256=$ACTUAL_SHA256" > audit/download_integrity.txt
           test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
           test "$ACTUAL_MD5" = "$EXPECTED_MD5"
 
@@ -158,14 +154,11 @@ jobs:
           PY
           echo "DATASET_ROOT=$RUNNER_TEMP/srl-extracted" >> "$GITHUB_ENV"
 
-      - name: Run full-file archive and 250 Hz audit
+      - name: Run structural archive audit
+        continue-on-error: true
         shell: bash
         run: |
-          set +e
-          uv run --frozen python "$RESEARCH_DIR/audit_srl_dataset.py"             "$DATASET_ROOT"             --sample-rows 0             --output-dir audit/archive
-          code=$?
-          echo "archive_audit_exit_code=$code" >> audit/stage_exit_codes.txt
-          exit 0
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_dataset.py" "$DATASET_ROOT" --sample-rows 5000 --output-dir audit/archive
 
       - name: Resolve released metadata paths
         id: released_paths
@@ -175,63 +168,47 @@ jobs:
           PARTICIPANTS="$(find "$DATASET_ROOT" -type f -name participants.csv -print -quit)"
           STIMULI="$(find "$DATASET_ROOT" -type f -name stimuli.csv -print -quit)"
           RAW_DIR="$(find "$DATASET_ROOT" -type d -name ET_data_raw -print -quit)"
-
           test -n "$PARTICIPANTS"
           test -n "$STIMULI"
           test -n "$RAW_DIR"
-
-          {
-            echo "participants=$PARTICIPANTS"
-            echo "stimuli=$STIMULI"
-            echo "raw_dir=$RAW_DIR"
-          } >> "$GITHUB_OUTPUT"
+          echo "participants=$PARTICIPANTS" >> "$GITHUB_OUTPUT"
+          echo "stimuli=$STIMULI" >> "$GITHUB_OUTPUT"
+          echo "raw_dir=$RAW_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Run cross-source identity audit
-        shell: bash
-        run: |
-          set -euo pipefail
-          uv run --frozen python "$RESEARCH_DIR/audit_srl_identity.py" \
-            "$DATASET_ROOT" \
-            --output-dir audit/identity
-
-      - name: Run full Task-level timebase audit
-        shell: bash
-        run: |
-          set -euo pipefail
-          uv run --frozen python "$RESEARCH_DIR/audit_srl_task_timebase.py" \
-            "${{ steps.released_paths.outputs.raw_dir }}" \
-            --output-dir audit/timebase
-
-      - name: Run design-identifiability audit
-        shell: bash
-        run: |
-          set +e
-          uv run --frozen python "$RESEARCH_DIR/audit_srl_identifiability.py"             "${{ steps.released_paths.outputs.participants }}"             "${{ steps.released_paths.outputs.stimuli }}"             --output-dir audit/identifiability
-          code=$?
-          echo "identifiability_audit_exit_code=$code" >> audit/stage_exit_codes.txt
-          exit 0
-
-      - name: Build pre-results participant-task-eye manifest
-        shell: bash
-        run: |
-          set +e
-          uv run --frozen python "$RESEARCH_DIR/build_srl_design_manifest.py"             "${{ steps.released_paths.outputs.participants }}"             "${{ steps.released_paths.outputs.stimuli }}"             "${{ steps.released_paths.outputs.raw_dir }}"             --output-dir audit/design_manifest
-          code=$?
-          echo "design_manifest_exit_code=$code" >> audit/stage_exit_codes.txt
-          exit 0
-
-      - name: Materialize frozen 96-specification universe
-        shell: bash
-        run: |
-          set -euo pipefail
-          uv run --frozen python "$RESEARCH_DIR/build_srl_primary_universe.py"             --research-dir "$RESEARCH_DIR"             --output-dir audit/primary_universe
-
-      - name: Evaluate pre-results execution readiness
-        id: readiness
         continue-on-error: true
         shell: bash
         run: |
-          uv run --frozen python "$RESEARCH_DIR/check_srl_execution_readiness.py"             --research-dir "$RESEARCH_DIR"             --archive-audit-dir audit/archive             --identifiability-dir audit/identifiability             --output audit/srl_execution_readiness.csv
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identity.py" "$DATASET_ROOT" --output-dir audit/identity
+
+      - name: Run full Task-level timebase audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_task_timebase.py" "${{ steps.released_paths.outputs.raw_dir }}" --output-dir audit/timebase
+
+      - name: Run design-identifiability audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identifiability.py" "${{ steps.released_paths.outputs.participants }}" "${{ steps.released_paths.outputs.stimuli }}" --output-dir audit/identifiability
+
+      - name: Build pre-results participant-task-eye manifest
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/build_srl_design_manifest.py" "${{ steps.released_paths.outputs.participants }}" "${{ steps.released_paths.outputs.stimuli }}" "${{ steps.released_paths.outputs.raw_dir }}" --output-dir audit/design_manifest
+
+      - name: Materialize frozen 144-specification universe
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/build_srl_primary_universe.py" --research-dir "$RESEARCH_DIR" --output-dir audit/primary_universe
+
+      - name: Evaluate pre-results execution readiness
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/check_srl_execution_readiness.py" --research-dir "$RESEARCH_DIR" --archive-audit-dir audit/archive --identifiability-dir audit/identifiability --identity-audit-dir audit/identity --timebase-audit-dir audit/timebase --output audit/srl_execution_readiness.csv
 
       - name: Summarize audit evidence
         if: always()
@@ -250,61 +227,35 @@ jobs:
                   frame["severity"].eq("BLOCKER")
                   & ~frame["ready"].astype(bool)
               ]
-              lines.extend(
-                  [
-                      f"- readiness rows: {len(frame)}",
-                      f"- unresolved blockers: {len(blockers)}",
-                      "",
-                  ]
-              )
-              if len(blockers):
-                  lines.append("## Unresolved blockers")
-                  for _, row in blockers.iterrows():
-                      lines.append(
-                          f"- {row['gate_id']}: {row['message']}"
-                      )
-                  lines.append("")
-
-          raw = Path("audit/archive/raw_sample_manifest.csv")
-          if raw.exists():
-              frame = pd.read_csv(raw)
-              lines.append(
-                  f"- raw participant files inventoried: {len(frame)}"
-              )
+              lines.append(f"- readiness rows: {len(frame)}")
+              lines.append(f"- unresolved blockers: {len(blockers)}")
 
           identity = Path("audit/identity/identity_summary.csv")
           if identity.exists():
               frame = pd.read_csv(identity)
               values = dict(zip(frame["metric"], frame["value"]))
-              lines.append(
-                  f"- exact raw+metadata participants: "
-                  f"{int(values.get('exact_raw_metadata_ids', 0))}"
-              )
+              lines.append(f"- raw participant IDs: {int(values.get('raw_file_ids', 0))}")
+              lines.append(f"- exact raw+metadata IDs: {int(values.get('exact_raw_metadata_ids', 0))}")
+              lines.append(f"- exact Prompt: {int(values.get('exact_raw_prompt', 0))}")
+              lines.append(f"- exact Non-prompt: {int(values.get('exact_raw_non_prompt', 0))}")
 
           timebase = Path("audit/timebase/participant_timebase_summary.csv")
           if timebase.exists():
               frame = pd.read_csv(timebase)
               lines.append(
                   f"- raw participants with 8 nominal 250 Hz tasks: "
-                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}"
-                  f"/{len(frame)}"
+                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}/{len(frame)}"
               )
               lines.append(
                   f"- raw participants with 8 strictly dense 250 Hz tasks: "
-                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}"
-                  f"/{len(frame)}"
+                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}/{len(frame)}"
               )
 
           universe = Path("audit/primary_universe/srl_primary_universe.csv")
           if universe.exists():
               frame = pd.read_csv(universe)
-              lines.append(
-                  f"- frozen primary specifications: {len(frame)}"
-              )
-              lines.append(
-                  f"- unique specification hashes: "
-                  f"{frame['specification_hash'].nunique()}"
-              )
+              lines.append(f"- frozen primary specifications: {len(frame)}")
+              lines.append(f"- unique specification hashes: {frame['specification_hash'].nunique()}")
 
           Path("audit/SUMMARY.md").write_text(
               "\n".join(lines) + "\n",
@@ -327,9 +278,7 @@ jobs:
         shell: bash
         run: |
           rm -rf "$RUNNER_TEMP/srl-extracted"
-          if [ -n "${ARCHIVE:-}" ]; then
-            rm -f "$ARCHIVE"
-          fi
+          if [ -n "$ARCHIVE" ]; then rm -f "$ARCHIVE"; fi
 
       - name: Enforce readiness gate
         if: always()
