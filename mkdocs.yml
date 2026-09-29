@@ -48,6 +48,7 @@ nav:
           - Reporting guidance: guides/reporting-detector-sensitivity.md
           - Reporting template: guides/detector-multiverse-reporting-template.md
           - Troubleshooting: guides/detector-multiverse-troubleshooting.md
+      - Gaze claim robustness: guides/gaze-claim-robustness.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
