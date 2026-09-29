@@ -144,6 +144,58 @@ plus enough task/stimulus information to reconstruct the focal outcome and AOIs.
 
 A dataset that begins at processed fixations can still be useful for downstream AOI/model sensitivity, but it cannot be used as evidence about detector robustness.
 
+## Validation strategy after feasibility audit
+
+No currently verified open dataset should be forced to support every stage of the final paper.
+
+### Tier 1 — raw-signal qualification: MCFW-Gaze
+
+MCFW-Gaze is the strongest currently verified open source for detector and quality sensitivity. Version 3 provides continuous 120 Hz Tobii Pro Fusion TSV streams for 15 participants, normalized display gaze, binocular validity/availability fields, pupil and eye-openness measures, known display geometry, structured tasks, and long web-browsing sessions.
+
+It should first be used to verify that the cross-stage runner can:
+
+- ingest a real continuous gaze stream;
+- preserve left/right validity and missingness;
+- rerun defensible event detectors;
+- propagate quality rules without silently dropping trials;
+- retain failed/non-converged branches;
+- reproduce deterministic universe manifests and hashes.
+
+MCFW-Gaze should not be presented as an interface A/B experiment unless a focal contrast is supported by its study design. The initial use is methodological qualification, not a manufactured HCI effect.
+
+The released `data_loss_per_trial.csv` also shows substantial trial-to-trial and eye-to-eye variation in invalid-sample fractions. That makes it suitable for testing quality-rule propagation, while any quality threshold used in a substantive multiverse must still be justified and frozen before inspecting focal effects.
+
+### Tier 2 — downstream HCI qualification: UEyes
+
+UEyes is strongly HCI-facing: 62 participants viewed 1,980 screenshots spanning webpage, desktop UI, mobile UI, and poster categories. It releases the screenshots, metadata, scanpaths and eyetracker logs.
+
+However, its released processing code treats the logs as Gazepoint fixation exports: it filters valid `BPOG` coordinates and uses `FPOGD` fixation duration. The released file naming also uses `*_fixations.csv`.
+
+Therefore UEyes is suitable for:
+
+- AOI-definition sensitivity;
+- feature/outcome sensitivity;
+- time-window sensitivity;
+- model-level conclusion stability across UI categories;
+
+but not for claims about re-running fixation detectors from the original sample stream.
+
+### Tier 3 — complete detector-to-claim HCI validation
+
+The final paper still needs at least one dataset that combines:
+
+1. continuous raw gaze;
+2. reconstructable interface/stimulus geometry;
+3. a defensible HCI manipulation or comparison;
+4. participant/trial metadata;
+5. enough information to reproduce the focal outcome.
+
+The University of Seville infrared/webcam benchmark is especially attractive because its record explicitly describes raw gaze/UI logs, scenario definitions, and low- versus high-density static-form tasks. Its files are currently restricted, so it is an access candidate rather than current evidence.
+
+The non-public RecGaze release is another strong later candidate because it adds raw gaze and pixel positions to genuinely interactive carousel-selection sessions, but it likewise requires authorized research access.
+
+A split Tier-1/Tier-2 demonstration is useful for framework qualification, but it must not be misrepresented as full cross-stage validation. Full detector-to-claim propagation remains a required milestone for the final CHI study.
+
 ## First-pilot decision
 
 Use Emoji Keyboard Gaze Search as the first feasibility target, but do not freeze the focal claim until the task-target and geometry metadata are recovered.
