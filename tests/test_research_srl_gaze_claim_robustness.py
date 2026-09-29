@@ -202,3 +202,87 @@ def test_srl_coordinate_branches_make_viewing_distance_explicit(tmp_path: Path):
     manifest = srl_coordinates.coordinate_branch_manifest()
     assert manifest["viewing_distance_cm"].tolist() == [60.0, 65.0, 70.0]
     assert manifest["pixels_per_degree"].is_monotonic_increasing
+
+
+def test_episode_aoi_assignment_respects_stimulus_identity():
+    recordings = pd.DataFrame(
+        [{"recording_id": "R1", "participant_id": "P1"}]
+    )
+    spaces = ep.new_coordinate_space(
+        "px",
+        "display_pixels_top_left",
+        width=1600,
+        height=900,
+    )
+    episodes = pd.DataFrame(
+        [
+            {
+                "episode_id": "E1",
+                "recording_id": "R1",
+                "episode_type": "fixation",
+                "start_time": 0.1,
+                "end_time": 0.2,
+                "duration_ms": 100.0,
+                "centroid_x": 100.0,
+                "centroid_y": 100.0,
+                "coordinate_space_id": "px",
+                "derived_by": "eyeprocess",
+                "trial_id": "T1",
+                "stimulus_id": "Task_1",
+            },
+            {
+                "episode_id": "E2",
+                "recording_id": "R1",
+                "episode_type": "fixation",
+                "start_time": 0.3,
+                "end_time": 0.4,
+                "duration_ms": 100.0,
+                "centroid_x": 100.0,
+                "centroid_y": 100.0,
+                "coordinate_space_id": "px",
+                "derived_by": "eyeprocess",
+                "trial_id": "T2",
+                "stimulus_id": "Task_2",
+            },
+        ]
+    )
+    dataset = ep.new_eye_dataset(
+        recordings=recordings,
+        episodes=episodes,
+        coordinate_spaces=spaces,
+    )
+    dataset = ep.register_aois(
+        dataset,
+        ep.new_aoi(
+            "task1_quarter",
+            stimulus_id="Task_1",
+            x=0,
+            y=0,
+            width=800,
+            height=450,
+            coordinate_space_id="px",
+        ),
+        ep.new_aoi(
+            "task2_quarter",
+            stimulus_id="Task_2",
+            x=0,
+            y=0,
+            width=800,
+            height=450,
+            coordinate_space_id="px",
+        ),
+        ep.new_aoi(
+            "global_reference",
+            x=0,
+            y=0,
+            width=800,
+            height=450,
+            coordinate_space_id="px",
+        ),
+    )
+
+    assigned = ep.assign_aois(dataset, component="episodes")
+    result = assigned["episodes"].set_index("episode_id")["aoi_id"]
+
+    assert result["E1"] == "task1_quarter"
+    assert result["E2"] == "task2_quarter"
