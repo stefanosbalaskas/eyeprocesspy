@@ -21,12 +21,12 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-
-import eyeprocesspy as ep
 import srl_adapter
 import srl_aoi_geometry
 import srl_coordinate_branches
 import srl_transition_outcome
+
+import eyeprocesspy as ep
 
 TASKS = tuple(f"Task_{i}" for i in range(1, 9))
 EYES = ("left", "right")
