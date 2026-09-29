@@ -7,6 +7,8 @@ from types import ModuleType
 import pandas as pd
 import pytest
 
+import eyeprocesspy as ep
+
 ROOT = Path(__file__).resolve().parents[1]
 RESEARCH = ROOT / "research" / "gaze_claim_robustness"
 
