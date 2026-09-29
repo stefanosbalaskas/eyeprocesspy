@@ -274,7 +274,7 @@ def build_manifest(
                         "primary_estimand_family": "between_aoi_transition_count",
                         "focal_factor": "stimulus_type",
                         "focal_contrast": "Multimedia_minus_Text",
-                        "outcome_frozen": False,
+                        "outcome_frozen": True,
                         "event_detector_frozen": False,
                         "aoi_geometry_frozen": False,
                         "quality_rule_frozen": False,
