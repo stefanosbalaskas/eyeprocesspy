@@ -64,6 +64,8 @@ def evaluate_readiness(
     models = _read(research_dir / "srl_model_plan.csv")
 
     rows: list[dict[str, object]] = []
+    dense_timebase_ok = False
+    dense_timebase_message = "actual archive audit not supplied"
 
     if archive_audit_dir is None:
         rows.append(
@@ -90,6 +92,19 @@ def evaluate_readiness(
             condition_counts = _read(condition_path)
 
             raw_ok = len(raw_manifest) == 84 and raw_failures.empty
+            dense_column_ok = "dense_regular_250hz" in raw_manifest
+            dense_timebase_ok = bool(
+                dense_column_ok
+                and len(raw_manifest) == 84
+                and raw_manifest["dense_regular_250hz"].astype(bool).all()
+            )
+            dense_timebase_message = (
+                f"dense_regular_250hz_files="
+                f"{int(raw_manifest['dense_regular_250hz'].astype(bool).sum())}"
+                f"/{len(raw_manifest)}"
+                if dense_column_ok
+                else "dense_regular_250hz column missing; run full-file audit"
+            )
             stimulus_ok = (
                 "present" in stimulus_audit
                 and stimulus_audit["present"].astype(bool).all()
@@ -214,19 +229,20 @@ def evaluate_readiness(
     remodnav = detectors.loc[
         detectors["detector_id"].astype(str).eq("remodnav_defaults")
     ]
-    remodnav_ok = (
+    remodnav_version_frozen = (
         len(remodnav) == 1
-        and not str(remodnav.iloc[0]["status"]).lower().endswith("pending")
-        and "pending" not in str(remodnav.iloc[0]["status"]).lower()
+        and "REMoDNaV 1.1.2" in str(remodnav.iloc[0]["algorithm"])
     )
+    remodnav_ok = bool(remodnav_version_frozen and dense_timebase_ok)
     rows.append(
         _status_row(
             "remodnav_timebase",
             "BLOCKER",
             remodnav_ok,
             (
-                "REMoDNaV 1.1.2 is version-frozen, but dense regular 250 Hz "
-                "sampling must be verified on the actual release."
+                f"REMoDNaV version_frozen={remodnav_version_frozen}; "
+                f"{dense_timebase_message}. Only dense regular sampling is "
+                "supported by REMoDNaV."
             ),
         )
     )
