@@ -148,25 +148,65 @@ def build_manifest(
             }
         )
 
-    participant_ids = sorted(
+    metadata_ids = {
         participant
         for participant in participants["participant_id"].unique()
         if participant
+    }
+    stimulus_ids = {
+        participant
+        for participant in stimuli["participant_id"].unique()
+        if participant
+    }
+    raw_ids = set(raw_index)
+    participant_ids = sorted(
+        metadata_ids & stimulus_ids & raw_ids,
+        key=lambda value: (not value.isdigit(), int(value) if value.isdigit() else value),
     )
-    if len(participant_ids) != 84:
+
+    raw_without_metadata = sorted(raw_ids - metadata_ids)
+    metadata_without_raw = sorted(metadata_ids - raw_ids)
+    if raw_without_metadata:
         issues.append(
             {
                 "severity": "warning",
-                "scope": "design",
+                "scope": "cross_source_identity",
                 "participant_id": "",
                 "stimulus_name": "",
                 "message": (
-                    "The descriptor reports 84 complete recordings; "
-                    f"participants.csv contains {len(participant_ids)} unique IDs. "
-                    "Verify whether the release includes additional/excluded records."
+                    "Raw participant IDs absent from participants.csv are retained "
+                    "as unresolved provenance records and excluded from the exact "
+                    f"raw+metadata cohort: {raw_without_metadata}."
                 ),
             }
         )
+    if metadata_without_raw:
+        issues.append(
+            {
+                "severity": "info",
+                "scope": "cross_source_identity",
+                "participant_id": "",
+                "stimulus_name": "",
+                "message": (
+                    f"{len(metadata_without_raw)} recruitment-metadata IDs have no "
+                    "released raw file; they are not treated as raw-cohort failures."
+                ),
+            }
+        )
+    issues.append(
+        {
+            "severity": "warning",
+            "scope": "design",
+            "participant_id": "",
+            "stimulus_name": "",
+            "message": (
+                "The published descriptor reports 84 complete ET recordings, while "
+                f"the exact released raw+participants+stimuli intersection contains "
+                f"{len(participant_ids)} IDs. The primary raw-sample cohort therefore "
+                "uses only exact cross-source IDs; unmatched IDs are not repaired."
+            ),
+        }
+    )
 
     rows: list[dict[str, object]] = []
     participant_lookup = participants.set_index("participant_id", drop=False)
@@ -223,17 +263,7 @@ def build_manifest(
                 }
             )
 
-        raw_path = raw_index.get(participant)
-        if raw_path is None:
-            issues.append(
-                {
-                    "severity": "error",
-                    "scope": "raw_file",
-                    "participant_id": participant,
-                    "stimulus_name": "",
-                    "message": "No unique raw participant file was identified.",
-                }
-            )
+        raw_path = raw_index[participant]
 
         for task in TASKS:
             task_rows = p_stimuli.loc[p_stimuli["stimulus"].eq(task)]
@@ -261,11 +291,7 @@ def build_manifest(
                         "stimulus_type": stimulus_type,
                         "eye": eye,
                         "design_cell": f"{condition}|{stimulus_type}",
-                        "raw_file": (
-                            raw_path.relative_to(raw_dir).as_posix()
-                            if raw_path is not None
-                            else pd.NA
-                        ),
+                        "raw_file": raw_path.relative_to(raw_dir).as_posix(),
                         "metadata_stimulus_time_seconds": task_row["stimulus_time"],
                         "metadata_tracking_ratio_percent": task_row["tracking_ratio"],
                         "nominal_sampling_rate_hz": 250.0,
