@@ -107,12 +107,22 @@ def convert_srl_pixels_to_degrees(
     recording = dataset["recordings"]
     if recording.empty:
         raise ValueError("dataset contains no recording metadata.")
-    width_values = pd.to_numeric(recording["screen_width_px"], errors="coerce").dropna()
-    height_values = pd.to_numeric(recording["screen_height_px"], errors="coerce").dropna()
+    width_values = (
+        pd.to_numeric(recording["screen_width_px"], errors="coerce")
+        .dropna()
+        .unique()
+    )
+    height_values = (
+        pd.to_numeric(recording["screen_height_px"], errors="coerce")
+        .dropna()
+        .unique()
+    )
     if len(width_values) != 1 or len(height_values) != 1:
-        raise ValueError("A single screen width and height are required.")
-    width_px = int(width_values.iloc[0])
-    height_px = int(height_values.iloc[0])
+        raise ValueError(
+            "All recordings must share one screen width and one screen height."
+        )
+    width_px = int(width_values[0])
+    height_px = int(height_values[0])
 
     ppd = pixels_per_degree(
         viewing_distance_cm,
