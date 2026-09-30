@@ -1,0 +1,2 @@
+planned_specifications,successful_specifications,positive_point_estimates,negative_point_estimates,wald95_ci_excludes_null_positive,wald95_ci_excludes_null_negative,wald95_ci_includes_null,closest_ci_lower_to_zero,smallest_ci_upper,median_log_rate_ratio,median_rate_ratio,minimum_rate_ratio,maximum_rate_ratio
+144,144,92,52,0,0,144,-0.0036472270530523,0.120863819691217,0.03401863260151395,1.0346042370345476,0.9439650324282728,1.2577011117328496
