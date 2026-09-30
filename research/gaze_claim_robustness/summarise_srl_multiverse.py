@@ -61,8 +61,26 @@ def summarize_results(
                 "zero_log_rate_ratio_specifications": int(
                     np.isclose(estimate, 0.0, atol=1e-12).sum()
                 ),
-                "positive_direction_proportion": (
+                "positive_direction_proportion_evaluable": (
                     float((estimate > 0).mean()) if len(ok) else np.nan
+                ),
+                "negative_direction_proportion_evaluable": (
+                    float((estimate < 0).mean()) if len(ok) else np.nan
+                ),
+                "positive_direction_proportion_planned": (
+                    float((estimate > 0).sum() / len(results))
+                    if len(results)
+                    else np.nan
+                ),
+                "negative_direction_proportion_planned": (
+                    float((estimate < 0).sum() / len(results))
+                    if len(results)
+                    else np.nan
+                ),
+                "successful_specification_proportion": (
+                    float(len(ok) / len(results))
+                    if len(results)
+                    else np.nan
                 ),
                 "median_log_rate_ratio": (
                     float(estimate.median()) if len(ok) else np.nan
@@ -88,17 +106,39 @@ def summarize_results(
 
     rows: list[dict[str, object]] = []
     for decision in DECISIONS:
-        for level, group in ok.groupby(decision, dropna=False, sort=True):
+        for level, planned_group in results.groupby(
+            decision,
+            dropna=False,
+            sort=True,
+        ):
+            group = ok.loc[ok[decision].astype(str).eq(str(level))].copy()
             values = pd.to_numeric(group["estimate"], errors="coerce")
             rows.append(
                 {
                     "decision": decision,
                     "level": level,
-                    "n_specifications": len(group),
-                    "mean_log_rate_ratio": float(values.mean()),
-                    "median_log_rate_ratio": float(values.median()),
-                    "minimum_log_rate_ratio": float(values.min()),
-                    "maximum_log_rate_ratio": float(values.max()),
+                    "planned_specifications": len(planned_group),
+                    "successful_specifications": len(group),
+                    "non_ok_specifications": int(
+                        (~planned_group["status"].eq("ok")).sum()
+                    ),
+                    "successful_specification_proportion": (
+                        float(len(group) / len(planned_group))
+                        if len(planned_group)
+                        else np.nan
+                    ),
+                    "mean_log_rate_ratio": (
+                        float(values.mean()) if len(values) else np.nan
+                    ),
+                    "median_log_rate_ratio": (
+                        float(values.median()) if len(values) else np.nan
+                    ),
+                    "minimum_log_rate_ratio": (
+                        float(values.min()) if len(values) else np.nan
+                    ),
+                    "maximum_log_rate_ratio": (
+                        float(values.max()) if len(values) else np.nan
+                    ),
                 }
             )
     decision = pd.DataFrame(rows)
@@ -197,8 +237,16 @@ def main() -> int:
         f"- successful specifications: {int(row['successful_specifications'])}",
         f"- non-ok specifications: {int(row['non_ok_specifications'])}",
         (
-            "- positive Prompt log-rate-ratio proportion: "
-            f"{row['positive_direction_proportion']:.6f}"
+            "- positive Prompt log-rate-ratio proportion among successful "
+            f"specifications: {row['positive_direction_proportion_evaluable']:.6f}"
+        ),
+        (
+            "- positive Prompt log-rate-ratio proportion against all planned "
+            f"specifications: {row['positive_direction_proportion_planned']:.6f}"
+        ),
+        (
+            "- successful-specification proportion: "
+            f"{row['successful_specification_proportion']:.6f}"
         ),
         (
             "- log-rate-ratio median/range: "
