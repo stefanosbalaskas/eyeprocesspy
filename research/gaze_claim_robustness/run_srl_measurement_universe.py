@@ -528,8 +528,6 @@ def _run_participant_job(
     stimuli_csv: Path,
 ) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Process one participant in an isolated worker process."""
-    participants = pd.read_csv(participants_csv)
-    stimuli = pd.read_csv(stimuli_csv)
     raw_file = raw_dir / f"ET_data_raw_{participant_id}.txt"
     if not raw_file.exists():
         raise FileNotFoundError(raw_file)
