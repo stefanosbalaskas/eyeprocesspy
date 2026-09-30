@@ -1092,7 +1092,9 @@ def test_srl_summary_reports_direction_without_automatic_verdict():
     assert row["planned_specifications"] == 3
     assert row["successful_specifications"] == 2
     assert row["non_ok_specifications"] == 1
-    assert row["positive_direction_proportion"] == pytest.approx(0.5)
+    assert row["positive_direction_proportion_evaluable"] == pytest.approx(0.5)
+    assert row["positive_direction_proportion_planned"] == pytest.approx(1 / 3)
+    assert row["successful_specification_proportion"] == pytest.approx(2 / 3)
     assert row["median_log_rate_ratio"] == pytest.approx(0.05)
     assert set(decision["decision"]) == {
         "detector_id",
