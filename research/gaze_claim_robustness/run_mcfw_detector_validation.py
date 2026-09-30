@@ -20,12 +20,12 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+import mcfw_adapter
+import mcfw_coordinates
 import numpy as np
 import pandas as pd
 
 import eyeprocesspy as ep
-import mcfw_adapter
-import mcfw_coordinates
 
 EYES = ("left", "right")
 DETECTOR_IDS = ("ivt_30_100_simple", "ivt_40_50_simple", "idt_1_100")
