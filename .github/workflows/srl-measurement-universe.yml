@@ -1,4 +1,5 @@
 name: SRL measurement universe
+# Measurement run: released 82-participant cohort, 3-detector primary universe
 # Measurement-only stage: no Prompt-effect model fitting is permitted here.
 
 on:
