@@ -79,55 +79,13 @@ jobs:
       - name: Verify measurement artifact is model-free and structurally complete
         shell: bash
         run: |
-          uv run --frozen python - <<'PY'
-          import os
-          from pathlib import Path
-          import pandas as pd
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/validate_srl_measurement_artifact.py" \
+            input/measurement/srl_measurement_counts.csv \
+            --identity-presence-csv input/evidence/identity/id_source_presence.csv \
+            --output input/measurement/srl_measurement_structure_audit.csv
 
-          measurement_path = Path("input/measurement/srl_measurement_counts.csv")
-          identity_path = Path("input/evidence/identity/id_source_presence.csv")
-          timebase_path = Path(
-              "input/evidence/timebase/participant_timebase_summary.csv"
-          )
-          for path in (measurement_path, identity_path, timebase_path):
-              if not path.exists():
-                  raise SystemExit(f"Required validated artifact file missing: {path}")
-
-          d = pd.read_csv(measurement_path)
-          expected = int(os.environ["EXPECTED_MEASUREMENT_ROWS"])
-          if len(d) != expected:
-              raise SystemExit(
-                  f"Expected {expected} measurement rows; found {len(d)}."
-              )
-
-          key = [
-              "participant_id",
-              "stimulus_id",
-              "detector_id",
-              "eye",
-              "viewing_distance_cm",
-              "aoi_convention",
-          ]
-          if d.duplicated(key).any():
-              raise SystemExit("Validated measurement artifact has duplicate branch keys.")
-
-          forbidden = {
-              "prompt_indicator",
-              "estimate",
-              "SE",
-              "CI_lower",
-              "CI_upper",
-              "rate_ratio",
-              "p_value",
-          }
-          present = sorted(forbidden & set(d.columns))
-          if present:
-              raise SystemExit(
-                  "Measurement artifact already contains forbidden focal-model fields: "
-                  + ", ".join(present)
-              )
-          print("Validated model-free measurement artifact:", measurement_path)
-          PY
+          test -f input/evidence/timebase/participant_timebase_summary.csv
 
       - name: Materialize frozen 144-specification model universe
         shell: bash
