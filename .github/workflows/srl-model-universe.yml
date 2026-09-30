@@ -11,11 +11,6 @@ on:
         description: Exact validated measurement artifact name
         required: true
         type: string
-  push:
-    branches:
-      - research/chi-gaze-claim-robustness
-    paths:
-      - .github/workflows/srl-model-universe.yml
 
 permissions:
   contents: read
@@ -31,8 +26,8 @@ jobs:
       EXPECTED_MODEL_SPECS: "144"
       FROZEN_GLMMTMB_VERSION: "1.1.14"
       GH_TOKEN: ${{ github.token }}
-      MEASUREMENT_RUN_ID: ${{ inputs.measurement_run_id || '36683906120' }}
-      MEASUREMENT_ARTIFACT_NAME: ${{ inputs.measurement_artifact_name || 'srl-measurement-universe-cfd8f8f99c5d4fdc19399661e6ec0f24a0080bb8' }}
+      MEASUREMENT_RUN_ID: ${{ inputs.measurement_run_id }}
+      MEASUREMENT_ARTIFACT_NAME: ${{ inputs.measurement_artifact_name }}
 
     steps:
       - uses: actions/checkout@v4
