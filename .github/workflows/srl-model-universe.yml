@@ -11,6 +11,11 @@ on:
         description: Exact validated measurement artifact name
         required: true
         type: string
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/srl-model-universe.yml
 
 permissions:
   contents: read
@@ -26,6 +31,8 @@ jobs:
       EXPECTED_MODEL_SPECS: "144"
       FROZEN_GLMMTMB_VERSION: "1.1.14"
       GH_TOKEN: ${{ github.token }}
+      MEASUREMENT_RUN_ID: ${{ inputs.measurement_run_id || '36683906120' }}
+      MEASUREMENT_ARTIFACT_NAME: ${{ inputs.measurement_artifact_name || 'srl-measurement-universe-cfd8f8f99c5d4fdc19399661e6ec0f24a0080bb8' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -68,9 +75,6 @@ jobs:
 
       - name: Download validated measurement artifact
         shell: bash
-        env:
-          MEASUREMENT_RUN_ID: ${{ inputs.measurement_run_id }}
-          MEASUREMENT_ARTIFACT_NAME: ${{ inputs.measurement_artifact_name }}
         run: |
           set -euo pipefail
           mkdir -p input
@@ -149,9 +153,6 @@ jobs:
 
       - name: Record analysis provenance
         shell: bash
-        env:
-          MEASUREMENT_RUN_ID: ${{ inputs.measurement_run_id }}
-          MEASUREMENT_ARTIFACT_NAME: ${{ inputs.measurement_artifact_name }}
         run: |
           set -euo pipefail
           {
