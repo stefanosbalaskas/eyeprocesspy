@@ -16,6 +16,7 @@ are applied later at model time, so gaze detection is not duplicated.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -519,6 +520,108 @@ def exact_cohort_ids(identity_presence_csv: Path) -> list[str]:
     return ids
 
 
+def _run_participant_job(
+    participant_id: str,
+    *,
+    raw_dir: Path,
+    participants_csv: Path,
+    stimuli_csv: Path,
+) -> tuple[str, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Process one participant in an isolated worker process."""
+    participants = pd.read_csv(participants_csv)
+    stimuli = pd.read_csv(stimuli_csv)
+    raw_file = raw_dir / f"ET_data_raw_{participant_id}.txt"
+    if not raw_file.exists():
+        raise FileNotFoundError(raw_file)
+
+    results, statuses, failures, detector_warnings = run_participant(
+        participant_id,
+        raw_file=raw_file,
+        participants_csv=participants_csv,
+        stimuli_csv=stimuli_csv,
+        participants=participants,
+        stimuli=stimuli,
+    )
+    return participant_id, results, statuses, failures, detector_warnings
+
+
+def _write_checkpoint(
+    checkpoint_dir: Path,
+    *,
+    participant_id: str,
+    results: pd.DataFrame,
+    statuses: pd.DataFrame,
+    failures: pd.DataFrame,
+    warnings: pd.DataFrame,
+) -> None:
+    """Write one participant checkpoint atomically enough for CI recovery."""
+    participant_dir = checkpoint_dir / str(participant_id)
+    participant_dir.mkdir(parents=True, exist_ok=True)
+
+    payloads = {
+        "measurement.csv": results,
+        "detector_status.csv": statuses,
+        "failures.csv": failures,
+        "warnings.csv": warnings,
+    }
+    for name, frame in payloads.items():
+        target = participant_dir / name
+        temp = participant_dir / f".{name}.tmp"
+        frame.to_csv(temp, index=False)
+        temp.replace(target)
+
+
+def _load_checkpoints(
+    checkpoint_dir: Path,
+    participant_ids: list[str],
+) -> tuple[
+    list[pd.DataFrame],
+    list[pd.DataFrame],
+    list[pd.DataFrame],
+    list[pd.DataFrame],
+    set[str],
+]:
+    """Load complete participant checkpoints and return completed IDs."""
+    results: list[pd.DataFrame] = []
+    statuses: list[pd.DataFrame] = []
+    failures: list[pd.DataFrame] = []
+    warnings: list[pd.DataFrame] = []
+    completed: set[str] = set()
+
+    for participant_id in participant_ids:
+        participant_dir = checkpoint_dir / str(participant_id)
+        measurement_path = participant_dir / "measurement.csv"
+        status_path = participant_dir / "detector_status.csv"
+        failure_path = participant_dir / "failures.csv"
+        warning_path = participant_dir / "warnings.csv"
+        if not measurement_path.exists():
+            continue
+
+        frame = pd.read_csv(measurement_path)
+        if len(frame) != 288:
+            continue
+
+        results.append(frame)
+        if status_path.exists() and status_path.stat().st_size:
+            try:
+                statuses.append(pd.read_csv(status_path))
+            except pd.errors.EmptyDataError:
+                pass
+        if failure_path.exists() and failure_path.stat().st_size:
+            try:
+                failures.append(pd.read_csv(failure_path))
+            except pd.errors.EmptyDataError:
+                pass
+        if warning_path.exists() and warning_path.stat().st_size:
+            try:
+                warnings.append(pd.read_csv(warning_path))
+            except pd.errors.EmptyDataError:
+                pass
+        completed.add(str(participant_id))
+
+    return results, statuses, failures, warnings, completed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset_root", type=Path)
@@ -533,6 +636,20 @@ def main() -> int:
         type=int,
         default=0,
         help="Research smoke-test limit; 0 means all exact participants.",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Parallel participant workers; must be >= 1.",
+    )
+    parser.add_argument(
+        "--checkpoint-dir",
+        type=Path,
+        help=(
+            "Optional participant-level checkpoint directory. Completed "
+            "participants are reused on rerun when structurally complete."
+        ),
     )
     args = parser.parse_args()
 
@@ -558,23 +675,47 @@ def main() -> int:
     if args.max_participants:
         ids = ids[: args.max_participants]
 
-    result_frames: list[pd.DataFrame] = []
-    status_frames: list[pd.DataFrame] = []
-    failure_frames: list[pd.DataFrame] = []
-    warning_frames: list[pd.DataFrame] = []
+    if args.workers < 1:
+        raise ValueError("workers must be >= 1.")
 
-    for index, participant_id in enumerate(ids, start=1):
-        raw_file = raw_dir / f"ET_data_raw_{participant_id}.txt"
-        if not raw_file.exists():
-            raise FileNotFoundError(raw_file)
+    checkpoint_dir = (
+        args.checkpoint_dir
+        if args.checkpoint_dir is not None
+        else args.output_dir / "participant_checkpoints"
+    )
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-        results, statuses, failures, detector_warnings = run_participant(
-            participant_id,
-            raw_file=raw_file,
-            participants_csv=participants_csv,
-            stimuli_csv=stimuli_csv,
-            participants=participants,
-            stimuli=stimuli,
+    (
+        result_frames,
+        status_frames,
+        failure_frames,
+        warning_frames,
+        completed,
+    ) = _load_checkpoints(checkpoint_dir, ids)
+
+    pending = [participant_id for participant_id in ids if participant_id not in completed]
+    if completed:
+        print(
+            f"Recovered {len(completed)} completed participant checkpoints; "
+            f"remaining={len(pending)}.",
+            flush=True,
+        )
+
+    def accept(
+        participant_id: str,
+        results: pd.DataFrame,
+        statuses: pd.DataFrame,
+        failures: pd.DataFrame,
+        detector_warnings: pd.DataFrame,
+        completed_count: int,
+    ) -> None:
+        _write_checkpoint(
+            checkpoint_dir,
+            participant_id=participant_id,
+            results=results,
+            statuses=statuses,
+            failures=failures,
+            warnings=detector_warnings,
         )
         result_frames.append(results)
         if not statuses.empty:
@@ -585,13 +726,78 @@ def main() -> int:
             warning_frames.append(detector_warnings)
 
         print(
-            f"[{index}/{len(ids)}] participant={participant_id}; "
+            f"[{completed_count}/{len(ids)}] participant={participant_id}; "
             f"measurement_rows={len(results)}; failures={len(failures)}; "
             f"warnings={len(detector_warnings)}",
             flush=True,
         )
 
+    completed_count = len(completed)
+    if args.workers == 1:
+        for participant_id in pending:
+            (
+                participant_id,
+                results,
+                statuses,
+                failures,
+                detector_warnings,
+            ) = _run_participant_job(
+                participant_id,
+                raw_dir=raw_dir,
+                participants_csv=participants_csv,
+                stimuli_csv=stimuli_csv,
+            )
+            completed_count += 1
+            accept(
+                participant_id,
+                results,
+                statuses,
+                failures,
+                detector_warnings,
+                completed_count,
+            )
+    else:
+        with ProcessPoolExecutor(max_workers=args.workers) as executor:
+            futures = {
+                executor.submit(
+                    _run_participant_job,
+                    participant_id,
+                    raw_dir=raw_dir,
+                    participants_csv=participants_csv,
+                    stimuli_csv=stimuli_csv,
+                ): participant_id
+                for participant_id in pending
+            }
+            for future in as_completed(futures):
+                (
+                    participant_id,
+                    results,
+                    statuses,
+                    failures,
+                    detector_warnings,
+                ) = future.result()
+                completed_count += 1
+                accept(
+                    participant_id,
+                    results,
+                    statuses,
+                    failures,
+                    detector_warnings,
+                    completed_count,
+                )
+
     results = pd.concat(result_frames, ignore_index=True, sort=False)
+    results = results.sort_values(
+        [
+            "participant_id",
+            "stimulus_id",
+            "detector_id",
+            "eye",
+            "viewing_distance_cm",
+            "aoi_convention",
+        ],
+        kind="stable",
+    ).reset_index(drop=True)
     statuses = (
         pd.concat(status_frames, ignore_index=True, sort=False)
         if status_frames
