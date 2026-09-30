@@ -20,7 +20,7 @@ permissions:
 jobs:
   measure:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     env:
       FIGSHARE_ARTICLE_ID: "28304069"
       FIGSHARE_FILE_ID: "54379415"
@@ -169,7 +169,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uv run --frozen python "$RESEARCH_DIR/run_srl_measurement_universe.py"             "$DATASET_ROOT"             evidence/identity/id_source_presence.csv             --output-dir measurement
+          uv run --frozen python "$RESEARCH_DIR/run_srl_measurement_universe.py"             "$DATASET_ROOT"             evidence/identity/id_source_presence.csv             --output-dir measurement             --workers 4             --checkpoint-dir measurement/participant_checkpoints
 
       - name: Validate structural completeness without fitting Prompt effect
         shell: bash
@@ -283,6 +283,7 @@ jobs:
               except pd.errors.EmptyDataError:
                   lines.append("- detector warning records: 0")
 
+          Path("measurement").mkdir(parents=True, exist_ok=True)
           Path("measurement/SUMMARY.md").write_text(
               "\n".join(lines) + "\n",
               encoding="utf-8",
