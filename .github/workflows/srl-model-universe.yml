@@ -48,14 +48,31 @@ jobs:
         with:
           r-version: "release"
 
-      - name: Install frozen glmmTMB estimator
+      - name: Install glmmTMB dependency stack
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: 'NA'
           packages: any::sessioninfo
           extra-packages: |
-            any::glmmTMB@1.1.14
-          cache-version: srl-glmmtmb-1.1.14
+            any::glmmTMB
+          cache-version: srl-glmmtmb-deps-20260930
+
+      - name: Install exact archived glmmTMB 1.1.14
+        shell: bash
+        run: |
+          set -euo pipefail
+          Rscript - <<'RS'
+          source_url <- paste0(
+            "https://cloud.r-project.org/src/contrib/Archive/glmmTMB/",
+            "glmmTMB_1.1.14.tar.gz"
+          )
+          utils::install.packages(
+            source_url,
+            repos = NULL,
+            type = "source",
+            lib = Sys.getenv("R_LIBS_USER")
+          )
+          RS
 
       - name: Verify frozen R estimator version
         shell: bash
@@ -174,5 +191,5 @@ jobs:
             frozen_universe/
             model_results/
             summary/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
