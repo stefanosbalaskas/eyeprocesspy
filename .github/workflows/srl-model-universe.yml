@@ -55,7 +55,8 @@ jobs:
           packages: any::sessioninfo
           extra-packages: |
             any::glmmTMB
-          cache-version: srl-glmmtmb-deps-20260930
+            any::RcppEigen
+          cache-version: srl-glmmtmb-deps-20260930-r2
 
       - name: Install exact archived glmmTMB 1.1.14
         shell: bash
