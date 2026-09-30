@@ -76,3 +76,42 @@ The four prespecified model-evaluable row counts are exactly:
 - exact_raw82 / trial_80_sensitivity: 634
 - nominal250_77 / released_sample: 608
 - nominal250_77 / trial_80_sensitivity: 595
+
+## Independent MCFW-Gaze measurement validation
+
+The independent MCFW-Gaze validation was executed only after its timestamp,
+geometry, detector-input, quality, outcome, and reporting decisions were
+frozen.
+
+Provenance:
+
+- analysis commit: `878e351a82a48665990955853c55b2315b10fd27`
+- workflow run: `36776432517`
+- workflow artifact: `11127976095`
+- workflow artifact SHA-256:
+  `ed2af7a036d1fb9a62b5226b71b6f02d007f87a9d23b1970828f9c9742b93020`
+- planned detector summaries: 28,170; evaluable: 28,164
+- planned detector-pair rows: 28,170; evaluable: 27,660
+
+Across evaluable pairwise rows, median sample-level agreement was 0.706767,
+but median fixation-state Jaccard was 0.272358 and median Cohen's kappa was
+0.198911. This distinction matters because raw agreement can be dominated by
+shared non-fixation time.
+
+The detector differences are structured. I-VT 40 deg/s and I-DT are the
+closest pair (median Jaccard 0.614 left / 0.534 right), whereas comparisons
+involving I-VT 30 deg/s show substantially lower positive-class overlap. Median
+fixation counts are approximately 2-3 per trial for I-VT 30 deg/s, 15-16 for
+I-VT 40 deg/s, and 21-22 for I-DT.
+
+Higher analyzed-eye usable-gaze fractions are generally associated with lower
+positive-class and event-summary divergence. For I-VT 40 deg/s versus I-DT,
+the usable-fraction association with fixation-count symmetric divergence is
+rho=-0.559 for the left eye and rho=-0.639 for the right eye.
+
+MCFW-Gaze is not treated as a replication of the SRL Prompt effect. Its role is
+independent measurement generalization: detector-dependent event
+representations persist across a different tracker, sampling rate, and task
+ecology. The canonical full workflow artifact remains outside Git; only compact
+summaries, provenance, and hashes are stored here.
+
