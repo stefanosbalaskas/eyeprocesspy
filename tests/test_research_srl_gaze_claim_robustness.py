@@ -58,6 +58,10 @@ srl_universe = _load_module(
     "srl_universe_research",
     RESEARCH / "build_srl_primary_universe.py",
 )
+srl_measurement_validator = _load_module(
+    "srl_measurement_validator_research",
+    RESEARCH / "validate_srl_measurement_artifact.py",
+)
 srl_model_table = _load_module(
     "srl_model_table_research",
     RESEARCH / "prepare_srl_model_table.py",
@@ -1098,3 +1102,83 @@ def test_srl_summary_reports_direction_without_automatic_verdict():
         "quality_rule",
         "cohort_id",
     }
+
+
+def test_srl_measurement_artifact_validator_requires_exact_frozen_structure():
+    participant_ids = [str(i) for i in range(1, 83)]
+    rows = []
+    for participant_id in participant_ids:
+        condition = "Prompt" if int(participant_id) <= 41 else "Non-prompt"
+        for task in srl_measurement_validator.EXPECTED_TASKS:
+            for detector in srl_measurement_validator.EXPECTED_DETECTORS:
+                for eye in srl_measurement_validator.EXPECTED_EYES:
+                    for distance in srl_measurement_validator.EXPECTED_DISTANCES:
+                        for aoi in srl_measurement_validator.EXPECTED_AOIS:
+                            rows.append(
+                                {
+                                    "participant_id": participant_id,
+                                    "stimulus_id": task,
+                                    "detector_id": detector,
+                                    "eye": eye,
+                                    "viewing_distance_cm": distance,
+                                    "aoi_convention": aoi,
+                                    "transition_count": 1.0,
+                                    "status": "ok",
+                                    "experiment_condition": condition,
+                                    "metadata_tracking_ratio_percent": 95.0,
+                                    "metadata_stimulus_time_seconds": 12.0,
+                                }
+                            )
+    measurement = pd.DataFrame(rows)
+    identity = pd.DataFrame(
+        {
+            "participant_id": participant_ids,
+            "exact_cross_source_raw_eligible": [True] * len(participant_ids),
+        }
+    )
+
+    audit = srl_measurement_validator.validate_measurement_artifact(
+        measurement,
+        identity_presence=identity,
+    )
+    assert len(measurement) == 23616
+    assert audit["status"].tolist() == ["ok"]
+    assert audit["rows"].tolist() == [23616]
+
+    bad = measurement.copy()
+    bad["estimate"] = 0.0
+    with pytest.raises(ValueError, match="forbidden focal-model fields"):
+        srl_measurement_validator.validate_measurement_artifact(
+            bad,
+            identity_presence=identity,
+        )
+
+
+def test_srl_measurement_artifact_validator_rejects_partial_branch():
+    participant_ids = [str(i) for i in range(1, 83)]
+    rows = []
+    for participant_id in participant_ids:
+        condition = "Prompt" if int(participant_id) <= 41 else "Non-prompt"
+        for task in srl_measurement_validator.EXPECTED_TASKS:
+            for detector in srl_measurement_validator.EXPECTED_DETECTORS:
+                for eye in srl_measurement_validator.EXPECTED_EYES:
+                    for distance in srl_measurement_validator.EXPECTED_DISTANCES:
+                        for aoi in srl_measurement_validator.EXPECTED_AOIS:
+                            rows.append(
+                                {
+                                    "participant_id": participant_id,
+                                    "stimulus_id": task,
+                                    "detector_id": detector,
+                                    "eye": eye,
+                                    "viewing_distance_cm": distance,
+                                    "aoi_convention": aoi,
+                                    "transition_count": 1.0,
+                                    "status": "ok",
+                                    "experiment_condition": condition,
+                                    "metadata_tracking_ratio_percent": 95.0,
+                                    "metadata_stimulus_time_seconds": 12.0,
+                                }
+                            )
+    measurement = pd.DataFrame(rows).iloc[:-1].copy()
+    with pytest.raises(ValueError, match="Expected 23616 measurement rows"):
+        srl_measurement_validator.validate_measurement_artifact(measurement)
