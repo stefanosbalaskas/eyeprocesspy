@@ -22,11 +22,11 @@ Eye-tracking preprocessing is part of the measurement model: when several measur
 
 ## Contribution claims
 
-The paper should claim three scientific contributions, without claiming that multiverse analysis itself is new:
+The paper should claim three scientific contributions, without claiming that multiverse analysis or downstream preprocessing sensitivity itself is new:
 
-1. **A claim-centered measurement-robustness workflow for eye-tracking HCI.** The workflow fixes a substantive claim contract, declares a finite set of defensible alternatives before result inspection, distinguishes measurement-definition alternatives and sample-definition sensitivities from analyses that change the estimand itself, propagates each planned branch through the same focal outcome/model contract, retains failed or non-evaluable branches in the denominator, and reports direction, magnitude, uncertainty, and evaluability separately.
+1. **A claim-centered measurement-robustness workflow for eye-tracking HCI.** The workflow fixes a substantive claim contract, declares a finite cross-stage set of defensible alternatives before result inspection, distinguishes measurement-definition alternatives and sample-definition sensitivities from analyses that change the estimand itself, propagates each planned branch through the same focal outcome/model contract, retains failed or non-evaluable branches in the denominator, and reports direction, magnitude, uncertainty, and evaluability separately.
 
-2. **An end-to-end empirical demonstration of measurement-to-claim propagation.** In the SRL case, 144/144 prespecified models converged, yet point-estimate direction changed across the frozen claim-stability universe. Viewing-distance assumptions used in pixel-to-degree conversion produced the largest systematic shift and interacted with detector choice, while all 144 confidence intervals still included the null.
+2. **An end-to-end empirical demonstration of measurement-to-claim propagation under that declared decision structure.** In the SRL case, 144/144 prespecified models converged, yet point-estimate direction changed across the frozen claim-stability universe. Viewing-distance assumptions used in pixel-to-degree conversion produced the largest systematic shift and interacted with detector choice, while all 144 confidence intervals still included the null.
 
 3. **Independent measurement-level generalization.** In MCFW-Gaze, detector-dependent fixation representations remained materially different across a separate 120 Hz Tobii dataset and six interaction contexts. Positive-class overlap and event summaries exposed substantially more disagreement than raw fixation/non-fixation agreement.
 
@@ -51,13 +51,13 @@ Frame the problem at the HCI-claim level, not as a software or detector-comparis
 Organize by methodological problem rather than tool:
 
 - analytical flexibility and multiverse/specification analysis;
-- eye-tracking temporal-window and cleaning/analysis multiverses;
+- eye-tracking temporal-window, cleaning/analysis, and complete preprocessing-pipeline sensitivity;
 - event-detection variability;
 - AOI and coordinate-geometry uncertainty;
 - data-quality decisions and missing gaze;
 - reproducible eye-tracking/HCI measurement pipelines.
 
-The novelty boundary must remain explicit: prior work already studies detector sensitivity, AOI sensitivity, temporal-window sensitivity, cleaning/analysis multiverses, and HCI multiverse tooling. The intended extension is **end-to-end propagation from a declared measurement-decision space to the stability of a prespecified substantive HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
+The novelty boundary must remain explicit: prior work already studies detector sensitivity, AOI sensitivity, temporal-window sensitivity, cleaning/analysis multiverses, HCI multiverse tooling, and downstream gaze-based relationships under alternative preprocessing pipelines, including Schindler and Onnasch (2026). The intended extension is the **declared cross-stage measurement-decision space and its mapping to a prespecified substantive HCI claim**, with branch-type distinctions, planned-denominator accountability, multidimensional interpretation, and an independent raw-signal validation case.
 
 Sources: `introduction_related_work.md`, `literature_positioning.csv`, `literature_references.bib`.
 
@@ -97,6 +97,7 @@ Use `frontmatter_conclusion.md`. Return to the thesis that reproducible eye-trac
 Do not write that:
 
 - multiverse analysis is new to eye tracking or HCI;
+- this is the first demonstration that preprocessing can change a downstream gaze-based relationship;
 - changing quality/cohort rules is formally estimand-preserving simply because the focal coefficient formula is unchanged;
 - the 60, 65, or 70 cm SRL branch is the true participant viewing distance;
 - I-VT 40°/s or I-DT is the correct detector because they agree more closely;
