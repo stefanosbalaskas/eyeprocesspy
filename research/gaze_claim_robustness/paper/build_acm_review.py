@@ -90,6 +90,8 @@ FIGURE_DESCRIPTIONS = {
     ),
 }
 
+SHORT_TITLE = "From Gaze Signals to HCI Claims"
+
 
 def _between(text: str, start: str, end: str) -> str:
     if start not in text or end not in text:
@@ -325,6 +327,7 @@ def build(
 \renewcommand\footnotetextcopyrightpermission[1]{{}}
 \begin{{document}}
 \title{{{_latex_escape(title)}}}
+\shorttitle{{{_latex_escape(SHORT_TITLE)}}}
 \author{{Anonymous Author(s)}}
 \begin{{abstract}}
 {_latex_escape(abstract)}
