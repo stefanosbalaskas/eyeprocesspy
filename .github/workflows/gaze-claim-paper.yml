@@ -74,12 +74,12 @@ jobs:
           test -s paper-figures/fig3_mcfw_context_jaccard.svg
           test -s paper-figures/fig3_mcfw_context_jaccard.pdf
 
-      - name: Install Pandoc for review-format conversion
+      - name: Install review-format and accessibility tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends pandoc
+          sudo apt-get install -y --no-install-recommends pandoc poppler-utils
 
-      - name: Generate anonymous ACM review TeX
+      - name: Generate anonymous tagged ACM review TeX
         run: |
           python research/gaze_claim_robustness/paper/build_acm_review.py \
             --output-dir acm-review \
@@ -89,15 +89,27 @@ jobs:
           test -s acm-review/figures/fig1_srl_specification_curve.pdf
           test -s acm-review/figures/fig2_srl_detector_distance.pdf
           test -s acm-review/figures/fig3_mcfw_context_jaccard.pdf
+          grep -q '\\documentclass\[manuscript,review,anonymous\]{acmart-tagged}' \
+            acm-review/manuscript_acm_review.tex
 
-      - name: Compile anonymous ACM review PDF
+      - name: Compile anonymous tagged ACM review PDF
         uses: xu-cheng/latex-action@v4
         with:
           root_file: manuscript_acm_review.tex
           working_directory: acm-review
+          latexmk_use_lualatex: true
 
-      - name: Verify ACM review PDF
-        run: test -s acm-review/manuscript_acm_review.pdf
+      - name: Verify ACM review PDF accessibility and anonymity
+        run: |
+          test -s acm-review/manuscript_acm_review.pdf
+          pdfinfo acm-review/manuscript_acm_review.pdf | tee acm-review/pdfinfo.txt
+          grep -Eq '^Tagged:[[:space:]]+yes$' acm-review/pdfinfo.txt
+          grep -Eq '^Pages:[[:space:]]+[1-9][0-9]*$' acm-review/pdfinfo.txt
+          pdftotext acm-review/manuscript_acm_review.pdf acm-review/manuscript_acm_review.txt
+          ! grep -Eiq 'github|stefanosbalaskas|36683906120|36708103076|36776432517|5fad0f19|878e351a' \
+            acm-review/manuscript_acm_review.txt
+          grep -Fq 'OpenAI ChatGPT was used as a research-assistance tool' \
+            acm-review/manuscript_acm_review.txt
 
       - name: Upload manuscript build
         uses: actions/upload-artifact@v4
@@ -110,6 +122,8 @@ jobs:
             paper-figures/*.pdf
             acm-review/manuscript_acm_review.tex
             acm-review/manuscript_acm_review.pdf
+            acm-review/manuscript_acm_review.txt
+            acm-review/pdfinfo.txt
             acm-review/literature_references.bib
             acm-review/figures/*.pdf
           if-no-files-found: error
