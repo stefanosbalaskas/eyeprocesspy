@@ -47,10 +47,10 @@ SVG_SHA256 = {
         "4c2531bdc716d51edc91a71196df61383a046c06a27ac04fb73301b002a4bcbc"
     ),
     "fig2_srl_detector_distance.svg": (
-        "a6ad1b378f624f652765fefbdb6aa14174691e67009562348ba54dc83f1d9666"
+        "bc25f54e554dbe9bff20852e1c63e82578c8fa92b69f605c2c6866ccfc21249c"
     ),
     "fig3_mcfw_context_jaccard.svg": (
-        "8123b2352966e5eca4773bac6a525bc16786685f1a3c052a820c88208b05cabe"
+        "aaf07ef4cc7e3f72352fed16b90d7d9e340527582ed273adb7427d57c5b24a0b"
     ),
 }
 
