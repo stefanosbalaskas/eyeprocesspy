@@ -39,7 +39,12 @@ jobs:
           enable-cache: true
 
       - name: Install frozen figure environment
-        run: uv sync --frozen --extra dev
+        run: |
+          uv sync --frozen --extra dev
+          uv pip install --python .venv/bin/python \
+            "matplotlib==3.10.8" \
+            "numpy==2.3.5" \
+            "pandas==2.2.3"
 
       - name: Assemble manuscript
         run: |
@@ -59,7 +64,7 @@ jobs:
 
       - name: Generate frozen publication figures
         run: |
-          uv run --frozen python research/gaze_claim_robustness/paper/make_publication_figures.py \
+          .venv/bin/python research/gaze_claim_robustness/paper/make_publication_figures.py \
             --snapshot-dir research/gaze_claim_robustness/results \
             --output-dir paper-figures
           test -s paper-figures/fig1_srl_specification_curve.svg
