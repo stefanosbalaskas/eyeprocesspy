@@ -1,0 +1,272 @@
+name: SRL archive audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/research-srl-archive-audit.yml
+
+concurrency:
+  group: srl-archive-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install research audit environment
+        run: uv sync --frozen --extra dev
+
+      - name: Download public Figshare SRL release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/srl_download evidence
+          curl             --fail             --location             --retry 5             --retry-all-errors             --retry-delay 5             --connect-timeout 30             --max-time 3600             --user-agent "Mozilla/5.0 eyeprocesspy-research-audit"             --output /tmp/srl_download/release.bin             "https://figshare.com/ndownloader/files/54379415"
+
+          stat --printf='bytes=%s\n' /tmp/srl_download/release.bin             | tee evidence/archive_size.txt
+          sha256sum /tmp/srl_download/release.bin             | tee evidence/archive_sha256.txt
+          md5sum /tmp/srl_download/release.bin             | tee evidence/archive_md5.txt
+          file /tmp/srl_download/release.bin             | tee evidence/archive_file_type.txt
+
+      - name: Extract release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/srl_release
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          import shutil
+          import tarfile
+          import zipfile
+
+          source = Path("/tmp/srl_download/release.bin")
+          target = Path("/tmp/srl_release")
+
+          if zipfile.is_zipfile(source):
+              with zipfile.ZipFile(source) as archive:
+                  archive.extractall(target)
+              kind = "zip"
+          elif tarfile.is_tarfile(source):
+              with tarfile.open(source) as archive:
+                  archive.extractall(target)
+              kind = "tar"
+          else:
+              destination = target / "release.bin"
+              shutil.copy2(source, destination)
+              raise SystemExit(
+                  "Figshare payload is not a ZIP or TAR archive; "
+                  f"copied to {destination} for inspection."
+              )
+
+          paths = sorted(
+              str(path.relative_to(target))
+              for path in target.rglob("*")
+              if path.is_file()
+          )
+          Path("evidence/archive_extraction.txt").write_text(
+              f"archive_kind={kind}\nfile_count={len(paths)}\n",
+              encoding="utf-8",
+          )
+          Path("evidence/archive_file_manifest.txt").write_text(
+              "\n".join(paths) + "\n",
+              encoding="utf-8",
+          )
+          print(f"Extracted {kind}: {len(paths)} files")
+          PY
+
+      - name: Resolve canonical SRL paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          import shlex
+
+          root = Path("/tmp/srl_release")
+          resolved = {}
+          for name in ("participants.csv", "stimuli.csv"):
+              matches = sorted(root.rglob(name))
+              if len(matches) != 1:
+                  raise SystemExit(
+                      f"Expected exactly one {name}; found {len(matches)}: {matches}"
+                  )
+              resolved[name] = matches[0]
+
+          raw_dirs = sorted(path for path in root.rglob("ET_data_raw") if path.is_dir())
+          if len(raw_dirs) != 1:
+              raise SystemExit(
+                  f"Expected exactly one ET_data_raw directory; found {len(raw_dirs)}"
+              )
+
+          values = {
+              "PARTICIPANTS": str(resolved["participants.csv"]),
+              "STIMULI": str(resolved["stimuli.csv"]),
+              "RAW_DIR": str(raw_dirs[0]),
+          }
+          lines = [f"{key}={shlex.quote(value)}" for key, value in values.items()]
+          Path("evidence/srl_paths.env").write_text(
+              "\n".join(lines) + "\n",
+              encoding="utf-8",
+          )
+          print("\n".join(lines))
+          PY
+
+      - name: Run structural SRL archive audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_dataset.py /tmp/srl_release --sample-rows 5000 --output-dir evidence/archive_audit | tee evidence/archive_audit_stdout.txt
+
+      - name: Reconcile participant identity across released sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_identity.py /tmp/srl_release --output-dir evidence/identity | tee evidence/identity_stdout.txt
+
+      - name: Audit Task-level raw sampling regularity
+        shell: bash
+        run: |
+          set -euo pipefail
+          source evidence/srl_paths.env
+          uv run --frozen python research/gaze_claim_robustness/audit_srl_task_timebase.py "$RAW_DIR" --output-dir evidence/task_timebase | tee evidence/task_timebase_stdout.txt
+
+      - name: Run estimand identifiability audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source evidence/srl_paths.env
+          uv run --frozen python             research/gaze_claim_robustness/audit_srl_identifiability.py             "$PARTICIPANTS"             "$STIMULI"             --output-dir evidence/identifiability             | tee evidence/identifiability_stdout.txt
+
+      - name: Build pre-results design manifest
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          source evidence/srl_paths.env
+          uv run --frozen python             research/gaze_claim_robustness/build_srl_design_manifest.py             "$PARTICIPANTS"             "$STIMULI"             "$RAW_DIR"             --output-dir evidence/design_manifest             | tee evidence/design_manifest_stdout.txt
+
+      - name: Build frozen 96-specification universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python             research/gaze_claim_robustness/build_srl_primary_universe.py             --research-dir research/gaze_claim_robustness             --output-dir evidence/primary_universe             | tee evidence/primary_universe_stdout.txt
+
+      - name: Evaluate execution readiness
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python             research/gaze_claim_robustness/check_srl_execution_readiness.py             --research-dir research/gaze_claim_robustness             --archive-audit-dir evidence/archive_audit             --identifiability-dir evidence/identifiability             --output evidence/srl_execution_readiness.csv             | tee evidence/readiness_stdout.txt
+
+      - name: Summarize evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --no-sync python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          out = []
+
+          manifest = Path("evidence/archive_audit/raw_sample_manifest.csv")
+          if manifest.exists():
+              raw = pd.read_csv(manifest)
+              out.append(f"raw_files={len(raw)}")
+              if "dense_regular_250hz" in raw:
+                  dense = raw["dense_regular_250hz"].astype(bool)
+                  out.append(f"dense_regular_250hz={int(dense.sum())}/{len(raw)}")
+              if "fraction_4ms_timestamp_steps" in raw:
+                  fraction = pd.to_numeric(
+                      raw["fraction_4ms_timestamp_steps"],
+                      errors="coerce",
+                  )
+                  out.append(f"min_fraction_4ms={fraction.min():.8f}")
+
+          identity = Path("evidence/identity/identity_summary.csv")
+          if identity.exists():
+              frame = pd.read_csv(identity)
+              for _, row in frame.iterrows():
+                  out.append(f"identity:{row['metric']}={row['value']}")
+
+          timebase = Path("evidence/task_timebase/participant_timebase_summary.csv")
+          if timebase.exists():
+              frame = pd.read_csv(timebase)
+              out.append(
+                  "task_timebase:all8_nominal_250="
+                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+              out.append(
+                  "task_timebase:all8_dense_250="
+                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+              out.append(
+                  "task_timebase:all8_lossless_nan_grid_250="
+                  f"{int(frame['all_8_tasks_lossless_nan_grid_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+
+          estimands = Path("evidence/identifiability/estimand_identifiability.csv")
+          if estimands.exists():
+              frame = pd.read_csv(estimands)
+              for _, row in frame.iterrows():
+                  out.append(
+                      f"{row['estimand']}={row['design_status']};"
+                      f"primary_eligible={row['primary_eligible']}"
+                  )
+
+          readiness = Path("evidence/srl_execution_readiness.csv")
+          if readiness.exists():
+              frame = pd.read_csv(readiness)
+              blockers = frame.loc[
+                  frame["severity"].eq("BLOCKER")
+                  & ~frame["ready"].astype(bool)
+              ]
+              out.append(f"unresolved_blockers={len(blockers)}")
+              for _, row in blockers.iterrows():
+                  out.append(f"BLOCKER:{row['gate_id']}:{row['message']}")
+
+          text = "\n".join(out) + "\n"
+          Path("evidence/summary.txt").write_text(text, encoding="utf-8")
+          print(text)
+          PY
+
+      - name: Upload audit evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: srl-archive-audit-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce scientific readiness gate
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f evidence/srl_execution_readiness.csv
+          uv run --no-sync python - <<'PY'
+          import pandas as pd
+
+          frame = pd.read_csv("evidence/srl_execution_readiness.csv")
+          blockers = frame.loc[
+              frame["severity"].eq("BLOCKER")
+              & ~frame["ready"].astype(bool)
+          ]
+          if len(blockers):
+              print(blockers.to_string(index=False))
+              raise SystemExit(
+                  f"SRL empirical execution remains blocked by {len(blockers)} gate(s)."
+              )
+          print("SRL empirical execution readiness: PASS")
+          PY
