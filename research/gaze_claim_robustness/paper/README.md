@@ -9,13 +9,16 @@ The manuscript should be edited from the section-level sources below rather than
 1. `paper_outline.md` — working title, thesis, RQs, contribution claims, abstract, paper structure, and explicit claims to avoid.
 2. `literature_positioning.csv` — evidence matrix recording what each positioning source establishes, what it does **not** establish, and its role in the novelty argument.
 3. `literature_references.bib` — locked minimal bibliography corresponding to the positioning matrix.
-4. `introduction_related_work.md` — complete Introduction and Related Work draft.
-5. `methods_draft.md` — claim-centered robustness framework plus frozen SRL and MCFW methods/provenance.
-6. `results_draft.md` — frozen empirical Results and figure captions.
-7. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
-8. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
+4. `frontmatter_conclusion.md` — title, abstract, keywords, and Conclusion source.
+5. `introduction_related_work.md` — complete Introduction and Related Work draft.
+6. `methods_draft.md` — claim-centered robustness framework plus frozen SRL and MCFW methods/provenance.
+7. `results_draft.md` — frozen empirical Results and figure captions.
+8. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
+9. `claims_audit.md` — evidence-to-claim and overclaim-control matrix for submission editing.
+10. `assemble_manuscript.py` — deterministic assembler that creates `manuscript_draft.md` from the section sources; the generated manuscript is a build product rather than a second hand-edited source.
+11. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
 
-The next assembly layer should concatenate these sources into a single submission draft rather than creating a second independent version of the analyses or literature record.
+This hierarchy keeps analysis, evidence positioning, manuscript prose, and generated presentation products distinct.
 
 ## Canonical empirical inputs
 
@@ -42,7 +45,17 @@ The novelty claim is deliberately narrower than "multiverse analysis for eye tra
 
 The paper's intended methodological extension is the **mapping from a declared cross-stage eye-tracking measurement-decision space to the stability of one prespecified downstream HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
 
-Every source in `literature_positioning.csv` includes a `what_it_does_not_establish` field so that detector, AOI, quality, or reporting evidence is not silently promoted into evidence for full claim propagation.
+Every source in `literature_positioning.csv` includes a `what_it_does_not_establish` field so that detector, AOI, quality, or reporting evidence is not silently promoted into evidence for full claim propagation. `claims_audit.md` applies the same discipline to the manuscript's own headline claims.
+
+## Manuscript assembly
+
+Run:
+
+```bash
+python research/gaze_claim_robustness/paper/assemble_manuscript.py
+```
+
+The assembler reads the section-level Markdown sources in fixed order, moves the Conclusion from the shared front-matter source to the end, and writes `manuscript_draft.md`. It performs no empirical computation and reads no result artifact directly.
 
 ## Figure generation
 
