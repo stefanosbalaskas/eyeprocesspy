@@ -19,7 +19,7 @@ The manuscript should be edited from the section-level sources below rather than
 11. `assemble_manuscript.py` — deterministic Markdown assembler; `manuscript_draft.md` is a build product, not a second hand-edited source.
 12. `manuscript_metrics.py` — mechanical abstract/main-text word-count gate.
 13. `make_publication_figures.py` — presentation-only renderer for the three frozen figures.
-14. `build_acm_review.py` — anonymous one-column `acmart` review-source generator with BibTeX citations, accessibility descriptions, real figures, and ACM running-title handling.
+14. `build_acm_review.py` — anonymous one-column `acmart` review-source generator with BibTeX citations, accessibility descriptions, real figures, ACM running-title handling, and CCS concepts.
 
 The GitHub Actions workflow `.github/workflows/gaze-claim-paper.yml` exercises the full paper path: manuscript assembly, length checks, frozen-figure regeneration, Pandoc conversion, anonymous ACM TeX generation, PDF compilation, and artifact upload.
 
@@ -42,21 +42,29 @@ The GitHub Actions workflow `.github/workflows/gaze-claim-paper.yml` exercises t
 - planned detector-summary rows: 28,170
 - planned detector-pair rows: 28,170
 
-## Literature-positioning contract
+## Literature-positioning and claim contract
 
 The novelty claim is deliberately narrower than "multiverse analysis for eye tracking." Existing work already establishes multiverse/specification analysis, HCI multiverse tooling, temporal-window sensitivity, eye-movement cleaning/analysis multiverses, detector disagreement, AOI uncertainty, gaze-data quality, and reporting standards.
 
 The paper's intended methodological extension is the **mapping from a declared cross-stage eye-tracking measurement-decision space to the stability of one prespecified downstream HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
 
+The manuscript now distinguishes three branch classes explicitly:
+
+1. **measurement-definition alternatives** — detector, analyzed eye, visual-angle geometry, and AOI convention;
+2. **sample-definition sensitivities** — quality rule and cohort, which alter empirical support and can change the formal target population;
+3. **estimand-changing analyses** — analyses that alter the scientific quantity itself and therefore remain outside the primary claim-stability denominator.
+
+A branch enters the declared universe only when its rationale is source- or literature-grounded, fully specified before focal-result inspection, executable without outcome-dependent tuning or silent repair, and comparable under the same focal claim contract. Specification counts describe this frozen grid and are not probabilities or invariant robustness percentages.
+
 Every source in `literature_positioning.csv` includes a `what_it_does_not_establish` field so that detector, AOI, quality, or reporting evidence is not silently promoted into evidence for full claim propagation. `claims_audit.md` applies the same discipline to the manuscript's own headline claims.
 
 ## Current CHI-format benchmark
 
-As verified on 2026-10-01, CHI 2027 uses single-column review submissions, encourages approximately 5,000–8,000 words, and caps abstracts at 150 words. The current mechanical manuscript build reports:
+As verified on 2026-10-01, CHI 2027 uses single-column anonymous review submissions, encourages approximately 5,000–8,000 words, and caps abstracts at 150 words. The current mechanical manuscript build reports:
 
-- abstract: **136 words**;
-- main text excluding headings, code blocks, and figure captions: **7,453 words**;
-- assembled Markdown including front matter and other counted material: **8,083 words**.
+- abstract: **140 words**;
+- main text excluding headings, code blocks, and figure captions: **7,306 words**;
+- assembled Markdown including front matter and other counted material: **7,940 words**.
 
 The CHI 2027 initial deadline (2026-09-10 AoE) has passed, so these constraints are treated as the current formatting benchmark unless the work corresponds to an already-submitted 2027 paper. The actual target-cycle call must be re-verified before submission. See `chi_format_notes.md` for the dated format check.
 
@@ -76,7 +84,7 @@ The automated paper workflow then builds an anonymous review manuscript using:
 \documentclass[manuscript,review,anonymous]{acmart}
 ```
 
-`build_acm_review.py` converts the assembled manuscript to BibTeX-backed ACM LaTeX, keeps the full paper title on page 1 while using `From Gaze Signals to HCI Claims` as the shorter running title, inserts the real publication figures with `\Description{...}` accessibility text, and compiles the review PDF in CI.
+`build_acm_review.py` converts the assembled manuscript to BibTeX-backed ACM LaTeX, keeps the full paper title on page 1 while using `From Gaze Signals to HCI Claims` as the shorter running title, inserts the real publication figures with `\Description{...}` accessibility text, emits the HCI design/evaluation and empirical-studies CCS concepts, and compiles the review PDF in CI. The ACM reference strip remains suppressed in the anonymous pre-eRights build so the local manuscript does not manufacture conference/DOI metadata that have not yet been assigned.
 
 ## Durable frozen figure inputs
 
@@ -132,4 +140,4 @@ The manuscript intentionally separates:
 1. **SRL claim propagation** — measurement choices alter the direction and magnitude of a substantive Prompt effect estimate while all 95% intervals include the null; and
 2. **MCFW-Gaze measurement generalization** — detector-dependent event representations persist across independent hardware, sampling rate, and interaction contexts.
 
-The paper does not interpret specification frequencies as probabilities that an effect is true, does not designate a detector/viewing distance/eye/AOI/quality branch as scientifically correct, and does not describe MCFW-Gaze as a replication of the SRL Prompt effect.
+The paper does not interpret specification frequencies as probabilities that an effect is true or as invariant robustness percentages, does not designate a detector/viewing distance/eye/AOI/quality branch as scientifically correct, does not claim strict formal estimand identity across sample-definition sensitivities, and does not describe MCFW-Gaze as a replication of the SRL Prompt effect.
