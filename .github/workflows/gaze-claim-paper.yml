@@ -8,10 +8,14 @@ on:
     paths:
       - .github/workflows/gaze-claim-paper.yml
       - research/gaze_claim_robustness/paper/**
+      - research/gaze_claim_robustness/results/srl_paper_figure_snapshot.csv
+      - research/gaze_claim_robustness/results/mcfw_context_jaccard_snapshot.csv
   pull_request:
     paths:
       - .github/workflows/gaze-claim-paper.yml
       - research/gaze_claim_robustness/paper/**
+      - research/gaze_claim_robustness/results/srl_paper_figure_snapshot.csv
+      - research/gaze_claim_robustness/results/mcfw_context_jaccard_snapshot.csv
 
 permissions:
   contents: read
@@ -30,6 +34,13 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install frozen figure environment
+        run: uv sync --frozen --extra dev
+
       - name: Assemble manuscript
         run: |
           python research/gaze_claim_robustness/paper/assemble_manuscript.py \
@@ -46,6 +57,18 @@ jobs:
       - name: Show manuscript metrics
         run: cat manuscript_metrics.json
 
+      - name: Generate frozen publication figures
+        run: |
+          uv run --frozen python research/gaze_claim_robustness/paper/make_publication_figures.py \
+            --snapshot-dir research/gaze_claim_robustness/results \
+            --output-dir paper-figures
+          test -s paper-figures/fig1_srl_specification_curve.svg
+          test -s paper-figures/fig1_srl_specification_curve.pdf
+          test -s paper-figures/fig2_srl_detector_distance.svg
+          test -s paper-figures/fig2_srl_detector_distance.pdf
+          test -s paper-figures/fig3_mcfw_context_jaccard.svg
+          test -s paper-figures/fig3_mcfw_context_jaccard.pdf
+
       - name: Install Pandoc for review-format conversion
         run: |
           sudo apt-get update -qq
@@ -54,9 +77,13 @@ jobs:
       - name: Generate anonymous ACM review TeX
         run: |
           python research/gaze_claim_robustness/paper/build_acm_review.py \
-            --output-dir acm-review
+            --output-dir acm-review \
+            --figure-dir paper-figures
           test -s acm-review/manuscript_acm_review.tex
           test -s acm-review/literature_references.bib
+          test -s acm-review/figures/fig1_srl_specification_curve.pdf
+          test -s acm-review/figures/fig2_srl_detector_distance.pdf
+          test -s acm-review/figures/fig3_mcfw_context_jaccard.pdf
 
       - name: Compile anonymous ACM review PDF
         uses: xu-cheng/latex-action@v4
@@ -74,8 +101,11 @@ jobs:
           path: |
             manuscript_draft.md
             manuscript_metrics.json
+            paper-figures/*.svg
+            paper-figures/*.pdf
             acm-review/manuscript_acm_review.tex
             acm-review/manuscript_acm_review.pdf
             acm-review/literature_references.bib
+            acm-review/figures/*.pdf
           if-no-files-found: error
           retention-days: 30
