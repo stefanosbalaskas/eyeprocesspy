@@ -6,19 +6,20 @@ This directory is the manuscript workspace for the gaze-claim robustness study. 
 
 The manuscript should be edited from the section-level sources below rather than by copying prose back into analysis scripts:
 
-1. `paper_outline.md` — working title, thesis, RQs, contribution claims, abstract, paper structure, and explicit claims to avoid.
+1. `paper_outline.md` — working title, thesis, RQs, contribution claims, paper structure, and explicit claims to avoid.
 2. `literature_positioning.csv` — evidence matrix recording what each positioning source establishes, what it does **not** establish, and its role in the novelty argument.
 3. `literature_references.bib` — locked minimal bibliography corresponding to the positioning matrix.
-4. `frontmatter_conclusion.md` — title, abstract, keywords, and Conclusion source.
-5. `introduction_related_work.md` — complete Introduction and Related Work draft.
-6. `methods_draft.md` — claim-centered robustness framework plus frozen SRL and MCFW methods/provenance.
-7. `results_draft.md` — frozen empirical Results and figure captions.
-8. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
-9. `claims_audit.md` — evidence-to-claim and overclaim-control matrix for submission editing.
-10. `assemble_manuscript.py` — deterministic assembler that creates `manuscript_draft.md` from the section sources; the generated manuscript is a build product rather than a second hand-edited source.
-11. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
+4. `chi_format_notes.md` — dated current-CHI format/word-limit benchmark and submission checks.
+5. `frontmatter_conclusion.md` — authoritative title, abstract, keywords, and Conclusion source.
+6. `introduction_related_work.md` — complete Introduction and Related Work draft.
+7. `methods_draft.md` — claim-centered robustness framework plus frozen SRL and MCFW methods/provenance.
+8. `results_draft.md` — frozen empirical Results and figure captions.
+9. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
+10. `claims_audit.md` — evidence-to-claim and overclaim-control matrix for submission editing.
+11. `assemble_manuscript.py` — deterministic assembler that creates `manuscript_draft.md` from the section sources; the generated manuscript is a build product rather than a second hand-edited source.
+12. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
 
-This hierarchy keeps analysis, evidence positioning, manuscript prose, and generated presentation products distinct.
+This hierarchy keeps analysis, evidence positioning, manuscript prose, format constraints, and generated presentation products distinct. The abstract exists only in `frontmatter_conclusion.md`; it is not duplicated in the outline.
 
 ## Canonical empirical inputs
 
@@ -46,6 +47,12 @@ The novelty claim is deliberately narrower than "multiverse analysis for eye tra
 The paper's intended methodological extension is the **mapping from a declared cross-stage eye-tracking measurement-decision space to the stability of one prespecified downstream HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
 
 Every source in `literature_positioning.csv` includes a `what_it_does_not_establish` field so that detector, AOI, quality, or reporting evidence is not silently promoted into evidence for full claim propagation. `claims_audit.md` applies the same discipline to the manuscript's own headline claims.
+
+## Current CHI-format benchmark
+
+As verified on 2026-10-01, CHI 2027 uses single-column review submissions, encourages approximately 5,000–8,000 words, and caps abstracts at 150 words. The current authoritative abstract is 133 words. The CHI 2027 initial deadline (2026-09-10 AoE) has passed, so these constraints are treated as the current formatting benchmark unless the work corresponds to an already-submitted 2027 paper. The actual target-cycle call must be re-verified before submission.
+
+See `chi_format_notes.md` for the full dated check.
 
 ## Manuscript assembly
 
