@@ -326,8 +326,7 @@ def build(
 \settopmatter{{printacmref=false,printccs=false,printfolios=true}}
 \renewcommand\footnotetextcopyrightpermission[1]{{}}
 \begin{{document}}
-\title{{{_latex_escape(title)}}}
-\shorttitle{{{_latex_escape(SHORT_TITLE)}}}
+\title[{_latex_escape(SHORT_TITLE)}]{{{_latex_escape(title)}}}
 \author{{Anonymous Author(s)}}
 \begin{{abstract}}
 {_latex_escape(abstract)}
