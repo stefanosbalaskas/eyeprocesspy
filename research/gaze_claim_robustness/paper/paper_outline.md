@@ -14,9 +14,9 @@ Eye-tracking preprocessing is part of the measurement model: when several measur
 
 ## Research questions
 
-**RQ1 — Claim propagation.** How much can the direction, magnitude, uncertainty, and evaluability of a fixed HCI estimand vary across a prespecified set of defensible eye-tracking measurement decisions?
+**RQ1 — Claim propagation.** How much can the direction, magnitude, uncertainty, and evaluability of a prespecified HCI claim vary across a declared set of defensible eye-tracking measurement and sample-definition decisions while the focal contrast, outcome-rate definition, and model term remain fixed?
 
-**RQ2 — Sensitivity structure.** Which measurement-decision families account for the largest descriptive shifts in the focal estimate, and do different decisions interact rather than act independently?
+**RQ2 — Sensitivity structure.** Which decision families are associated with the largest descriptive shifts in the focal estimate, and do different decisions interact rather than act independently?
 
 **RQ3 — Independent measurement generalization.** Do detector-dependent event representations persist in an independent raw-gaze dataset collected with different hardware, sampling rate, and interaction contexts?
 
@@ -24,9 +24,9 @@ Eye-tracking preprocessing is part of the measurement model: when several measur
 
 The paper should claim four contributions, without claiming that multiverse analysis itself is new:
 
-1. **A claim-centered measurement-robustness workflow for eye-tracking HCI.** The workflow fixes the substantive estimand, declares a finite set of defensible measurement alternatives before result inspection, propagates each alternative through the same outcome/model contract, retains failed or non-evaluable branches in the denominator, and reports direction, magnitude, uncertainty, and evaluability separately.
+1. **A claim-centered measurement-robustness workflow for eye-tracking HCI.** The workflow fixes a substantive claim contract, declares a finite set of defensible alternatives before result inspection, distinguishes measurement-definition alternatives and sample-definition sensitivities from analyses that change the estimand itself, propagates each planned branch through the same focal outcome/model contract, retains failed or non-evaluable branches in the denominator, and reports direction, magnitude, uncertainty, and evaluability separately.
 
-2. **An end-to-end empirical demonstration of measurement-to-claim propagation.** In the SRL case, 144/144 prespecified models converged, yet point-estimate direction changed across the frozen measurement universe. Viewing-distance assumptions used in pixel-to-degree conversion produced the largest systematic shift and interacted with detector choice, while all 144 confidence intervals still included the null.
+2. **An end-to-end empirical demonstration of measurement-to-claim propagation.** In the SRL case, 144/144 prespecified models converged, yet point-estimate direction changed across the frozen claim-stability universe. Viewing-distance assumptions used in pixel-to-degree conversion produced the largest systematic shift and interacted with detector choice, while all 144 confidence intervals still included the null.
 
 3. **Independent measurement-level generalization.** In MCFW-Gaze, detector-dependent fixation representations remained materially different across a separate 120 Hz Tobii dataset and six interaction contexts. Positive-class overlap and event summaries exposed substantially more disagreement than raw fixation/non-fixation agreement.
 
@@ -34,7 +34,7 @@ The paper should claim four contributions, without claiming that multiverse anal
 
 ## Abstract source
 
-The authoritative abstract is in `frontmatter_conclusion.md`. It is intentionally **not duplicated here**. The current version is 133 words and was compressed to satisfy the current CHI 2027 150-word abstract cap. See `chi_format_notes.md` for the dated format check.
+The authoritative abstract is in `frontmatter_conclusion.md`. It is intentionally **not duplicated here**. The current version is designed to satisfy the current CHI 150-word abstract cap. See `chi_format_notes.md` for the dated format check.
 
 ## Paper structure
 
@@ -61,13 +61,14 @@ Sources: `introduction_related_work.md`, `literature_positioning.csv`, `literatu
 
 Present the general workflow independently of either dataset:
 
-1. define the substantive estimand;
-2. separate estimand-preserving measurement decisions from estimand-changing alternatives;
-3. freeze a defensible decision registry before focal-result inspection;
-4. execute all planned specifications under the same outcome/model contract;
-5. preserve failures/non-evaluable branches in the denominator;
-6. summarize claim stability by direction, magnitude, uncertainty, evaluability, and decision-family structure;
-7. validate general measurement behavior on an independent dataset where possible.
+1. define a substantive claim contract: focal contrast, outcome semantics, population/support definition, and model term;
+2. classify planned branches as measurement-definition alternatives, sample-definition sensitivities, or estimand-changing analyses;
+3. admit a branch only when its rationale is source- or literature-grounded, fully specified before focal-result inspection, and executable without outcome-dependent tuning or silent repair;
+4. freeze the finite decision registry and deterministic manifest before focal-result inspection;
+5. execute all planned specifications under the declared focal outcome/model contract;
+6. preserve failures/non-evaluable branches in the denominator;
+7. summarize claim stability by direction, magnitude, uncertainty, evaluability, sample support, and decision-family structure;
+8. validate general measurement behavior on an independent dataset where possible.
 
 Then document the SRL claim-propagation case and MCFW independent measurement-generalization case. Source: `methods_draft.md`.
 
@@ -92,6 +93,7 @@ Use `frontmatter_conclusion.md`. Return to the thesis that reproducible eye-trac
 Do not write that:
 
 - multiverse analysis is new to eye tracking or HCI;
+- changing quality/cohort rules is formally estimand-preserving simply because the focal coefficient formula is unchanged;
 - the 60, 65, or 70 cm SRL branch is the true participant viewing distance;
 - I-VT 40°/s or I-DT is the correct detector because they agree more closely;
 - MCFW-Gaze replicates the SRL Prompt effect;
