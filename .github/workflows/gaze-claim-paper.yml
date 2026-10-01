@@ -74,12 +74,22 @@ jobs:
           test -s paper-figures/fig3_mcfw_context_jaccard.svg
           test -s paper-figures/fig3_mcfw_context_jaccard.pdf
 
+      - name: Build anonymous single-ZIP review supplement
+        run: |
+          python research/gaze_claim_robustness/paper/build_anonymized_supplement.py \
+            --output anonymous-review-supplement.zip
+          test -s anonymous-review-supplement.zip
+          unzip -t anonymous-review-supplement.zip
+          unzip -l anonymous-review-supplement.zip | tee supplement-contents.txt
+          grep -q 'README.txt' supplement-contents.txt
+          grep -q 'MANIFEST.tsv' supplement-contents.txt
+
       - name: Install review-format and accessibility tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends pandoc poppler-utils
 
-      - name: Generate anonymous tagged ACM review TeX
+      - name: Generate official anonymous ACM review TeX
         run: |
           python research/gaze_claim_robustness/paper/build_acm_review.py \
             --output-dir acm-review \
@@ -89,35 +99,39 @@ jobs:
           test -s acm-review/figures/fig1_srl_specification_curve.pdf
           test -s acm-review/figures/fig2_srl_detector_distance.pdf
           test -s acm-review/figures/fig3_mcfw_context_jaccard.pdf
-          grep -q '\\documentclass\[manuscript,review,anonymous\]{acmart-tagged}' \
+          grep -q '\\documentclass\[manuscript,review,anonymous\]{acmart}' \
             acm-review/manuscript_acm_review.tex
+          test "$(grep -Fc '\\Description{' acm-review/manuscript_acm_review.tex)" -eq 3
 
-      - name: Compile anonymous tagged ACM review PDF
+      - name: Compile official anonymous ACM review PDF
         uses: xu-cheng/latex-action@v4
         with:
           root_file: manuscript_acm_review.tex
           working_directory: acm-review
           latexmk_use_lualatex: true
 
-      - name: Verify ACM review PDF accessibility and anonymity
+      - name: Verify ACM review PDF format and anonymity
         run: |
           test -s acm-review/manuscript_acm_review.pdf
           pdfinfo acm-review/manuscript_acm_review.pdf | tee acm-review/pdfinfo.txt
-          grep -Eq '^Tagged:[[:space:]]+yes$' acm-review/pdfinfo.txt
           grep -Eq '^Pages:[[:space:]]+[1-9][0-9]*$' acm-review/pdfinfo.txt
           pdftotext acm-review/manuscript_acm_review.pdf acm-review/manuscript_acm_review.txt
           ! grep -Eiq 'github|stefanosbalaskas|36683906120|36708103076|36776432517|5fad0f19|878e351a' \
             acm-review/manuscript_acm_review.txt
           grep -Fq 'OpenAI ChatGPT was used as a research-assistance tool' \
             acm-review/manuscript_acm_review.txt
+          printf 'Review-PDF tag state (manual remediation may still be required by SIGCHI):\n'
+          grep -E '^Tagged:' acm-review/pdfinfo.txt || true
 
-      - name: Upload manuscript build
+      - name: Upload CHI review build
         uses: actions/upload-artifact@v4
         with:
           name: gaze-claim-paper-${{ github.sha }}
           path: |
             manuscript_draft.md
             manuscript_metrics.json
+            anonymous-review-supplement.zip
+            supplement-contents.txt
             paper-figures/*.svg
             paper-figures/*.pdf
             acm-review/manuscript_acm_review.tex
