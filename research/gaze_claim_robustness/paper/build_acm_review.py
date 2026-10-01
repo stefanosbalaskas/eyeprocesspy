@@ -11,7 +11,6 @@ It never reads empirical workflow artifacts or changes the frozen analyses.
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import shutil
 import subprocess
@@ -162,7 +161,7 @@ def _figure_block(number: int, caption: str, figure_available: bool) -> str:
             rf"{{\centering Figure {number} placeholder\\"
             r"generated from frozen artifact}}}"
         )
-    return f"""```{{=latex}}
+    return rf"""```{{=latex}}
 \begin{{figure}}[t]
 \centering
 {visual}
