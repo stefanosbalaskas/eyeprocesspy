@@ -1,8 +1,23 @@
 # CHI paper-facing evidence package
 
-This directory contains **presentation-only** artifacts derived from the two frozen empirical universes. Nothing in this layer refits the SRL models, reruns MCFW detectors, changes a measurement decision, or selects a preferred branch after results inspection.
+This directory is the manuscript workspace for the gaze-claim robustness study. It contains **presentation and writing artifacts only**. Nothing in this layer refits the SRL models, reruns MCFW detectors, changes a frozen measurement decision, or selects a preferred branch after result inspection.
 
-## Canonical inputs
+## Source hierarchy
+
+The manuscript should be edited from the section-level sources below rather than by copying prose back into analysis scripts:
+
+1. `paper_outline.md` — working title, thesis, RQs, contribution claims, abstract, paper structure, and explicit claims to avoid.
+2. `literature_positioning.csv` — evidence matrix recording what each positioning source establishes, what it does **not** establish, and its role in the novelty argument.
+3. `literature_references.bib` — locked minimal bibliography corresponding to the positioning matrix.
+4. `introduction_related_work.md` — complete Introduction and Related Work draft.
+5. `methods_draft.md` — claim-centered robustness framework plus frozen SRL and MCFW methods/provenance.
+6. `results_draft.md` — frozen empirical Results and figure captions.
+7. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
+8. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
+
+The next assembly layer should concatenate these sources into a single submission draft rather than creating a second independent version of the analyses or literature record.
+
+## Canonical empirical inputs
 
 ### SRL claim-propagation universe
 
@@ -20,6 +35,14 @@ This directory contains **presentation-only** artifacts derived from the two fro
 - artifact SHA-256: `ed2af7a036d1fb9a62b5226b71b6f02d007f87a9d23b1970828f9c9742b93020`
 - planned detector-summary rows: 28,170
 - planned detector-pair rows: 28,170
+
+## Literature-positioning contract
+
+The novelty claim is deliberately narrower than "multiverse analysis for eye tracking." Existing work already establishes multiverse/specification analysis, HCI multiverse tooling, temporal-window sensitivity, eye-movement cleaning/analysis multiverses, detector disagreement, AOI uncertainty, gaze-data quality, and reporting standards.
+
+The paper's intended methodological extension is the **mapping from a declared cross-stage eye-tracking measurement-decision space to the stability of one prespecified downstream HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
+
+Every source in `literature_positioning.csv` includes a `what_it_does_not_establish` field so that detector, AOI, quality, or reporting evidence is not silently promoted into evidence for full claim propagation.
 
 ## Figure generation
 
@@ -44,11 +67,11 @@ The SVG renderer uses a fixed Matplotlib SVG hash salt, leaves text editable as 
 
 The SVG files are generated products; the source of truth is the figure generator plus the exact canonical workflow artifacts and their hashes.
 
-## Manuscript draft
+## Manuscript interpretation boundary
 
-`results_draft.md` is the current paper-facing Results section. It intentionally separates:
+The manuscript intentionally separates:
 
 1. **SRL claim propagation** — measurement choices alter the direction and magnitude of a substantive Prompt effect estimate while all 95% intervals include the null; and
 2. **MCFW-Gaze measurement generalization** — detector-dependent event representations persist across independent hardware, sampling rate, and interaction contexts.
 
-The draft does not interpret specification frequencies as probabilities that an effect is true, and it does not designate a detector, viewing distance, eye, AOI convention, or quality branch as the scientifically correct choice.
+The paper does not interpret specification frequencies as probabilities that an effect is true, does not designate a detector/viewing distance/eye/AOI/quality branch as scientifically correct, and does not describe MCFW-Gaze as a replication of the SRL Prompt effect.
