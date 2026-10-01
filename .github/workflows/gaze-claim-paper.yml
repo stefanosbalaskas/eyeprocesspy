@@ -46,6 +46,27 @@ jobs:
       - name: Show manuscript metrics
         run: cat manuscript_metrics.json
 
+      - name: Install Pandoc for review-format conversion
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends pandoc
+
+      - name: Generate anonymous ACM review TeX
+        run: |
+          python research/gaze_claim_robustness/paper/build_acm_review.py \
+            --output-dir acm-review
+          test -s acm-review/manuscript_acm_review.tex
+          test -s acm-review/literature_references.bib
+
+      - name: Compile anonymous ACM review PDF
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: manuscript_acm_review.tex
+          working_directory: acm-review
+
+      - name: Verify ACM review PDF
+        run: test -s acm-review/manuscript_acm_review.pdf
+
       - name: Upload manuscript build
         uses: actions/upload-artifact@v4
         with:
@@ -53,5 +74,8 @@ jobs:
           path: |
             manuscript_draft.md
             manuscript_metrics.json
+            acm-review/manuscript_acm_review.tex
+            acm-review/manuscript_acm_review.pdf
+            acm-review/literature_references.bib
           if-no-files-found: error
           retention-days: 30
