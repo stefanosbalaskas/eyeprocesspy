@@ -9,8 +9,9 @@ change either frozen empirical universe. It supports two equivalent input modes:
 2. compact, committed paper snapshots extracted verbatim from those artifacts,
    whose file SHA-256 values are likewise verified.
 
-The three SVG outputs are checked against their already-frozen hashes. PDF
-sidecars are emitted only for manuscript typesetting.
+The three SVG outputs are checked against their already-frozen hashes under the
+explicit renderer versions that produced those bytes. PDF sidecars are emitted
+only for manuscript typesetting.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -31,6 +33,12 @@ SRL_ARTIFACT_SHA256 = "b125b071a9a1bf68f5ba3c11f1b8fdeedca1195de94a64e27155af79d
 MCFW_ARTIFACT_SHA256 = "ed2af7a036d1fb9a62b5226b71b6f02d007f87a9d23b1970828f9c9742b93020"
 SRL_SNAPSHOT_SHA256 = "706b57051efe074700d3b3dbc693bece3d3747da2d5940565f4c93f6a9dc6193"
 MCFW_SNAPSHOT_SHA256 = "d0c7471199e5a6242c1f51f872f4f7a3a915adb8a91749adea7fe0ff60ee235f"
+
+RENDERER_VERSIONS = {
+    "matplotlib": "3.10.8",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+}
 
 SVG_SHA256 = {
     "fig1_srl_specification_curve.svg": (
@@ -84,6 +92,19 @@ def _verify(path: Path, expected: str, label: str) -> None:
     actual = _sha256(path)
     if actual != expected:
         raise ValueError(f"{label} SHA-256 mismatch: {actual}")
+
+
+def _verify_renderer_versions() -> None:
+    actual = {
+        "matplotlib": matplotlib.__version__,
+        "numpy": np.__version__,
+        "pandas": pd.__version__,
+    }
+    if actual != RENDERER_VERSIONS:
+        raise RuntimeError(
+            "Frozen SVG byte verification requires the declared renderer "
+            f"environment {RENDERER_VERSIONS}; observed {actual}."
+        )
 
 
 def _extract(zip_path: Path, target: Path) -> None:
@@ -206,7 +227,10 @@ def figure_mcfw_context_jaccard(context: pd.DataFrame, out: Path) -> None:
     _save_figure(fig, out)
 
 
-def _load_artifact_inputs(srl_artifact: Path, mcfw_artifact: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+def _load_artifact_inputs(
+    srl_artifact: Path,
+    mcfw_artifact: Path,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     _verify(srl_artifact, SRL_ARTIFACT_SHA256, "SRL artifact")
     _verify(mcfw_artifact, MCFW_ARTIFACT_SHA256, "MCFW artifact")
     with tempfile.TemporaryDirectory() as tmp:
@@ -266,6 +290,8 @@ def main() -> int:
     )
     parser.add_argument("--output-dir", type=Path, default=Path("paper/figures"))
     args = parser.parse_args()
+
+    _verify_renderer_versions()
 
     artifact_mode = args.srl_artifact is not None or args.mcfw_artifact is not None
     snapshot_mode = args.snapshot_dir is not None
