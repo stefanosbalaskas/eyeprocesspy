@@ -87,7 +87,7 @@ jobs:
       - name: Install review-format and accessibility tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends pandoc poppler-utils
+          sudo apt-get install -y --no-install-recommends pandoc poppler-utils zip
 
       - name: Generate official anonymous ACM review TeX
         run: |
@@ -101,7 +101,10 @@ jobs:
           test -s acm-review/figures/fig3_mcfw_context_jaccard.pdf
           grep -q '\\documentclass\[manuscript,review,anonymous\]{acmart}' \
             acm-review/manuscript_acm_review.tex
-          test "$(grep -Fc '\\Description{' acm-review/manuscript_acm_review.tex)" -eq 3
+          test "$(grep -Fc '\Description{' acm-review/manuscript_acm_review.tex)" -eq 3
+          (cd acm-review && zip -q -r ../anonymous-acm-review-source.zip \
+            manuscript_acm_review.tex literature_references.bib figures)
+          test -s anonymous-acm-review-source.zip
 
       - name: Compile official anonymous ACM review PDF
         uses: xu-cheng/latex-action@v4
@@ -131,6 +134,7 @@ jobs:
             manuscript_draft.md
             manuscript_metrics.json
             anonymous-review-supplement.zip
+            anonymous-acm-review-source.zip
             supplement-contents.txt
             paper-figures/*.svg
             paper-figures/*.pdf
