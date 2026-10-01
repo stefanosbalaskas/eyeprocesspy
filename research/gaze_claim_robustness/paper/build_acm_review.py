@@ -253,6 +253,7 @@ def _pandoc_body(markdown: str, *, pandoc: str) -> str:
                 str(source),
                 "--from=markdown+citations+raw_tex",
                 "--to=latex",
+                "--no-highlight",
                 "--natbib",
                 "--top-level-division=section",
                 "--shift-heading-level-by=-1",
