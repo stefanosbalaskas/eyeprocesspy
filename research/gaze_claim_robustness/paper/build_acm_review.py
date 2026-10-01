@@ -230,16 +230,20 @@ def _pandoc_body(markdown: str, *, pandoc: str) -> str:
                 "--natbib",
                 "--listings",
                 "--top-level-division=section",
+                "--shift-heading-level-by=-1",
                 f"--output={output}",
             ],
             check=True,
         )
         latex = output.read_text(encoding="utf-8")
-    return re.sub(
+    latex = re.sub(
         r"(\\(?:section|subsection|subsubsection)\{)(\d+(?:\.\d+)*\s+)",
         lambda match: match.group(1),
         latex,
     )
+    if r"\section{Introduction}" not in latex:
+        raise ValueError("Pandoc output did not promote Introduction to a top-level section.")
+    return latex
 
 
 def _copy_available_figures(figure_dir: Path | None, output_dir: Path) -> set[int]:
@@ -323,7 +327,7 @@ def build(
 \title{{{_latex_escape(title)}}}
 \author{{Anonymous Author(s)}}
 \begin{{abstract}}
-{abstract}
+{_latex_escape(abstract)}
 \end{{abstract}}
 \keywords{{{_latex_escape(keyword_text)}}}
 \maketitle
