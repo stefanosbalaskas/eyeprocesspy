@@ -10,6 +10,8 @@ This distinction matters for reproducibility. Two analysts can use the same raw 
 
 The SRL universe illustrates why a single robust/fragile label would discard important information. Direction was not stable: 92 specifications were positive and 52 negative. Magnitude also varied, with point-estimate rate ratios ranging from 0.944 to 1.258. Yet interval-level inference was completely stable in a different sense: every 95% Wald interval included the null. These are not contradictory findings. They describe different properties of the same result.
 
+The 92/52 split is also not an invariant “robustness percentage.” In a Cartesian universe, branch frequencies depend partly on how many levels each decision family contributes, so changing grid granularity can change the fraction of positive specifications without changing any underlying fitted branch. We therefore use the count only to describe this frozen decision inventory and interpret family-level patterns separately.
+
 For HCI robustness analyses, direction, magnitude, uncertainty, model evaluability, sample support, and the source of variation should therefore be reported separately. A specification frequency is descriptive evidence about a declared decision universe; it is not a posterior probability that an effect exists. Likewise, a branch crossing a conventional significance threshold does not by itself establish substantive fragility. The relevant question is what aspect of the scientific conclusion changes, under which defensible decisions, and by how much.
 
 ## 5.3 Viewing geometry is part of the measurement model
