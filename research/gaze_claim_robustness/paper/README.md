@@ -8,7 +8,7 @@ The manuscript should be edited from the section-level sources below rather than
 
 1. `paper_outline.md` — working title, thesis, RQs, contribution claims, paper structure, and explicit claims to avoid.
 2. `literature_positioning.csv` — evidence matrix recording what each positioning source establishes, what it does **not** establish, and its role in the novelty argument.
-3. `literature_references.bib` — locked minimal bibliography corresponding to the positioning matrix.
+3. `literature_references.bib` — locked bibliography for the paper-facing sources.
 4. `chi_format_notes.md` — dated current-CHI format/word-limit benchmark and submission checks.
 5. `frontmatter_conclusion.md` — authoritative title, abstract, keywords, and Conclusion source.
 6. `introduction_related_work.md` — complete Introduction and Related Work draft.
@@ -16,10 +16,12 @@ The manuscript should be edited from the section-level sources below rather than
 8. `results_draft.md` — frozen empirical Results and figure captions.
 9. `discussion_draft.md` — interpretation, HCI implications, limitations, and scope boundaries.
 10. `claims_audit.md` — evidence-to-claim and overclaim-control matrix for submission editing.
-11. `assemble_manuscript.py` — deterministic assembler that creates `manuscript_draft.md` from the section sources; the generated manuscript is a build product rather than a second hand-edited source.
-12. `make_publication_figures.py` — deterministic presentation-only figure generator from canonical workflow artifacts.
+11. `assemble_manuscript.py` — deterministic Markdown assembler; `manuscript_draft.md` is a build product, not a second hand-edited source.
+12. `manuscript_metrics.py` — mechanical abstract/main-text word-count gate.
+13. `make_publication_figures.py` — presentation-only renderer for the three frozen figures.
+14. `build_acm_review.py` — anonymous one-column `acmart` review-source generator with BibTeX citations, accessibility descriptions, real figures, and ACM running-title handling.
 
-This hierarchy keeps analysis, evidence positioning, manuscript prose, format constraints, and generated presentation products distinct. The abstract exists only in `frontmatter_conclusion.md`; it is not duplicated in the outline.
+The GitHub Actions workflow `.github/workflows/gaze-claim-paper.yml` exercises the full paper path: manuscript assembly, length checks, frozen-figure regeneration, Pandoc conversion, anonymous ACM TeX generation, PDF compilation, and artifact upload.
 
 ## Canonical empirical inputs
 
@@ -50,13 +52,17 @@ Every source in `literature_positioning.csv` includes a `what_it_does_not_establ
 
 ## Current CHI-format benchmark
 
-As verified on 2026-10-01, CHI 2027 uses single-column review submissions, encourages approximately 5,000–8,000 words, and caps abstracts at 150 words. The current authoritative abstract is 133 words. The CHI 2027 initial deadline (2026-09-10 AoE) has passed, so these constraints are treated as the current formatting benchmark unless the work corresponds to an already-submitted 2027 paper. The actual target-cycle call must be re-verified before submission.
+As verified on 2026-10-01, CHI 2027 uses single-column review submissions, encourages approximately 5,000–8,000 words, and caps abstracts at 150 words. The current mechanical manuscript build reports:
 
-See `chi_format_notes.md` for the full dated check.
+- abstract: **136 words**;
+- main text excluding headings, code blocks, and figure captions: **7,453 words**;
+- assembled Markdown including front matter and other counted material: **8,083 words**.
 
-## Manuscript assembly
+The CHI 2027 initial deadline (2026-09-10 AoE) has passed, so these constraints are treated as the current formatting benchmark unless the work corresponds to an already-submitted 2027 paper. The actual target-cycle call must be re-verified before submission. See `chi_format_notes.md` for the dated format check.
 
-Run:
+## Manuscript assembly and ACM review build
+
+Markdown assembly:
 
 ```bash
 python research/gaze_claim_robustness/paper/assemble_manuscript.py
@@ -64,28 +70,60 @@ python research/gaze_claim_robustness/paper/assemble_manuscript.py
 
 The assembler reads the section-level Markdown sources in fixed order, moves the Conclusion from the shared front-matter source to the end, and writes `manuscript_draft.md`. It performs no empirical computation and reads no result artifact directly.
 
-## Figure generation
+The automated paper workflow then builds an anonymous review manuscript using:
 
-`make_publication_figures.py` requires the two canonical GitHub Actions ZIP artifacts and verifies their exact SHA-256 values before reading any result table.
+```latex
+\documentclass[manuscript,review,anonymous]{acmart}
+```
 
-Example:
+`build_acm_review.py` converts the assembled manuscript to BibTeX-backed ACM LaTeX, keeps the full paper title on page 1 while using `From Gaze Signals to HCI Claims` as the shorter running title, inserts the real publication figures with `\Description{...}` accessibility text, and compiles the review PDF in CI.
+
+## Durable frozen figure inputs
+
+The publication figures can still be reproduced directly from the two canonical workflow ZIP artifacts. For durable paper builds after those Actions artifacts expire, the repository also stores exact compact presentation snapshots extracted from the frozen results:
+
+- `results/srl_paper_figure_snapshot.csv` — SHA-256 `706b57051efe074700d3b3dbc693bece3d3747da2d5940565f4c93f6a9dc6193`;
+- `results/mcfw_context_jaccard_snapshot.csv` — SHA-256 `d0c7471199e5a6242c1f51f872f4f7a3a915adb8a91749adea7fe0ff60ee235f`.
+
+These snapshots introduce no new statistical computation; they are exact paper-facing extracts of the already-frozen empirical outputs.
+
+Canonical-artifact mode:
 
 ```bash
 python research/gaze_claim_robustness/paper/make_publication_figures.py \
   --srl-artifact /path/to/srl-frozen-model-universe-5fad0f192067ca74277c4b5f2bec462514395124.zip \
   --mcfw-artifact /path/to/mcfw-detector-validation-878e351a82a48665990955853c55b2315b10fd27.zip \
-  --output-dir research/gaze_claim_robustness/paper/figures
+  --output-dir paper-figures
 ```
 
-The SVG renderer uses a fixed Matplotlib SVG hash salt, leaves text editable as SVG text, and suppresses generation-date metadata. Repeated generation from the same canonical artifacts is therefore byte-deterministic.
+Durable snapshot mode:
 
-## Frozen generated-figure hashes
+```bash
+python research/gaze_claim_robustness/paper/make_publication_figures.py \
+  --snapshot-dir research/gaze_claim_robustness/results \
+  --output-dir paper-figures
+```
 
-- `fig1_srl_specification_curve.svg`: `4c2531bdc716d51edc91a71196df61383a046c06a27ac04fb73301b002a4bcbc`
-- `fig2_srl_detector_distance.svg`: `a6ad1b378f624f652765fefbdb6aa14174691e67009562348ba54dc83f1d9666`
-- `fig3_mcfw_context_jaccard.svg`: `8123b2352966e5eca4773bac6a525bc16786685f1a3c052a820c88208b05cabe`
+## Frozen renderer and generated-figure hashes
 
-The SVG files are generated products; the source of truth is the figure generator plus the exact canonical workflow artifacts and their hashes.
+Byte-identical SVG verification is explicitly tied to the renderer environment that produced the frozen figure bytes:
+
+- Matplotlib `3.10.8`;
+- pandas `2.2.3`;
+- NumPy `2.3.5`;
+- Matplotlib SVG hash salt `gaze-claim-robustness-chi`;
+- SVG text retained as editable text;
+- generation-date metadata suppressed.
+
+The renderer refuses byte-hash verification under a different declared renderer version. This keeps scientific input provenance separate from presentation-library versioning.
+
+Frozen SVG SHA-256 values:
+
+- `fig1_srl_specification_curve.svg`: `4c2531bdc716d51edc91a71196df61383a046c06a27ac04fb73301b002a4bcbc`;
+- `fig2_srl_detector_distance.svg`: `a6ad1b378f624f652765fefbdb6aa14174691e67009562348ba54dc83f1d9666`;
+- `fig3_mcfw_context_jaccard.svg`: `8123b2352966e5eca4773bac6a525bc16786685f1a3c052a820c88208b05cabe`.
+
+PDF sidecars are generated from the same figure objects solely for `acmart` typesetting. The SVG hashes remain the frozen presentation identity.
 
 ## Manuscript interpretation boundary
 
