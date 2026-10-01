@@ -22,7 +22,7 @@ Eye-tracking preprocessing is part of the measurement model: when several measur
 
 ## Contribution claims
 
-The paper should claim four contributions, without claiming that multiverse analysis itself is new:
+The paper should claim three scientific contributions, without claiming that multiverse analysis itself is new:
 
 1. **A claim-centered measurement-robustness workflow for eye-tracking HCI.** The workflow fixes a substantive claim contract, declares a finite set of defensible alternatives before result inspection, distinguishes measurement-definition alternatives and sample-definition sensitivities from analyses that change the estimand itself, propagates each planned branch through the same focal outcome/model contract, retains failed or non-evaluable branches in the denominator, and reports direction, magnitude, uncertainty, and evaluability separately.
 
@@ -30,7 +30,11 @@ The paper should claim four contributions, without claiming that multiverse anal
 
 3. **Independent measurement-level generalization.** In MCFW-Gaze, detector-dependent fixation representations remained materially different across a separate 120 Hz Tobii dataset and six interaction contexts. Positive-class overlap and event summaries exposed substantially more disagreement than raw fixation/non-fixation agreement.
 
-4. **A reproducible evidence package.** Decision registries, archive audits, frozen specification manifests, workflow provenance, exact artifact hashes, failure accounting, compact result snapshots, and deterministic publication figures preserve the distinction between pre-result specification and post-result interpretation.
+The reproducible evidence package—decision registries, archive audits, frozen specification manifests, workflow provenance, exact artifact hashes, failure accounting, compact result snapshots, and deterministic publication figures—is supporting infrastructure for these three contributions rather than a separate scientific contribution.
+
+## Intended audience
+
+The primary audience is HCI researchers who derive event-, AOI-, or process-level measures from recorded gaze to support inferential claims about interaction. The workflow is not positioned as a universal prescription for real-time gaze-control systems or for studies whose measurement target requires a different claim contract.
 
 ## Abstract source
 
