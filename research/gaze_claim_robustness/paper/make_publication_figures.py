@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 
 plt.rcParams["svg.hashsalt"] = "gaze-claim-robustness-chi"
+plt.rcParams["svg.fonttype"] = "none"
 
 SRL_ARTIFACT_SHA256 = "b125b071a9a1bf68f5ba3c11f1b8fdeedca1195de94a64e27155af79d7ae342d"
 MCFW_ARTIFACT_SHA256 = "ed2af7a036d1fb9a62b5226b71b6f02d007f87a9d23b1970828f9c9742b93020"
