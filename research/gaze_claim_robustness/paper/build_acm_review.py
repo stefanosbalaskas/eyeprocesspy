@@ -108,6 +108,8 @@ def _latex_escape(text: str) -> str:
         ("#", r"\#"),
         ("×", r"$\times$"),
         ("°", r"$^\circ$"),
+        ("≥", r"$\geq$"),
+        ("≤", r"$\leq$"),
     )
     for old, new in replacements:
         text = text.replace(old, new)
@@ -323,7 +325,7 @@ def build(
 \providecommand{{\passthrough}}[1]{{#1}}
 \providecommand{{\tightlist}}{{\setlength{{\itemsep}}{{0pt}}\setlength{{\parskip}}{{0pt}}}}
 \setcopyright{{none}}
-\settopmatter{{printacmref=false,printccs=false,printfolios=true}}
+\settopmatter{{printacmref=false,printccs=true,printfolios=true}}
 \renewcommand\footnotetextcopyrightpermission[1]{{}}
 \begin{{document}}
 \title[{_latex_escape(SHORT_TITLE)}]{{{_latex_escape(title)}}}
@@ -331,6 +333,8 @@ def build(
 \begin{{abstract}}
 {_latex_escape(abstract)}
 \end{{abstract}}
+\ccsdesc[500]{{Human-centered computing~HCI design and evaluation methods}}
+\ccsdesc[300]{{Human-centered computing~Empirical studies in HCI}}
 \keywords{{{_latex_escape(keyword_text)}}}
 \maketitle
 {body_latex}
