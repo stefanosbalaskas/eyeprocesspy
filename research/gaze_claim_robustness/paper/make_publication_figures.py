@@ -9,9 +9,11 @@ change either frozen empirical universe. It supports two equivalent input modes:
 2. compact, committed paper snapshots extracted verbatim from those artifacts,
    whose file SHA-256 values are likewise verified.
 
-The three SVG outputs are checked against their already-frozen hashes under the
-explicit renderer versions that produced those bytes. PDF sidecars are emitted
-only for manuscript typesetting.
+The figures use marker/line-style encodings in addition to color so their
+scientific distinctions remain legible in grayscale and for readers with color-
+vision deficiencies. The three SVG outputs are checked against frozen hashes
+under the explicit renderer versions that produced those bytes. PDF sidecars
+are emitted only for manuscript typesetting.
 """
 from __future__ import annotations
 
@@ -57,11 +59,22 @@ DETECTOR_LABELS = {
     "ivt_40_50_simple": "I-VT 40°/s, 50 ms",
     "idt_1_100": "I-DT 1°, 100 ms",
 }
+DETECTOR_STYLES = {
+    "idt_1_100": {"marker": "o", "linestyle": "-"},
+    "ivt_30_100_simple": {"marker": "s", "linestyle": "--"},
+    "ivt_40_50_simple": {"marker": "^", "linestyle": "-."},
+}
 PAIR_LABELS = {
     ("ivt_30_100_simple", "ivt_40_50_simple"): "I-VT 30 vs I-VT 40",
     ("ivt_30_100_simple", "idt_1_100"): "I-VT 30 vs I-DT",
     ("ivt_40_50_simple", "idt_1_100"): "I-VT 40 vs I-DT",
 }
+PAIR_LINESTYLES = {
+    ("ivt_30_100_simple", "ivt_40_50_simple"): "-",
+    ("ivt_30_100_simple", "idt_1_100"): "--",
+    ("ivt_40_50_simple", "idt_1_100"): "-.",
+}
+EYE_MARKERS = {"left": "o", "right": "s"}
 CONTEXT_ORDER = [
     "natural_image",
     "gaze_pattern_auth",
@@ -168,19 +181,23 @@ def figure_srl_detector_distance(srl: pd.DataFrame, out: Path) -> None:
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
     for detector, group in med.groupby("detector_id"):
         group = group.sort_values("viewing_distance_cm")
-        ax.plot(
+        style = DETECTOR_STYLES[detector]
+        yerr = np.vstack(
+            [
+                group["median_rr"] - group["q25_rr"],
+                group["q75_rr"] - group["median_rr"],
+            ]
+        )
+        ax.errorbar(
             group["viewing_distance_cm"],
             group["median_rr"],
-            marker="o",
+            yerr=yerr,
+            marker=style["marker"],
+            linestyle=style["linestyle"],
             linewidth=1.8,
+            elinewidth=1.2,
+            capsize=3,
             label=DETECTOR_LABELS[detector],
-        )
-        ax.vlines(
-            group["viewing_distance_cm"],
-            group["q25_rr"],
-            group["q75_rr"],
-            linewidth=1.2,
-            alpha=0.8,
         )
     ax.axhline(1, linewidth=1, linestyle="--")
     ax.set_xticks([60, 65, 70])
@@ -196,7 +213,6 @@ def figure_mcfw_context_jaccard(context: pd.DataFrame, out: Path) -> None:
     fig, ax = plt.subplots(figsize=(8.4, 5.0))
     positions = np.arange(len(CONTEXT_ORDER))
     offsets = {"left": -0.10, "right": 0.10}
-    markers = {"left": "o", "right": "s"}
     for pair, pair_frame in context.groupby(["detector_a", "detector_b"]):
         pair_label = PAIR_LABELS[pair]
         for eye in ("left", "right"):
@@ -208,7 +224,8 @@ def figure_mcfw_context_jaccard(context: pd.DataFrame, out: Path) -> None:
             ax.plot(
                 positions + offsets[eye],
                 group["median_fixation_jaccard"],
-                marker=markers[eye],
+                marker=EYE_MARKERS[eye],
+                linestyle=PAIR_LINESTYLES[pair],
                 linewidth=1.3,
                 label=f"{pair_label} — {eye}",
             )
@@ -275,8 +292,13 @@ def _validate_context(context: pd.DataFrame) -> None:
 
 
 def _verify_frozen_svgs(output_dir: Path) -> None:
+    mismatches: list[str] = []
     for filename, expected in SVG_SHA256.items():
-        _verify(output_dir / filename, expected, filename)
+        actual = _sha256(output_dir / filename)
+        if actual != expected:
+            mismatches.append(f"{filename}: observed {actual}; expected {expected}")
+    if mismatches:
+        raise ValueError("Frozen SVG hash mismatch:\n" + "\n".join(mismatches))
 
 
 def main() -> int:
