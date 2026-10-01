@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
-"""Generate the frozen CHI paper figures from canonical workflow artifacts.
+"""Generate the frozen CHI paper figures from canonical frozen result inputs.
 
 This script is presentation-only. It does not refit models, rerun detectors, or
-change either frozen empirical universe. It verifies the canonical GitHub
-Actions artifact SHA-256 values before reading their CSV outputs.
+change either frozen empirical universe. It supports two equivalent input modes:
+
+1. the canonical GitHub Actions ZIP artifacts, whose full SHA-256 values are
+   verified before reading their result tables; or
+2. compact, committed paper snapshots extracted verbatim from those artifacts,
+   whose file SHA-256 values are likewise verified.
+
+The three SVG outputs are checked against their already-frozen hashes. PDF
+sidecars are emitted only for manuscript typesetting.
 """
 from __future__ import annotations
 
@@ -22,6 +29,20 @@ plt.rcParams["svg.fonttype"] = "none"
 
 SRL_ARTIFACT_SHA256 = "b125b071a9a1bf68f5ba3c11f1b8fdeedca1195de94a64e27155af79d7ae342d"
 MCFW_ARTIFACT_SHA256 = "ed2af7a036d1fb9a62b5226b71b6f02d007f87a9d23b1970828f9c9742b93020"
+SRL_SNAPSHOT_SHA256 = "706b57051efe074700d3b3dbc693bece3d3747da2d5940565f4c93f6a9dc6193"
+MCFW_SNAPSHOT_SHA256 = "d0c7471199e5a6242c1f51f872f4f7a3a915adb8a91749adea7fe0ff60ee235f"
+
+SVG_SHA256 = {
+    "fig1_srl_specification_curve.svg": (
+        "4c2531bdc716d51edc91a71196df61383a046c06a27ac04fb73301b002a4bcbc"
+    ),
+    "fig2_srl_detector_distance.svg": (
+        "a6ad1b378f624f652765fefbdb6aa14174691e67009562348ba54dc83f1d9666"
+    ),
+    "fig3_mcfw_context_jaccard.svg": (
+        "8123b2352966e5eca4773bac6a525bc16786685f1a3c052a820c88208b05cabe"
+    ),
+}
 
 DETECTOR_LABELS = {
     "ivt_30_100_simple": "I-VT 30°/s, 100 ms",
@@ -62,12 +83,23 @@ def _sha256(path: Path) -> str:
 def _verify(path: Path, expected: str, label: str) -> None:
     actual = _sha256(path)
     if actual != expected:
-        raise ValueError(f"{label} artifact SHA-256 mismatch: {actual}")
+        raise ValueError(f"{label} SHA-256 mismatch: {actual}")
 
 
 def _extract(zip_path: Path, target: Path) -> None:
     with zipfile.ZipFile(zip_path) as archive:
         archive.extractall(target)
+
+
+def _save_figure(fig: plt.Figure, svg_out: Path) -> None:
+    fig.savefig(svg_out, format="svg", bbox_inches="tight", metadata={"Date": None})
+    fig.savefig(
+        svg_out.with_suffix(".pdf"),
+        format="pdf",
+        bbox_inches="tight",
+        metadata={"CreationDate": None, "ModDate": None},
+    )
+    plt.close(fig)
 
 
 def figure_srl_specification_curve(srl: pd.DataFrame, out: Path) -> None:
@@ -100,8 +132,7 @@ def figure_srl_specification_curve(srl: pd.DataFrame, out: Path) -> None:
         fontsize=9,
     )
     fig.tight_layout()
-    fig.savefig(out, format="svg", bbox_inches="tight", metadata={"Date": None})
-    plt.close(fig)
+    _save_figure(fig, out)
 
 
 def figure_srl_detector_distance(srl: pd.DataFrame, out: Path) -> None:
@@ -137,8 +168,7 @@ def figure_srl_detector_distance(srl: pd.DataFrame, out: Path) -> None:
     ax.set_title("SRL: detector and visual-angle geometry jointly shift the effect estimate")
     ax.legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(out, format="svg", bbox_inches="tight", metadata={"Date": None})
-    plt.close(fig)
+    _save_figure(fig, out)
 
 
 def figure_mcfw_context_jaccard(context: pd.DataFrame, out: Path) -> None:
@@ -173,42 +203,101 @@ def figure_mcfw_context_jaccard(context: pd.DataFrame, out: Path) -> None:
     ax.set_title("MCFW-Gaze: detector overlap remains structured across independent contexts")
     ax.legend(frameon=False, ncol=2, fontsize=8)
     fig.tight_layout()
-    fig.savefig(out, format="svg", bbox_inches="tight", metadata={"Date": None})
-    plt.close(fig)
+    _save_figure(fig, out)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--srl-artifact", required=True, type=Path)
-    parser.add_argument("--mcfw-artifact", required=True, type=Path)
-    parser.add_argument("--output-dir", type=Path, default=Path("paper/figures"))
-    args = parser.parse_args()
-
-    _verify(args.srl_artifact, SRL_ARTIFACT_SHA256, "SRL")
-    _verify(args.mcfw_artifact, MCFW_ARTIFACT_SHA256, "MCFW")
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-
+def _load_artifact_inputs(srl_artifact: Path, mcfw_artifact: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    _verify(srl_artifact, SRL_ARTIFACT_SHA256, "SRL artifact")
+    _verify(mcfw_artifact, MCFW_ARTIFACT_SHA256, "MCFW artifact")
     with tempfile.TemporaryDirectory() as tmp:
         tmp_root = Path(tmp)
         srl_root = tmp_root / "srl"
         mcfw_root = tmp_root / "mcfw"
         srl_root.mkdir()
         mcfw_root.mkdir()
-        _extract(args.srl_artifact, srl_root)
-        _extract(args.mcfw_artifact, mcfw_root)
-
+        _extract(srl_artifact, srl_root)
+        _extract(mcfw_artifact, mcfw_root)
         srl = pd.read_csv(srl_root / "model_results" / "srl_multiverse_model_results.csv")
         context = pd.read_csv(mcfw_root / "summary" / "mcfw_context_profile.csv")
+    if len(srl) != 144 or not srl["status"].eq("ok").all():
+        raise ValueError("SRL frozen model universe is not the expected 144-row complete result.")
+    return srl, context
 
-        if len(srl) != 144 or not srl["status"].eq("ok").all():
-            raise ValueError("SRL frozen model universe is not the expected 144-row complete result.")
-        if set(context["trial_family"]) != set(CONTEXT_ORDER):
-            raise ValueError("MCFW context-family set differs from the frozen validation.")
 
-        figure_srl_specification_curve(srl, args.output_dir / "fig1_srl_specification_curve.svg")
-        figure_srl_detector_distance(srl, args.output_dir / "fig2_srl_detector_distance.svg")
-        figure_mcfw_context_jaccard(context, args.output_dir / "fig3_mcfw_context_jaccard.svg")
+def _load_snapshot_inputs(snapshot_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    srl_path = snapshot_dir / "srl_paper_figure_snapshot.csv"
+    mcfw_path = snapshot_dir / "mcfw_context_jaccard_snapshot.csv"
+    _verify(srl_path, SRL_SNAPSHOT_SHA256, "SRL paper snapshot")
+    _verify(mcfw_path, MCFW_SNAPSHOT_SHA256, "MCFW paper snapshot")
+    srl = pd.read_csv(srl_path)
+    context = pd.read_csv(mcfw_path)
+    if len(srl) != 144:
+        raise ValueError("SRL paper snapshot must contain exactly 144 rows.")
+    if set(srl["viewing_distance_cm"]) != {60.0, 65.0, 70.0}:
+        raise ValueError("SRL paper snapshot viewing-distance set differs from the frozen universe.")
+    if set(srl["detector_id"]) != set(DETECTOR_LABELS):
+        raise ValueError("SRL paper snapshot detector set differs from the frozen universe.")
+    return srl, context
 
+
+def _validate_context(context: pd.DataFrame) -> None:
+    if set(context["trial_family"]) != set(CONTEXT_ORDER):
+        raise ValueError("MCFW context-family set differs from the frozen validation.")
+    pairs = set(zip(context["detector_a"], context["detector_b"]))
+    if pairs != set(PAIR_LABELS):
+        raise ValueError("MCFW detector-pair set differs from the frozen validation.")
+    if set(context["eye"]) != {"left", "right"}:
+        raise ValueError("MCFW eye set differs from the frozen validation.")
+
+
+def _verify_frozen_svgs(output_dir: Path) -> None:
+    for filename, expected in SVG_SHA256.items():
+        _verify(output_dir / filename, expected, filename)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--srl-artifact", type=Path)
+    parser.add_argument("--mcfw-artifact", type=Path)
+    parser.add_argument(
+        "--snapshot-dir",
+        type=Path,
+        help="Directory containing the two committed compact paper snapshots.",
+    )
+    parser.add_argument("--output-dir", type=Path, default=Path("paper/figures"))
+    args = parser.parse_args()
+
+    artifact_mode = args.srl_artifact is not None or args.mcfw_artifact is not None
+    snapshot_mode = args.snapshot_dir is not None
+    if artifact_mode == snapshot_mode:
+        parser.error(
+            "Choose exactly one input mode: both --srl-artifact/--mcfw-artifact, "
+            "or --snapshot-dir."
+        )
+    if artifact_mode:
+        if args.srl_artifact is None or args.mcfw_artifact is None:
+            parser.error("Artifact mode requires both --srl-artifact and --mcfw-artifact.")
+        srl, context = _load_artifact_inputs(args.srl_artifact, args.mcfw_artifact)
+    else:
+        assert args.snapshot_dir is not None
+        srl, context = _load_snapshot_inputs(args.snapshot_dir)
+
+    _validate_context(context)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+
+    figure_srl_specification_curve(
+        srl,
+        args.output_dir / "fig1_srl_specification_curve.svg",
+    )
+    figure_srl_detector_distance(
+        srl,
+        args.output_dir / "fig2_srl_detector_distance.svg",
+    )
+    figure_mcfw_context_jaccard(
+        context,
+        args.output_dir / "fig3_mcfw_context_jaccard.svg",
+    )
+    _verify_frozen_svgs(args.output_dir)
     return 0
 
 
