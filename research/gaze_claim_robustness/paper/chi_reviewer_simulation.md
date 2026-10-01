@@ -6,19 +6,19 @@ This is an author-facing review-control document. It evaluates the assembled man
 
 The paper is strongest when read as a **methodology contribution about the measurement-to-claim mapping**, not as a detector-comparison paper, a software paper, or a generic multiverse paper. Its empirical evidence has two complementary roles: SRL demonstrates propagation from upstream measurement decisions to a downstream HCI coefficient, whereas MCFW-Gaze demonstrates that detector-dependent event representations persist in an independent raw-signal setting. The manuscript should preserve that division throughout review and revision.
 
-The primary review risk is therefore conceptual positioning rather than technical qualification. A reviewer familiar with Godwin et al. (2025), Peelle and Van Engen (2021), or general multiverse methods may initially ask whether the work is only another sensitivity analysis. The manuscript must make the narrower extension immediately legible: cross-stage eye-tracking measurement decisions are declared before focal-result inspection, propagated through one claim contract, audited against a planned denominator including non-evaluable branches, and complemented by independent measurement-level validation.
+The primary review risk is conceptual positioning rather than technical qualification. In addition to Peelle and Van Engen (2021) and Godwin et al. (2025), the September 2026 paper by Schindler and Onnasch, *The Workload Multiverse*, is a particularly close precedent: it compares three open eye-tracking preprocessing pipelines and shows pipeline-dependent relationships between mean fixation duration and mental workload. A reviewer can therefore reasonably reject any novelty argument based merely on “preprocessing can change a downstream gaze-based conclusion.” The manuscript must make the narrower extension immediately legible: **a declared cross-stage decision space**, explicit measurement/sample/estimand branch types, pre-result branch admission, one fixed claim contract, planned-denominator accountability including non-evaluable branches, and independent measurement-level validation.
 
 ## Review dimensions
 
 ### Originality
 
-**Current strength.** The paper does not claim that multiverse analysis, detector disagreement, AOI sensitivity, or eye-tracking reporting is new. Instead, it treats the cross-stage mapping from recorded gaze to a downstream HCI claim as the methodological object. The distinction between measurement-definition alternatives, sample-definition sensitivities, and estimand-changing analyses is particularly useful because it prevents a nominally fixed coefficient formula from being mistaken for a formally identical target population.
+**Current strength.** The paper does not claim that multiverse analysis, detector disagreement, AOI sensitivity, eye-tracking reporting, or downstream preprocessing sensitivity is new. Instead, it treats the declared cross-stage mapping from recorded gaze to a downstream HCI claim as the methodological object. The distinction between measurement-definition alternatives, sample-definition sensitivities, and estimand-changing analyses is particularly useful because it prevents a nominally fixed coefficient formula from being mistaken for a formally identical target population.
 
-**Likely reviewer question.** How is this materially different from prior eye-movement multiverse work, especially Godwin et al. (2025)?
+**Likely reviewer question.** How is this materially different from prior eye-movement multiverse work, especially Godwin et al. (2025) and Schindler and Onnasch (2026)?
 
-**Defensible response already in the manuscript.** The difference is scope and unit of interpretation: the SRL case begins at sample-level gaze, crosses geometry, detector, eye, AOI, quality/cohort, and outcome construction, and ends at one fixed downstream HCI coefficient. The planned denominator and failure semantics are explicit, and detector behavior is then examined independently in MCFW-Gaze.
+**Defensible response already in the manuscript.** Godwin et al. establish a large cleaning/analysis multiverse for a reading effect. Schindler and Onnasch establish that alternative complete preprocessing pipelines can change the apparent form of a downstream workload relationship. The present workflow makes the **decision structure itself** auditable: the SRL case begins at sample-level gaze, exposes separate geometry, detector, eye, AOI, quality/cohort, and outcome-construction decisions, crosses the admitted families under one fixed downstream coefficient definition, retains the planned denominator and failure semantics, explicitly separates sample-support changes from measurement-definition changes, and then examines detector representation independently in MCFW-Gaze.
 
-**Do not strengthen further by claiming a "first."** The contribution is an extension and synthesis with a different methodological object.
+**Do not strengthen further by claiming a "first."** The contribution is an extension and synthesis with a more explicit methodological object and accountability structure.
 
 ### Correctness
 
@@ -34,11 +34,11 @@ The primary review risk is therefore conceptual positioning rather than technica
 
 ### Novelty
 
-**Current strength.** The novelty argument is appropriately narrow. The method combines ideas that exist separately but asks a different robustness question: not merely whether preprocessing outputs differ, but whether defensible uncertainty across several measurement stages changes the HCI quantity that is interpreted.
+**Current strength.** The novelty argument is now appropriately narrow even against the closest 2026 precedent. The paper does not claim novelty for multiverse analysis or for discovering that preprocessing can alter a downstream gaze-based relationship. Its contribution is the claim-centered **cross-stage decision-space methodology and accountability contract**, demonstrated end-to-end and paired with independent measurement validation.
 
-**Primary risk.** A reviewer may see "multiverse + eye tracking" and stop reading before reaching the distinction.
+**Primary risk.** A reviewer may see “multiverse + eye tracking” or cite Schindler and Onnasch (2026) and conclude that the central point is already known.
 
-**Author action.** Keep the introduction's contribution paragraph to three scientific contributions. Treat the reproducibility package as evidence infrastructure, not a fourth scientific contribution. Preserve the sentence that the intended contribution is the measurement-to-claim mapping.
+**Author action.** Keep the introduction's contribution paragraph to three scientific contributions. Treat the reproducibility package as evidence infrastructure, not a fourth scientific contribution. Preserve the explicit sentence that the contribution is not the observation that preprocessing can affect a downstream relationship; it is the declared cross-stage measurement-to-claim mapping with branch-type distinctions, denominator accountability, and independent validation.
 
 ### Importance
 
@@ -52,7 +52,7 @@ The primary review risk is therefore conceptual positioning rather than technica
 
 ### Clarity of exposition
 
-**Current strength.** The paper now presents a coherent sequence: problem → prior flexibility work → claim-centered contract → SRL propagation → MCFW measurement generalization → multidimensional interpretation. The three empirical figures correspond to the three most important result messages.
+**Current strength.** The paper now presents a coherent sequence: problem → prior flexibility/downstream-sensitivity work → claim-centered contract → SRL propagation → MCFW measurement generalization → multidimensional interpretation. The three empirical figures correspond to the three most important result messages.
 
 **Potential confusion to continue avoiding.**
 
@@ -62,28 +62,33 @@ The primary review risk is therefore conceptual positioning rather than technica
 - MCFW is not a replication of the Prompt effect.
 - inter-detector similarity does not identify a correct detector.
 - sample-definition sensitivities are not presented as formally identical population estimands.
+- downstream preprocessing sensitivity itself is not claimed as unprecedented.
 
 ## Most likely substantive reviewer objections
 
-### 1. "All 144 confidence intervals include the null, so what claim actually changes?"
+### 1. "Schindler & Onnasch (2026) already show preprocessing changes a downstream eye-tracking relationship. What is new here?"
 
-This is the most serious substantive objection and should be answered rather than evaded. The paper does **not** demonstrate instability of a binary significance conclusion. It demonstrates that point-estimate direction and magnitude are sensitive while interval-level inference is stable. That coexistence is itself the methodological point: robustness is multidimensional. The paper should never imply that the SRL example shows a result switching from statistically established positive to statistically established negative.
+This is now the most important novelty objection. The correct response is not to minimize that paper. It establishes a close premise using three complete preprocessing pipelines in a workload application. Our contribution is the **methodological decomposition and accountability layer**: we declare and cross multiple measurement-stage decisions rather than compare only complete pipelines, fix one claim contract, distinguish measurement-definition alternatives from sample-definition sensitivities and estimand-changing analyses, keep planned failed/non-evaluable branches in the denominator, avoid probability-like interpretation of branch counts, and add independent raw-signal measurement validation. The manuscript has been revised to make this boundary explicit.
+
+### 2. "All 144 confidence intervals include the null, so what claim actually changes?"
+
+This is the most serious empirical-interpretation objection and should be answered rather than evaded. The paper does **not** demonstrate instability of a binary significance conclusion. It demonstrates that point-estimate direction and magnitude are sensitive while interval-level inference is stable. That coexistence is itself the methodological point: robustness is multidimensional. The paper should never imply that the SRL example shows a result switching from statistically established positive to statistically established negative.
 
 No new analysis is needed to answer this objection. The existing Results and Discussion already state both properties separately.
 
-### 2. "The Cartesian grid gives arbitrary weight to families with more levels."
+### 3. "The Cartesian grid gives arbitrary weight to families with more levels."
 
 Correct. The manuscript explicitly states that specification frequencies depend on grid granularity and therefore are descriptive inventory counts, not probabilities or invariant robustness scores. Family-level patterns are interpreted separately. This safeguard should remain prominent around the 92/144 result.
 
-### 3. "Viewing distance is hypothetical rather than measured."
+### 4. "Viewing distance is hypothetical rather than measured."
 
 Correct and intentionally so. The public source reports approximately 60–70 cm without participant-specific measurements. The 60 and 70 cm branches are source bounds; 65 cm is an explicit midpoint sensitivity assumption. The paper uses the result to show what can happen when angular detector thresholds are derived from incompletely observed geometry, not to estimate participants' true distances.
 
-### 4. "Why should the MCFW case count as validation without ground truth?"
+### 5. "Why should the MCFW case count as validation without ground truth?"
 
 It validates **measurement generalization**, not detector accuracy. Its purpose is to show whether representation differences among the frozen detector choices persist on different hardware, sampling rate, signal quality, and interaction contexts. The absence of universal fixation ground truth is acknowledged and prevents a detector-winner claim.
 
-### 5. "Is this a software contribution disguised as methodology?"
+### 6. "Is this a software contribution disguised as methodology?"
 
 The paper should continue to keep software machinery subordinate. The implementation is described as an orchestration layer that enforces the methodology. Function counts, package breadth, and product-style claims should stay out of the manuscript. Reproducibility artifacts support the method but are not the core contribution.
 
@@ -94,7 +99,8 @@ The following author-facing changes are justified and have been made:
 1. reduce the headline contribution list from four items to **three scientific contributions**, with reproducibility infrastructure supporting them rather than competing with them;
 2. state the intended HCI audience explicitly;
 3. expose the pre-result rationale for the exact detector branches in the main Methods rather than leaving it only in the registry;
-4. retain the existing safeguards around specification frequency, sample-definition sensitivity, detector correctness, and independent-validation scope.
+4. incorporate Schindler and Onnasch (2026) as the closest recent downstream-preprocessing precedent and narrow the novelty claim accordingly;
+5. retain the existing safeguards around specification frequency, sample-definition sensitivity, detector correctness, and independent-validation scope.
 
 ## Changes not justified by this review
 
