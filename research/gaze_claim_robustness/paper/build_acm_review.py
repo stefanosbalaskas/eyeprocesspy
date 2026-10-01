@@ -3,9 +3,9 @@
 
 The Markdown section files remain the editable source of truth. This utility is
 presentation-only: it assembles those sources, converts known author-year
-references into BibTeX-backed citations, emits an anonymous single-column
-``acmart-tagged`` review manuscript, and optionally compiles a PDF with
-LuaLaTeX.
+references into BibTeX-backed citations, emits the official anonymous
+single-column ``acmart`` review manuscript, and optionally compiles a PDF with
+LuaLaTeX plus PDF accessibility metadata.
 
 It never reads empirical workflow artifacts or changes the frozen analyses.
 """
@@ -348,7 +348,7 @@ pdfstandard=ua-2,
 lang=en,
 testphase={{phase-III,firstaid,math,title}}
 }}
-\documentclass[manuscript,review,anonymous]{{acmart-tagged}}
+\documentclass[manuscript,review,anonymous]{{acmart}}
 \providecommand{{\passthrough}}[1]{{#1}}
 \providecommand{{\tightlist}}{{\setlength{{\itemsep}}{{0pt}}\setlength{{\parskip}}{{0pt}}}}
 \setcopyright{{none}}
