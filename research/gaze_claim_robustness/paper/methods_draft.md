@@ -58,7 +58,7 @@ The primary universe contains 144 planned specifications:
 
 **AOI geometry.** The source reports four slide quartiles and an AOI area of 359,550 pixels. Exact 1600 × 900 quarters are 800 × 450 = 360,000 pixels, whereas 799 × 450 equals the reported area. We therefore freeze exact quarters and a 799 × 450 published-area-compatible geometry with a symmetric two-pixel vertical seam. Released vendor labels are reference evidence only.
 
-**Quality rule.** The source documents an 80% tracking-ratio exclusion rule. We contrast the public released sample with a trial-level sensitivity retaining `stimuli.csv` tracking ratio ≥80%. The latter is not claimed to reconstruct the historical recording-level exclusion process. Missing samples are never converted to zero. This is a sample-definition sensitivity because it changes trial support.
+**Quality rule.** The source documents an 80% tracking-ratio exclusion rule. We contrast the public released sample with a trial-level sensitivity retaining `stimuli.csv` tracking ratio of at least 80%. The latter is not claimed to reconstruct the historical recording-level exclusion process. Missing samples are never converted to zero. This is a sample-definition sensitivity because it changes trial support.
 
 **Cohort.** We contrast the 82 exact raw+metadata identities with the 77-participant nominal-250-Hz subset. This is likewise a sample-definition sensitivity.
 
