@@ -159,7 +159,7 @@ def _figure_block(number: int, caption: str, figure_available: bool) -> str:
         visual = (
             rf"\fbox{{\parbox[c][1.65in][c]{{0.92\linewidth}}"
             rf"{{\centering Figure {number} placeholder\\"
-            r"generated from frozen artifact}}}"
+            r"generated from frozen artifact}}"
         )
     return rf"""```{{=latex}}
 \begin{{figure}}[t]
