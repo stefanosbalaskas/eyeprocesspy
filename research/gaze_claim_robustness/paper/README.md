@@ -34,13 +34,13 @@ python research/gaze_claim_robustness/paper/make_publication_figures.py \
   --output-dir research/gaze_claim_robustness/paper/figures
 ```
 
-The SVG renderer uses a fixed Matplotlib SVG hash salt and suppresses the generation-date metadata, so repeated generation from the same artifacts is byte-deterministic.
+The SVG renderer uses a fixed Matplotlib SVG hash salt, leaves text editable as SVG text, and suppresses generation-date metadata. Repeated generation from the same canonical artifacts is therefore byte-deterministic.
 
 ## Frozen generated-figure hashes
 
-- `fig1_srl_specification_curve.svg`: `633c01374b9f4384289a089526b98456fa36b918d0d1dd64d57e0d627e856fec`
-- `fig2_srl_detector_distance.svg`: `ec2b5e3614f13cbba9de8971a5ae459e69a3f1a9eb204beeccd39c1e90f427fb`
-- `fig3_mcfw_context_jaccard.svg`: `1f5f6ed4541f42b334aef82657ab1025955826d49a0e669a6f252b61b1ca31a6`
+- `fig1_srl_specification_curve.svg`: `4c2531bdc716d51edc91a71196df61383a046c06a27ac04fb73301b002a4bcbc`
+- `fig2_srl_detector_distance.svg`: `a6ad1b378f624f652765fefbdb6aa14174691e67009562348ba54dc83f1d9666`
+- `fig3_mcfw_context_jaccard.svg`: `8123b2352966e5eca4773bac6a525bc16786685f1a3c052a820c88208b05cabe`
 
 The SVG files are generated products; the source of truth is the figure generator plus the exact canonical workflow artifacts and their hashes.
 
