@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Build an anonymous ACM/CHI review manuscript from the Markdown sources.
+"""Build an anonymous, accessibility-tagged ACM/CHI review manuscript.
 
 The Markdown section files remain the editable source of truth. This utility is
 presentation-only: it assembles those sources, converts known author-year
 references into BibTeX-backed citations, emits an anonymous single-column
-``acmart`` review manuscript, and optionally compiles a PDF.
+``acmart-tagged`` review manuscript, and optionally compiles a PDF with
+LuaLaTeX.
 
 It never reads empirical workflow artifacts or changes the frozen analyses.
 """
@@ -75,18 +76,21 @@ FIGURE_DESCRIPTIONS = {
     1: (
         "Specification curve for 144 SRL measurement specifications. Point "
         "estimates span both sides of the no-effect line while every 95 percent "
-        "confidence interval crosses the line. Marker shape distinguishes the "
-        "60, 65, and 70 cm viewing-distance assumptions."
+        "confidence interval crosses the line. Circles, squares, and triangles "
+        "distinguish the 60, 65, and 70 cm viewing-distance assumptions."
     ),
     2: (
         "Line chart of median SRL Prompt rate ratios by event detector and "
-        "assumed viewing distance. The three detector trajectories separate as "
-        "viewing distance changes, illustrating detector-by-geometry sensitivity."
+        "assumed viewing distance. Detector trajectories separate as viewing "
+        "distance changes. Distinct markers and line styles distinguish the "
+        "three detector branches in addition to color."
     ),
     3: (
         "Line chart of median fixation-state Jaccard overlap across six MCFW-Gaze "
-        "contexts. I-VT 40 degrees per second and I-DT have consistently greater "
-        "overlap than detector pairs involving I-VT 30 degrees per second."
+        "contexts. Detector-pair and eye combinations use distinct marker and "
+        "line-style encodings in addition to color. I-VT 40 degrees per second "
+        "versus I-DT shows consistently greater overlap than detector pairs "
+        "involving I-VT 30 degrees per second."
     ),
 }
 
@@ -158,7 +162,10 @@ def _figure_block(number: int, caption: str, figure_available: bool) -> str:
     escaped_caption = _latex_escape(caption)
     description = _latex_escape(FIGURE_DESCRIPTIONS[number])
     if figure_available:
-        visual = rf"\includegraphics[width=\linewidth]{{figures/{filename}}}"
+        visual = (
+            rf"\includegraphics[width=\linewidth,alt={{{description}}}]"
+            rf"{{figures/{filename}}}"
+        )
     else:
         visual = (
             rf"\fbox{{\parbox[c][1.65in][c]{{0.92\linewidth}}"
@@ -219,6 +226,21 @@ def _replace_figure_caption_section(
     )
 
 
+def _strip_pandoc_hypertargets(latex: str) -> str:
+    pattern = re.compile(
+        r"\\hypertarget\{[^}]+\}\{%\n"
+        r"(\\(?:section|subsection|subsubsection)\{.*?\}\\label\{.*?\})\}",
+        flags=re.DOTALL,
+    )
+    previous = None
+    while previous != latex:
+        previous = latex
+        latex = pattern.sub(r"\1", latex)
+    if r"\hypertarget" in latex:
+        raise ValueError("Pandoc emitted an unsupported hypertarget wrapper.")
+    return latex
+
+
 def _pandoc_body(markdown: str, *, pandoc: str) -> str:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -232,7 +254,6 @@ def _pandoc_body(markdown: str, *, pandoc: str) -> str:
                 "--from=markdown+citations+raw_tex",
                 "--to=latex",
                 "--natbib",
-                "--listings",
                 "--top-level-division=section",
                 "--shift-heading-level-by=-1",
                 f"--output={output}",
@@ -240,6 +261,7 @@ def _pandoc_body(markdown: str, *, pandoc: str) -> str:
             check=True,
         )
         latex = output.read_text(encoding="utf-8")
+    latex = _strip_pandoc_hypertargets(latex)
     latex = re.sub(
         r"(\\(?:section|subsection|subsubsection)\{)(\d+(?:\.\d+)*\s+)",
         lambda match: match.group(1),
@@ -276,13 +298,13 @@ def _compiler(name: str, fallback: str | None = None) -> str:
 
 
 def _compile_pdf(output_dir: Path, tex_name: str) -> None:
-    pdflatex = _compiler("pdflatex")
+    lualatex = _compiler("lualatex")
     try:
         bibtex = _compiler("bibtex")
     except RuntimeError:
         bibtex = _compiler("bibtex.original")
     stem = Path(tex_name).stem
-    command = [pdflatex, "-interaction=nonstopmode", "-halt-on-error", tex_name]
+    command = [lualatex, "-interaction=nonstopmode", "-halt-on-error", tex_name]
     subprocess.run(command, cwd=output_dir, check=True)
     subprocess.run([bibtex, stem], cwd=output_dir, check=True)
     subprocess.run(command, cwd=output_dir, check=True)
@@ -320,8 +342,13 @@ def build(
     keyword_text = ", ".join(
         part.strip() for part in re.split(r"[;,]", keywords) if part.strip()
     )
-    tex = rf"""\documentclass[manuscript,review,anonymous]{{acmart}}
-\usepackage{{listings}}
+    tex = rf"""\DocumentMetadata{{
+pdfversion=2.0,
+pdfstandard=ua-2,
+lang=en,
+testphase={{phase-III,firstaid,math,title}}
+}}
+\documentclass[manuscript,review,anonymous]{{acmart-tagged}}
 \providecommand{{\passthrough}}[1]{{#1}}
 \providecommand{{\tightlist}}{{\setlength{{\itemsep}}{{0pt}}\setlength{{\parskip}}{{0pt}}}}
 \setcopyright{{none}}
