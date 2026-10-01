@@ -32,29 +32,30 @@ The paper should claim four contributions, without claiming that multiverse anal
 
 4. **A reproducible evidence package.** Decision registries, archive audits, frozen specification manifests, workflow provenance, exact artifact hashes, failure accounting, compact result snapshots, and deterministic publication figures preserve the distinction between pre-result specification and post-result interpretation.
 
-## Abstract draft
+## Abstract source
 
-Eye tracking is widely used in HCI to operationalize visual attention and interaction processes, yet substantive conclusions can depend on measurement decisions made before statistical modeling. We present a claim-centered workflow for propagating uncertainty in defensible eye-tracking measurement choices to a fixed HCI estimand. In a self-regulated-learning dataset, we froze a 144-specification universe spanning event detector, eye, viewing-distance assumption, AOI geometry, quality rule, and cohort definition, while holding the transition-rate estimand and negative-binomial mixed model fixed. All 144 models converged. Prompt-effect point estimates changed direction across specifications (92 positive; 52 negative), with viewing-distance assumptions producing the largest systematic shift, although every 95% confidence interval included the null. We then evaluated detector representation in an independent 120 Hz Tobii dataset across six interaction contexts. Median raw fixation/non-fixation agreement was 0.707, whereas median fixation-state Jaccard overlap was 0.272, revealing substantial event-representation differences hidden by shared non-fixation time. We argue that eye-tracking measurement assumptions should be treated as part of the inferential design: frozen before focal-result inspection, propagated to the substantive claim, and reported through multidimensional stability evidence rather than a single pipeline or binary robustness label.
+The authoritative abstract is in `frontmatter_conclusion.md`. It is intentionally **not duplicated here**. The current version is 133 words and was compressed to satisfy the current CHI 2027 150-word abstract cap. See `chi_format_notes.md` for the dated format check.
 
-## Planned paper structure
+## Paper structure
 
 ### 1. Introduction
 
-Frame the problem at the HCI-claim level, not as a software or detector-comparison paper. The motivating gap is that eye-tracking studies often document a final detector/AOI/filtering configuration but do not show whether a substantive conclusion depends on other defensible measurement choices.
-
-End the Introduction with the three RQs and four contribution claims above.
+Frame the problem at the HCI-claim level, not as a software or detector-comparison paper. End with the three RQs and contribution claims above. Source: `introduction_related_work.md`.
 
 ### 2. Related Work
 
 Organize by methodological problem rather than tool:
 
-- analytical flexibility and multiverse/sensitivity analysis;
-- eye-tracking event-detection variability;
+- analytical flexibility and multiverse/specification analysis;
+- eye-tracking temporal-window and cleaning/analysis multiverses;
+- event-detection variability;
 - AOI and coordinate-geometry uncertainty;
 - data-quality decisions and missing gaze;
 - reproducible eye-tracking/HCI measurement pipelines.
 
-The novelty boundary should be explicit: prior work can study detector sensitivity, AOI sensitivity, temporal-window sensitivity, or multiverse analysis; this paper's intended contribution is **end-to-end propagation from a declared measurement-decision space to the stability of a prespecified substantive HCI claim**, with an independent raw-signal validation case.
+The novelty boundary must remain explicit: prior work already studies detector sensitivity, AOI sensitivity, temporal-window sensitivity, cleaning/analysis multiverses, and HCI multiverse tooling. The intended extension is **end-to-end propagation from a declared measurement-decision space to the stability of a prespecified substantive HCI claim**, with planned-denominator accountability and an independent raw-signal validation case.
+
+Sources: `introduction_related_work.md`, `literature_positioning.csv`, `literature_references.bib`.
 
 ### 3. Claim-Centered Measurement Robustness
 
@@ -68,46 +69,35 @@ Present the general workflow independently of either dataset:
 6. summarize claim stability by direction, magnitude, uncertainty, evaluability, and decision-family structure;
 7. validate general measurement behavior on an independent dataset where possible.
 
-### 4. Empirical Cases and Results
+Then document the SRL claim-propagation case and MCFW independent measurement-generalization case. Source: `methods_draft.md`.
 
-#### 4.1 SRL complete-pipeline case
+### 4. Results
 
-Dataset identity, archive audit, Prompt/Non-prompt contrast, transition-rate estimand, 144-specification construction, frozen NB2 GLMM, and complete result.
+Use `results_draft.md` and the three deterministic empirical figures:
 
-#### 4.2 MCFW-Gaze independent measurement case
-
-Dataset provenance, timestamp and geometry gates, three frozen detectors, source-usable sample contract, pairwise fixation-state/event-summary outcomes, and six context families.
-
-#### 4.3 Results
-
-Use `results_draft.md` and Figures 1–3.
+1. 144-specification SRL curve;
+2. detector × viewing-distance SRL sensitivity;
+3. MCFW detector-overlap profile across contexts.
 
 ### 5. Discussion
 
-Use `discussion_draft.md`. The Discussion should emphasize inference and measurement practice rather than recommending a detector.
+Use `discussion_draft.md`. Emphasize inference and measurement practice rather than recommending a detector.
 
-### 6. Limitations and Future Work
+### 6. Conclusion
 
-Keep this focused:
-
-- one substantive claim-propagation dataset;
-- finite rather than exhaustive decision universe;
-- no universal fixation ground truth in MCFW-Gaze;
-- SRL viewing distances are sensitivity assumptions, not participant measurements;
-- future work should test additional HCI estimands and measurement families under preregistered/frozen uncertainty sets.
-
-### 7. Conclusion
-
-Return to the thesis: a reproducible eye-tracking study should make consequential measurement uncertainty visible at the level of the conclusion, not only at the level of preprocessing documentation.
+Use `frontmatter_conclusion.md`. Return to the thesis that reproducible eye-tracking research should make consequential measurement uncertainty visible at the level of the conclusion, not only through documentation of one preprocessing pipeline.
 
 ## Claims to avoid
 
 Do not write that:
 
-- multiverse analysis is new to eye tracking;
-- the 60, 65, or 70 cm branch is the true SRL viewing distance;
+- multiverse analysis is new to eye tracking or HCI;
+- the 60, 65, or 70 cm SRL branch is the true participant viewing distance;
 - I-VT 40°/s or I-DT is the correct detector because they agree more closely;
 - MCFW-Gaze replicates the SRL Prompt effect;
 - 92/144 positive estimates imply a 63.9% probability that the Prompt effect is positive;
 - all intervals including zero means measurement choices do not matter;
-- the present two datasets establish prevalence of measurement fragility across HCI generally.
+- the two datasets establish prevalence of measurement fragility across HCI generally;
+- decision-family mean shifts identify causal effects of preprocessing choices.
+
+For line-by-line supported wording, use `claims_audit.md`.
