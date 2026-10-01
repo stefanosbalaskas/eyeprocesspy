@@ -78,7 +78,7 @@ transition_count
 
 The focal coefficient is Prompt minus Non-prompt on the log-rate scale; exponentiation yields the rate ratio. We require optimizer convergence code 0 and a positive-definite Hessian. There is no fallback estimator. Each branch records estimate, standard error, Wald interval, N, convergence/evaluability, specification decisions, and stable hash.
 
-Measurement and modeling were executed in separate frozen workflows (runs `36683906120` and `36708103076`; model analysis commit `5fad0f19…`). Full artifact identifiers and checksums are retained in the reproducibility package. No primary decision changed after the focal SRL result was observed.
+Measurement and modeling were executed in separate frozen workflows (runs `36683906120` and `36708103076`; model analysis commit `5fad0f19`). Full artifact identifiers and checksums are retained in the reproducibility package. No primary decision changed after the focal SRL result was observed.
 
 ### 3.3 Independent case: MCFW-Gaze measurement generalization
 
@@ -116,7 +116,7 @@ when the denominator is nonzero, avoiding a ground-truth reference detector.
 
 The six source-defined contexts are descriptive, not randomized treatments. We compute Spearman's rho between eye-specific usable fraction and disagreement outcomes overall for each detector pair/eye and descriptively within context. No p-value threshold or automatic robustness label is applied.
 
-The frozen MCFW validation was executed at commit `878e351a…` in workflow run `36776432517`. Full artifact identifiers and checksums are retained in the reproducibility package. The planned denominator is 28,170 detector-summary rows and 28,170 detector-pair rows; no execution/protocol decision changed after the detector result was observed.
+The frozen MCFW validation was executed at commit `878e351a` in workflow run `36776432517`. Full artifact identifiers and checksums are retained in the reproducibility package. The planned denominator is 28,170 detector-summary rows and 28,170 detector-pair rows; no execution/protocol decision changed after the detector result was observed.
 
 ### 3.4 Cross-case reporting and interpretation
 
