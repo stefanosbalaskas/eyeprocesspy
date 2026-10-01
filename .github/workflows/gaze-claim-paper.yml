@@ -1,0 +1,57 @@
+name: Gaze-claim paper build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/gaze-claim-paper.yml
+      - research/gaze_claim_robustness/paper/**
+  pull_request:
+    paths:
+      - .github/workflows/gaze-claim-paper.yml
+      - research/gaze_claim_robustness/paper/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gaze-claim-paper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Assemble manuscript
+        run: |
+          python research/gaze_claim_robustness/paper/assemble_manuscript.py \
+            --output manuscript_draft.md
+
+      - name: Check manuscript metrics
+        run: |
+          python research/gaze_claim_robustness/paper/manuscript_metrics.py \
+            manuscript_draft.md \
+            --output manuscript_metrics.json \
+            --abstract-limit 150 \
+            --fail-over-abstract
+
+      - name: Show manuscript metrics
+        run: cat manuscript_metrics.json
+
+      - name: Upload manuscript build
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaze-claim-paper-${{ github.sha }}
+          path: |
+            manuscript_draft.md
+            manuscript_metrics.json
+          if-no-files-found: error
+          retention-days: 30
