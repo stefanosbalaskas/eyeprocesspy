@@ -32,6 +32,25 @@ def _drop_draft_h1(text: str) -> str:
     return "\n".join(lines).strip()
 
 
+def _drop_working_reference_key(text: str) -> str:
+    """Remove the draft-only bibliography note from the assembled manuscript."""
+    marker = "\n## Working reference key\n"
+    if marker not in text:
+        return text
+    return text.split(marker, maxsplit=1)[0].rstrip()
+
+
+def _wrap_numbered_subsections(text: str, number: int, title: str) -> str:
+    """Add a parent section and demote numbered subsection headings one level."""
+    prefix = f"## {number}."
+    replacement = f"### {number}."
+    lines = [
+        line.replace(prefix, replacement, 1) if line.startswith(prefix) else line
+        for line in text.splitlines()
+    ]
+    return f"## {number} {title}\n\n" + "\n".join(lines).strip()
+
+
 def assemble(paper_dir: Path) -> str:
     frontmatter = _read(paper_dir / "frontmatter_conclusion.md")
     marker = "\n## 6 Conclusion\n"
@@ -45,7 +64,14 @@ def assemble(paper_dir: Path) -> str:
         path = paper_dir / name
         if not path.is_file():
             raise FileNotFoundError(path)
-        sections.append(_drop_draft_h1(_read(path)))
+        section = _drop_draft_h1(_read(path))
+        if name == "introduction_related_work.md":
+            section = _drop_working_reference_key(section)
+        elif name == "results_draft.md":
+            section = _wrap_numbered_subsections(section, 4, "Results")
+        elif name == "discussion_draft.md":
+            section = _wrap_numbered_subsections(section, 5, "Discussion")
+        sections.append(section)
     sections.append(conclusion)
     sections.append(
         "## References\n\n"
