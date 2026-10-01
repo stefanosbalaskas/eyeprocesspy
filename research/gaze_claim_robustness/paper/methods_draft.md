@@ -78,7 +78,7 @@ transition_count
 
 The focal coefficient is Prompt minus Non-prompt on the log-rate scale; exponentiation yields the rate ratio. We require optimizer convergence code 0 and a positive-definite Hessian. There is no fallback estimator. Each branch records estimate, standard error, Wald interval, N, convergence/evaluability, specification decisions, and stable hash.
 
-Measurement and modeling were executed in separate frozen workflows (runs `36683906120` and `36708103076`; model analysis commit `5fad0f19`). Full artifact identifiers and checksums are retained in the reproducibility package. No primary decision changed after the focal SRL result was observed.
+Measurement and modeling were executed in separate frozen, version-controlled workflows. Content checksums and an anonymized provenance manifest are retained in the supplementary reproducibility package. No primary decision changed after the focal SRL result was observed.
 
 ### 3.3 Independent case: MCFW-Gaze measurement generalization
 
@@ -116,7 +116,7 @@ when the denominator is nonzero, avoiding a ground-truth reference detector.
 
 The six source-defined contexts are descriptive, not randomized treatments. We compute Spearman's rho between eye-specific usable fraction and disagreement outcomes overall for each detector pair/eye and descriptively within context. No p-value threshold or automatic robustness label is applied.
 
-The frozen MCFW validation was executed at commit `878e351a` in workflow run `36776432517`. Full artifact identifiers and checksums are retained in the reproducibility package. The planned denominator is 28,170 detector-summary rows and 28,170 detector-pair rows; no execution/protocol decision changed after the detector result was observed.
+The frozen MCFW validation was executed in a separate frozen, version-controlled workflow. Content checksums and an anonymized provenance manifest are retained in the supplementary reproducibility package. The planned denominator is 28,170 detector-summary rows and 28,170 detector-pair rows; no execution/protocol decision changed after the detector result was observed.
 
 ### 3.4 Cross-case reporting and interpretation
 
@@ -124,10 +124,12 @@ The cases answer different questions and are never pooled. SRL tests claim propa
 
 Across both cases, failures and non-evaluable branches remain evidence. We do not silently drop them, convert missing outcomes to zero, select a detector based on agreement with another detector, or interpret the most frequent sign as an effect probability. Decision-family summaries are descriptive sensitivity accounting, not causal attribution to preprocessing choices.
 
-### 3.5 Reproducibility and pre-result/post-result separation
+### 3.5 Reproducibility, ethics, and AI-assisted research workflow
 
-Decision registries, source audits, detector/AOI/quality plans, claim definitions, model contracts, and planned denominators were committed before the corresponding focal outcomes were inspected. Executions used verified public archives in GitHub Actions. Canonical outputs are preserved by workflow run, commit, and checksums; compact snapshots are committed while large derived outputs remain represented by their canonical workflow artifacts.
+Decision registries, source audits, detector/AOI/quality plans, claim definitions, model contracts, and planned denominators were frozen before the corresponding focal outcomes were inspected. Executions used checksum-verified public archives in automated version-controlled workflows. Canonical outputs are preserved by content checksums and frozen manifests; compact paper-facing snapshots and anonymized provenance information are supplied as supplementary material.
 
 The paper figure generator is presentation-only: it verifies frozen input hashes, refits no model, reruns no detector, and deterministically regenerates the publication figures. Thus figure production does not create a second analytical pathway.
 
-Both datasets are previously released public research data; this work introduces no new participant recruitment or data collection. Ethical approval and consent procedures are those of the source studies.
+This work is a secondary analysis of previously released public research data. It involved no new participant recruitment, intervention, or participant contact; ethical approval and consent procedures are those documented by the source studies.
+
+OpenAI ChatGPT was used as a research-assistance tool during methodological planning, software implementation, test scaffolding, literature-search planning, and manuscript drafting. The authors made and approved the research decisions, verified source material and citations, reviewed all generated code, and checked numerical claims against frozen analysis outputs. The AI tool did not generate or alter participant data, select specifications based on observed outcomes, replace the declared statistical estimators, or override the pre-result decision registries.
