@@ -27,3 +27,24 @@ scenario = compare_missingness_sensitivity(
 - Subsequent qualification should compare gap profiles with controlled known-truth dropout and participant-clustered empirical data, then validate integration with inference.
 
 See [mediation missingness and quality](../guides/multilevel-mediation/missingness-and-quality.md) and the [data-quality guide](../guides/data-quality.md).
+
+
+## Related: physical gaze-validation provenance (experimental)
+
+The 17 September retinal-tracking paper motivates separating artificial-eye and human validation, relative trajectory precision, absolute gaze accuracy, and post-offset correction. This source-checkout-only helper **declares** reference metadata; it does not measure accuracy.
+
+```python
+from research.methods_briefing_2026.gaze_reference_provenance import (
+    declare_gaze_validation_provenance,
+)
+
+reference = declare_gaze_validation_provenance(
+    reference_type="human_validation_target",
+    coordinate_space="absolute_gaze",
+    reference_identifier="participant-9-point-2026",
+    accuracy_deg=.65, precision_deg=.18,
+    target_measurements_available=True,
+)
+```
+
+Absolute accuracy requires a declared physical reference with actual target measurements. Relative-only evidence cannot be passed as absolute accuracy; precision is not interchangeable with accuracy. This complements the existing [spatial QC methods](../guides/data-quality.md), not a replacement for empirical calibration experiments.
