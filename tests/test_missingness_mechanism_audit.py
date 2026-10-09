@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from eyeprocesspy.missingness_mechanism_audit import (
+from research.methods_briefing_2026.missingness_mechanism_audit import (
     compare_missingness_sensitivity,
     profile_missingness_mechanism,
 )
