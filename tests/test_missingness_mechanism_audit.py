@@ -61,3 +61,23 @@ def test_group_without_observed_outcomes_is_not_silently_dropped():
     data.loc[data["condition"] == "passive", "observed"] = 0
     with pytest.raises(ValueError, match="at least one"):
         compare_missingness_sensitivity(data, outcome_col="outcome", observed_col="observed")
+
+
+def test_same_recorded_rows_do_not_identify_missing_outcome_mechanism():
+    """Two hidden potential-outcome worlds have an identical observed export."""
+    recorded = pd.DataFrame({
+        "condition": ["active"] * 6,
+        "observed": [1, 1, 0, 0, 1, 0],
+        "outcome": [10.0, 12.0, None, None, 11.0, None],
+    })
+    # The complete-data truths below are deliberately not inputs to the API.
+    full_low = [10.0, 12.0, 2.0, 2.0, 11.0, 2.0]
+    full_high = [10.0, 12.0, 20.0, 20.0, 11.0, 20.0]
+    assert sum(full_low) / 6 != sum(full_high) / 6
+    report = compare_missingness_sensitivity(
+        recorded, outcome_col="outcome", observed_col="observed",
+        deltas=[-9.0, 0.0, 9.0],
+    )
+    assert report["observed_mean"].tolist() == [11.0] * 3
+    assert report["scenario_mean"].tolist() == [6.5, 11.0, 15.5]
+    assert set(report["inference_status"]) == {"descriptive_sensitivity_only"}
