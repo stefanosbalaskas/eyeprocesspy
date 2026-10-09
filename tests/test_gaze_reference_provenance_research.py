@@ -1,6 +1,11 @@
 import pytest
 
-from research.methods_briefing_2026.gaze_reference_provenance import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from research.methods_briefing_2026.gaze_reference_provenance import (  # noqa: E402
     declare_gaze_validation_provenance,
 )
 
