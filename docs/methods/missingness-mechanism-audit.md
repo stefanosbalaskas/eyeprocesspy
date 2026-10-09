@@ -1,9 +1,9 @@
 # Experimental missingness-mechanism audit (Python)
 
-This development-only, module-scoped utility is not a new stable root export. It addresses the 20 September 2026 methods briefing without claiming to implement PMSI or identify an MCAR/MAR/MNAR mechanism.
+This source-checkout-only (not pip-installed) development, module-scoped utility is not a new stable root export. It addresses the 20 September 2026 methods briefing without claiming to implement PMSI or identify an MCAR/MAR/MNAR mechanism.
 
 ```python
-from eyeprocesspy.missingness_mechanism_audit import (
+from research.methods_briefing_2026.missingness_mechanism_audit import (
     profile_missingness_mechanism,
     compare_missingness_sensitivity,
 )
