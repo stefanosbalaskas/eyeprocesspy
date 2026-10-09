@@ -2,7 +2,12 @@
 import pandas as pd
 import pytest
 
-from research.methods_briefing_2026.missingness_mechanism_audit import (
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from research.methods_briefing_2026.missingness_mechanism_audit import (  # noqa: E402
     compare_missingness_sensitivity,
     profile_missingness_mechanism,
 )
