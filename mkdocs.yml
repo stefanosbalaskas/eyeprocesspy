@@ -51,6 +51,7 @@ nav:
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
+      - Experimental missingness mechanism audit: methods/missingness-mechanism-audit.md
       - Measurement validity & dynamic gaze: guides/measurement-validity-dynamic-gaze.md
       - Standardized Data Quality:
           - Overview & equations: guides/data-quality.md
