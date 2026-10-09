@@ -4,10 +4,10 @@ No free-viewing data can be relabelled absolute accuracy by metadata alone.
 """
 from __future__ import annotations
 
-from collections.abc import Mapping
-from hashlib import sha256
 import json
 import math
+from collections.abc import Mapping
+from hashlib import sha256
 
 
 def declare_gaze_validation_provenance(
