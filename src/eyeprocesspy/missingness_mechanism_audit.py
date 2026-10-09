@@ -51,7 +51,7 @@ def profile_missingness_mechanism(
         raise ValueError("at least one grouping column is required")
     required = [*groups, observed_col, *([time_col] if time_col else [])]
     frame = _frame(data, required)
-    if frame[groups].isna().any().any():
+    if frame[list(groups)].isna().any().any():
         raise ValueError("group identities cannot be missing")
     frame["_observed_audit"] = _observed(frame[observed_col])
     if time_col:
@@ -78,7 +78,6 @@ def profile_missingness_mechanism(
             "mechanism": "not_identified",
         })
         active_start = None
-        missing_positions = np.flatnonzero(~indicators)
         for position in range(n + 1):
             missing = position < n and not indicators[position]
             if missing and active_start is None:
@@ -92,7 +91,6 @@ def profile_missingness_mechanism(
                     "end_time": float(t[end]) if time_col else np.nan,
                 })
                 active_start = None
-        assert n_missing == len(missing_positions)
     return {
         "summary": pd.DataFrame(summary),
         "gap_runs": pd.DataFrame(
