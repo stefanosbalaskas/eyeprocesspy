@@ -1,0 +1,312 @@
+name: SRL measurement universe
+# Measurement run: released 82-participant cohort, 3-detector primary universe
+# Measurement-only stage: no Prompt-effect model fitting is permitted here.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/srl-measurement-universe.yml
+
+concurrency:
+  group: srl-measurement-universe-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      FIGSHARE_ARTICLE_ID: "28304069"
+      FIGSHARE_FILE_ID: "54379415"
+      RESEARCH_DIR: research/gaze_claim_robustness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install frozen research environment
+        run: uv sync --frozen --extra dev
+
+      - name: Resolve public Figshare file metadata
+        id: figshare
+        shell: bash
+        run: |
+          mkdir -p evidence
+          uv run --frozen python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          article_id = os.environ["FIGSHARE_ARTICLE_ID"]
+          file_id = int(os.environ["FIGSHARE_FILE_ID"])
+          request = urllib.request.Request(
+              f"https://api.figshare.com/v2/articles/{article_id}",
+              headers={"User-Agent": "eyeprocesspy-srl-measurement/1.0"},
+          )
+          with urllib.request.urlopen(request, timeout=60) as response:
+              article = json.load(response)
+
+          matches = [
+              item for item in article.get("files", [])
+              if int(item.get("id", -1)) == file_id
+          ]
+          if len(matches) != 1:
+              raise SystemExit(
+                  f"Expected one Figshare file id={file_id}; found {len(matches)}."
+              )
+
+          item = matches[0]
+          selected = {
+              "article_id": article_id,
+              "file_id": file_id,
+              "name": str(item.get("name", "")).strip(),
+              "size": int(item.get("size", 0)),
+              "computed_md5": str(
+                  item.get("computed_md5")
+                  or item.get("supplied_md5")
+                  or ""
+              ).strip().lower(),
+              "download_url": str(item.get("download_url", "")).strip(),
+          }
+          if not selected["download_url"]:
+              raise SystemExit("Figshare metadata contains no download_url.")
+          if selected["size"] <= 0:
+              raise SystemExit("Figshare metadata contains no positive file size.")
+          if len(selected["computed_md5"]) != 32:
+              raise SystemExit("Figshare metadata contains no usable MD5 checksum.")
+
+          Path("evidence/figshare_selected_file.json").write_text(
+              json.dumps(selected, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as handle:
+              handle.write(f"download_url={selected['download_url']}\n")
+              handle.write(f"file_name={selected['name']}\n")
+              handle.write(f"expected_size={selected['size']}\n")
+              handle.write(f"expected_md5={selected['computed_md5']}\n")
+          PY
+
+      - name: Download public SRL archive
+        shell: bash
+        env:
+          DOWNLOAD_URL: ${{ steps.figshare.outputs.download_url }}
+          FILE_NAME: ${{ steps.figshare.outputs.file_name }}
+        run: |
+          set -euo pipefail
+          ARCHIVE="$RUNNER_TEMP/$FILE_NAME"
+          curl             --fail             --location             --retry 5             --retry-delay 5             --retry-all-errors             --continue-at -             --output "$ARCHIVE"             "$DOWNLOAD_URL"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Verify source archive integrity
+        shell: bash
+        env:
+          EXPECTED_SIZE: ${{ steps.figshare.outputs.expected_size }}
+          EXPECTED_MD5: ${{ steps.figshare.outputs.expected_md5 }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SIZE="$(stat -c '%s' "$ARCHIVE")"
+          ACTUAL_MD5="$(md5sum "$ARCHIVE" | awk '{print $1}')"
+          ACTUAL_SHA256="$(sha256sum "$ARCHIVE" | awk '{print $1}')"
+          printf '%s\n'             "expected_size=$EXPECTED_SIZE"             "actual_size=$ACTUAL_SIZE"             "expected_md5=$EXPECTED_MD5"             "actual_md5=$ACTUAL_MD5"             "actual_sha256=$ACTUAL_SHA256"             > evidence/download_integrity.txt
+          test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
+          test "$ACTUAL_MD5" = "$EXPECTED_MD5"
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/srl-extracted"
+          uv run --frozen python - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+
+          archive = Path(os.environ["ARCHIVE"])
+          destination = Path(os.environ["RUNNER_TEMP"]) / "srl-extracted"
+          shutil.unpack_archive(str(archive), str(destination))
+          PY
+          echo "DATASET_ROOT=$RUNNER_TEMP/srl-extracted" >> "$GITHUB_ENV"
+
+      - name: Resolve released data paths
+        id: released_paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          PARTICIPANTS="$(find "$DATASET_ROOT" -type f -name participants.csv -print -quit)"
+          STIMULI="$(find "$DATASET_ROOT" -type f -name stimuli.csv -print -quit)"
+          RAW_DIR="$(find "$DATASET_ROOT" -type d -name ET_data_raw -print -quit)"
+          test -n "$PARTICIPANTS"
+          test -n "$STIMULI"
+          test -n "$RAW_DIR"
+          echo "participants=$PARTICIPANTS" >> "$GITHUB_OUTPUT"
+          echo "stimuli=$STIMULI" >> "$GITHUB_OUTPUT"
+          echo "raw_dir=$RAW_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Reconstruct exact cross-source cohort evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identity.py"             "$DATASET_ROOT"             --output-dir evidence/identity
+
+      - name: Reconstruct Task-level sampling evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_task_timebase.py"             "${{ steps.released_paths.outputs.raw_dir }}"             --output-dir evidence/timebase
+
+      - name: Execute measurement-only universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen python "$RESEARCH_DIR/run_srl_measurement_universe.py"             "$DATASET_ROOT"             evidence/identity/id_source_presence.csv             --output-dir measurement             --workers 4             --checkpoint-dir measurement/participant_checkpoints
+
+      - name: Validate structural completeness without fitting Prompt effect
+        shell: bash
+        run: |
+          uv run --frozen python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          result = pd.read_csv("measurement/srl_measurement_counts.csv")
+          expected = 82 * 8 * 3 * 2 * 3 * 2
+          if len(result) != expected:
+              raise SystemExit(
+                  f"Expected {expected} measurement rows; found {len(result)}."
+              )
+
+          key = [
+              "participant_id",
+              "stimulus_id",
+              "detector_id",
+              "eye",
+              "viewing_distance_cm",
+              "aoi_convention",
+          ]
+          if result.duplicated(key).any():
+              raise SystemExit("Duplicate measurement branch keys detected.")
+
+          expectations = {
+              "participant_id": 82,
+              "stimulus_id": 8,
+              "detector_id": 3,
+              "eye": 2,
+              "viewing_distance_cm": 3,
+              "aoi_convention": 2,
+          }
+          for column, n_expected in expectations.items():
+              observed = result[column].nunique(dropna=False)
+              if observed != n_expected:
+                  raise SystemExit(
+                      f"{column}: expected {n_expected} levels; found {observed}."
+                  )
+
+          # This stage must remain measurement-only.
+          forbidden = {
+              "prompt_indicator",
+              "estimate",
+              "SE",
+              "CI_lower",
+              "CI_upper",
+              "rate_ratio",
+              "p_value",
+          }
+          present = sorted(forbidden & set(result.columns))
+          if present:
+              raise SystemExit(
+                  "Measurement artifact unexpectedly contains focal-model fields: "
+                  + ", ".join(present)
+              )
+          PY
+
+      - name: Summarize measurement evidence
+        if: always()
+        shell: bash
+        run: |
+          uv run --frozen python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          lines = ["# SRL measurement-only universe", ""]
+
+          counts_path = Path("measurement/srl_measurement_counts.csv")
+          if counts_path.exists():
+              d = pd.read_csv(counts_path)
+              lines.extend(
+                  [
+                      f"- measurement rows: {len(d)}",
+                      f"- participants: {d['participant_id'].nunique()}",
+                      f"- tasks: {d['stimulus_id'].nunique()}",
+                      f"- detectors: {d['detector_id'].nunique()}",
+                      f"- eyes: {d['eye'].nunique()}",
+                      f"- viewing-distance branches: {d['viewing_distance_cm'].nunique()}",
+                      f"- AOI branches: {d['aoi_convention'].nunique()}",
+                      f"- outcome rows status=ok: {int(d['status'].eq('ok').sum())}",
+                      f"- outcome rows non-ok: {int((~d['status'].eq('ok')).sum())}",
+                  ]
+              )
+
+          failures_path = Path("measurement/srl_measurement_failures.csv")
+          if failures_path.exists():
+              try:
+                  failures = pd.read_csv(failures_path)
+                  lines.append(f"- hard failure records: {len(failures)}")
+              except pd.errors.EmptyDataError:
+                  lines.append("- hard failure records: 0")
+
+          warning_path = Path("measurement/srl_detector_warnings.csv")
+          if warning_path.exists():
+              try:
+                  warnings = pd.read_csv(warning_path)
+                  lines.append(f"- detector warning records: {len(warnings)}")
+                  if len(warnings):
+                      counts = (
+                          warnings["warning"]
+                          .astype(str)
+                          .value_counts()
+                          .head(10)
+                      )
+                      lines.append("")
+                      lines.append("## Most common detector warnings")
+                      for message, count in counts.items():
+                          lines.append(f"- {count} × {message}")
+              except pd.errors.EmptyDataError:
+                  lines.append("- detector warning records: 0")
+
+          Path("measurement").mkdir(parents=True, exist_ok=True)
+          Path("measurement/SUMMARY.md").write_text(
+              "\n".join(lines) + "\n",
+              encoding="utf-8",
+          )
+          print("\n".join(lines))
+          PY
+
+      - name: Upload derived measurement evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: srl-measurement-universe-${{ github.sha }}
+          path: |
+            measurement/
+            evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove source dataset from runner
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/srl-extracted"
+          if [ -n "${ARCHIVE:-}" ]; then
+            rm -f "$ARCHIVE"
+          fi

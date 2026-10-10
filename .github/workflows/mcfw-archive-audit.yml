@@ -1,0 +1,290 @@
+name: MCFW-Gaze archive audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/mcfw-archive-audit.yml
+
+concurrency:
+  group: mcfw-archive-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      ZENODO_RECORD_ID: "20300972"
+      RESEARCH_DIR: research/gaze_claim_robustness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install frozen research environment
+        run: uv sync --frozen --extra dev
+
+      - name: Resolve latest MCFW-Gaze Zenodo files
+        id: zenodo
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit/source
+          uv run --frozen python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          record_id = os.environ["ZENODO_RECORD_ID"]
+          url = f"https://zenodo.org/api/records/{record_id}"
+          request = urllib.request.Request(
+              url,
+              headers={"User-Agent": "eyeprocesspy-mcfw-audit/1.0"},
+          )
+          with urllib.request.urlopen(request, timeout=60) as response:
+              record = json.load(response)
+
+          Path("audit/source/zenodo_record.json").write_text(
+              json.dumps(record, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+
+          files = record.get("files", [])
+          by_key = {str(item.get("key", "")): item for item in files}
+          if "dataset.zip" not in by_key:
+              raise SystemExit(
+                  "Latest MCFW-Gaze record does not expose dataset.zip."
+              )
+
+          selected = by_key["dataset.zip"]
+          links = selected.get("links", {})
+          download = (
+              links.get("content")
+              or links.get("self")
+              or selected.get("links", {}).get("download")
+          )
+          if not download:
+              raise SystemExit("dataset.zip has no usable download link.")
+
+          checksum = str(selected.get("checksum", "")).strip()
+          size = int(selected.get("size", 0))
+          if size <= 0:
+              raise SystemExit("dataset.zip has no positive size.")
+
+          metadata = {
+              "record_id": record_id,
+              "doi": record.get("doi"),
+              "title": record.get("metadata", {}).get("title"),
+              "dataset_file": "dataset.zip",
+              "size": size,
+              "checksum": checksum,
+              "download_url": download,
+              "available_files": sorted(by_key),
+          }
+          Path("audit/source/selected_files.json").write_text(
+              json.dumps(metadata, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as handle:
+              handle.write(f"dataset_url={download}\n")
+              handle.write(f"dataset_size={size}\n")
+              handle.write(f"dataset_checksum={checksum}\n")
+              for key in ("data_loss_per_trial.csv", "data_quality_validation.csv"):
+                  item = by_key.get(key)
+                  if item is not None:
+                      item_url = (
+                          item.get("links", {}).get("content")
+                          or item.get("links", {}).get("self")
+                      )
+                      if item_url:
+                          output_key = (
+                              "trial_quality_url"
+                              if key == "data_loss_per_trial.csv"
+                              else "validation_quality_url"
+                          )
+                          handle.write(f"{output_key}={item_url}\n")
+          PY
+
+      - name: Download and verify public MCFW-Gaze archive
+        shell: bash
+        env:
+          DATASET_URL: ${{ steps.zenodo.outputs.dataset_url }}
+          EXPECTED_SIZE: ${{ steps.zenodo.outputs.dataset_size }}
+          EXPECTED_CHECKSUM: ${{ steps.zenodo.outputs.dataset_checksum }}
+        run: |
+          set -euo pipefail
+          ARCHIVE="$RUNNER_TEMP/mcfw-dataset.zip"
+          curl --fail --location --retry 5 --retry-delay 5 --retry-all-errors             --continue-at - --output "$ARCHIVE" "$DATASET_URL"
+
+          ACTUAL_SIZE="$(stat -c '%s' "$ARCHIVE")"
+          ACTUAL_MD5="$(md5sum "$ARCHIVE" | awk '{print $1}')"
+          ACTUAL_SHA256="$(sha256sum "$ARCHIVE" | awk '{print $1}')"
+
+          printf '%s\n'             "expected_size=$EXPECTED_SIZE"             "actual_size=$ACTUAL_SIZE"             "published_checksum=$EXPECTED_CHECKSUM"             "actual_md5=$ACTUAL_MD5"             "actual_sha256=$ACTUAL_SHA256"             > audit/source/download_integrity.txt
+
+          test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
+          if [[ "$EXPECTED_CHECKSUM" == md5:* ]]; then
+            test "$ACTUAL_MD5" = "${EXPECTED_CHECKSUM#md5:}"
+          fi
+
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Download published quality tables when present
+        shell: bash
+        env:
+          TRIAL_QUALITY_URL: ${{ steps.zenodo.outputs.trial_quality_url }}
+          VALIDATION_QUALITY_URL: ${{ steps.zenodo.outputs.validation_quality_url }}
+        run: |
+          set -euo pipefail
+          if [ -n "${TRIAL_QUALITY_URL:-}" ]; then
+            curl --fail --location --retry 3               --output audit/source/data_loss_per_trial.csv               "$TRIAL_QUALITY_URL"
+          fi
+          if [ -n "${VALIDATION_QUALITY_URL:-}" ]; then
+            curl --fail --location --retry 3               --output audit/source/data_quality_validation.csv               "$VALIDATION_QUALITY_URL"
+          fi
+
+      - name: Extract archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="$RUNNER_TEMP/mcfw-extracted"
+          mkdir -p "$DEST"
+          unzip -q "$ARCHIVE" -d "$DEST"
+          echo "EXTRACTED_ROOT=$DEST" >> "$GITHUB_ENV"
+
+      - name: Resolve dataset root
+        id: root
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$(find "$EXTRACTED_ROOT" -type d -name data -printf '%h\n' | head -1)"
+          test -n "$ROOT"
+          test -d "$ROOT/data"
+          echo "dataset_root=$ROOT" >> "$GITHUB_OUTPUT"
+          {
+            echo "dataset_root=$ROOT"
+            find "$ROOT" -maxdepth 2 -type f | sort | head -100
+          } > audit/source/archive_structure.txt
+
+      - name: Audit all raw participant trial files
+        shell: bash
+        run: |
+          set +e
+          uv run --frozen python "$RESEARCH_DIR/audit_mcfw_dataset.py"             "${{ steps.root.outputs.dataset_root }}"             --output-dir audit/raw
+          code=$?
+          echo "raw_audit_exit_code=$code" > audit/stage_exit_codes.txt
+          exit 0
+
+      - name: Audit published quality summaries
+        shell: bash
+        run: |
+          set +e
+          if [ -f audit/source/data_loss_per_trial.csv ]; then
+            args=(
+              audit/source/data_loss_per_trial.csv
+              --output-dir audit/quality
+            )
+            if [ -f audit/source/data_quality_validation.csv ]; then
+              args+=(--validation-csv audit/source/data_quality_validation.csv)
+            fi
+            uv run --frozen python "$RESEARCH_DIR/audit_mcfw_quality.py" "${args[@]}"
+            code=$?
+          else
+            code=0
+            echo "Published standalone quality tables not present in current record."               > audit/quality_tables_not_present.txt
+          fi
+          echo "quality_audit_exit_code=$code" >> audit/stage_exit_codes.txt
+          exit 0
+
+      - name: Summarize MCFW audit
+        shell: bash
+        run: |
+          uv run --frozen python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          lines = ["# MCFW-Gaze pre-analysis archive audit", ""]
+
+          manifest_path = Path("audit/raw/mcfw_file_manifest.csv")
+          failure_path = Path("audit/raw/mcfw_failures.csv")
+          if manifest_path.exists():
+              d = pd.read_csv(manifest_path)
+              lines.extend([
+                  f"- raw trial files: {len(d)}",
+                  f"- participants: {d['participant'].nunique()}",
+                  f"- trial families: {d['trial_family'].nunique()}",
+                  f"- total samples: {int(d['n_samples'].sum())}",
+                  f"- files with non-increasing timestamps: "
+                  f"{int((d['nonincreasing_device_steps'] > 0).sum())}",
+                  f"- median either-eye usable fraction: "
+                  f"{d['either_eye_usable_fraction'].median():.6f}",
+                  f"- median both-eyes usable fraction: "
+                  f"{d['both_eyes_usable_fraction'].median():.6f}",
+              ])
+          if failure_path.exists():
+              f = pd.read_csv(failure_path)
+              lines.append(f"- raw audit failures: {len(f)}")
+
+          lines.extend([
+              "",
+              "This audit does not define an HCI treatment effect.",
+              "MCFW-Gaze is used as an independent raw-signal/measurement generalization case.",
+          ])
+          Path("audit/SUMMARY.md").write_text(
+              "\n".join(lines) + "\n",
+              encoding="utf-8",
+          )
+          print("\n".join(lines))
+          PY
+
+      - name: Upload compact audit evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcfw-pre-analysis-audit-${{ github.sha }}
+          path: audit/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove downloaded research data
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$EXTRACTED_ROOT"
+          if [ -n "${ARCHIVE:-}" ]; then rm -f "$ARCHIVE"; fi
+
+      - name: Enforce raw archive structural gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f audit/raw/mcfw_file_manifest.csv
+          test -f audit/raw/mcfw_failures.csv
+          uv run --frozen python - <<'PY'
+          import pandas as pd
+          manifest = pd.read_csv("audit/raw/mcfw_file_manifest.csv")
+          failures = pd.read_csv("audit/raw/mcfw_failures.csv")
+          if len(failures):
+              raise SystemExit(
+                  f"MCFW audit remains blocked: {len(failures)} raw file failures."
+              )
+          if manifest["participant"].nunique() < 10:
+              raise SystemExit("Unexpectedly few MCFW participants in archive.")
+          if not {"natural_image", "gaze_pattern_auth", "password",
+                  "web_shopping", "web_news", "web_video"}.issubset(
+                      set(manifest["trial_family"].astype(str))
+                  ):
+              raise SystemExit("Expected MCFW task families are incomplete.")
+          print("MCFW raw archive structural gate: PASS")
+          PY

@@ -48,6 +48,7 @@ nav:
           - Reporting guidance: guides/reporting-detector-sensitivity.md
           - Reporting template: guides/detector-multiverse-reporting-template.md
           - Troubleshooting: guides/detector-multiverse-troubleshooting.md
+      - Gaze claim robustness: guides/gaze-claim-robustness.md
       - Gazepoint import & QC: guides/gazepoint-import-qc.md
       - Pupillometry: guides/pupillometry.md
       - Quality & uncertainty: guides/process-quality-uncertainty.md
@@ -111,6 +112,7 @@ nav:
       - Reference map: reference/index.md
       - Complete API reference: reference/api.md
       - Detector multiverse API: reference/detector-multiverse.md
+      - Gaze claim robustness API: reference/gaze-claim-robustness.md
       - Plotting reference: reference/plotting.md
       - Gaze-survival API: reference/gaze-survival.md
       - AOI perturbation API: reference/aoi-perturbation.md

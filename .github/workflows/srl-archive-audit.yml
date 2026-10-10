@@ -1,0 +1,306 @@
+name: SRL archive audit
+# Audit revision: exact released cohorts + task-level timebase
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/srl-archive-audit.yml
+
+concurrency:
+  group: srl-archive-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      FIGSHARE_ARTICLE_ID: "28304069"
+      FIGSHARE_FILE_ID: "54379415"
+      RESEARCH_DIR: research/gaze_claim_robustness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install frozen research environment
+        run: uv sync --frozen --extra dev
+
+      - name: Resolve public Figshare file metadata
+        id: figshare
+        shell: bash
+        run: |
+          mkdir -p audit
+          uv run --frozen python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          article_id = os.environ["FIGSHARE_ARTICLE_ID"]
+          file_id = int(os.environ["FIGSHARE_FILE_ID"])
+          url = f"https://api.figshare.com/v2/articles/{article_id}"
+          request = urllib.request.Request(
+              url,
+              headers={"User-Agent": "eyeprocesspy-srl-audit/1.0"},
+          )
+          with urllib.request.urlopen(request, timeout=60) as response:
+              article = json.load(response)
+
+          Path("audit/figshare_article_metadata.json").write_text(
+              json.dumps(article, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+
+          matches = [
+              item for item in article.get("files", [])
+              if int(item.get("id", -1)) == file_id
+          ]
+          if len(matches) != 1:
+              raise SystemExit(
+                  f"Expected one Figshare file id={file_id}; found {len(matches)}."
+              )
+
+          item = matches[0]
+          download_url = str(item.get("download_url", "")).strip()
+          file_name = str(item.get("name", "")).strip()
+          expected_size = int(item.get("size", 0))
+          expected_md5 = str(
+              item.get("computed_md5")
+              or item.get("supplied_md5")
+              or ""
+          ).strip().lower()
+
+          if not download_url:
+              raise SystemExit("Figshare metadata contains no download_url.")
+          if not file_name:
+              raise SystemExit("Figshare metadata contains no file name.")
+          if expected_size <= 0:
+              raise SystemExit("Figshare metadata contains no positive file size.")
+          if len(expected_md5) != 32:
+              raise SystemExit(
+                  "Figshare metadata contains no usable 32-character MD5 checksum."
+              )
+
+          Path("audit/figshare_selected_file.json").write_text(
+              json.dumps(
+                  {
+                      "article_id": article_id,
+                      "file_id": file_id,
+                      "name": file_name,
+                      "size": expected_size,
+                      "computed_md5": expected_md5,
+                      "download_url": download_url,
+                  },
+                  indent=2,
+                  sort_keys=True,
+              ),
+              encoding="utf-8",
+          )
+
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
+              handle.write(f"download_url={download_url}\n")
+              handle.write(f"file_name={file_name}\n")
+              handle.write(f"expected_size={expected_size}\n")
+              handle.write(f"expected_md5={expected_md5}\n")
+          PY
+
+      - name: Download public SRL archive
+        shell: bash
+        env:
+          DOWNLOAD_URL: ${{ steps.figshare.outputs.download_url }}
+          FILE_NAME: ${{ steps.figshare.outputs.file_name }}
+        run: |
+          set -euo pipefail
+          ARCHIVE="$RUNNER_TEMP/$FILE_NAME"
+          curl --fail --location --retry 5 --retry-delay 5 --retry-all-errors --continue-at - --output "$ARCHIVE" "$DOWNLOAD_URL"
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - name: Verify Figshare size and MD5
+        shell: bash
+        env:
+          EXPECTED_SIZE: ${{ steps.figshare.outputs.expected_size }}
+          EXPECTED_MD5: ${{ steps.figshare.outputs.expected_md5 }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SIZE="$(stat -c '%s' "$ARCHIVE")"
+          ACTUAL_MD5="$(md5sum "$ARCHIVE" | awk '{print $1}')"
+          ACTUAL_SHA256="$(sha256sum "$ARCHIVE" | awk '{print $1}')"
+          printf '%s\n' "expected_size=$EXPECTED_SIZE" "actual_size=$ACTUAL_SIZE" "expected_md5=$EXPECTED_MD5" "actual_md5=$ACTUAL_MD5" "actual_sha256=$ACTUAL_SHA256" > audit/download_integrity.txt
+          test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
+          test "$ACTUAL_MD5" = "$EXPECTED_MD5"
+
+      - name: Extract archive without retaining it as an artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/srl-extracted"
+          uv run --frozen python - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+
+          archive = Path(os.environ["ARCHIVE"])
+          destination = Path(os.environ["RUNNER_TEMP"]) / "srl-extracted"
+          shutil.unpack_archive(str(archive), str(destination))
+          PY
+          echo "DATASET_ROOT=$RUNNER_TEMP/srl-extracted" >> "$GITHUB_ENV"
+
+      - name: Run structural archive audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_dataset.py" "$DATASET_ROOT" --sample-rows 5000 --output-dir audit/archive
+
+      - name: Resolve released metadata paths
+        id: released_paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          PARTICIPANTS="$(find "$DATASET_ROOT" -type f -name participants.csv -print -quit)"
+          STIMULI="$(find "$DATASET_ROOT" -type f -name stimuli.csv -print -quit)"
+          RAW_DIR="$(find "$DATASET_ROOT" -type d -name ET_data_raw -print -quit)"
+          test -n "$PARTICIPANTS"
+          test -n "$STIMULI"
+          test -n "$RAW_DIR"
+          echo "participants=$PARTICIPANTS" >> "$GITHUB_OUTPUT"
+          echo "stimuli=$STIMULI" >> "$GITHUB_OUTPUT"
+          echo "raw_dir=$RAW_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Run cross-source identity audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identity.py" "$DATASET_ROOT" --output-dir audit/identity
+
+      - name: Run full Task-level timebase audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_task_timebase.py" "${{ steps.released_paths.outputs.raw_dir }}" --output-dir audit/timebase
+
+      - name: Run design-identifiability audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/audit_srl_identifiability.py" "${{ steps.released_paths.outputs.participants }}" "${{ steps.released_paths.outputs.stimuli }}" --output-dir audit/identifiability
+
+      - name: Build pre-results participant-task-eye manifest
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/build_srl_design_manifest.py" "${{ steps.released_paths.outputs.participants }}" "${{ steps.released_paths.outputs.stimuli }}" "${{ steps.released_paths.outputs.raw_dir }}" --output-dir audit/design_manifest
+
+      - name: Materialize frozen 144-specification universe
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/build_srl_primary_universe.py" --research-dir "$RESEARCH_DIR" --output-dir audit/primary_universe
+
+      - name: Evaluate pre-results execution readiness
+        continue-on-error: true
+        shell: bash
+        run: |
+          uv run --frozen python "$RESEARCH_DIR/check_srl_execution_readiness.py" --research-dir "$RESEARCH_DIR" --archive-audit-dir audit/archive --identifiability-dir audit/identifiability --identity-audit-dir audit/identity --timebase-audit-dir audit/timebase --output audit/srl_execution_readiness.csv
+
+      - name: Summarize audit evidence
+        if: always()
+        shell: bash
+        run: |
+          uv run --frozen python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          lines = ["# SRL pre-results archive audit", ""]
+
+          readiness = Path("audit/srl_execution_readiness.csv")
+          if readiness.exists():
+              frame = pd.read_csv(readiness)
+              blockers = frame.loc[
+                  frame["severity"].eq("BLOCKER")
+                  & ~frame["ready"].astype(bool)
+              ]
+              lines.append(f"- readiness rows: {len(frame)}")
+              lines.append(f"- unresolved blockers: {len(blockers)}")
+
+          identity = Path("audit/identity/identity_summary.csv")
+          if identity.exists():
+              frame = pd.read_csv(identity)
+              values = dict(zip(frame["metric"], frame["value"]))
+              lines.append(f"- raw participant IDs: {int(values.get('raw_file_ids', 0))}")
+              lines.append(f"- exact raw+metadata IDs: {int(values.get('exact_raw_metadata_ids', 0))}")
+              lines.append(f"- exact Prompt: {int(values.get('exact_raw_prompt', 0))}")
+              lines.append(f"- exact Non-prompt: {int(values.get('exact_raw_non_prompt', 0))}")
+
+          timebase = Path("audit/timebase/participant_timebase_summary.csv")
+          if timebase.exists():
+              frame = pd.read_csv(timebase)
+              lines.append(
+                  f"- raw participants with 8 nominal 250 Hz tasks: "
+                  f"{int(frame['all_8_tasks_nominal_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+              lines.append(
+                  f"- raw participants with 8 strictly dense 250 Hz tasks: "
+                  f"{int(frame['all_8_tasks_dense_regular_250hz'].astype(bool).sum())}/{len(frame)}"
+              )
+
+          universe = Path("audit/primary_universe/srl_primary_universe.csv")
+          if universe.exists():
+              frame = pd.read_csv(universe)
+              lines.append(f"- frozen primary specifications: {len(frame)}")
+              lines.append(f"- unique specification hashes: {frame['specification_hash'].nunique()}")
+
+          Path("audit/SUMMARY.md").write_text(
+              "\n".join(lines) + "\n",
+              encoding="utf-8",
+          )
+          print("\n".join(lines))
+          PY
+
+      - name: Upload compact audit evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: srl-pre-results-audit-${{ github.sha }}
+          path: audit/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove downloaded research data from runner
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/srl-extracted"
+          if [ -n "$ARCHIVE" ]; then rm -f "$ARCHIVE"; fi
+
+      - name: Enforce readiness gate
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f audit/srl_execution_readiness.csv ]; then
+            echo "Readiness evidence was not produced."
+            exit 1
+          fi
+          uv run --frozen python - <<'PY'
+          import pandas as pd
+
+          frame = pd.read_csv("audit/srl_execution_readiness.csv")
+          blockers = frame.loc[
+              frame["severity"].eq("BLOCKER")
+              & ~frame["ready"].astype(bool)
+          ]
+          if len(blockers):
+              print(blockers.to_string(index=False))
+              raise SystemExit(
+                  f"SRL analysis remains locked: {len(blockers)} blocker(s)."
+              )
+          print("SRL pre-results readiness gate: PASS")
+          PY

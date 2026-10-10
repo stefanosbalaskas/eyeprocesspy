@@ -1,0 +1,148 @@
+name: Gaze-claim paper build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/chi-gaze-claim-robustness
+    paths:
+      - .github/workflows/gaze-claim-paper.yml
+      - research/gaze_claim_robustness/paper/**
+      - research/gaze_claim_robustness/results/srl_paper_figure_snapshot.csv
+      - research/gaze_claim_robustness/results/mcfw_context_jaccard_snapshot.csv
+  pull_request:
+    paths:
+      - .github/workflows/gaze-claim-paper.yml
+      - research/gaze_claim_robustness/paper/**
+      - research/gaze_claim_robustness/results/srl_paper_figure_snapshot.csv
+      - research/gaze_claim_robustness/results/mcfw_context_jaccard_snapshot.csv
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gaze-claim-paper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install frozen figure environment
+        run: |
+          uv sync --frozen --extra dev
+          uv pip install --python .venv/bin/python \
+            "matplotlib==3.10.8" \
+            "numpy==2.3.5" \
+            "pandas==2.2.3"
+
+      - name: Assemble manuscript
+        run: |
+          python research/gaze_claim_robustness/paper/assemble_manuscript.py \
+            --output manuscript_draft.md
+
+      - name: Check manuscript metrics
+        run: |
+          python research/gaze_claim_robustness/paper/manuscript_metrics.py \
+            manuscript_draft.md \
+            --output manuscript_metrics.json \
+            --abstract-limit 150 \
+            --fail-over-abstract
+
+      - name: Show manuscript metrics
+        run: cat manuscript_metrics.json
+
+      - name: Generate frozen publication figures
+        run: |
+          .venv/bin/python research/gaze_claim_robustness/paper/make_publication_figures.py \
+            --snapshot-dir research/gaze_claim_robustness/results \
+            --output-dir paper-figures
+          test -s paper-figures/fig1_srl_specification_curve.svg
+          test -s paper-figures/fig1_srl_specification_curve.pdf
+          test -s paper-figures/fig2_srl_detector_distance.svg
+          test -s paper-figures/fig2_srl_detector_distance.pdf
+          test -s paper-figures/fig3_mcfw_context_jaccard.svg
+          test -s paper-figures/fig3_mcfw_context_jaccard.pdf
+
+      - name: Build anonymous single-ZIP review supplement
+        run: |
+          python research/gaze_claim_robustness/paper/build_anonymized_supplement.py \
+            --output anonymous-review-supplement.zip
+          test -s anonymous-review-supplement.zip
+          unzip -t anonymous-review-supplement.zip
+          unzip -l anonymous-review-supplement.zip | tee supplement-contents.txt
+          grep -q 'README.txt' supplement-contents.txt
+          grep -q 'MANIFEST.tsv' supplement-contents.txt
+
+      - name: Install review-format and accessibility tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends pandoc poppler-utils zip
+
+      - name: Generate official anonymous ACM review TeX
+        run: |
+          python research/gaze_claim_robustness/paper/build_acm_review.py \
+            --output-dir acm-review \
+            --figure-dir paper-figures
+          test -s acm-review/manuscript_acm_review.tex
+          test -s acm-review/literature_references.bib
+          test -s acm-review/figures/fig1_srl_specification_curve.pdf
+          test -s acm-review/figures/fig2_srl_detector_distance.pdf
+          test -s acm-review/figures/fig3_mcfw_context_jaccard.pdf
+          grep -Fq '\documentclass[manuscript,review,anonymous]{acmart}' \
+            acm-review/manuscript_acm_review.tex
+          test "$(grep -Fc '\Description{' acm-review/manuscript_acm_review.tex)" -eq 3
+          (cd acm-review && zip -q -r ../anonymous-acm-review-source.zip \
+            manuscript_acm_review.tex literature_references.bib figures)
+          test -s anonymous-acm-review-source.zip
+
+      - name: Compile official anonymous ACM review PDF
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: manuscript_acm_review.tex
+          working_directory: acm-review
+          latexmk_use_lualatex: true
+
+      - name: Verify ACM review PDF format and anonymity
+        run: |
+          test -s acm-review/manuscript_acm_review.pdf
+          pdfinfo acm-review/manuscript_acm_review.pdf | tee acm-review/pdfinfo.txt
+          grep -Eq '^Pages:[[:space:]]+[1-9][0-9]*$' acm-review/pdfinfo.txt
+          pdftotext acm-review/manuscript_acm_review.pdf acm-review/manuscript_acm_review.txt
+          ! grep -Eiq 'github|stefanosbalaskas|36683906120|36708103076|36776432517|5fad0f19|878e351a' \
+            acm-review/manuscript_acm_review.txt
+          grep -Fq 'OpenAI ChatGPT was used as a research-assistance tool' \
+            acm-review/manuscript_acm_review.txt
+          printf 'Review-PDF tag state (manual remediation may still be required by SIGCHI):\n'
+          grep -E '^Tagged:' acm-review/pdfinfo.txt || true
+
+      - name: Upload CHI review build
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaze-claim-paper-${{ github.sha }}
+          path: |
+            manuscript_draft.md
+            manuscript_metrics.json
+            anonymous-review-supplement.zip
+            anonymous-acm-review-source.zip
+            supplement-contents.txt
+            paper-figures/*.svg
+            paper-figures/*.pdf
+            acm-review/manuscript_acm_review.tex
+            acm-review/manuscript_acm_review.pdf
+            acm-review/manuscript_acm_review.txt
+            acm-review/pdfinfo.txt
+            acm-review/literature_references.bib
+            acm-review/figures/*.pdf
+          if-no-files-found: error
+          retention-days: 30
