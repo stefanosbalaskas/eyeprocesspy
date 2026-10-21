@@ -9,7 +9,7 @@ hide:
 <section class="ep-hero-v3">
   <div class="ep-hero-v3__copy">
     <div class="ep-kicker-row">
-      <span class="ep-kicker">eyeprocesspy 0.1.0</span>
+      <span class="ep-kicker">eyeprocesspy 0.2.3</span>
       <span class="ep-live-dot">Stable · PyPI</span>
     </div>
     <h1>See the gaze process.<br><span>Measure what changes.</span></h1>
@@ -53,11 +53,11 @@ hide:
 <div class="ep-install-strip">
   <div>
     <span class="ep-install-label">Install stable</span>
-    <code>pip install eyeprocesspy==0.1.0</code>
+    <code>pip install eyeprocesspy==0.2.3</code>
   </div>
   <div class="ep-install-links">
     <a href="https://pypi.org/project/eyeprocesspy/">PyPI</a>
-    <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.1.0">Release</a>
+    <a href="https://github.com/stefanosbalaskas/eyeprocesspy/releases/tag/v0.2.3">Release</a>
     <a href="https://doi.org/10.5281/zenodo.22285167">Zenodo</a>
   </div>
 </div>
@@ -260,7 +260,7 @@ assert audit["valid"]
 </section>
 
 <section class="ep-final-cta">
-  <div><span class="ep-overline">Ready to run the pipeline?</span><h2>Start with the benchmark. Keep every decision visible.</h2><p>Install 0.1.0, validate the known-good benchmark surface, then move into the workflow that matches your research question.</p></div>
+  <div><span class="ep-overline">Ready to run the pipeline?</span><h2>Start with the benchmark. Keep every decision visible.</h2><p>Install 0.2.3, validate the known-good benchmark surface, then move into the workflow that matches your research question.</p></div>
   <div class="ep-final-cta__actions"><a class="md-button md-button--primary" href="getting-started/">Open quickstart</a><a class="md-button" href="examples/">See worked examples</a></div>
 </section>
 
