@@ -37,6 +37,9 @@ def event_reconstruction_audit(
         raise ValueError("matched input lengths and three samples required")
     if not reference[keys].equals(predicted[keys]):
         raise ValueError("reference and predicted keys must match in exact row order")
+    # Use positional indexing below, regardless of caller-provided DataFrame labels.
+    reference = reference.reset_index(drop=True)
+    predicted = predicted.reset_index(drop=True)
     if reference[keys].isna().any().any():
         raise ValueError("missing sample identity")
     for frame in (reference, predicted):
