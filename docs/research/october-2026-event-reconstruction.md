@@ -48,3 +48,9 @@ fig.tight_layout()
 ### Outstanding validation
 
 Real reference-gaze datasets, calibration geometry, participant-disjoint uncertainty, event-boundary detection agreement and external-device checks are required before scientific promotion. The displayed curves are illustrative, not empirical gaze measurements.
+
+## Publication and qualification status (21 October 2026)
+
+This page and its original synthetic figures are merged into the GitHub documentation source. The worked research modules are under `research/october_2026/` and **are not automatically included in installed PyPI wheels or exported as stable package APIs**. Their empirical accuracy, device transfer and inferential calibration are not implied by a green CI test or a successful website build.
+
+The explicit outstanding scientific acceptance criteria and eligible real-data benchmarks are tracked in [research-to-release issue #41](https://github.com/stefanosbalaskas/eyeprocesspy/issues/41). This source-only research contribution is separate from the existing stable package version, and a new maintenance release must not claim these experiments as installed features.

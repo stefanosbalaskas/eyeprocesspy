@@ -156,3 +156,9 @@ The Python package is developed against the frozen `eyeprocess 0.11.1` reference
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
+
+## October 2026 research article and figure
+
+[**Gaze event reconstruction and reference confidence**](docs/research/october-2026-event-reconstruction.md) documents experimental, source-only validation methods and reproducible synthetic examples. It is available in the website navigation, while independently qualified external empirical claims and stable PyPI APIs remain separate ([scientific acceptance criteria](https://github.com/stefanosbalaskas/eyeprocesspy/issues/41)).
+
+![Original synthetic research figure](docs/assets/october-2026-event-reconstruction.svg)
