@@ -4,6 +4,15 @@ All notable changes to `eyeprocesspy` are documented here.
 
 ## Unreleased
 
+## 0.2.3 — 2026-10-21
+
+### Documentation and reproducibility maintenance
+
+- Publish the October 2026 illustrated research-methods article and original synthetic figures, and link them in the documentation navigation.
+- Maintain the frozen R 0.11.1 parity surface and all previously supported public APIs; no research-only experimental estimator is promoted to the installed wheel.
+- Keep independent event reconstruction and cross-device validation explicitly outstanding (issue #41).
+- Re-run frozen parity, cross-platform tests, strict documentation, wheel/sdist checks and provenance before GitHub/PyPI publication.
+
 ## 0.2.2 — 2026-09-27
 
 ### Measurement validity, dynamic gaze, and BN robustness
