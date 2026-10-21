@@ -13,7 +13,7 @@ not_in_nav: |
   /articles/*.md
 
 nav:
-  - October 2026 research validation: articles/october-2026-event-reconstruction.md
+  - October 2026 research validation: research/october-2026-event-reconstruction.md
   - Home: index.md
   - Start Here:
       - Getting started: getting-started.md
