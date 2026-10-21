@@ -1,5 +1,7 @@
 # Spatial accuracy is not event reconstruction
 
+![Rendered synthetic plot](../assets/october-2026-plot.svg)
+
 **Research implementation, October 2026.** Reference angles and labels must come from an independent, suitably synchronized source.
 
 ![Illustration: geometrically different gaze estimates](../assets/october-2026-event-reconstruction.svg)
