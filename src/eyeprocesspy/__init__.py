@@ -4655,7 +4655,7 @@ from .vendor_importers_10 import (
     read_tobii as read_tobii,
 )
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 __r_reference_version__ = "0.11.1"
 
 register_eye_adapter(
