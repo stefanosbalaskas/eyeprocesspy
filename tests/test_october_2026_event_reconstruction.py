@@ -58,3 +58,11 @@ def test_vendor_confidence_is_participant_scoped():
     assert s.iloc[0].acceptable_fraction_selected == 1
     assert s.iloc[1].acceptable_fraction_selected == 0
     assert (s.calibration_scope == "within_participant_descriptive_only").all()
+
+
+def test_nonstandard_dataframe_indices_are_positional_not_array_indices():
+    reference, predicted = _frames()
+    reference.index = range(100, 106)
+    predicted.index = range(100, 106)
+    result = event_reconstruction_audit(reference, predicted)
+    assert result["angular_error_mean_deg"] == pytest.approx(0)
