@@ -923,7 +923,16 @@ def assign_aois(x, component="gaze_samples", overlap="first", overwrite=True):
                 compatible = (
                     data["coordinate_space_id"].eq(geometry["coordinate_space_id"]).fillna(False)
                 )
-                hit = compatible.to_numpy() & _aoi_contains(ex, ey, et, definition, geometry)
+                stimulus = definition["stimulus_id"]
+                if pd.isna(stimulus) or not str(stimulus).strip():
+                    stimulus_ok = pd.Series(True, index=data.index)
+                else:
+                    stimulus_ok = data["stimulus_id"].eq(stimulus).fillna(False)
+                hit = (
+                    compatible.to_numpy()
+                    & stimulus_ok.to_numpy()
+                    & _aoi_contains(ex, ey, et, definition, geometry)
+                )
                 hit &= pd.isna(assigned)
                 assigned[hit] = str(definition["aoi_id"])
 

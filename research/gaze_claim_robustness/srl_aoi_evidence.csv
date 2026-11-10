@@ -1,0 +1,12 @@
+evidence_id,property,value,status,interpretation,source
+"srl_display","display_resolution","1600 x 900 px","source_exact","Technical validation states stimuli were presented at 1600 x 900.","https://doi.org/10.1038/s41597-025-05304-1"
+"srl_aoi_count","AOIs_per_learning_slide","4","source_exact","Each of the eight learning slides contained four AOIs.","https://doi.org/10.1038/s41597-025-05304-1"
+"srl_aoi_area","reported_AOI_area_px","359550","source_exact","Each AOI is reported as 359,550 pixels.","https://doi.org/10.1038/s41597-025-05304-1"
+"srl_transition_definition","transition","saccade from one AOI to another","source_exact","Primary outcome should be constructed from event-level AOI changes, not sample-to-sample pixel crossing.","https://doi.org/10.1038/s41597-025-05304-1"
+"srl_transition_unit","aggregation","total transitions per learning slide per participant","source_exact","This matches the prespecified trial-level transition-count outcome family.","https://doi.org/10.1038/s41597-025-05304-1"
+"srl_usage_note","AOI_spatial_description","different quartiles of the learning slides","source_exact","Strongly constrains the four AOIs to slide quarters, while exact pixel edge conventions remain unstated.","https://doi.org/10.1038/s41597-025-05304-1"
+"derived_exact_quarter","mathematical_quarter_area_px","360000","derived_no_gaze","1600/2 × 900/2 = 800 × 450 = 360,000 px, 450 px larger than the reported AOI area.","derived from source-exact display resolution"
+"derived_reported_factorization","reported_area_factorization","799 x 450 = 359550","derived_no_gaze","The reported area is exactly compatible with a 799-pixel-wide by 450-pixel-high quarter-like AOI. This suggests a narrow vertical boundary/edge convention but does not identify its placement.","derived arithmetic"
+"geometry_nominal_family","nominal_geometry","four slide quartiles","frozen_family","The source wording is sufficient to freeze the geometry family as four quartiles; exact boundary coordinates remain pending.","source constraint"
+"geometry_boundary_convention","exact_boundary_coordinates","pending","pending","Do not infer the 1-2 pixel edge/seam convention from gaze outcomes. Preserve all source-compatible conventions until stimulus/archive metadata are inspected.","pre-analysis rule"
+"vendor_labels","raw_AOI_labels","AOI Name Left / AOI Name Right","reference_only","Released labels can quantify agreement with independent candidate geometries but must not be used to manufacture the focal effect or silently define geometry.","source raw schema"

@@ -1,0 +1,15 @@
+# From Gaze Signals to HCI Claims: Propagating Eye-Tracking Measurement Uncertainty Through Analysis Pipelines
+
+## Abstract
+
+Eye tracking supports many HCI claims, yet conclusions can depend on measurement decisions made before statistical modeling. We present a claim-centered workflow that freezes defensible eye-tracking measurement alternatives and propagates them through one fixed focal contrast and model contract. In a self-regulated-learning dataset, 144 specifications varied detector, eye, viewing-distance assumption, AOI geometry, quality rule, and cohort while holding the transition-rate model fixed. All models converged; Prompt estimates changed direction (92 positive, 52 negative), with viewing-distance assumptions producing the largest shift, although every 95% confidence interval included the null. In an independent 120 Hz Tobii dataset, median raw fixation/non-fixation agreement was 0.707 but median fixation-state Jaccard overlap was 0.272, exposing event-representation differences hidden by shared non-fixation time. We argue that eye-tracking measurement assumptions belong in inferential design and should be frozen, propagated, and reported through multidimensional claim-stability evidence.
+
+## Keywords
+
+eye tracking; HCI methodology; measurement robustness; multiverse analysis; specification analysis; event detection; areas of interest; reproducibility
+
+## 6 Conclusion
+
+Eye-tracking studies do not move directly from recorded gaze to scientific claims. They move through a measurement pipeline in which coordinate geometry, event detection, eye representation, AOI definitions, quality rules, cohort decisions, and outcome construction can all shape the behavior that reaches the statistical model. Our SRL case shows that reasonable choices in this pipeline can change the direction and magnitude of a fixed downstream HCI estimate even when interval-level inference remains stable. The independent MCFW-Gaze case shows that detector-dependent event representations persist across different hardware, sampling rate, data quality, and interaction contexts.
+
+The methodological implication is not that every eye-tracking study should enumerate a maximal Cartesian multiverse or search for a universally correct detector. It is that consequential uncertainty should be made explicit at the level where HCI claims are interpreted. When multiple measurement choices are defensible, researchers can define that uncertainty before inspecting the focal result, propagate the declared alternatives through one predeclared claim contract, distinguish measurement-definition alternatives and sample-definition sensitivities from analyses that change the estimand itself, retain failed and non-evaluable branches in the denominator, and report direction, magnitude, uncertainty, and evaluability separately. In this form, measurement robustness extends reproducibility from documenting **which pipeline was used** to showing **how much the scientific conclusion depends on the pipeline that was chosen**.
