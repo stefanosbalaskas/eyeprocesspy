@@ -169,8 +169,12 @@ def ivt(t,x,y,threshold,min_ms):
     # Exact physical geometry from the released EMIP header, not real head position.
     px_mm_x=344.0/1920.0
     px_mm_y=194.0/1080.0
-    degx=np.degrees(np.arctan(((x-960.0)*px_mm_x)/700.0))
-    degy=np.degrees(np.arctan(((y-540.0)*px_mm_y)/700.0))
+    # Per-pair small-angle pixel displacement: degrees ≈ dx_mm/700 * (180/pi).
+    # The frozen protocol specifies instantaneous velocity of pixel displacement
+    # under the 344×194-mm / 700-mm nominal source geometry, not absolute
+    # eccentricity under a nonlinear coordinate projection.
+    degx=(x-960.0)*px_mm_x/700.0*(180.0/np.pi)
+    degy=(y-540.0)*px_mm_y/700.0*(180.0/np.pi)
     dt=np.diff(t).astype(float)/1e6
     spd=np.hypot(np.diff(degx),np.diff(degy))/dt
     edges=spd<=threshold
