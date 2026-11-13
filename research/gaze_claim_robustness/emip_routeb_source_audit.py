@@ -105,13 +105,101 @@ def prefix_text(url: str, max_bytes=160_000) -> str:
     return content.decode("utf-8-sig", errors="replace")
 
 
+
+def archive_audit(status):
+    """Fallback for the original toolkit public EMIP ZIP (no participant payload uploaded)."""
+    import tempfile
+    import zipfile
+    from pathlib import Path
+    url = "https://osf.io/j6vt3/download"  # URL documented by nalmadi/EMIP-Toolkit data_catalog.py
+    with tempfile.TemporaryDirectory(prefix="emip_raw_") as tmpdir:
+        zip_path = Path(tmpdir) / "emip_source.zip"
+        digest = __import__("hashlib").sha256()
+        total = 0
+        with SESSION.get(url, stream=True, timeout=(30, 180)) as response:
+            response.raise_for_status()
+            with zip_path.open("wb") as output:
+                for chunk in response.iter_content(1024 * 1024):
+                    if not chunk:
+                        continue
+                    total += len(chunk)
+                    if total > 2_000_000_000:
+                        raise RuntimeError("Archive larger than 2 GB; stop rather than download unbounded input")
+                    output.write(chunk)
+                    digest.update(chunk)
+        with zipfile.ZipFile(zip_path) as source:
+            entries = [i for i in source.infolist() if not i.is_dir()]
+            raw = [i for i in entries if "/rawdata/" in "/"+i.filename.lower() and i.filename.lower().endswith(".tsv")]
+            meta = [i for i in entries if i.filename.lower().endswith("emip_metadata.csv")]
+            stimuli = [i for i in entries if "/stimuli/" in "/"+i.filename.lower()]
+            with (OUT / "source_manifest.csv").open("w", newline="", encoding="utf-8") as output:
+                cols = ["path", "size", "id", "modified"]
+                writer = csv.DictWriter(output, fieldnames=cols)
+                writer.writeheader()
+                writer.writerows({
+                    "path": i.filename, "size": i.file_size, "id": "", "modified": ""
+                } for i in sorted(entries, key=lambda obj: obj.filename))
+            status["archive_url"] = url
+            status["archive_sha256"] = digest.hexdigest()
+            status["archive_download_bytes"] = total
+            status["file_count"] = len(entries)
+            status["raw"] = {
+                "file_count": len(raw),
+                "extensions": {".tsv": len(raw)},
+            }
+            status["stimuli"] = {
+                "file_count": len(stimuli),
+                "sample_paths": [i.filename for i in stimuli[:15]],
+            }
+            if meta:
+                with source.open(meta[0]) as fd:
+                    prefix = fd.read(256_000).decode("utf-8-sig", errors="replace")
+                hdr = next(csv.reader(io.StringIO(prefix)), [])
+                status["metadata"] = {
+                    "present": True,
+                    "columns": hdr,
+                    "has_expertise": any("expert" in x.lower() for x in hdr),
+                    "has_order": any("order" in x.lower() for x in hdr),
+                    "has_correctness_or_response": any(
+                        re.search(r"correct|answer|response", x, re.I) for x in hdr
+                    ),
+                }
+            else:
+                status["metadata"] = {"present": False}
+            if raw:
+                with source.open(sorted(raw, key=lambda x: x.filename)[0]) as fd:
+                    lines = fd.read(256_000).decode("utf-8-sig", errors="replace").splitlines()
+                rows = [r for r in lines if r and not r.startswith("#")]
+                head = next((r for r in rows if "Time" in r and "\t" in r), rows[0] if rows else "")
+                status["raw"]["inspected_file"] = sorted(raw, key=lambda x: x.filename)[0].filename
+                status["raw"]["header_columns"] = head.split("\t")
+                status["raw"]["timestamp_column_present"] = "Time" in head.split("\t")
+                status["raw"]["message_name_present"] = any("\tMSG\t" in row for row in rows)
+            status["status"] = (
+                "schema_audited"
+                if status["metadata"].get("present")
+                and status["raw"].get("timestamp_column_present")
+                and len(stimuli) > 0
+                else "partial_audit"
+            )
+
 def main():
     status = {"audit_timestamp_utc": datetime.now(timezone.utc).isoformat(),
               "osf_node": "53kts", "source_url": ROOT_URL, "status":"pending",
               "file_count":0, "metadata":{}, "raw":{}, "stimuli":{},
               "warnings":WARN}
     try:
-        scan()
+        try:
+            scan()
+        except Exception as source_error:
+            WARN.append("OSF API listing unavailable: " + str(source_error))
+        if not any(f["path"].lower().endswith("emip_metadata.csv") for f in FILES):
+            archive_audit(status)
+            (OUT / "feasibility.json").write_text(
+                json.dumps(status, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+            print("EMIP archive fallback status:", status["status"])
+            return 0 if status["status"] == "schema_audited" else 2
         status["file_count"] = len(FILES)
         status["top_level"] = dict(Counter(f["path"].split("/")[0] for f in FILES))
         with (OUT/"source_manifest.csv").open("w", newline="", encoding="utf-8") as out:
@@ -120,9 +208,9 @@ def main():
             writer.writerows({k:f.get(k) for k in cols} for f in sorted(FILES,key=lambda x:x["path"]))
 
         meta = next((f for f in FILES if f["path"].lower().endswith("emip_metadata.csv")), None)
-        raw_files = [f for f in FILES if re.search(r"rawdata/.*\\.(tsv|txt|csv)$", f["path"], re.I)]
+        raw_files = [f for f in FILES if re.search(r"rawdata/.*\.(tsv|txt|csv)$", f["path"], re.I)]
         if not raw_files:
-            raw_files = [f for f in FILES if re.search(r"\\.(tsv)$", f["path"], re.I)]
+            raw_files = [f for f in FILES if re.search(r"\.(tsv)$", f["path"], re.I)]
         stimulus_files = [f for f in FILES if re.search(r"stimuli/|aoi",f["path"],re.I)]
         status["raw"]={"file_count":len(raw_files),"extensions":dict(Counter(Path(f["path"]).suffix.lower() for f in raw_files))}
         status["stimuli"]={"file_count":len(stimulus_files),"extensions":dict(Counter(Path(f["path"]).suffix.lower() for f in stimulus_files)),
