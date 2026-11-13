@@ -1,0 +1,213 @@
+{
+  "study": "EMIP public Java-language mirror subset, not full 216-case release",
+  "date_utc": "2026-11-13",
+  "certification_scope": "Independent internal computational raw-to-claim reproduction, not independent third-party external accreditation",
+  "source_repositories": {
+    "raw": "egeiran/Data-Preprocessing-EMIP",
+    "metadata_and_aois": "hiqb269/EMIP-Toolkit",
+    "analysis": "stefanosbalaskas/eyeprocesspy"
+  },
+  "frozen_protocol": "research/gaze_claim_robustness/EMIP_ROUTE_B_FROZEN_MIRROR_PROTOCOL.md",
+  "input_fixture": "research/gaze_claim_robustness/results/emip_raw_validation_reference.json",
+  "source_files": [
+    {
+      "pid": 1,
+      "blob_sha": "beb71ac34a8d6f2eb5037c109ed6c3ea86ae9009",
+      "bytes": 12371508
+    },
+    {
+      "pid": 2,
+      "blob_sha": "a4bee57be5e8b12585cbffe875fe3d8b495403b1",
+      "bytes": 11147365
+    },
+    {
+      "pid": 3,
+      "blob_sha": "5af29df8f46620991c26406fe0ebf0f64ca73184",
+      "bytes": 10439207
+    },
+    {
+      "pid": 4,
+      "blob_sha": "0910d7e68e7fc25f26e199328c8fae8ae8c3f39c",
+      "bytes": 10405508
+    },
+    {
+      "pid": 5,
+      "blob_sha": "d0639dda331da632cd57b44ab6b8157fbd8f55d7",
+      "bytes": 11148739
+    },
+    {
+      "pid": 6,
+      "blob_sha": "078dd96d722a089fe2b79554d46e30d8b430d552",
+      "bytes": 11889655
+    },
+    {
+      "pid": 8,
+      "blob_sha": "2750b0b16a1de5c52fe6a8357ab3c2d6d301c238",
+      "bytes": 15961992
+    },
+    {
+      "pid": 9,
+      "blob_sha": "71f94e23a9e86efd1635b8ac587f3ec1837d415b",
+      "bytes": 11738873
+    },
+    {
+      "pid": 10,
+      "blob_sha": "fb2f4ed75f8023c58873287516240c99dee9b840",
+      "bytes": 8235823
+    },
+    {
+      "pid": 11,
+      "blob_sha": "48c51cb45a21578387180ef8085da69947e129f1",
+      "bytes": 10161113
+    },
+    {
+      "pid": 12,
+      "blob_sha": "08f0c1df3c09328f8fdca564534d1153c1f00c7a",
+      "bytes": 15379181
+    },
+    {
+      "pid": 13,
+      "blob_sha": "2c04d46b314d4d0a139e512a0c9804df06d66d2b",
+      "bytes": 15030061
+    },
+    {
+      "pid": 15,
+      "blob_sha": "8321b1f2c7c811a8516ae674724563c111578fa4",
+      "bytes": 9968887
+    },
+    {
+      "pid": 16,
+      "blob_sha": "275de5390a0cab10773a0eb68ae07513a53d5624",
+      "bytes": 15033450
+    },
+    {
+      "pid": 17,
+      "blob_sha": "e45c306ad7a68ac12599be4b7b3a2e96410b12e4",
+      "bytes": 13858915
+    },
+    {
+      "pid": 18,
+      "blob_sha": "83a9b924bb9b4e99feba1272a713c16bea360291",
+      "bytes": 14133350
+    },
+    {
+      "pid": 20,
+      "blob_sha": "02021704725078278af508c667717e36a3398ed1",
+      "bytes": 12132510
+    },
+    {
+      "pid": 21,
+      "blob_sha": "b796e2c7551de3d2c39b4c62bed1ea6396ca5303",
+      "bytes": 15160416
+    },
+    {
+      "pid": 22,
+      "blob_sha": "9f4b66c7db3650cf64f13e511801a613dd3e38ee",
+      "bytes": 10744941
+    },
+    {
+      "pid": 23,
+      "blob_sha": "7afe6f0ee1424bd158b6f304d82c8abc22a49a42",
+      "bytes": 9631969
+    },
+    {
+      "pid": 24,
+      "blob_sha": "d8342a23b6ef186a5c9dea8d7af02a1c3068250a",
+      "bytes": 11662989
+    },
+    {
+      "pid": 25,
+      "blob_sha": "53ed7bdc015a27b033cf394673a2dd00ca729de0",
+      "bytes": 15327502
+    },
+    {
+      "pid": 26,
+      "blob_sha": "9074c88e827b1d9fae780d3561ef43712729897b",
+      "bytes": 8965878
+    },
+    {
+      "pid": 28,
+      "blob_sha": "e238c8f31db03d48ba3d4771131668a7772db579",
+      "bytes": 12952841
+    },
+    {
+      "pid": 30,
+      "blob_sha": "6217be029b18f29c28d7e0afeaf60fb0c02f53f3",
+      "bytes": 14321414
+    },
+    {
+      "pid": 31,
+      "blob_sha": "0825193ef9d90c186fa3a4f324f9c6e92727a0c4",
+      "bytes": 11892729
+    },
+    {
+      "pid": 33,
+      "blob_sha": "9f014bdca5ddf772e3d3cad264923d310d78ab37",
+      "bytes": 10338519
+    },
+    {
+      "pid": 34,
+      "blob_sha": "74344353d32ca8dd90f21847250c5c9b4886c10e",
+      "bytes": 14058174
+    },
+    {
+      "pid": 37,
+      "blob_sha": "939fe661995cb5fb2cacbeb763c31a096f3c663d",
+      "bytes": 14251549
+    },
+    {
+      "pid": 39,
+      "blob_sha": "4abad035d99e3a1a1fd4111afab671e33e85bc8e",
+      "bytes": 11056057
+    },
+    {
+      "pid": 41,
+      "blob_sha": "3578895c2ee670bda3ade5690a60a477ee017074",
+      "bytes": 20245379
+    }
+  ],
+  "gates": {
+    "original_metadata_rows": 216,
+    "original_metadata_subject_task_matches": 62,
+    "raw_files_examined": 31,
+    "code_stimulus_pairs": 62,
+    "raw_geometry_header_matches": 31,
+    "stimulus_identity_matches": 62,
+    "expected_derived_rows": 744,
+    "original_raw_to_derived_rows_exactly_equal": 744,
+    "mismatched_rows": 0,
+    "independent_models_reestimated": 24,
+    "maximum_absolute_model_output_error": 1.9984014443252818e-15,
+    "all_wald_intervals_include_null": true
+  },
+  "coefficient_summary": {
+    "positive_logRR": 20,
+    "negative_logRR": 4,
+    "minimum_RR": 0.9924952613063657,
+    "maximum_RR": 1.2169768173991666
+  },
+  "branch_qc": {
+    "all_raw_windows_and_measurements_match": true,
+    "all_source_metadata_matched": true,
+    "all_model_estimates_match": true,
+    "no_additional_participants": true,
+    "no_new_study_conditions": true,
+    "no_change_to_srl_or_mcfw": true
+  },
+  "scientific_limitations": [
+    "31 nonrandom Java-language mirror participants; not representative of the original 216 published participants",
+    "Eye alternatives are validity masks on overlapping released point-of-regard streams, not independent binocular gaze tracks",
+    "Correctness is observational; no causal effect of comprehension can be inferred",
+    "No statistically supported correctness association in any of the 24 branch-wise Wald 95% intervals",
+    "This internal independent reproducibility audit is not an external laboratory certification of detector accuracy"
+  ],
+  "status": "RAW_TO_CLAIM_INDEPENDENTLY_REPRODUCED_FOR_31_MIRROR_PARTICIPANTS",
+  "implementation_clarification": {
+    "audit_addendum": "research/gaze_claim_robustness/EMIP_ROUTE_B_AUDIT_ADDENDUM.md",
+    "velocity_mapping": "small-angle pairwise pixel displacement under source nominal geometry",
+    "pre_result_protocol_exact_formula_specified": false,
+    "post_audit_clarification": true,
+    "initial_alternative_eccentricity_mapping": "one additional I-VT 40 deg/s fixation in initial participant-1/Vehicle/left check; no AOI or transition change on that check",
+    "interpretation": "Exact numerical reproducibility of this implementation; no universality claim across visual-angle mappings"
+  }
+}

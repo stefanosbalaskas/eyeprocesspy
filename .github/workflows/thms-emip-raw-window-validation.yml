@@ -1,0 +1,24 @@
+name: THMS EMIP raw-to-trial source audit
+on:
+  push:
+    branches: [research/thms-routeb-emip]
+    paths:
+      - research/gaze_claim_robustness/validate_emip_raw_windows.py
+      - research/gaze_claim_robustness/results/emip_mirror_derived_batch_*.csv
+      - .github/workflows/thms-emip-raw-window-validation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit-public-mirror-source-windows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install network client
+        run: python -m pip install 'requests>=2.31,<3'
+      - name: Independently audit original trial boundaries and eye-validity counts
+        run: python research/gaze_claim_robustness/validate_emip_raw_windows.py
