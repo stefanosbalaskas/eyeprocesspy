@@ -20,8 +20,8 @@ ROOT=Path(__file__).resolve().parent
 S_DIR=ROOT/"results"
 MIRROR="https://raw.githubusercontent.com/egeiran/Data-Preprocessing-EMIP/main/emip_dataset/rawdata"
 PIDS=(1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,20,21,22,23,24,25,26,28,30,31,33,34,37,39,41)
-BEGIN=re.compile(r"(rectangle|vehicle)_java(?:2)?\\.jpg",re.I)
-END=re.compile(r"(?:mupliple|multiple)_choice_(rectangle|vehicle)\\.jpg",re.I)
+BEGIN=re.compile(r"(rectangle|vehicle)_java(?:2)?\.jpg",re.I)
+END=re.compile(r"(?:mupliple|multiple)_choice_(rectangle|vehicle)\.jpg",re.I)
 
 def source_stream(session,pid):
     url=f"{MIRROR}/{pid}_rawdata.tsv"
