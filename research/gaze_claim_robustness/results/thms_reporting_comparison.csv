@@ -1,0 +1,4 @@
+view,n_specifications,positive,negative,median_rate_ratio,min_rate_ratio,max_rate_ratio,intervals_including_null
+Illustrative single pipeline,1,1,0,1.03545903953,1.03545903953,1.03545903953,1
+Detector-only alternatives,3,1,2,0.988163177768,0.973073401766,1.03545903953,3
+Full frozen cross-stage universe,144,92,52,1.03460423703,0.943965032428,1.25770111173,144
