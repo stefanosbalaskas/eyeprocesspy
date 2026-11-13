@@ -1,0 +1,31 @@
+name: THMS EMIP source-schema feasibility audit
+on:
+  push:
+    branches:
+      - research/thms-routeb-emip
+    paths:
+      - research/gaze_claim_robustness/emip_routeb_source_audit.py
+      - .github/workflows/thms-emip-source-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  non-outcome-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install source-audit dependency
+        run: python -m pip install 'requests>=2.31,<3'
+      - name: Audit public EMIP OSF source without fitting any models
+        run: python research/gaze_claim_robustness/emip_routeb_source_audit.py
+      - name: Upload nonparticipant schema/availability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: thms-emip-source-audit
+          path: emip_routeb_audit/
+          if-no-files-found: warn
