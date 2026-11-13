@@ -201,5 +201,13 @@
     "No statistically supported correctness association in any of the 24 branch-wise Wald 95% intervals",
     "This internal independent reproducibility audit is not an external laboratory certification of detector accuracy"
   ],
-  "status": "RAW_TO_CLAIM_INDEPENDENTLY_REPRODUCED_FOR_31_MIRROR_PARTICIPANTS"
+  "status": "RAW_TO_CLAIM_INDEPENDENTLY_REPRODUCED_FOR_31_MIRROR_PARTICIPANTS",
+  "implementation_clarification": {
+    "audit_addendum": "research/gaze_claim_robustness/EMIP_ROUTE_B_AUDIT_ADDENDUM.md",
+    "velocity_mapping": "small-angle pairwise pixel displacement under source nominal geometry",
+    "pre_result_protocol_exact_formula_specified": false,
+    "post_audit_clarification": true,
+    "initial_alternative_eccentricity_mapping": "one additional I-VT 40 deg/s fixation in initial participant-1/Vehicle/left check; no AOI or transition change on that check",
+    "interpretation": "Exact numerical reproducibility of this implementation; no universality claim across visual-angle mappings"
+  }
 }
