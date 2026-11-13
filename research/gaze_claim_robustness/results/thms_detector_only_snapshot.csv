@@ -1,0 +1,4 @@
+universe_id,detector_id,eye,viewing_distance_cm,aoi_convention,quality_rule,cohort_id,estimate,CI_lower,CI_upper,rate_ratio
+srl_u105,idt_1_100,left,65,exact_quarters,released_sample,exact_raw82,-0.0119074351876,-0.20616178766,0.182346917285,0.988163177768
+srl_u009,ivt_30_100_simple,left,65,exact_quarters,released_sample,exact_raw82,-0.0272957610335,-0.216432608685,0.161841086618,0.973073401766
+srl_u057,ivt_40_50_simple,left,65,exact_quarters,released_sample,exact_raw82,0.0348448448518,-0.163286406425,0.232976096129,1.03545903953
