@@ -1,6 +1,6 @@
 # EMIP Route B — frozen public-mirror subset analysis protocol v1.0
 
-**Frozen before computing gaze-derived outcomes or inspecting a model coefficient (13 November 2026).**
+**Frozen before examining any model coefficient (13 November 2026).** Source-audit clarification v1.1: validity-mask semantics corrected after a dry-run on ID 10 and explicit pre-model comparison of jointly valid L/R POR positions. The planned 24-branch denominator is unchanged; no inferential estimate was seen when this wording was corrected.
 This is a NEW prospective, post-SRL validation demonstration, not an original EMIP
 analysis, not a preregistered clinical experiment, and not the full EMIP release.
 
@@ -85,7 +85,7 @@ For one participant × task × decision branch:
 These are **algorithm and parameter comparisons**, not instrument accuracy
 certifications.
 
-**Eye (2):** independently left vs right. No undocumented binocular averaging.
+**Validity-gating eye (2):** left-valid vs right-valid sample masks. **Source audit before focal model results** found that, when both eyes are marked valid, the released L/R POR coordinates are identical for audited recordings (e.g., IDs 1, 6, 10). Thus this factor tests different eye-specific validity masks applied to a common released POR stream, **not independent left- and right-eye gaze positions**. Do not claim independent binocular streams or double the participant sample.
 
 **AOI representation (2):**
 1. `line_bbox`: published source `level=line` rectangles.
