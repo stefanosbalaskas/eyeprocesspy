@@ -1,0 +1,52 @@
+{
+  "raw_source_participants": 31,
+  "processed_participants": 31,
+  "derived_rows": 744,
+  "expected_rows": 744,
+  "unique_rows": 744,
+  "task_rows_per_participant": {
+    "1": 24,
+    "2": 24,
+    "3": 24,
+    "4": 24,
+    "5": 24,
+    "6": 24,
+    "8": 24,
+    "9": 24,
+    "10": 24,
+    "11": 24,
+    "12": 24,
+    "13": 24,
+    "15": 24,
+    "16": 24,
+    "17": 24,
+    "18": 24,
+    "20": 24,
+    "21": 24,
+    "22": 24,
+    "23": 24,
+    "24": 24,
+    "25": 24,
+    "26": 24,
+    "28": 24,
+    "30": 24,
+    "31": 24,
+    "33": 24,
+    "34": 24,
+    "37": 24,
+    "39": 24,
+    "41": 24
+  },
+  "quality_eligible_by_eye": {
+    "left": {
+      "source_valid": 62,
+      "valid80": 53,
+      "participants80": 28
+    },
+    "right": {
+      "source_valid": 62,
+      "valid80": 52,
+      "participants80": 29
+    }
+  }
+}
